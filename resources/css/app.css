@@ -1,0 +1,114 @@
+@import "tailwindcss";
+
+@source "../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php";
+@source "../../storage/framework/views/*.php";
+
+@theme {
+    --font-sans: "Instrument Sans", "Outfit", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Custom Background Animations and Gradient Styles */
+.ambient-glow-1 {
+    background: radial-gradient(circle, rgba(14, 165, 233, 0.15) 0%, rgba(255, 255, 255, 0) 70%);
+    filter: blur(80px);
+}
+
+.ambient-glow-2 {
+    background: radial-gradient(circle, rgba(20, 184, 166, 0.12) 0%, rgba(255, 255, 255, 0) 70%);
+    filter: blur(80px);
+}
+
+.ambient-glow-3 {
+    background: radial-gradient(circle, rgba(124, 58, 237, 0.08) 0%, rgba(255, 255, 255, 0) 70%);
+    filter: blur(90px);
+}
+
+@keyframes floatUp {
+    0% {
+        transform: translateY(100vh) rotate(0deg);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.15;
+    }
+    90% {
+        opacity: 0.15;
+    }
+    100% {
+        transform: translateY(-20vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+.floating-particle {
+    position: absolute;
+    bottom: -50px;
+    border-radius: 50%;
+    background-color: rgba(14, 165, 233, 0.3);
+    animation: floatUp 25s infinite linear;
+    pointer-events: none;
+}
+
+@keyframes drift {
+    0% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+    50% {
+        transform: translate(15px, -20px) rotate(5deg);
+    }
+    100% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+}
+
+.floating-icon {
+    animation: drift 12s ease-in-out infinite;
+    opacity: 0.07;
+    transition: opacity 0.3s ease;
+}
+
+.floating-icon:hover {
+    opacity: 0.15;
+}
+
+/* Smooth glassmorphism style card */
+.glass-card {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.06), 0 10px 15px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Custom inputs and buttons focus transitions */
+.custom-input {
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.custom-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+    background-color: #ffffff;
+}
+
+/* Clean scrollbar for registration views */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(203, 213, 225, 0.5);
+    border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.5);
+}
