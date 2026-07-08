@@ -114,6 +114,8 @@ Route::prefix('center')->name('center.')->group(function () {
 });
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\GroupController;
 
 // Admin Pages
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -123,5 +125,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/exams/{exam}', [AdminController::class, 'updateExam'])->name('exams.update');
         Route::patch('/exams/{exam}/archive', [AdminController::class, 'archiveExam'])->name('exams.archive');
         Route::post('/logout', [AuthController::class, 'logout'])->defaults('role', 'admin')->name('logout');
+
+        // Users CRUD
+        Route::get('/users', [UserController::class, 'index'])->name('users.index')->middleware('permission:view-users');
+        Route::get('/users/create', [UserController::class, 'create'])->name('users.create')->middleware('permission:create-users');
+        Route::post('/users', [UserController::class, 'store'])->name('users.store')->middleware('permission:create-users');
+        Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit')->middleware('permission:edit-users');
+        Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update')->middleware('permission:edit-users');
+        Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy')->middleware('permission:delete-users');
+
+        // Groups CRUD
+        Route::get('/groups', [GroupController::class, 'index'])->name('groups.index')->middleware('permission:view-groups');
+        Route::get('/groups/create', [GroupController::class, 'create'])->name('groups.create')->middleware('permission:create-groups');
+        Route::post('/groups', [GroupController::class, 'store'])->name('groups.store')->middleware('permission:create-groups');
+        Route::get('/groups/{group}/edit', [GroupController::class, 'edit'])->name('groups.edit')->middleware('permission:edit-groups');
+        Route::put('/groups/{group}', [GroupController::class, 'update'])->name('groups.update')->middleware('permission:edit-groups');
+        Route::delete('/groups/{group}', [GroupController::class, 'destroy'])->name('groups.destroy')->middleware('permission:delete-groups');
     });
 });
