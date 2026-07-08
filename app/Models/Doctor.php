@@ -5,9 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 
-#[Fillable(['user_id', 'speciality', 'doctor_code'])]
+#[Fillable(['user_id', 'speciality', 'doctor_code', 'is_archive'])]
 class Doctor extends Model
 {
+    protected function casts(): array
+    {
+        return [
+            'is_archive' => 'boolean',
+        ];
+    }
     public function user()
     {
         return $this->belongsTo(User::class);
