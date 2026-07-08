@@ -23,4 +23,9 @@ class Action extends Model
     {
         return $this->hasMany(GroupPermission::class);
     }
+
+    public function groups()
+    {
+        return $this->belongsToMany(Group::class, 'group_permissions', 'action_id', 'group_id')->withTimestamps();
+    }
 }

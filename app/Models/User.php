@@ -60,4 +60,25 @@ class User extends Authenticatable
     {
         return $this->hasOne(Staff::class);
     }
+
+    /**
+     * Check if the user has a specific permission/action.
+     */
+    public function hasPermission(string $actionCode): bool
+    {
+        if (!$this->group) {
+            return false;
+        }
+
+        // Admin group gets all permissions automatically
+        if ($this->group->code === 'admin') {
+            return true;
+        }
+
+        if (!$this->group->relationLoaded('actions')) {
+            $this->group->load('actions');
+        }
+
+        return $this->group->actions->contains('code', $actionCode);
+    }
 }
