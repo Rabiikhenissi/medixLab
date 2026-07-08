@@ -4,15 +4,8 @@
     <div class="absolute bottom-0 right-0 w-[50vw] h-[50vw] ambient-glow-2 opacity-80"></div>
     <div class="absolute top-1/3 right-1/4 w-[35vw] h-[35vw] ambient-glow-3 opacity-60"></div>
 
-    <!-- Floating Particles -->
-    <div class="floating-particle" style="left: 5%; width: 4px; height: 4px; animation-delay: 0s; animation-duration: 18s;"></div>
-    <div class="floating-particle" style="left: 15%; width: 6px; height: 6px; animation-delay: 2s; animation-duration: 25s; background-color: rgba(20, 184, 166, 0.25);"></div>
-    <div class="floating-particle" style="left: 25%; width: 3px; height: 3px; animation-delay: 5s; animation-duration: 20s;"></div>
-    <div class="floating-particle" style="left: 40%; width: 5px; height: 5px; animation-delay: 1s; animation-duration: 28s;"></div>
-    <div class="floating-particle" style="left: 55%; width: 4px; height: 4px; animation-delay: 7s; animation-duration: 22s; background-color: rgba(124, 58, 237, 0.2);"></div>
-    <div class="floating-particle" style="left: 70%; width: 7px; height: 7px; animation-delay: 3s; animation-duration: 32s;"></div>
-    <div class="floating-particle" style="left: 85%; width: 5px; height: 5px; animation-delay: 6s; animation-duration: 24s; background-color: rgba(20, 184, 166, 0.25);"></div>
-    <div class="floating-particle" style="left: 95%; width: 3px; height: 3px; animation-delay: 9s; animation-duration: 19s;"></div>
+    <!-- Interactive Particle Canvas -->
+    <canvas id="interactive-particles" class="absolute inset-0 w-full h-full pointer-events-none" style="opacity: 0.85; mix-blend-mode: multiply;"></canvas>
 
     <!-- Floating Medical Outline Icons -->
     <!-- Stethoscope -->
@@ -51,3 +44,153 @@
         <rect x="5" y="5" width="14" height="14" rx="7" transform="rotate(45 12 12)" stroke-linecap="round" stroke-linejoin="round" />
     </svg>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const canvas = document.getElementById("interactive-particles");
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d");
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        const particles = [];
+        const particleCount = Math.min(80, Math.floor((width * height) / 18000));
+        const connectionDistance = 110;
+        const mouseRepelRadius = 150;
+        const mouseForce = 0.8;
+
+        const mouse = {
+            x: null,
+            y: null,
+            targetX: null,
+            targetY: null
+        };
+
+        const colors = [
+            "rgba(0, 102, 255, 0.22)",   // Blue
+            "rgba(13, 148, 136, 0.22)",  // Teal
+            "rgba(124, 58, 237, 0.18)",  // Purple
+            "rgba(245, 158, 11, 0.22)"    // Amber
+        ];
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.size = Math.random() * 2.5 + 1.2;
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+                
+                // Slow ambient drift velocities
+                this.vx = (Math.random() - 0.5) * 0.35;
+                this.vy = (Math.random() - 0.5) * 0.35;
+                
+                // Track home velocity to return to
+                this.baseVx = this.vx;
+                this.baseVy = this.vy;
+
+                // Current velocity with repulsion
+                this.dx = 0;
+                this.dy = 0;
+            }
+
+            update() {
+                // Return slowly to base velocity (inertia/friction)
+                this.vx += (this.baseVx - this.vx) * 0.05;
+                this.vy += (this.baseVy - this.vy) * 0.05;
+
+                // Mouse interaction
+                if (mouse.x !== null) {
+                    const diffX = this.x - mouse.x;
+                    const diffY = this.y - mouse.y;
+                    const dist = Math.hypot(diffX, diffY);
+
+                    if (dist < mouseRepelRadius) {
+                        const force = (mouseRepelRadius - dist) / mouseRepelRadius;
+                        // Calculate push direction
+                        const angle = Math.atan2(diffY, diffX);
+                        
+                        // Push away from mouse
+                        this.vx += Math.cos(angle) * force * mouseForce;
+                        this.vy += Math.sin(angle) * force * mouseForce;
+                    }
+                }
+
+                // Apply velocity
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Wrap around edges with margin
+                const margin = 20;
+                if (this.x < -margin) this.x = width + margin;
+                if (this.x > width + margin) this.x = -margin;
+                if (this.y < -margin) this.y = height + margin;
+                if (this.y > height + margin) this.y = -margin;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+        }
+
+        // Initialize particles
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+
+        // Track mouse
+        window.addEventListener("mousemove", (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
+
+        window.addEventListener("mouseleave", () => {
+            mouse.x = null;
+            mouse.y = null;
+        });
+
+        // Resize handler
+        window.addEventListener("resize", () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+
+        // Animation Loop
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+
+            // Draw connections first
+            for (let i = 0; i < particles.length; i++) {
+                const p1 = particles[i];
+                for (let j = i + 1; j < particles.length; j++) {
+                    const p2 = particles[j];
+                    const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
+
+                    if (dist < connectionDistance) {
+                        // Calculate opacity based on distance
+                        const alpha = (1 - dist / connectionDistance) * 0.08;
+                        ctx.beginPath();
+                        ctx.moveTo(p1.x, p1.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.strokeStyle = `rgba(100, 116, 139, ${alpha})`;
+                        ctx.lineWidth = 0.8;
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            // Draw and update particles
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    });
+</script>

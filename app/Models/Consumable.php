@@ -5,9 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 
-#[Fillable(['labo_id', 'name', 'unit', 'quantity', 'min_quantity'])]
+#[Fillable(['labo_id', 'name', 'unit', 'quantity', 'min_quantity', 'is_archive'])]
 class Consumable extends Model
 {
+    protected function casts(): array
+    {
+        return [
+            'is_archive' => 'boolean',
+        ];
+    }
     public function labo()
     {
         return $this->belongsTo(Labo::class);

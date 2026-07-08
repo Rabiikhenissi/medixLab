@@ -5,9 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 
-#[Fillable(['code', 'name', 'category', 'description', 'default_normal_range', 'preparation_instructions'])]
+#[Fillable(['code', 'name', 'category', 'description', 'default_normal_range', 'preparation_instructions', 'is_archive'])]
 class Exam extends Model
 {
+    protected function casts(): array
+    {
+        return [
+            'is_archive' => 'boolean',
+        ];
+    }
     public function availableExams()
     {
         return $this->hasMany(AvailableExam::class);

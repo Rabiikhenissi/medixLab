@@ -5,9 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 
-#[Fillable(['doctor_id', 'name', 'description'])]
+#[Fillable(['doctor_id', 'name', 'description', 'is_archive'])]
 class ExamGroup extends Model
 {
+    protected function casts(): array
+    {
+        return [
+            'is_archive' => 'boolean',
+        ];
+    }
     protected $table = 'exam_groups';
 
     public function doctor()

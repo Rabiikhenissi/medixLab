@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 
-#[Fillable(['labo_id', 'exam_id', 'price', 'is_active'])]
+#[Fillable(['labo_id', 'exam_id', 'price', 'is_active', 'is_archive'])]
 class AvailableExam extends Model
 {
     protected $table = 'available_exams';
@@ -15,6 +15,7 @@ class AvailableExam extends Model
         return [
             'price' => 'decimal:2',
             'is_active' => 'boolean',
+            'is_archive' => 'boolean',
         ];
     }
 
