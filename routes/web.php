@@ -44,12 +44,46 @@ Route::prefix('doctor')->name('doctor.')->group(function () {
 
     Route::middleware('auth')->group(function () {
         Route::get('/dashboard', function () {
+            $user = auth()->user();
             // Verify they are a doctor
-            if (!auth()->user()->doctor) {
+            if (!$user->doctor) {
                 return redirect()->route('home');
             }
-            return view('doctor.dashboard', ['user' => auth()->user()]);
+            $doctor = $user->doctor;
+
+            $recentPatients = \App\Models\DoctorPatientAccess::where('doctor_id', $doctor->id)
+                ->where('access_status', 'granted')
+                ->with('patient.user')
+                ->latest('updated_at')
+                ->limit(20)
+                ->get();
+            $recentExams = \App\Models\ExamRequest::where('doctor_id', $doctor->id)
+                ->with(['patient.user', 'items.exam'])
+                ->latest('created_at')
+                ->limit(20)
+                ->get();
+
+            $exams = \App\Models\Exam::where('is_archive', false)
+                ->select('id', 'name', 'category')
+                ->get();
+
+            return view('doctor.dashboard', compact('user', 'recentPatients', 'recentExams', 'exams'));
         })->name('dashboard');
+
+        // Doctor Interface Routes
+        Route::get('/patient-search', [\App\Http\Controllers\DoctorController::class, 'patientSearch'])->name('patient-search');
+        Route::post('/search-patient', [\App\Http\Controllers\DoctorController::class, 'searchPatient'])->name('search-patient');
+        Route::post('/request-access', [\App\Http\Controllers\DoctorController::class, 'requestAccess'])->name('request-access');
+        Route::get('/exams-selection/{patient}', [\App\Http\Controllers\DoctorController::class, 'selectExams'])->name('select-exams');
+        Route::post('/create-exam-request', [\App\Http\Controllers\DoctorController::class, 'createExamRequest'])->name('create-exam-request');
+        Route::post('/apply-exam-group', [\App\Http\Controllers\DoctorController::class, 'applyExamGroup'])->name('apply-exam-group');
+
+        // Exam Groups CRUD (dedicated page)
+        Route::get('/exam-groups', [\App\Http\Controllers\DoctorController::class, 'examGroupsIndex'])->name('exam-groups.index');
+        Route::post('/exam-groups', [\App\Http\Controllers\DoctorController::class, 'examGroupsStore'])->name('exam-groups.store');
+        Route::get('/exam-groups/{examGroup}/edit', [\App\Http\Controllers\DoctorController::class, 'examGroupsEdit'])->name('exam-groups.edit');
+        Route::put('/exam-groups/{examGroup}', [\App\Http\Controllers\DoctorController::class, 'examGroupsUpdate'])->name('exam-groups.update');
+        Route::delete('/exam-groups/{examGroup}', [\App\Http\Controllers\DoctorController::class, 'examGroupsDestroy'])->name('exam-groups.destroy');
 
         Route::post('/logout', [AuthController::class, 'logout'])->defaults('role', 'doctor')->name('logout');
     });
@@ -79,6 +113,17 @@ Route::prefix('patient')->name('patient.')->group(function () {
             }
             return view('patient.dashboard', ['user' => auth()->user()]);
         })->name('dashboard');
+
+        // Patient Notification Routes
+        Route::get('/notifications', [\App\Http\Controllers\PatientController::class, 'getNotifications'])->name('get-notifications');
+        Route::get('/notifications/unread-count', [\App\Http\Controllers\PatientController::class, 'getUnreadCount'])->name('unread-count');
+        Route::post('/notifications/{notification}/read', [\App\Http\Controllers\PatientController::class, 'markAsRead'])->name('mark-as-read');
+        Route::post('/access-request/respond', [\App\Http\Controllers\PatientController::class, 'respondToAccessRequest'])->name('respond-access');
+        Route::get('/access-requests', [\App\Http\Controllers\PatientController::class, 'getAccessRequests'])->name('get-access-requests');
+
+        // Patient Exam Requests Routes
+        Route::get('/exam-requests', [\App\Http\Controllers\PatientController::class, 'getExamRequests'])->name('get-exam-requests');
+        Route::get('/exam-requests/{examRequest}', [\App\Http\Controllers\PatientController::class, 'getExamRequest'])->name('exam-request-detail');
 
         Route::post('/logout', [AuthController::class, 'logout'])->defaults('role', 'patient')->name('logout');
     });
@@ -141,5 +186,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/groups/{group}/edit', [GroupController::class, 'edit'])->name('groups.edit')->middleware('permission:edit-groups');
         Route::put('/groups/{group}', [GroupController::class, 'update'])->name('groups.update')->middleware('permission:edit-groups');
         Route::delete('/groups/{group}', [GroupController::class, 'destroy'])->name('groups.destroy')->middleware('permission:delete-groups');
+
+        // Features CRUD
+        Route::get('/features', [\App\Http\Controllers\FeatureController::class, 'index'])->name('features.index')->middleware('permission:view-features');
+        Route::get('/features/create', [\App\Http\Controllers\FeatureController::class, 'create'])->name('features.create')->middleware('permission:create-features');
+        Route::post('/features', [\App\Http\Controllers\FeatureController::class, 'store'])->name('features.store')->middleware('permission:create-features');
+        Route::get('/features/{feature}/edit', [\App\Http\Controllers\FeatureController::class, 'edit'])->name('features.edit')->middleware('permission:edit-features');
+        Route::put('/features/{feature}', [\App\Http\Controllers\FeatureController::class, 'update'])->name('features.update')->middleware('permission:edit-features');
+        Route::delete('/features/{feature}', [\App\Http\Controllers\FeatureController::class, 'destroy'])->name('features.destroy')->middleware('permission:delete-features');
+
+        // Actions management (nested under Features)
+        Route::post('/features/{feature}/actions', [\App\Http\Controllers\FeatureController::class, 'storeAction'])->name('features.actions.store')->middleware('permission:edit-features');
+        Route::delete('/actions/{action}', [\App\Http\Controllers\FeatureController::class, 'destroyAction'])->name('actions.destroy')->middleware('permission:edit-features');
     });
 });

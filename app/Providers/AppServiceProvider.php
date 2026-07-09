@@ -24,5 +24,13 @@ class AppServiceProvider extends ServiceProvider
                 return true;
             }
         });
+
+        \Illuminate\Support\Facades\View::composer('layouts.admin', function ($view) {
+            $sidebarFeatures = \App\Models\Feature::where('is_archive', false)
+                ->where('is_sidebar', true)
+                ->orderBy('order', 'asc')
+                ->get();
+            $view->with('sidebarFeatures', $sidebarFeatures);
+        });
     }
 }
