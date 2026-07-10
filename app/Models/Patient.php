@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 
-#[Fillable(['user_id', 'patient_code', 'is_archive'])]
+#[Fillable(['user_id', 'patient_code', 'blood_group', 'is_archive'])]
 class Patient extends Model
 {
     protected function casts(): array

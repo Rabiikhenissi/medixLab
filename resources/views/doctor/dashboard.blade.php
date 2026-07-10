@@ -72,13 +72,13 @@
 
                 {{-- Statistics Dashboard Cards --}}
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="relative overflow-hidden p-6 bg-gradient-to-br from-[#0066FF]/5 to-[#0066FF]/10 border border-[#0066FF]/20 rounded-2xl shadow-xs">
+                    <a href="{{ route('doctor.exam-groups.index') }}" class="relative overflow-hidden p-6 bg-gradient-to-br from-[#0066FF]/5 to-[#0066FF]/10 border border-[#0066FF]/20 rounded-2xl shadow-xs block hover:border-[#0066FF]/40 transition">
                         <div class="text-3xl font-black text-[#0066FF] mb-1">{{ $user->doctor->examGroups()->count() }}</div>
                         <p class="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Groupes d'Examens</p>
                         <svg class="absolute -right-3 -bottom-3 w-14 h-14 text-[#0066FF]/10" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>
                         </svg>
-                    </div>
+                    </a>
                     <div class="relative overflow-hidden p-6 bg-gradient-to-br from-emerald-500/5 to-emerald-500/10 border border-emerald-500/20 rounded-2xl shadow-xs">
                         <div class="text-3xl font-black text-emerald-600 mb-1">{{ $user->doctor->examRequests()->count() }}</div>
                         <p class="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Prescriptions Envoyées</p>
@@ -176,16 +176,23 @@
                             </svg>
                             Mes Groupes d'Examens
                         </h3>
-                        <button
-                            type="button"
-                            id="createNewGroupBtn"
-                            class="bg-[#0066FF] hover:bg-[#0052CC] text-white font-bold px-3 py-1.5 rounded-xl transition text-[10px] uppercase tracking-wider flex items-center gap-1 cursor-pointer"
+                        <div class="flex items-center gap-2">
+                        <a
+                            href="{{ route('doctor.exam-groups.create') }}"
+                            class="bg-[#0066FF] hover:bg-[#0052CC] text-white font-bold px-3 py-1.5 rounded-xl transition text-[10px] uppercase tracking-wider flex items-center gap-1"
                         >
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                             </svg>
                             Nouveau
-                        </button>
+                        </a>
+                        <a
+                            href="{{ route('doctor.exam-groups.index') }}"
+                            class="bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] font-bold px-3 py-1.5 rounded-xl transition text-[10px] uppercase tracking-wider flex items-center gap-1 border border-[#e2e8f0]"
+                        >
+                            Gérer
+                        </a>
+                        </div>
                     </div>
 
                     @php
@@ -210,41 +217,35 @@
                                         </p>
                                     </div>
                                     <div class="flex items-center gap-1.5 self-start sm:self-auto flex-shrink-0">
-                                        <button
-                                            type="button"
-                                            class="inline-flex items-center gap-1 bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] font-bold px-2.5 py-1.5 rounded-lg border border-[#e2e8f0] text-[10px] uppercase tracking-wider cursor-pointer viewGroupDetailsBtn"
-                                            data-id="{{ $group->id }}"
-                                            data-name="{{ $group->name }}"
-                                            data-desc="{{ $group->description }}"
-                                            data-exams="{{ json_encode($group->items->map(fn($it) => $it->exam ? ['id' => $it->exam->id, 'name' => $it->exam->name] : null)->filter()->values()) }}"
+                                        <a
+                                            href="{{ route('doctor.exam-groups.edit', $group->id) }}"
+                                            class="inline-flex items-center gap-1 bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] font-bold px-2.5 py-1.5 rounded-lg border border-[#e2e8f0] text-[10px] uppercase tracking-wider"
                                         >
                                             Voir
-                                        </button>
-                                        <button
-                                            type="button"
-                                            class="inline-flex items-center gap-1 bg-[#EFF6FF] hover:bg-[#DBEAFE] text-[#0066FF] font-bold px-2.5 py-1.5 rounded-lg border border-[#BFDBFE] text-[10px] uppercase tracking-wider cursor-pointer editGroupBtn"
-                                            data-id="{{ $group->id }}"
-                                            data-name="{{ $group->name }}"
-                                            data-desc="{{ $group->description }}"
-                                            data-exam-ids="{{ json_encode($group->items->pluck('exam_id')) }}"
+                                        </a>
+                                        <a
+                                            href="{{ route('doctor.exam-groups.edit', $group->id) }}"
+                                            class="inline-flex items-center gap-1 bg-[#EFF6FF] hover:bg-[#DBEAFE] text-[#0066FF] font-bold px-2.5 py-1.5 rounded-lg border border-[#BFDBFE] text-[10px] uppercase tracking-wider"
                                         >
                                             Modifier
-                                        </button>
-                                        <button
-                                            type="button"
-                                            class="inline-flex items-center gap-1 bg-red-50 hover:bg-red-100 text-red-600 font-bold px-2.5 py-1.5 rounded-lg border border-red-100 text-[10px] uppercase tracking-wider cursor-pointer deleteGroupBtn"
-                                            data-id="{{ $group->id }}"
-                                            data-name="{{ $group->name }}"
-                                        >
-                                            Supprimer
-                                        </button>
+                                        </a>
+                                        <form action="{{ route('doctor.exam-groups.destroy', $group->id) }}" method="POST" class="inline" onsubmit="return confirm('Supprimer définitivement « {{ addslashes($group->name) }} » ?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="inline-flex items-center gap-1 bg-red-50 hover:bg-red-100 text-red-600 font-bold px-2.5 py-1.5 rounded-lg border border-red-100 text-[10px] uppercase tracking-wider cursor-pointer">
+                                                Supprimer
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
                             @endforeach
                         </div>
                     @else
                         <div class="text-center py-10 border border-dashed border-[#cbd5e1] rounded-xl no-groups-placeholder">
-                            <p class="text-xs text-[#94a3b8] italic">Vous n'avez pas encore créé de groupe d'examens personnalisé.</p>
+                            <p class="text-xs text-[#94a3b8] italic mb-3">Vous n'avez pas encore créé de groupe d'examens personnalisé.</p>
+                            <a href="{{ route('doctor.exam-groups.create') }}" class="inline-flex items-center gap-1 bg-[#0066FF] hover:bg-[#0052CC] text-white font-bold px-4 py-2 rounded-xl text-[10px] uppercase tracking-wider">
+                                Créer un groupe
+                            </a>
                         </div>
                     @endif
                 </div>
@@ -457,142 +458,6 @@
         </div>
     </div>
 
-    <!-- Exam Group Create / Edit Modal -->
-    <div id="groupCrudModal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="glass-card rounded-[20px] max-w-[500px] w-full shadow-2xl overflow-hidden">
-            <div class="p-8">
-                <!-- Header -->
-                <div class="flex items-center justify-between mb-6 pb-4 border-b border-[#e2e8f0]/80">
-                    <h3 id="groupCrudModalTitle" class="text-base font-bold text-[#1e293b]">Nouveau Groupe d'Examens</h3>
-                    <button type="button" class="closeGroupCrudModalBtn text-[#94a3b8] hover:text-[#1e293b] transition cursor-pointer">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-
-                <form id="groupCrudForm" class="space-y-4">
-                    <input type="hidden" id="groupCrudId" value="">
-                    
-                    <div>
-                        <label for="groupCrudName" class="text-xs font-bold text-[#64748b] uppercase tracking-wider block mb-1">Nom du groupe</label>
-                        <input
-                            type="text"
-                            id="groupCrudName"
-                            placeholder="Ex: Bilan Lipidique, Diabète..."
-                            class="w-full px-4 py-2.5 border border-[#e2e8f0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0066FF]/20 focus:border-[#0066FF] transition text-[#1e293b] text-xs font-semibold bg-white"
-                            required
-                        />
-                    </div>
-
-                    <div>
-                        <label for="groupCrudDesc" class="text-xs font-bold text-[#64748b] uppercase tracking-wider block mb-1">Description</label>
-                        <textarea
-                            id="groupCrudDesc"
-                            rows="2"
-                            placeholder="Description succincte..."
-                            class="w-full px-4 py-2.5 border border-[#e2e8f0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0066FF]/20 focus:border-[#0066FF] transition text-[#1e293b] text-xs font-semibold bg-white resize-none"
-                            required
-                        ></textarea>
-                    </div>
-
-                    <div>
-                        <label class="text-xs font-bold text-[#64748b] uppercase tracking-wider block mb-2">Sélectionner les examens</label>
-                        
-                        {{-- Search bar within modal --}}
-                        <div class="relative mb-2">
-                            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#64748b]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                            </svg>
-                            <input
-                                type="text"
-                                id="modalExamSearchInput"
-                                placeholder="Rechercher un examen..."
-                                class="w-full pl-9 pr-4 py-2 border border-[#e2e8f0] rounded-lg text-xs outline-none focus:border-[#0066FF] transition font-semibold"
-                            />
-                        </div>
-
-                        <div class="border border-[#e2e8f0] rounded-xl p-3 max-h-[180px] overflow-y-auto space-y-2 bg-[#F8FAFC]">
-                            @foreach($exams as $exam)
-                                <label class="flex items-start gap-2.5 p-2 bg-white rounded-lg border border-[#e2e8f0]/80 hover:border-[#0066FF]/30 transition cursor-pointer modal-exam-item-label">
-                                    <input
-                                        type="checkbox"
-                                        name="modal_exam_ids[]"
-                                        value="{{ $exam->id }}"
-                                        class="modal-exam-checkbox mt-0.5 accent-[#0066FF]"
-                                    />
-                                    <div class="text-[11px] min-w-0">
-                                        <span class="font-bold text-[#1e293b] block modal-exam-name">{{ $exam->name }}</span>
-                                        @if($exam->category)
-                                            <span class="text-[9px] text-[#64748b] font-semibold uppercase">{{ $exam->category }}</span>
-                                        @endif
-                                    </div>
-                                </label>
-                            @endforeach
-                        </div>
-                    </div>
-
-                    <div class="pt-4 border-t border-[#e2e8f0]/80 flex gap-3">
-                        <button
-                            type="submit"
-                            id="groupCrudSubmitBtn"
-                            class="flex-1 bg-[#0066FF] hover:bg-[#0052CC] text-white font-bold py-2.5 px-4 rounded-xl transition transform hover:scale-[1.02] active:scale-[0.98] shadow-md text-xs uppercase tracking-wider"
-                        >
-                            Enregistrer
-                        </button>
-                        <button
-                            type="button"
-                            class="closeGroupCrudModalBtn flex-1 bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] font-bold py-2.5 px-4 rounded-xl transition border border-[#e2e8f0] uppercase tracking-wider text-xs cursor-pointer"
-                        >
-                            Annuler
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Exam Group Details View Modal -->
-    <div id="groupDetailsViewModal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="glass-card rounded-[20px] max-w-[460px] w-full shadow-2xl">
-            <div class="p-8">
-                <!-- Header -->
-                <div class="flex items-center justify-between mb-6 pb-4 border-b border-[#e2e8f0]/80">
-                    <h3 class="text-base font-bold text-[#1e293b]">Détails du Groupe d'Examens</h3>
-                    <button type="button" class="closeGroupDetailsViewModalBtn text-[#94a3b8] hover:text-[#1e293b] transition cursor-pointer">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-
-                <div class="space-y-4 text-xs">
-                    <div>
-                        <span class="text-[#64748b] font-medium block">Nom :</span>
-                        <span id="viewGroupName" class="font-bold text-sm text-[#1e293b]"></span>
-                    </div>
-                    <div>
-                        <span class="text-[#64748b] font-medium block">Description :</span>
-                        <div id="viewGroupDesc" class="p-3 bg-[#F8FAFC] border border-[#e2e8f0] rounded-xl text-[#64748b] leading-relaxed mt-1"></div>
-                    </div>
-                    <div>
-                        <span class="text-[#64748b] font-medium block mb-2">Examens inclus :</span>
-                        <div id="viewGroupExamsList" class="space-y-1.5 max-h-[180px] overflow-y-auto pr-1"></div>
-                    </div>
-                </div>
-
-                <div class="pt-6 border-t border-[#e2e8f0]/80 mt-6 flex justify-end">
-                    <button
-                        type="button"
-                        class="closeGroupDetailsViewModalBtn bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] font-bold py-2.5 px-5 rounded-xl transition border border-[#e2e8f0] uppercase tracking-wider text-xs cursor-pointer"
-                    >
-                        Fermer
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script>
         // Modal logic for previous exam details
         const detailsModal = document.getElementById('requestDetailsModal');
@@ -768,178 +633,5 @@
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 2500);
         }
-
-        // CRUD Modals and buttons
-        const groupCrudModal = document.getElementById('groupCrudModal');
-        const groupCrudModalTitle = document.getElementById('groupCrudModalTitle');
-        const groupCrudForm = document.getElementById('groupCrudForm');
-        const groupCrudId = document.getElementById('groupCrudId');
-        const groupCrudName = document.getElementById('groupCrudName');
-        const groupCrudDesc = document.getElementById('groupCrudDesc');
-        const modalExamSearchInput = document.getElementById('modalExamSearchInput');
-
-        // Close functions
-        const closeGroupCrud = () => {
-            groupCrudModal.classList.add('hidden');
-        };
-
-        document.querySelectorAll('.closeGroupCrudModalBtn').forEach(b => b.addEventListener('click', closeGroupCrud));
-
-        // Open Create
-        document.getElementById('createNewGroupBtn').addEventListener('click', () => {
-            groupCrudModalTitle.textContent = "Nouveau Groupe d'Examens";
-            groupCrudId.value = "";
-            groupCrudName.value = "";
-            groupCrudDesc.value = "";
-            modalExamSearchInput.value = "";
-            document.querySelectorAll('.modal-exam-checkbox').forEach(cb => cb.checked = false);
-            document.querySelectorAll('.modal-exam-item-label').forEach(lbl => lbl.style.display = '');
-            groupCrudModal.classList.remove('hidden');
-        });
-
-        // Open Edit
-        document.querySelectorAll('.editGroupBtn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const dataset = btn.dataset;
-                groupCrudModalTitle.textContent = "Modifier le Groupe d'Examens";
-                groupCrudId.value = dataset.id;
-                groupCrudName.value = dataset.name;
-                groupCrudDesc.value = dataset.desc;
-                modalExamSearchInput.value = "";
-                
-                const examIds = JSON.parse(dataset.examIds);
-                document.querySelectorAll('.modal-exam-checkbox').forEach(cb => {
-                    cb.checked = examIds.includes(parseInt(cb.value));
-                });
-                document.querySelectorAll('.modal-exam-item-label').forEach(lbl => lbl.style.display = '');
-                groupCrudModal.classList.remove('hidden');
-            });
-        });
-
-        // Search exam items inside modal
-        modalExamSearchInput.addEventListener('input', () => {
-            const query = modalExamSearchInput.value.toLowerCase();
-            document.querySelectorAll('.modal-exam-item-label').forEach(lbl => {
-                const name = lbl.querySelector('.modal-exam-name').textContent.toLowerCase();
-                lbl.style.display = name.includes(query) ? '' : 'none';
-            });
-        });
-
-        // Submit form (create/update)
-        groupCrudForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const id = groupCrudId.value;
-            const name = groupCrudName.value.trim();
-            const desc = groupCrudDesc.value.trim();
-            const examIds = [...document.querySelectorAll('.modal-exam-checkbox:checked')].map(cb => cb.value);
-
-            if (examIds.length === 0) {
-                showSuccessToast('Veuillez sélectionner au moins un examen.', 'error');
-                return;
-            }
-
-            const submitBtn = document.getElementById('groupCrudSubmitBtn');
-            const originalHTML = submitBtn.innerHTML;
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = 'Envoi...';
-
-            const url = id ? `/doctor/update-exam-group/${id}` : '/doctor/create-exam-group';
-
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    },
-                    body: JSON.stringify({
-                        name: name,
-                        description: desc,
-                        exam_ids: examIds
-                    })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    showSuccessToast(data.message, 'success');
-                    closeGroupCrud();
-                    setTimeout(() => window.location.reload(), 1000);
-                } else {
-                    showSuccessToast(data.message || 'Erreur', 'error');
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = originalHTML;
-                }
-            } catch (err) {
-                console.error(err);
-                showSuccessToast('Une erreur est survenue.', 'error');
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalHTML;
-            }
-        });
-
-        // Details view modal
-        const groupDetailsViewModal = document.getElementById('groupDetailsViewModal');
-        const viewGroupName = document.getElementById('viewGroupName');
-        const viewGroupDesc = document.getElementById('viewGroupDesc');
-        const viewGroupExamsList = document.getElementById('viewGroupExamsList');
-
-        const closeGroupDetailsView = () => {
-            groupDetailsViewModal.classList.add('hidden');
-        };
-
-        document.querySelectorAll('.closeGroupDetailsViewModalBtn').forEach(b => b.addEventListener('click', closeGroupDetailsView));
-
-        document.querySelectorAll('.viewGroupDetailsBtn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const dataset = btn.dataset;
-                viewGroupName.textContent = dataset.name;
-                viewGroupDesc.textContent = dataset.desc || 'Aucune description';
-                
-                const exams = JSON.parse(dataset.exams);
-                viewGroupExamsList.innerHTML = exams.map(ex => `
-                    <div class="p-2.5 bg-[#F8FAFC] border border-[#e2e8f0] rounded-lg font-semibold text-[#1e293b] flex items-center gap-2">
-                        <span class="w-1.5 h-1.5 rounded-full bg-[#0066FF]"></span>
-                        ${ex.name}
-                    </div>
-                `).join('');
-
-                groupDetailsViewModal.classList.remove('hidden');
-            });
-        });
-
-        // Delete group
-        document.querySelectorAll('.deleteGroupBtn').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const id = btn.dataset.id;
-                const name = btn.dataset.name;
-                
-                if (!confirm(`Êtes-vous sûr de vouloir supprimer le groupe "${name}" ?`)) {
-                    return;
-                }
-
-                try {
-                    const response = await fetch(`/doctor/delete-exam-group/${id}`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        }
-                    });
-
-                    const data = await response.json();
-
-                    if (data.success) {
-                        showSuccessToast(data.message, 'success');
-                        setTimeout(() => window.location.reload(), 1000);
-                    } else {
-                        showSuccessToast(data.message || 'Erreur', 'error');
-                    }
-                } catch (err) {
-                    console.error(err);
-                    showSuccessToast('Une erreur est survenue.', 'error');
-                }
-            });
-        });
     </script>
 </x-layouts.auth>

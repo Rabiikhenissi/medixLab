@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Auth\Notifications\ResetPassword;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,6 +24,15 @@ class AppServiceProvider extends ServiceProvider
             if (method_exists($user, 'hasPermission') && $user->hasPermission($ability)) {
                 return true;
             }
+        });
+
+        // Customise the branded password-reset email
+        ResetPassword::toMailUsing(function ($notifiable, string $token) {
+            $url = url('/patient/reset-password/' . $token . '?email=' . urlencode($notifiable->email));
+
+            return (new \Illuminate\Notifications\Messages\MailMessage)
+                ->subject('Réinitialisation de votre mot de passe — Medix eSanté')
+                ->view('emails.reset-password', ['url' => $url]);
         });
     }
 }
