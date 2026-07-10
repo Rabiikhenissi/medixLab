@@ -1,0 +1,90 @@
+@extends('layouts.admin')
+
+@section('title', 'Creer un Utilisateur')
+
+@section('page-title', 'Nouveau Compte Utilisateur')
+@section('page-subtitle', 'Saisissez les informations de l\'utilisateur et attribuez-lui un role de securite.')
+
+@section('content')
+    <div class="data-section anim anim-1" style="padding: 28px;">
+        <h3 class="data-title" style="margin-top: 0; margin-bottom: 24px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; font-size: 16px;">
+            Informations Personnelles & Role
+        </h3>
+
+        @if($errors->any())
+            <div class="form-errors">
+                <ul>
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <form action="{{ route('admin.users.store') }}" method="POST">
+            @csrf
+
+            <!-- Form Row -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Prenom<span class="required-star">*</span></label>
+                    <input type="text" name="first_name" value="{{ old('first_name') }}" required placeholder="Ex: Jean" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Nom<span class="required-star">*</span></label>
+                    <input type="text" name="last_name" value="{{ old('last_name') }}" required placeholder="Ex: Dupont" class="form-control">
+                </div>
+            </div>
+
+            <!-- Form Row -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Adresse Email<span class="required-star">*</span></label>
+                    <input type="email" name="email" value="{{ old('email') }}" required placeholder="Ex: jean.dupont@email.com" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Telephone</label>
+                    <input type="text" name="phone" value="{{ old('phone') }}" placeholder="Ex: 55123456" class="form-control">
+                </div>
+            </div>
+
+            <!-- Form Row -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Role / Groupe de Securite<span class="required-star">*</span></label>
+                    <div style="position:relative;">
+                        <select name="group_id" required class="form-control">
+                            <option value="">Selectionner un groupe...</option>
+                            @foreach($groups as $group)
+                                <option value="{{ $group->id }}" {{ old('group_id') == $group->id ? 'selected' : '' }}>{{ $group->name }}</option>
+                            @endforeach
+                        </select>
+                        <svg style="position:absolute;right:12px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:#94a3b8;pointer-events:none;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Adresse de residence</label>
+                    <input type="text" name="address" value="{{ old('address') }}" placeholder="Ex: 15 Rue de Paris, Tunis" class="form-control">
+                </div>
+            </div>
+
+            <!-- Form Row -->
+            <div class="form-row" style="margin-bottom: 24px;">
+                <div class="form-group">
+                    <label class="form-label">Mot de Passe<span class="required-star">*</span></label>
+                    <input type="password" name="password" required placeholder="Saisir 8 caracteres minimum" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Confirmer le Mot de Passe<span class="required-star">*</span></label>
+                    <input type="password" name="password_confirmation" required placeholder="Confirmer le mot de passe" class="form-control">
+                </div>
+            </div>
+
+            <!-- Footer actions -->
+            <div style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid #f1f5f9; padding-top: 24px; margin-top: 24px;">
+                <a href="{{ route('admin.users.index') }}" class="btn-cancel">Annuler</a>
+                <button type="submit" class="btn-submit">Creer l'utilisateur</button>
+            </div>
+        </form>
+    </div>
+@endsection

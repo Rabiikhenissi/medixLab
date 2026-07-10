@@ -170,15 +170,12 @@
                     {{ $examGroups->count() }} groupe(s)
                 </span>
                 @if(!$editGroup)
-                <button
-                    id="toggleCreateFormBtn"
-                    class="btn-primary"
-                >
+                <a href="{{ route('doctor.exam-groups.create') }}" class="btn-primary">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
                     </svg>
                     Nouveau groupe
-                </button>
+                </a>
                 @endif
             </div>
         </div>
@@ -201,79 +198,12 @@
             </div>
         @endif
 
-        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <div class="grid grid-cols-1 {{ $editGroup ? 'lg:grid-cols-5' : '' }} gap-6">
 
-            {{-- ===== LEFT: FORM (Create / Edit) ===== --}}
+            {{-- ===== LEFT: EDIT FORM ===== --}}
+            @if($editGroup)
             <div class="lg:col-span-2">
-                {{-- CREATE FORM --}}
-                @if(!$editGroup)
-                <div id="createFormPanel" class="glass-card rounded-[20px] p-6 hidden">
-                    <div class="flex items-center justify-between mb-5 pb-4 border-b border-[#e2e8f0]">
-                        <h2 class="text-sm font-bold text-[#1e293b]">Nouveau groupe</h2>
-                        <button type="button" id="closeCreateFormBtn" class="text-[#94a3b8] hover:text-[#1e293b] transition cursor-pointer">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-                            </svg>
-                        </button>
-                    </div>
-
-                    <form action="{{ route('doctor.exam-groups.store') }}" method="POST" class="space-y-4">
-                        @csrf
-                        <div>
-                            <label class="section-label block mb-1.5">Nom du groupe</label>
-                            <input type="text" name="name" class="form-input" placeholder="Ex: Bilan Lipidique..." value="{{ old('name') }}" required/>
-                            @error('name')<p class="text-red-500 text-[10px] mt-1 font-semibold">{{ $message }}</p>@enderror
-                        </div>
-
-                        <div>
-                            <label class="section-label block mb-1.5">Description</label>
-                            <textarea name="description" rows="2" class="form-input resize-none" placeholder="Description succincte...">{{ old('description') }}</textarea>
-                            @error('description')<p class="text-red-500 text-[10px] mt-1 font-semibold">{{ $message }}</p>@enderror
-                        </div>
-
-                        <div>
-                            <label class="section-label block mb-2">Examens ({{ $exams->count() }} disponibles)</label>
-                            <div class="relative mb-2">
-                                <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#94a3b8]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                                </svg>
-                                <input type="text" id="createSearchInput" class="form-input pl-9" placeholder="Filtrer les examens..."/>
-                            </div>
-                            @error('exam_ids')<p class="text-red-500 text-[10px] mb-1 font-semibold">{{ $message }}</p>@enderror
-                            <div class="border border-[#e2e8f0] rounded-xl p-2.5 max-h-[220px] overflow-y-auto space-y-1.5 bg-[#F8FAFC]" id="createExamList">
-                                @forelse($exams as $exam)
-                                    <label class="exam-checkbox-label create-exam-item">
-                                        <input type="checkbox" name="exam_ids[]" value="{{ $exam->id }}" class="mt-0.5 accent-[#0066FF]"
-                                            @if(is_array(old('exam_ids')) && in_array($exam->id, old('exam_ids'))) checked @endif
-                                        />
-                                        <div class="text-[11px] min-w-0">
-                                            <span class="font-bold text-[#1e293b] block create-exam-name">{{ $exam->name }}</span>
-                                            @if($exam->category)
-                                                <span class="text-[9px] text-[#64748b] font-semibold uppercase">{{ $exam->category }}</span>
-                                            @endif
-                                        </div>
-                                    </label>
-                                @empty
-                                    <p class="text-center text-[11px] text-[#94a3b8] py-4 italic">Aucun examen disponible</p>
-                                @endforelse
-                            </div>
-                        </div>
-
-                        <div class="flex gap-2 pt-2">
-                            <button type="submit" class="btn-primary flex-1 justify-center">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                                </svg>
-                                Créer le groupe
-                            </button>
-                            <button type="button" id="closeCreateFormBtn2" class="btn-secondary">Annuler</button>
-                        </div>
-                    </form>
-                </div>
-                @endif
-
                 {{-- EDIT FORM --}}
-                @if($editGroup)
                 <div class="glass-card rounded-[20px] p-6">
                     <div class="flex items-center gap-3 mb-5 pb-4 border-b border-[#e2e8f0]">
                         <div class="w-8 h-8 rounded-xl bg-[#0066FF]/10 flex items-center justify-center">
@@ -338,23 +268,11 @@
                         </div>
                     </form>
                 </div>
-                @endif
-
-                {{-- If no form shown: show placeholder tip --}}
-                @if(!$editGroup)
-                <div id="noFormPlaceholder" class="glass-card rounded-[20px] p-6 text-center border border-dashed border-[#cbd5e1]">
-                    <div class="w-12 h-12 rounded-2xl bg-[#0066FF]/10 flex items-center justify-center mx-auto mb-3">
-                        <svg class="w-6 h-6 text-[#0066FF]" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                        </svg>
-                    </div>
-                    <p class="text-xs font-semibold text-[#64748b]">Cliquez sur <strong class="text-[#0066FF]">+ Nouveau groupe</strong> pour créer votre premier groupe d'examens personnalisé.</p>
-                </div>
-                @endif
             </div>
+            @endif
 
-            {{-- ===== RIGHT: LIST ===== --}}
-            <div class="lg:col-span-3">
+            {{-- ===== LIST ===== --}}
+            <div class="{{ $editGroup ? 'lg:col-span-3' : '' }}">
                 <div class="glass-card rounded-[20px] p-6">
                     <div class="flex items-center justify-between mb-5 pb-4 border-b border-[#e2e8f0]">
                         <h2 class="text-xs font-bold text-[#64748b] uppercase tracking-widest flex items-center gap-2">
@@ -437,7 +355,12 @@
                                 </svg>
                             </div>
                             <p class="text-xs font-semibold text-[#94a3b8]">Aucun groupe créé pour le moment.</p>
-                            <p class="text-[11px] text-[#b0bec5] mt-1">Utilisez le bouton « + Nouveau groupe » pour commencer.</p>
+                            <a href="{{ route('doctor.exam-groups.create') }}" class="inline-flex items-center gap-1.5 mt-3 btn-primary">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                                </svg>
+                                Créer un groupe
+                            </a>
                         </div>
                     @endif
                 </div>
@@ -446,41 +369,6 @@
     </div>
 
     <script>
-        // ——— Toggle create form ———
-        const createFormPanel   = document.getElementById('createFormPanel');
-        const noFormPlaceholder = document.getElementById('noFormPlaceholder');
-        const toggleCreateBtn   = document.getElementById('toggleCreateFormBtn');
-        const closeCreateBtns   = document.querySelectorAll('#closeCreateFormBtn, #closeCreateFormBtn2');
-
-        if (toggleCreateBtn) {
-            toggleCreateBtn.addEventListener('click', () => {
-                createFormPanel?.classList.toggle('hidden');
-                noFormPlaceholder?.classList.toggle('hidden');
-            });
-        }
-        closeCreateBtns.forEach(btn => btn.addEventListener('click', () => {
-            createFormPanel?.classList.add('hidden');
-            noFormPlaceholder?.classList.remove('hidden');
-        }));
-
-        // Auto-open create form on validation error (old input present)
-        @if($errors->any() && !$editGroup)
-        createFormPanel?.classList.remove('hidden');
-        noFormPlaceholder?.classList.add('hidden');
-        @endif
-
-        // ——— Search inside CREATE exam list ———
-        const createSearchInput = document.getElementById('createSearchInput');
-        if (createSearchInput) {
-            createSearchInput.addEventListener('input', () => {
-                const q = createSearchInput.value.toLowerCase();
-                document.querySelectorAll('.create-exam-item').forEach(el => {
-                    const name = el.querySelector('.create-exam-name')?.textContent.toLowerCase() ?? '';
-                    el.style.display = name.includes(q) ? '' : 'none';
-                });
-            });
-        }
-
         // ——— Search inside EDIT exam list ———
         const editSearchInput = document.getElementById('editSearchInput');
         if (editSearchInput) {

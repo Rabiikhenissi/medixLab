@@ -5,6 +5,7 @@
         title="Inscription Centre"
         subtitle="Créez votre compte d'établissement"
         action="{{ route('center.register') }}"
+        backUrl="{{ route('center.login') }}"
     >
         @if($errors->any())
             <div class="p-3 text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-200 rounded-xl">
