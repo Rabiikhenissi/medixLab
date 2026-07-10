@@ -41,4 +41,4 @@ class AppServiceProvider extends ServiceProvider
             $view->with('sidebarFeatures', $sidebarFeatures);
         });
     }
-}
+);}}

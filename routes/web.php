@@ -229,8 +229,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/exams', [AdminController::class, 'storeExam'])->name('exams.store');
         Route::put('/exams/{exam}', [AdminController::class, 'updateExam'])->name('exams.update');
         Route::patch('/exams/{exam}/archive', [AdminController::class, 'archiveExam'])->name('exams.archive');
-        Route::post('/logout', [AuthController::class, 'logout'])->defaults('role', 'admin')->name('logout');
-
+Route::match(['get', 'post'], '/logout', [AuthController::class, 'logout'])
+    ->defaults('role', 'admin')
+    ->name('logout');
         // Users CRUD
         Route::get('/users', [UserController::class, 'index'])->name('users.index')->middleware('permission:view-users');
         Route::get('/users/create', [UserController::class, 'create'])->name('users.create')->middleware('permission:create-users');
