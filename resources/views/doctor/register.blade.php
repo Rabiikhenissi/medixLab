@@ -5,6 +5,7 @@
         title="Inscription Médecin"
         subtitle="Créez votre compte pour accéder aux services"
         action="{{ route('doctor.register') }}"
+        backUrl="{{ route('doctor.login') }}"
     >
         @if($errors->any())
             <div class="p-3 text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-200 rounded-xl">
