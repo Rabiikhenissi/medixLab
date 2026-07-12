@@ -368,20 +368,22 @@
                 if (data.success && data.exam_requests.length > 0) {
                     examRequestsList.innerHTML = data.exam_requests.map(request => {
                         const statusColors = {
-                            'pending': 'bg-amber-50 border-amber-200',
-                            'collected': 'bg-blue-50 border-blue-200',
-                            'processing': 'bg-purple-50 border-purple-200',
-                            'completed': 'bg-green-50 border-green-200',
-                            'cancelled': 'bg-red-50 border-red-200',
-                        };
+    'pending': 'bg-amber-50 border-amber-200',
+    'assigned': 'bg-teal-50 border-teal-200',
+    'collected': 'bg-blue-50 border-blue-200',
+    'processing': 'bg-purple-50 border-purple-200',
+    'completed': 'bg-green-50 border-green-200',
+    'cancelled': 'bg-red-50 border-red-200',
+};
 
-                        const statusLabels = {
-                            'pending': 'En attente',
-                            'collected': 'Collectée',
-                            'processing': 'En traitement',
-                            'completed': 'Complétée',
-                            'cancelled': 'Annulée',
-                        };
+                       const statusLabels = {
+    'pending': 'En attente',
+    'assigned': 'Laboratoire sélectionné',
+    'collected': 'Collectée',
+    'processing': 'En traitement',
+    'completed': 'Complétée',
+    'cancelled': 'Annulée',
+};
 
                         return `
                             <div class="${statusColors[request.status] || 'bg-[#F8FAFC]/50 border-[#e2e8f0]/60'} border rounded-2xl p-6">
@@ -398,9 +400,75 @@
                                     <strong>${request.exams_count}</strong> examen(s) prescrit(s)
                                 </p>
                                 <p class="text-xs text-[#94a3b8] mb-4">${request.created_at_relative}</p>
-                                <button type="button" class="w-full bg-[#0D9488] hover:bg-[#0a7068] text-white font-bold py-2.5 rounded-xl transition uppercase tracking-wider text-xs viewExamsBtn" data-exam-request-id="${request.id}">
-                                    Voir les Détails
-                                </button>
+${request.laboratory ? `
+
+<div class="
+mt-3
+p-3
+bg-green-50
+border
+border-green-200
+rounded-xl
+text-sm">
+
+<p class="text-green-800 mb-3">
+Laboratoire sélectionné :
+<strong>
+${request.laboratory.name}
+</strong>
+</p>
+
+<a href="/patient/exam-requests/${request.id}/choose-laboratory"
+class="
+block
+text-center
+w-full
+bg-purple-600
+hover:bg-purple-700
+text-white
+font-bold
+py-2
+rounded-lg
+transition
+uppercase
+tracking-wider
+text-xs">
+
+Changer le laboratoire
+
+</a>
+
+</div>
+
+` : `
+<a href="/patient/exam-requests/${request.id}/choose-laboratory"
+class="
+block
+text-center
+w-full
+mt-3
+bg-purple-600
+hover:bg-purple-700
+text-white
+font-bold
+py-2.5
+rounded-xl
+transition
+uppercase
+tracking-wider
+text-xs">
+
+Choisir un laboratoire
+
+</a>
+
+`}
+<button 
+type="button"
+class="viewExamsBtn mt-4 w-full bg-[#0D9488] hover:bg-[#0a7068] text-white font-bold py-2.5 rounded-xl transition uppercase tracking-wider text-xs"
+data-exam-request-id="${request.id}">
+    Voir les Détails
+</button>
                             </div>
                         `;
                     }).join('');

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\LaboResultController;
 
 /*
 |--------------------------------------------------------------------------
@@ -160,16 +161,32 @@ Route::prefix('patient')->name('patient.')->group(function () {
         Route::get('/access-requests', [\App\Http\Controllers\PatientController::class, 'getAccessRequests'])->name('get-access-requests');
 
         // Patient Exam Requests Routes
-        Route::get('/exam-requests', [\App\Http\Controllers\PatientController::class, 'getExamRequests'])->name('get-exam-requests');
-        Route::get('/exam-requests/{examRequest}', [\App\Http\Controllers\PatientController::class, 'getExamRequest'])->name('exam-request-detail');
+Route::get('/exam-requests', [\App\Http\Controllers\PatientController::class, 'getExamRequests'])
+    ->name('get-exam-requests');
+
+Route::get('/exam-requests/{examRequest}', [\App\Http\Controllers\PatientController::class, 'getExamRequest'])
+    ->name('exam-request-detail');
+
+
+// Patient chooses laboratory
+Route::get('/exam-requests/{examRequest}/choose-laboratory',
+    [\App\Http\Controllers\PatientController::class, 'chooseLaboratory'])
+    ->name('choose-laboratory');
+
+
+Route::post('/exam-requests/{examRequest}/assign-laboratory',
+    [\App\Http\Controllers\PatientController::class, 'assignLaboratory'])
+    ->name('assign-laboratory');
 
         Route::post('/logout', [AuthController::class, 'logout'])->defaults('role', 'patient')->name('logout');
     });
 });
 
-/// Medical Center Authentication Pages
+// Medical Center Authentication Pages
 Route::prefix('center')->name('center.')->group(function () {
 
+
+    // Guest Center Routes
     Route::middleware('guest')->group(function () {
 
         Route::get('/login', fn() => view('center.login'))
@@ -177,6 +194,7 @@ Route::prefix('center')->name('center.')->group(function () {
 
         Route::post('/login', [AuthController::class, 'login'])
             ->defaults('role', 'center');
+
 
         Route::get('/register', fn() => view('center.register'))
             ->name('register');
@@ -190,13 +208,16 @@ Route::prefix('center')->name('center.')->group(function () {
             ->defaults('role', 'center')
             ->name('password.request');
 
+
         Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])
             ->defaults('role', 'center')
             ->name('password.email');
 
+
         Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])
             ->defaults('role', 'center')
             ->name('password.reset');
+
 
         Route::post('/reset-password', [AuthController::class, 'resetPassword'])
             ->defaults('role', 'center')
@@ -205,35 +226,157 @@ Route::prefix('center')->name('center.')->group(function () {
     });
 
 
+
+
+
+    // Authenticated Center Routes
     Route::middleware('auth')->group(function () {
-        Route::get('/dashboard', [\App\Http\Controllers\CenterController::class, 'dashboard'])->name('dashboard');
-        
+
+
+        // Dashboard
+        Route::get('/dashboard',
+            [\App\Http\Controllers\CenterController::class,'dashboard']
+        )->name('dashboard');
+
+
+
+        // Exam Requests
+        Route::get('/exam-requests',
+            [\App\Http\Controllers\CenterController::class,'examRequests']
+        )->name('exam-requests');
+
+
+        Route::post('/exam-requests/{examRequest}/claim',
+            [\App\Http\Controllers\CenterController::class,'claimExamRequest']
+        )->name('exam-requests.claim');
+
+
+
+
+        // ==========================
+        // LAB RESULTS
+        // ==========================
+
+
+        Route::get('/results/{item}/create',
+            [LaboResultController::class,'create']
+        )->name('results.create');
+
+
+        Route::post('/results/{item}',
+            [LaboResultController::class,'store']
+        )->name('results.store');
+
+
+        Route::get('/results/{result}/edit',
+            [LaboResultController::class,'edit']
+        )->name('results.edit');
+
+
+        Route::put('/results/{result}',
+            [LaboResultController::class,'update']
+        )->name('results.update');
+
+
+
+
+
         // Working Hours
-        Route::get('/working-hours', [\App\Http\Controllers\CenterController::class, 'workingHours'])->name('working-hours');
-        Route::post('/working-hours/update', [\App\Http\Controllers\CenterController::class, 'updateWorkingHours'])->name('working-hours.update');
-        Route::post('/working-hours/exceptions', [\App\Http\Controllers\CenterController::class, 'addException'])->name('working-hours.exceptions.store');
-        Route::delete('/working-hours/exceptions/{workingHour}', [\App\Http\Controllers\CenterController::class, 'deleteException'])->name('working-hours.exceptions.destroy');
+
+        Route::get('/working-hours',
+            [\App\Http\Controllers\CenterController::class,'workingHours']
+        )->name('working-hours');
+
+
+        Route::post('/working-hours/update',
+            [\App\Http\Controllers\CenterController::class,'updateWorkingHours']
+        )->name('working-hours.update');
+
+
+        Route::post('/working-hours/exceptions',
+            [\App\Http\Controllers\CenterController::class,'addException']
+        )->name('working-hours.exceptions.store');
+
+
+        Route::delete('/working-hours/exceptions/{workingHour}',
+            [\App\Http\Controllers\CenterController::class,'deleteException']
+        )->name('working-hours.exceptions.destroy');
+
+
+
+
 
         // Consumables & Stock
-        Route::get('/consumables', [\App\Http\Controllers\CenterController::class, 'consumables'])->name('consumables');
-        Route::post('/consumables', [\App\Http\Controllers\CenterController::class, 'storeConsumable'])->name('consumables.store');
-        Route::put('/consumables/{consumable}', [\App\Http\Controllers\CenterController::class, 'updateConsumable'])->name('consumables.update');
-        Route::post('/consumables/{consumable}/move', [\App\Http\Controllers\CenterController::class, 'addStockMovement'])->name('consumables.move');
 
-        // Equipment & Maintenance
-        Route::get('/equipment', [\App\Http\Controllers\CenterController::class, 'equipment'])->name('equipment');
-        Route::post('/equipment', [\App\Http\Controllers\CenterController::class, 'storeEquipment'])->name('equipment.store');
-        Route::put('/equipment/{equipment}', [\App\Http\Controllers\CenterController::class, 'updateEquipment'])->name('equipment.update');
-        Route::post('/equipment/{equipment}/maintenance', [\App\Http\Controllers\CenterController::class, 'storeMaintenance'])->name('equipment.maintenance.store');
-        Route::put('/equipment/maintenance/{maintenance}', [\App\Http\Controllers\CenterController::class, 'updateMaintenance'])->name('equipment.maintenance.update');
+        Route::get('/consumables',
+            [\App\Http\Controllers\CenterController::class,'consumables']
+        )->name('consumables');
 
-        Route::post('/logout', [AuthController::class, 'logout'])->defaults('role', 'center')->name('logout');
+
+        Route::post('/consumables',
+            [\App\Http\Controllers\CenterController::class,'storeConsumable']
+        )->name('consumables.store');
+
+
+        Route::put('/consumables/{consumable}',
+            [\App\Http\Controllers\CenterController::class,'updateConsumable']
+        )->name('consumables.update');
+
+
+        Route::post('/consumables/{consumable}/move',
+            [\App\Http\Controllers\CenterController::class,'addStockMovement']
+        )->name('consumables.move');
+
+
+
+
+
+        // Equipment
+
+        Route::get('/equipment',
+            [\App\Http\Controllers\CenterController::class,'equipment']
+        )->name('equipment');
+
+
+        Route::post('/equipment',
+            [\App\Http\Controllers\CenterController::class,'storeEquipment']
+        )->name('equipment.store');
+
+
+        Route::put('/equipment/{equipment}',
+            [\App\Http\Controllers\CenterController::class,'updateEquipment']
+        )->name('equipment.update');
+
+
+        Route::post('/equipment/{equipment}/maintenance',
+            [\App\Http\Controllers\CenterController::class,'storeMaintenance']
+        )->name('equipment.maintenance.store');
+
+
+        Route::put('/equipment/maintenance/{maintenance}',
+            [\App\Http\Controllers\CenterController::class,'updateMaintenance']
+        )->name('equipment.maintenance.update');
+
+
+
+
+
+        // Logout
+
+        Route::post('/logout',
+            [AuthController::class,'logout']
+        )
+        ->defaults('role','center')
+        ->name('logout');
+
     });
+
 });
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\GroupController;
+use App\Http\Controllers\Admin\ExamController;
 
 // Admin Pages
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -241,7 +384,24 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
         Route::post('/exams', [AdminController::class, 'storeExam'])->name('exams.store');
         Route::put('/exams/{exam}', [AdminController::class, 'updateExam'])->name('exams.update');
-        Route::patch('/exams/{exam}/archive', [AdminController::class, 'archiveExam'])->name('exams.archive');
+        // Exams CRUD
+Route::get('/exams', [AdminController::class, 'exams'])->name('exams.index');
+
+Route::get('/exams/create', [AdminController::class, 'createExam'])
+    ->name('exams.create');
+
+Route::post('/exams', [AdminController::class, 'storeExam'])
+    ->name('exams.store');
+
+Route::get('/exams/{exam}/edit', [AdminController::class, 'editExam'])
+    ->name('exams.edit');
+Route::get('/exams/{exam}', [AdminController::class, 'showExam'])
+    ->name('exams.show');
+Route::put('/exams/{exam}', [AdminController::class, 'updateExam'])
+    ->name('exams.update');
+
+Route::patch('/exams/{exam}/archive', [AdminController::class, 'archiveExam'])
+    ->name('exams.archive');
         Route::match(['get', 'post'], '/logout', [AuthController::class, 'logout'])
             ->defaults('role', 'admin')
             ->name('logout');

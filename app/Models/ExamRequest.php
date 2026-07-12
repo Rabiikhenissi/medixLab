@@ -26,9 +26,9 @@ class ExamRequest extends Model
         return $this->belongsTo(Patient::class);
     }
 
-    public function labo()
+    public function laboratory()
     {
-        return $this->belongsTo(Labo::class);
+        return $this->belongsTo(Labo::class, 'labo_id');
     }
 
     public function items()
