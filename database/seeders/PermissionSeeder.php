@@ -75,11 +75,11 @@ class PermissionSeeder extends Seeder
                 ]
             ],
             [
-                'name' => 'Laboratory Management',
+                'name' => 'Laboratoires',
                 'code' => 'laboratory-management',
-                'route_name' => null,
-                'icon' => null,
-                'is_sidebar' => false,
+                'route_name' => 'admin.laboratories.index',
+                'icon' => 'beaker',
+                'is_sidebar' => true,
                 'order' => 10,
                 'view_permission' => 'view-laboratories',
                 'actions' => [

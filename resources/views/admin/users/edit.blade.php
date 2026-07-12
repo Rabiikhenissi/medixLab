@@ -54,10 +54,10 @@
                 <div class="form-group">
                     <label class="form-label">Rôle / Groupe de Sécurité<span class="required-star">*</span></label>
                     <div style="position:relative;">
-                        <select name="group_id" required class="form-control">
+                        <select name="group_id" id="group_id" required class="form-control" onchange="toggleLabField()">
                             <option value="">Sélectionner un groupe...</option>
                             @foreach($groups as $group)
-                                <option value="{{ $group->id }}" {{ old('group_id', $user->group_id) == $group->id ? 'selected' : '' }}>{{ $group->name }}</option>
+                                <option value="{{ $group->id }}" data-code="{{ $group->code }}" {{ old('group_id', $user->group_id) == $group->id ? 'selected' : '' }}>{{ $group->name }}</option>
                             @endforeach
                         </select>
                         <svg style="position:absolute;right:12px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:#94a3b8;pointer-events:none;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
@@ -66,6 +66,20 @@
                 <div class="form-group">
                     <label class="form-label">Adresse de résidence</label>
                     <input type="text" name="address" value="{{ old('address', $user->address) }}" placeholder="Ex: 15 Rue de Paris, Tunis" class="form-control">
+                </div>
+            </div>
+
+            <!-- Laboratory Select (Conditional) -->
+            <div class="form-group" id="laboratory-group" style="display: none; margin-bottom: 16px;">
+                <label class="form-label">Laboratoire Associé<span class="required-star">*</span></label>
+                <div style="position:relative;">
+                    <select name="laboratory_id" id="laboratory_id" class="form-control">
+                        <option value="">Sélectionner un laboratoire...</option>
+                        @foreach($laboratories as $labo)
+                            <option value="{{ $labo->id }}" {{ old('laboratory_id', $user->staff ? $user->staff->laboratory_id : '') == $labo->id ? 'selected' : '' }}>{{ $labo->name }} ({{ $labo->city }})</option>
+                        @endforeach
+                    </select>
+                    <svg style="position:absolute;right:12px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:#94a3b8;pointer-events:none;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
                 </div>
             </div>
 
@@ -88,4 +102,32 @@
             </div>
         </form>
     </div>
+@endsection
+
+@section('scripts')
+<script>
+    function toggleLabField() {
+        var groupSelect = document.getElementById('group_id');
+        var labGroup = document.getElementById('laboratory-group');
+        var labSelect = document.getElementById('laboratory_id');
+        
+        if (!groupSelect) return;
+        
+        var selectedOption = groupSelect.options[groupSelect.selectedIndex];
+        var code = selectedOption ? selectedOption.getAttribute('data-code') : '';
+        
+        if (code === 'center') {
+            labGroup.style.display = 'flex';
+            labSelect.setAttribute('required', 'required');
+        } else {
+            labGroup.style.display = 'none';
+            labSelect.removeAttribute('required');
+        }
+    }
+    
+    // Run on load
+    document.addEventListener('DOMContentLoaded', function() {
+        toggleLabField();
+    });
+</script>
 @endsection
