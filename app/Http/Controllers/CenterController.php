@@ -151,7 +151,7 @@ class CenterController extends Controller
      */
     public function deleteException(WorkingHours $workingHour)
     {
-        if ($workingHour->labo_id !== auth()->user()->staff->laboratory_id) {
+        if ($workingHour->labo_id !== auth()->user()->staff->labo_id) {
             abort(403);
         }
 
@@ -217,7 +217,7 @@ class CenterController extends Controller
      */
     public function updateConsumable(Request $request, Consumable $consumable)
     {
-        if ($consumable->labo_id !== auth()->user()->staff->laboratory_id) {
+        if ($consumable->labo_id !== auth()->user()->staff->labo_id) {
             abort(403);
         }
 
@@ -241,7 +241,7 @@ class CenterController extends Controller
      */
     public function addStockMovement(Request $request, Consumable $consumable)
     {
-        if ($consumable->labo_id !== auth()->user()->staff->laboratory_id) {
+        if ($consumable->labo_id !== auth()->user()->staff->labo_id) {
             abort(403);
         }
 
@@ -336,7 +336,7 @@ class CenterController extends Controller
      */
     public function updateEquipment(Request $request, Equipment $equipment)
     {
-        if ($equipment->labo_id !== auth()->user()->staff->laboratory_id) {
+        if ($equipment->labo_id !== auth()->user()->staff->labo_id) {
             abort(403);
         }
 
@@ -362,7 +362,7 @@ class CenterController extends Controller
      */
     public function storeMaintenance(Request $request, Equipment $equipment)
     {
-        if ($equipment->labo_id !== auth()->user()->staff->laboratory_id) {
+        if ($equipment->labo_id !== auth()->user()->staff->labo_id) {
             abort(403);
         }
 
@@ -403,7 +403,7 @@ class CenterController extends Controller
      */
     public function updateMaintenance(Request $request, EquipmentMaintenance $maintenance)
     {
-        if ($maintenance->equipment->labo_id !== auth()->user()->staff->laboratory_id) {
+        if ($maintenance->equipment->labo_id !== auth()->user()->staff->labo_id) {
             abort(403);
         }
 
@@ -432,4 +432,40 @@ class CenterController extends Controller
 
         return back()->with('success', 'État de maintenance mis à jour avec succès.');
     }
+
+public function examRequests()
+{
+    $lab = auth()->user()->staff->laboratory;
+
+    $requests = \App\Models\ExamRequest::where('labo_id', $lab->id)
+        ->with([
+            'patient.user',
+            'doctor.user',
+            'items.exam'
+        ])
+        ->latest()
+        ->get();
+
+    return view('center.exam-requests', compact('requests'));
+}
+
+
+public function claimExamRequest(\App\Models\ExamRequest $examRequest)
+{
+    $lab = auth()->user()->staff->laboratory;
+
+    if ($examRequest->labo_id !== $lab->id) {
+        abort(403);
+    }
+
+    if ($examRequest->status !== 'assigned') {
+        return back()->with('error', 'Cette demande ne peut plus être prise en charge.');
+    }
+
+    $examRequest->update([
+        'status' => 'processing',
+    ]);
+
+    return back()->with('success', 'La demande est maintenant en traitement.');
+}
 }

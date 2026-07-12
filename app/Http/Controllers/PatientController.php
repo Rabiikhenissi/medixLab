@@ -1,11 +1,11 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\Labo;
+use App\Models\ExamRequest;
 use App\Models\Patient;
 use App\Models\Notification;
 use App\Models\DoctorPatientAccess;
-use App\Models\ExamRequest;
 use App\Models\ExamRequestItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -160,49 +160,104 @@ class PatientController extends Controller
     /**
      * Get exam requests for patient
      */
-    public function getExamRequests()
-    {
-        $patient = Auth::user()->patient;
-        if (!$patient) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Profil patient non trouvé.',
-                'exam_requests' => []
-            ], 403);
-        }
+ public function getExamRequests()
+{
+    $patient = Auth::user()->patient;
 
-        $examRequests = ExamRequest::where('patient_id', $patient->id)
-            ->with(['doctor.user', 'items.exam'])
-            ->latest('created_at')
-            ->limit(50)
-            ->get();
-
+    if (!$patient) {
         return response()->json([
-            'success' => true,
-            'exam_requests' => $examRequests->map(function ($request) {
-                $exams = $request->items->map(function ($item) {
-                    return [
-                        'id' => $item->exam->id,
-                        'name' => $item->exam->name,
-                        'category' => $item->exam->category,
-                        'description' => $item->exam->description,
-                    ];
-                });
+            'success' => false,
+            'message' => 'Profil patient non trouvé.',
+            'exam_requests' => []
+        ], 403);
+    }
+
+
+    $examRequests = ExamRequest::where('patient_id', $patient->id)
+        ->with([
+            'doctor.user',
+            'items.exam',
+            'laboratory'
+        ])
+        ->latest('created_at')
+        ->limit(50)
+        ->get();
+
+
+
+    return response()->json([
+        'success' => true,
+
+        'exam_requests' => $examRequests->map(function ($request) {
+
+
+            $exams = $request->items->map(function ($item) {
 
                 return [
-                    'id' => $request->id,
-                    'doctor_name' => $request->doctor->user->first_name . ' ' . $request->doctor->user->last_name,
-                    'doctor_speciality' => $request->doctor->speciality,
-                    'status' => $request->status,
-                    'clinical_notes' => $request->clinical_notes,
-                    'exams' => $exams,
-                    'exams_count' => $exams->count(),
-                    'created_at' => $request->created_at->format('d/m/Y H:i'),
-                    'created_at_relative' => $request->created_at->diffForHumans(),
+                    'id' => $item->exam->id,
+                    'name' => $item->exam->name,
+                    'category' => $item->exam->category,
+                    'description' => $item->exam->description,
                 ];
-            }),
-        ]);
-    }
+
+            });
+
+
+
+            return [
+
+                'id' => $request->id,
+
+
+                'doctor_name' =>
+                    $request->doctor->user->first_name
+                    . ' '
+                    .
+                    $request->doctor->user->last_name,
+
+
+                'doctor_speciality' =>
+                    $request->doctor->speciality,
+
+
+                'status' =>
+                    $request->status,
+
+
+                'clinical_notes' =>
+                    $request->clinical_notes,
+
+
+                'laboratory' => $request->laboratory ? [
+                    'id' => $request->laboratory->id,
+                    'name' => $request->laboratory->name,
+                    'city' => $request->laboratory->city,
+                ] : null,
+
+
+                'needs_laboratory_selection' =>
+                    $request->laboratory_id === null,
+
+
+                'exams' => $exams,
+
+
+                'exams_count' =>
+                    $exams->count(),
+
+
+                'created_at' =>
+                    $request->created_at->format('d/m/Y H:i'),
+
+
+                'created_at_relative' =>
+                    $request->created_at->diffForHumans(),
+
+            ];
+
+        }),
+    ]);
+}
 
     /**
      * Get specific exam request details
@@ -265,4 +320,48 @@ class PatientController extends Controller
         }
         return 'general';
     }
+    /**
+ * Show laboratories for an exam request
+ */
+public function assignLaboratory(Request $request, ExamRequest $examRequest)
+{
+    $patient = auth()->user()->patient;
+
+    if (!$patient || $examRequest->patient_id !== $patient->id) {
+        abort(403);
+    }
+
+    $request->validate([
+        'labo_id' => 'required|exists:labos,id'
+    ]);
+
+    $examRequest->update([
+        'labo_id' => $request->labo_id,
+        'status' => 'assigned'
+    ]);
+
+    return redirect()
+        ->route('patient.dashboard')
+        ->with('success', 'Laboratoire sélectionné avec succès.');
+}
+
+public function chooseLaboratory($id)
+{
+    $patient = auth()->user()->patient;
+
+    $examRequest = ExamRequest::findOrFail($id);
+
+    if (!$patient || $examRequest->patient_id !== $patient->id) {
+        abort(403);
+    }
+
+    $laboratories = Labo::all();
+
+    return view('patient.choose-laboratory', [
+        'examRequest' => $examRequest,
+        'laboratories' => $laboratories
+    ]);
+}
+
+
 }
