@@ -206,13 +206,26 @@ Route::prefix('center')->name('center.')->group(function () {
 
 
     Route::middleware('auth')->group(function () {
-        Route::get('/dashboard', function () {
-            // Verify they are staff
-            if (!auth()->user()->staff) {
-                return redirect()->route('home');
-            }
-            return view('center.dashboard', ['user' => auth()->user()]);
-        })->name('dashboard');
+        Route::get('/dashboard', [\App\Http\Controllers\CenterController::class, 'dashboard'])->name('dashboard');
+        
+        // Working Hours
+        Route::get('/working-hours', [\App\Http\Controllers\CenterController::class, 'workingHours'])->name('working-hours');
+        Route::post('/working-hours/update', [\App\Http\Controllers\CenterController::class, 'updateWorkingHours'])->name('working-hours.update');
+        Route::post('/working-hours/exceptions', [\App\Http\Controllers\CenterController::class, 'addException'])->name('working-hours.exceptions.store');
+        Route::delete('/working-hours/exceptions/{workingHour}', [\App\Http\Controllers\CenterController::class, 'deleteException'])->name('working-hours.exceptions.destroy');
+
+        // Consumables & Stock
+        Route::get('/consumables', [\App\Http\Controllers\CenterController::class, 'consumables'])->name('consumables');
+        Route::post('/consumables', [\App\Http\Controllers\CenterController::class, 'storeConsumable'])->name('consumables.store');
+        Route::put('/consumables/{consumable}', [\App\Http\Controllers\CenterController::class, 'updateConsumable'])->name('consumables.update');
+        Route::post('/consumables/{consumable}/move', [\App\Http\Controllers\CenterController::class, 'addStockMovement'])->name('consumables.move');
+
+        // Equipment & Maintenance
+        Route::get('/equipment', [\App\Http\Controllers\CenterController::class, 'equipment'])->name('equipment');
+        Route::post('/equipment', [\App\Http\Controllers\CenterController::class, 'storeEquipment'])->name('equipment.store');
+        Route::put('/equipment/{equipment}', [\App\Http\Controllers\CenterController::class, 'updateEquipment'])->name('equipment.update');
+        Route::post('/equipment/{equipment}/maintenance', [\App\Http\Controllers\CenterController::class, 'storeMaintenance'])->name('equipment.maintenance.store');
+        Route::put('/equipment/maintenance/{maintenance}', [\App\Http\Controllers\CenterController::class, 'updateMaintenance'])->name('equipment.maintenance.update');
 
         Route::post('/logout', [AuthController::class, 'logout'])->defaults('role', 'center')->name('logout');
     });
@@ -229,9 +242,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/exams', [AdminController::class, 'storeExam'])->name('exams.store');
         Route::put('/exams/{exam}', [AdminController::class, 'updateExam'])->name('exams.update');
         Route::patch('/exams/{exam}/archive', [AdminController::class, 'archiveExam'])->name('exams.archive');
-Route::match(['get', 'post'], '/logout', [AuthController::class, 'logout'])
-    ->defaults('role', 'admin')
-    ->name('logout');
+        Route::match(['get', 'post'], '/logout', [AuthController::class, 'logout'])
+            ->defaults('role', 'admin')
+            ->name('logout');
+        // Laboratories CRUD
+        Route::get('/laboratories', [\App\Http\Controllers\LaboratoryController::class, 'index'])->name('laboratories.index')->middleware('permission:view-laboratories');
+        Route::get('/laboratories/create', [\App\Http\Controllers\LaboratoryController::class, 'create'])->name('laboratories.create')->middleware('permission:add-laboratory');
+        Route::post('/laboratories', [\App\Http\Controllers\LaboratoryController::class, 'store'])->name('laboratories.store')->middleware('permission:add-laboratory');
+        Route::get('/laboratories/{laboratory}/edit', [\App\Http\Controllers\LaboratoryController::class, 'edit'])->name('laboratories.edit')->middleware('permission:modify-laboratory');
+        Route::put('/laboratories/{laboratory}', [\App\Http\Controllers\LaboratoryController::class, 'update'])->name('laboratories.update')->middleware('permission:modify-laboratory');
+        Route::delete('/laboratories/{laboratory}', [\App\Http\Controllers\LaboratoryController::class, 'destroy'])->name('laboratories.destroy')->middleware('permission:delete-laboratory');
+
         // Users CRUD
         Route::get('/users', [UserController::class, 'index'])->name('users.index')->middleware('permission:view-users');
         Route::get('/users/create', [UserController::class, 'create'])->name('users.create')->middleware('permission:create-users');

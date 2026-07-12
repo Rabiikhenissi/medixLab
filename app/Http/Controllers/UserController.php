@@ -58,9 +58,11 @@ class UserController extends Controller
     public function create()
     {
         $groups = Group::where('is_archive', false)->orWhereNull('is_archive')->orderBy('name', 'asc')->get();
+        $laboratories = \App\Models\Labo::where('is_archive', false)->orWhereNull('is_archive')->orderBy('name', 'asc')->get();
 
         return view('admin.users.create', [
             'groups' => $groups,
+            'laboratories' => $laboratories,
         ]);
     }
 
@@ -69,6 +71,9 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
+        $centerGroup = Group::where('code', 'center')->first();
+        $centerGroupId = $centerGroup ? $centerGroup->id : null;
+
         $data = $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
@@ -77,9 +82,10 @@ class UserController extends Controller
             'phone' => 'nullable|string|max:255',
             'address' => 'nullable|string',
             'group_id' => 'required|exists:groups,id',
+            'laboratory_id' => ($centerGroupId ? 'required_if:group_id,' . $centerGroupId : 'nullable') . '|nullable|exists:labos,id',
         ]);
 
-        DB::transaction(function () use ($data) {
+        DB::transaction(function () use ($data, $request) {
             $user = User::create([
                 'first_name' => $data['first_name'],
                 'last_name' => $data['last_name'],
@@ -113,6 +119,14 @@ class UserController extends Controller
                     'patient_code' => 'PAT-' . strtoupper(\Illuminate\Support\Str::random(6)),
                 ]);
             }
+            // If Medical Center
+            elseif ($group && $group->code === 'center') {
+                \App\Models\Staff::create([
+                    'user_id' => $user->id,
+                    'laboratory_id' => $request->input('laboratory_id'),
+                    'staff_code' => 'STF-' . strtoupper(\Illuminate\Support\Str::random(8)),
+                ]);
+            }
         });
 
         return redirect()->route('admin.users.index')->with('success', 'Utilisateur créé avec succès.');
@@ -124,10 +138,12 @@ class UserController extends Controller
     public function edit(User $user)
     {
         $groups = Group::where('is_archive', false)->orWhereNull('is_archive')->orderBy('name', 'asc')->get();
+        $laboratories = \App\Models\Labo::where('is_archive', false)->orWhereNull('is_archive')->orderBy('name', 'asc')->get();
 
         return view('admin.users.edit', [
             'user' => $user,
             'groups' => $groups,
+            'laboratories' => $laboratories,
         ]);
     }
 
@@ -136,6 +152,9 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
+        $centerGroup = Group::where('code', 'center')->first();
+        $centerGroupId = $centerGroup ? $centerGroup->id : null;
+
         $data = $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
@@ -144,9 +163,10 @@ class UserController extends Controller
             'phone' => 'nullable|string|max:255',
             'address' => 'nullable|string',
             'group_id' => 'required|exists:groups,id',
+            'laboratory_id' => ($centerGroupId ? 'required_if:group_id,' . $centerGroupId : 'nullable') . '|nullable|exists:labos,id',
         ]);
 
-        DB::transaction(function () use ($data, $user) {
+        DB::transaction(function () use ($data, $user, $request) {
             $oldGroup = $user->group;
 
             $updateData = [
@@ -174,6 +194,8 @@ class UserController extends Controller
                     \App\Models\Doctor::where('user_id', $user->id)->delete();
                 } elseif ($oldGroup->code === 'patient') {
                     \App\Models\Patient::where('user_id', $user->id)->delete();
+                } elseif ($oldGroup->code === 'center') {
+                    \App\Models\Staff::where('user_id', $user->id)->delete();
                 }
 
                 // Create new role record
@@ -192,7 +214,23 @@ class UserController extends Controller
                     ], [
                         'patient_code' => 'PAT-' . strtoupper(\Illuminate\Support\Str::random(6)),
                     ]);
+                } elseif ($newGroup->code === 'center') {
+                    \App\Models\Staff::firstOrCreate([
+                        'user_id' => $user->id
+                    ], [
+                        'laboratory_id' => $request->input('laboratory_id'),
+                        'staff_code' => 'STF-' . strtoupper(\Illuminate\Support\Str::random(8)),
+                    ]);
                 }
+            } elseif ($newGroup && $newGroup->code === 'center') {
+                // If group is center and hasn't changed, sync the laboratory_id
+                \App\Models\Staff::updateOrCreate(
+                    ['user_id' => $user->id],
+                    [
+                        'laboratory_id' => $request->input('laboratory_id'),
+                        'staff_code' => $user->staff ? $user->staff->staff_code : 'STF-' . strtoupper(\Illuminate\Support\Str::random(8)),
+                    ]
+                );
             }
         });
 
