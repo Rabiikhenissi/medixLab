@@ -5,6 +5,7 @@
         title="Inscription Patient"
         subtitle="Créez votre compte pour accéder aux services"
         action="{{ route('patient.register') }}"
+        backUrl="{{ route('patient.login') }}"
     >
         @if($errors->any())
             <div class="p-3 text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-200 rounded-xl">
@@ -24,6 +25,7 @@
                 label="Prénom"
                 placeholder="ex. Marie"
                 :required="true"
+                :value="old('first_name')"
             />
 
             <!-- Last Name -->
@@ -33,6 +35,7 @@
                 label="Nom"
                 placeholder="ex. Martin"
                 :required="true"
+                :value="old('last_name')"
             />
         </div>
 
@@ -43,6 +46,7 @@
                 name="birth_date"
                 label="Date de naissance"
                 :required="true"
+                :value="old('birth_date')"
             />
 
             <!-- Gender -->
@@ -53,6 +57,7 @@
                 placeholder="Sélectionner"
                 :required="true"
                 :options="['M' => 'Masculin', 'F' => 'Féminin', 'O' => 'Autre']"
+                :value="old('gender')"
             />
         </div>
 
@@ -64,6 +69,7 @@
                 label="Email"
                 placeholder="patient@esante.com"
                 :required="true"
+                :value="old('email')"
             />
 
             <!-- Phone -->
@@ -73,6 +79,7 @@
                 label="Téléphone"
                 placeholder="+216 00 000 000"
                 :required="true"
+                :value="old('phone')"
             />
         </div>
 
@@ -82,18 +89,23 @@
                 type="select"
                 name="country"
                 label="Pays"
-                placeholder="Sélectionner"
+                placeholder="Chargement des pays..."
                 :required="true"
-                :options="[
-                    'TN' => 'Tunisie',
-                    'FR' => 'France',
-                    'MA' => 'Maroc',
-                    'DZ' => 'Algérie',
-                    'autre' => 'Autre'
-                ]"
-                value="TN"
+                :options="[]"
             />
 
+            <!-- State/Province -->
+            <x-input
+                type="select"
+                name="state_code"
+                label="Province / État"
+                placeholder="Sélectionner un pays d'abord"
+                :required="true"
+                :options="[]"
+            />
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Blood Group -->
             <x-input
                 type="select"
@@ -111,17 +123,19 @@
                     'O+' => 'O+',
                     'O-' => 'O-'
                 ]"
+                :value="old('blood_group')"
+            />
+
+            <!-- Allergies (optional) -->
+            <x-input
+                type="text"
+                name="allergies"
+                label="Allergies (Optionnel)"
+                placeholder="ex. Pénicilline, Pollen (sinon laisser vide)"
+                :required="false"
+                :value="old('allergies')"
             />
         </div>
-
-        <!-- Allergies (optional) -->
-        <x-input
-            type="text"
-            name="allergies"
-            label="Allergies (Optionnel)"
-            placeholder="ex. Pénicilline, Pollen (sinon laisser vide)"
-            :required="false"
-        />
 
         <!-- Address -->
         <x-input
@@ -130,6 +144,7 @@
             label="Adresse"
             placeholder="ex. Avenue Habib Bourguiba, Tunis"
             :required="false"
+            :value="old('address')"
         />
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -167,4 +182,127 @@
             </div>
         </x-slot:footer>
     </x-auth-card>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const countrySelect = document.getElementById('country');
+            const stateSelect = document.getElementById('state_code');
+            
+            const oldCountry = @json(old('country', 'TN'));
+            const oldStateCode = @json(old('state_code'));
+
+            function loadCountries() {
+                countrySelect.innerHTML = '<option value="" disabled selected>Chargement des pays...</option>';
+                
+                fetch('{{ route("countries.index") }}')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(res => {
+                        countrySelect.innerHTML = '<option value="" disabled>Sélectionner un pays</option>';
+                        
+                        if (res.data && res.data.length > 0) {
+                            res.data.forEach(item => {
+                                const option = document.createElement('option');
+                                option.value = item.Iso2;
+                                option.textContent = item.name;
+                                countrySelect.appendChild(option);
+                            });
+
+                            const valueToSelect = oldCountry || 'TN';
+                            if (valueToSelect) {
+                                countrySelect.value = valueToSelect;
+                                if (countrySelect.value === valueToSelect) {
+                                    loadStates(valueToSelect);
+                                } else {
+                                    countrySelect.value = "";
+                                }
+                            }
+                        } else {
+                            countrySelect.innerHTML = '<option value="" disabled selected>Aucun pays disponible</option>';
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error fetching countries:', err);
+                        countrySelect.innerHTML = '<option value="" disabled selected>Erreur de chargement des pays</option>';
+                    });
+            }
+
+           function loadStates(countryCode) {
+
+    console.log("Loading states for country:", countryCode);
+
+    stateSelect.innerHTML =
+        '<option value="" disabled selected>Chargement des provinces...</option>';
+
+    fetch(`/countries/${countryCode}/states`)
+        .then(response => {
+
+            console.log("States HTTP status:", response.status);
+
+            return response.json();
+
+        })
+        .then(res => {
+
+            console.log("States response:", res);
+
+
+            stateSelect.innerHTML =
+                '<option value="" disabled selected>Sélectionner une province</option>';
+
+
+            if (res.data && res.data.length > 0) {
+
+                res.data.forEach(item => {
+
+                    console.log("Adding state:", item);
+
+
+                    const option = document.createElement('option');
+
+                    option.value = item.state_code;
+                    option.textContent = item.name;
+
+                    stateSelect.appendChild(option);
+
+                });
+
+
+            } else {
+
+                console.log("No states returned");
+
+                stateSelect.innerHTML =
+                '<option value="" disabled>Aucune province disponible</option>';
+
+            }
+
+        })
+        .catch(err => {
+
+            console.error("States fetch error:", err);
+
+            stateSelect.innerHTML =
+            '<option value="" disabled>Erreur de chargement</option>';
+
+        });
+}
+
+            countrySelect.addEventListener('change', function () {
+                const countryCode = this.value;
+                if (countryCode) {
+                    loadStates(countryCode);
+                } else {
+                    stateSelect.innerHTML = '<option value="" disabled selected>Sélectionner un pays d\'abord</option>';
+                }
+            });
+
+            // Initial load
+            loadCountries();
+        });
+    </script>
 </x-layouts.auth>

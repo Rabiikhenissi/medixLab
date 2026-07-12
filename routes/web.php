@@ -28,18 +28,38 @@ Route::get('/home', function () {
 
 // Doctor Authentication Pages
 Route::prefix('doctor')->name('doctor.')->group(function () {
+
     Route::middleware('guest')->group(function () {
-        Route::get('/login', function () {
-            return view('doctor.login');
-        })->name('login');
 
-        Route::post('/login', [AuthController::class, 'login'])->defaults('role', 'doctor');
+        Route::get('/login', fn() => view('doctor.login'))
+            ->name('login');
 
-        Route::get('/register', function () {
-            return view('doctor.register');
-        })->name('register');
+        Route::post('/login', [AuthController::class, 'login'])
+            ->defaults('role', 'doctor');
 
-        Route::post('/register', [AuthController::class, 'register'])->defaults('role', 'doctor');
+        Route::get('/register', fn() => view('doctor.register'))
+            ->name('register');
+
+        Route::post('/register', [AuthController::class, 'register'])
+            ->defaults('role', 'doctor');
+
+
+        // Password Reset
+        Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])
+            ->defaults('role', 'doctor')
+            ->name('password.request');
+
+        Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])
+            ->defaults('role', 'doctor')
+            ->name('password.email');
+
+        Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])
+            ->defaults('role', 'doctor')
+            ->name('password.reset');
+
+        Route::post('/reset-password', [AuthController::class, 'resetPassword'])
+            ->defaults('role', 'doctor')
+            ->name('password.update');
     });
 
     Route::middleware('auth')->group(function () {
@@ -63,11 +83,7 @@ Route::prefix('doctor')->name('doctor.')->group(function () {
                 ->limit(20)
                 ->get();
 
-            $exams = \App\Models\Exam::where('is_archive', false)
-                ->select('id', 'name', 'category')
-                ->get();
-
-            return view('doctor.dashboard', compact('user', 'recentPatients', 'recentExams', 'exams'));
+            return view('doctor.dashboard', compact('user', 'recentPatients', 'recentExams'));
         })->name('dashboard');
 
         // Doctor Interface Routes
@@ -78,8 +94,9 @@ Route::prefix('doctor')->name('doctor.')->group(function () {
         Route::post('/create-exam-request', [\App\Http\Controllers\DoctorController::class, 'createExamRequest'])->name('create-exam-request');
         Route::post('/apply-exam-group', [\App\Http\Controllers\DoctorController::class, 'applyExamGroup'])->name('apply-exam-group');
 
-        // Exam Groups CRUD (dedicated page)
+        // Exam Groups CRUD (dedicated pages)
         Route::get('/exam-groups', [\App\Http\Controllers\DoctorController::class, 'examGroupsIndex'])->name('exam-groups.index');
+        Route::get('/exam-groups/create', [\App\Http\Controllers\DoctorController::class, 'examGroupsCreate'])->name('exam-groups.create');
         Route::post('/exam-groups', [\App\Http\Controllers\DoctorController::class, 'examGroupsStore'])->name('exam-groups.store');
         Route::get('/exam-groups/{examGroup}/edit', [\App\Http\Controllers\DoctorController::class, 'examGroupsEdit'])->name('exam-groups.edit');
         Route::put('/exam-groups/{examGroup}', [\App\Http\Controllers\DoctorController::class, 'examGroupsUpdate'])->name('exam-groups.update');
@@ -91,18 +108,39 @@ Route::prefix('doctor')->name('doctor.')->group(function () {
 
 // Patient Authentication Pages
 Route::prefix('patient')->name('patient.')->group(function () {
+
     Route::middleware('guest')->group(function () {
-        Route::get('/login', function () {
-            return view('patient.login');
-        })->name('login');
 
-        Route::post('/login', [AuthController::class, 'login'])->defaults('role', 'patient');
+        Route::get('/login', fn() => view('patient.login'))
+            ->name('login');
 
-        Route::get('/register', function () {
-            return view('patient.register');
-        })->name('register');
+        Route::post('/login', [AuthController::class, 'login'])
+            ->defaults('role', 'patient');
 
-        Route::post('/register', [AuthController::class, 'register'])->defaults('role', 'patient');
+        Route::get('/register', fn() => view('patient.register'))
+            ->name('register');
+
+        Route::post('/register', [AuthController::class, 'register'])
+            ->defaults('role', 'patient');
+
+
+        // Password Reset
+        Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])
+            ->defaults('role', 'patient')
+            ->name('password.request');
+
+        Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])
+            ->defaults('role', 'patient')
+            ->name('password.email');
+
+        Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])
+            ->defaults('role', 'patient')
+            ->name('password.reset');
+
+        Route::post('/reset-password', [AuthController::class, 'resetPassword'])
+            ->defaults('role', 'patient')
+            ->name('password.update');
+
     });
 
     Route::middleware('auth')->group(function () {
@@ -129,21 +167,43 @@ Route::prefix('patient')->name('patient.')->group(function () {
     });
 });
 
-// Medical Center Authentication Pages
+/// Medical Center Authentication Pages
 Route::prefix('center')->name('center.')->group(function () {
+
     Route::middleware('guest')->group(function () {
-        Route::get('/login', function () {
-            return view('center.login');
-        })->name('login');
 
-        Route::post('/login', [AuthController::class, 'login'])->defaults('role', 'center');
+        Route::get('/login', fn() => view('center.login'))
+            ->name('login');
 
-        Route::get('/register', function () {
-            return view('center.register');
-        })->name('register');
+        Route::post('/login', [AuthController::class, 'login'])
+            ->defaults('role', 'center');
 
-        Route::post('/register', [AuthController::class, 'register'])->defaults('role', 'center');
+        Route::get('/register', fn() => view('center.register'))
+            ->name('register');
+
+        Route::post('/register', [AuthController::class, 'register'])
+            ->defaults('role', 'center');
+
+
+        // Password Reset
+        Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])
+            ->defaults('role', 'center')
+            ->name('password.request');
+
+        Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])
+            ->defaults('role', 'center')
+            ->name('password.email');
+
+        Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])
+            ->defaults('role', 'center')
+            ->name('password.reset');
+
+        Route::post('/reset-password', [AuthController::class, 'resetPassword'])
+            ->defaults('role', 'center')
+            ->name('password.update');
+
     });
+
 
     Route::middleware('auth')->group(function () {
         Route::get('/dashboard', function () {
@@ -169,8 +229,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/exams', [AdminController::class, 'storeExam'])->name('exams.store');
         Route::put('/exams/{exam}', [AdminController::class, 'updateExam'])->name('exams.update');
         Route::patch('/exams/{exam}/archive', [AdminController::class, 'archiveExam'])->name('exams.archive');
-        Route::post('/logout', [AuthController::class, 'logout'])->defaults('role', 'admin')->name('logout');
-
+Route::match(['get', 'post'], '/logout', [AuthController::class, 'logout'])
+    ->defaults('role', 'admin')
+    ->name('logout');
         // Users CRUD
         Route::get('/users', [UserController::class, 'index'])->name('users.index')->middleware('permission:view-users');
         Route::get('/users/create', [UserController::class, 'create'])->name('users.create')->middleware('permission:create-users');
@@ -200,3 +261,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('/actions/{action}', [\App\Http\Controllers\FeatureController::class, 'destroyAction'])->name('actions.destroy')->middleware('permission:edit-features');
     });
 });
+
+// Location routes (AJAX API endpoints)
+Route::get('/countries', [\App\Http\Controllers\LocationController::class, 'getCountries'])->name('countries.index');
+Route::get('/countries/{country}/states', [\App\Http\Controllers\LocationController::class, 'getStates'])->name('countries.states');
+

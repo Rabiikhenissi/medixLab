@@ -223,6 +223,7 @@ class DoctorController extends Controller
     {
         $doctor = Auth::user()->doctor;
         $examGroups = $doctor->examGroups()
+            ->where('is_archive', false)
             ->with('items.exam')
             ->latest()
             ->get();
@@ -282,6 +283,7 @@ class DoctorController extends Controller
         }
 
         $examGroups = $doctor->examGroups()
+            ->where('is_archive', false)
             ->with('items.exam')
             ->latest()
             ->get();
@@ -418,5 +420,18 @@ class DoctorController extends Controller
             'message'         => 'Groupe d\'examens appliqué avec succès.',
             'exam_request_id' => $examRequest->id,
         ]);
+    }
+
+    /**
+     * Show create form for a new exam group (dedicated page)
+     */
+    public function examGroupsCreate()
+    {
+        $exams = Exam::where('is_archive', false)
+            ->select('id', 'name', 'category')
+            ->orderBy('name')
+            ->get();
+
+        return view('doctor.exam-groups-create', compact('exams'));
     }
 }

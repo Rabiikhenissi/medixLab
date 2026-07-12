@@ -11,7 +11,9 @@ use App\Models\Labo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
+use Illuminate\Auth\Events\PasswordReset;
 
 class AuthController extends Controller
 {
@@ -112,7 +114,9 @@ class AuthController extends Controller
                 'email' => 'required|string|email|max:255|unique:users',
                 'phone' => 'required|string|max:255',
                 'address' => 'nullable|string',
-                'country' => 'required|string|max:10',
+                'country' => 'required|string|max:255',
+                'state_code' => 'required|string|max:255',
+                'blood_group' => 'nullable|in:A+,A-,B+,B-,AB+,AB-,O+,O-',
                 'password' => 'required|string|min:8|confirmed',
             ]);
 
@@ -128,21 +132,13 @@ class AuthController extends Controller
                 'group_id' => $group->id,
             ]);
 
-            $postalCode = $this->extractPostalCode($data['address'] ?? '');
-            $countryCodes = [
-                'TN' => '216',
-                'FR' => '033',
-                'MA' => '212',
-                'DZ' => '213',
-                'autre' => '000'
-            ];
-            $countryCode = $countryCodes[$data['country']] ?? '000';
             $timestamp = date('YmdHis');
-            $patientCode = $countryCode . $postalCode . $timestamp;
+            $patientCode = $data['country'] . $data['state_code'] . $timestamp;
 
             Patient::create([
                 'user_id' => $user->id,
                 'patient_code' => $patientCode,
+                'blood_group' => $data['blood_group'] ?? null,
             ]);
 
             Auth::login($user);
@@ -215,54 +211,67 @@ class AuthController extends Controller
     }
 
     /**
-     * Helper method to extract 3-digit postal code based on the address or city keywords.
+     * Show the forgot-password form for a given role.
      */
-    private function extractPostalCode(?string $address): string
+    public function showForgotPassword(string $role)
     {
-        if (empty($address)) {
-            return '000';
-        }
-
-        // Try to find a 4 or 5 digit number in the address (standard postal codes)
-        if (preg_match('/\b(\d{4,5})\b/', $address, $matches)) {
-            return str_pad(substr($matches[1], 0, 3), 3, '0', STR_PAD_RIGHT);
-        }
-
-        // If no number matches, look for city keywords in Tunisia and map them
-        $cityMap = [
-            'tunis' => '100',
-            'ariana' => '200',
-            'ben arous' => '209',
-            'manouba' => '201',
-            'nabeul' => '800',
-            'zaghouan' => '110',
-            'bizerte' => '700',
-            'beja' => '900',
-            'jendouba' => '810',
-            'kef' => '710',
-            'siliana' => '610',
-            'sousse' => '400',
-            'monastir' => '500',
-            'mahdia' => '510',
-            'sfax' => '300',
-            'kairouan' => '310',
-            'kasserine' => '120',
-            'sidi bouzid' => '910',
-            'gabes' => '600',
-            'medenine' => '410',
-            'tataouine' => '320',
-            'gafsa' => '210',
-            'tozeur' => '220',
-            'kebili' => '420'
-        ];
-
-        $lowerAddress = mb_strtolower($address);
-        foreach ($cityMap as $city => $code) {
-            if (mb_strpos($lowerAddress, $city) !== false) {
-                return $code;
-            }
-        }
-
-        return '000';
+    return view('auth.forgot-password', compact('role'));
     }
+
+    /**
+     * Send the password reset link email.
+     */
+    public function sendResetLink(Request $request, string $role)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        $status = Password::sendResetLink($request->only('email'));
+
+        if ($status === Password::RESET_LINK_SENT) {
+            return back()->with('status', __($status));
+        }
+
+        return back()->withErrors(['email' => __($status)])->withInput();
+    }
+
+    /**
+     * Show the password reset form (with token from email link).
+     */
+ public function showResetPassword(Request $request, string $token, string $role)
+{
+    return view('auth.reset-password', [
+        'token' => $token,
+        'email' => $request->email,
+        'role' => $role,
+    ]);
+}
+    /**
+     * Handle the new password submission.
+     */
+    public function resetPassword(Request $request, string $role)
+    {
+        $request->validate([
+            'token'                 => 'required',
+            'email'                 => 'required|email',
+            'password'              => 'required|string|min:8|confirmed',
+        ]);
+
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function (User $user, string $password) {
+                $user->forceFill(['password' => Hash::make($password)])
+                     ->setRememberToken(Str::random(60));
+                $user->save();
+                event(new PasswordReset($user));
+            }
+        );
+
+        if ($status === Password::PASSWORD_RESET) {
+            return redirect()->route("{$role}.login")
+                ->with('status', __($status));
+        }
+
+        return back()->withErrors(['email' => __($status)])->withInput();
+    }
+
 }

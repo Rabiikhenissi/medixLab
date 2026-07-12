@@ -6,7 +6,13 @@
         subtitle="Accédez à votre espace sécurisé"
         badge="PROFESSIONNEL DE SANTÉ"
         action="{{ route('doctor.login') }}"
+        backUrl="{{ route('home') }}"
     >
+        @if(session('status'))
+            <div class="p-3 text-xs font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-xl mb-4">
+                {{ session('status') }}
+            </div>
+        @endif
         @if($errors->any())
             <div class="p-3 text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-200 rounded-xl">
                 <ul class="list-disc pl-4 space-y-0.5">
@@ -42,9 +48,9 @@
                 label="Se souvenir de moi"
             />
 
-            <a href="#" class="text-xs font-semibold text-[#0066FF] hover:underline">
-                Mot de passe oublié ?
-            </a>
+           <a href="{{ route('doctor.password.request') }}" class="text-xs font-semibold text-[#0066FF] hover:underline">
+    Mot de passe oublié ?
+</a>
         </div>
 
         <!-- Submit Button -->

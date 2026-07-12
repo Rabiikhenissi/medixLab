@@ -2,11 +2,19 @@
     'title' => '',
     'subtitle' => '',
     'badge' => null,
-    'action' => '#'
+    'action' => '#',
+    'backUrl' => null
 ])
 
 <div class="w-full max-w-[458px] mx-auto py-8">
     <div class="glass-card rounded-[20px] p-8 md:p-10 relative overflow-hidden">
+        @if($backUrl)
+            <a href="{{ $backUrl }}" class="absolute top-6 left-6 text-[#64748b] hover:text-[#1e293b] transition-colors duration-200" title="Retour">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+            </a>
+        @endif
         <!-- Logo -->
         <div class="flex flex-col items-center mb-6 select-none">
             <div class="w-12 h-12 rounded-full bg-white border-2 border-[#0066FF] flex items-center justify-center shadow-sm mb-2 transition-transform duration-300 hover:scale-105">

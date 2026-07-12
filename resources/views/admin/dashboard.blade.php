@@ -181,7 +181,7 @@ Espace <span style="color:#0066ff;">Administrateur</span>
                                 </button>
 
                                 <form action="{{ route('admin.exams.archive', $exam) }}" method="POST" style="display:inline;margin:0;"
-                                      onsubmit="return confirm('{{ $exam->is_archive ? \'Restaurer cet examen ?\' : \'Archiver cet examen ?\' }}')">
+                                      onsubmit="return confirm('{{ $exam->is_archive ? 'Restaurer cet examen ?' :'Archiver cet examen ?' }}')">
                                     @csrf
                                     @method('PATCH')
                                     <button type="submit" class="table-action-btn {{ $exam->is_archive ? 'restore-btn' : 'archive-btn' }}" title="{{ $exam->is_archive ? 'Restaurer' : 'Archiver' }}">
