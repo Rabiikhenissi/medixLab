@@ -4,17 +4,21 @@
     <div class="w-full max-w-[800px] mx-auto py-8">
         <div class="glass-card rounded-[20px] p-8 md:p-10 relative overflow-hidden">
             <!-- Header -->
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-[#e2e8f0]/80 pb-6 mb-8 select-none">
+            <div
+                class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-[#e2e8f0]/80 pb-6 mb-8 select-none">
                 <div class="flex items-center space-x-4 mb-4 sm:mb-0">
-                    <div class="w-12 h-12 rounded-full bg-white border-2 border-[#0D9488] flex items-center justify-center shadow-sm">
-                        <svg class="w-6 h-6 text-[#0D9488]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <div
+                        class="w-12 h-12 rounded-full bg-white border-2 border-[#0D9488] flex items-center justify-center shadow-sm">
+                        <svg class="w-6 h-6 text-[#0D9488]" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M4 20V8l8 7 8-7v12" />
                             <path d="M12 3v4M10 5h4" stroke-width="2.2" stroke="#0D9488" />
                         </svg>
                     </div>
                     <div>
                         <h2 class="text-xl font-bold text-[#1e293b]">Espace Patient</h2>
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-bold tracking-wider text-[#0D9488] bg-[#0D9488]/10 border border-[#0D9488]/20 uppercase mt-1">
+                        <span
+                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-bold tracking-wider text-[#0D9488] bg-[#0D9488]/10 border border-[#0D9488]/20 uppercase mt-1">
                             PATIENT
                         </span>
                     </div>
@@ -23,18 +27,24 @@
                 <div class="flex items-center space-x-3">
                     <!-- Notification Bell -->
                     <div class="relative">
-                        <button id="notificationBell" type="button" class="relative p-2 text-[#64748b] hover:text-[#0D9488] transition" title="Notifications">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        <button id="notificationBell" type="button"
+                            class="relative p-2 text-[#64748b] hover:text-[#0D9488] transition" title="Notifications">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                             </svg>
-                            <span id="notificationBadge" class="hidden absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">0</span>
+                            <span id="notificationBadge"
+                                class="hidden absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">0</span>
                         </button>
 
                         <!-- Notification Dropdown -->
-                        <div id="notificationPanel" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-[#e2e8f0] z-50 overflow-hidden">
+                        <div id="notificationPanel"
+                            class="hidden absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-[#e2e8f0] z-50 overflow-hidden">
                             <div class="bg-gradient-to-r from-[#0D9488] to-[#0a7068] p-4 text-white">
                                 <h3 class="font-bold">Notifications</h3>
-                                <p class="text-xs text-[#0D9488]/80">Vous avez <span id="unreadNotifCount">0</span> notification(s)</p>
+                                <p class="text-xs text-[#0D9488]/80">Vous avez <span id="unreadNotifCount">0</span>
+                                    notification(s)</p>
                             </div>
 
                             <div id="notificationList" class="max-h-96 overflow-y-auto">
@@ -63,7 +73,8 @@
                         Bonjour, <span class="text-[#0D9488]">{{ $user->first_name }} {{ $user->last_name }}</span> !
                     </h1>
                     <p class="text-sm text-[#64748b] mt-1 font-medium leading-relaxed">
-                        Bienvenue sur votre espace patient sécurisé. Vous pouvez consulter vos demandes d'examens et informations personnelles.
+                        Bienvenue sur votre espace patient sécurisé. Vous pouvez consulter vos demandes d'examens et
+                        informations personnelles.
                     </p>
                 </div>
 
@@ -72,8 +83,10 @@
                     <!-- Profile Info -->
                     <div class="bg-[#F8FAFC]/50 border border-[#e2e8f0]/60 rounded-2xl p-6">
                         <h3 class="text-sm font-bold text-[#1e293b] uppercase tracking-wider mb-4 flex items-center">
-                            <svg class="w-4 h-4 text-[#0D9488] mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                            <svg class="w-4 h-4 text-[#0D9488] mr-2" fill="none" stroke="currentColor"
+                                stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                             </svg>
                             Informations Personnelles
                         </h3>
@@ -92,7 +105,8 @@
                             </div>
                             <div class="flex justify-between py-1">
                                 <span class="text-[#64748b] font-medium">Adresse :</span>
-                                <span class="font-semibold text-[#1e293b]">{{ $user->address ?? 'Non renseignée' }}</span>
+                                <span
+                                    class="font-semibold text-[#1e293b]">{{ $user->address ?? 'Non renseignée' }}</span>
                             </div>
                         </div>
                     </div>
@@ -100,24 +114,30 @@
                     <!-- Medical Activity -->
                     <div class="bg-[#F8FAFC]/50 border border-[#e2e8f0]/60 rounded-2xl p-6">
                         <h3 class="text-sm font-bold text-[#1e293b] uppercase tracking-wider mb-4 flex items-center">
-                            <svg class="w-4 h-4 text-[#0D9488] mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            <svg class="w-4 h-4 text-[#0D9488] mr-2" fill="none" stroke="currentColor"
+                                stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                             Activité Médicale
                         </h3>
                         <div class="space-y-4">
-                            <div class="flex items-center justify-between p-3 bg-white border border-[#e2e8f0] rounded-xl shadow-xs">
+                            <div
+                                class="flex items-center justify-between p-3 bg-white border border-[#e2e8f0] rounded-xl shadow-xs">
                                 <div class="flex items-center space-x-3">
-                                    <div class="w-8 h-8 rounded-lg bg-[#0D9488]/10 flex items-center justify-center text-[#0D9488] font-bold text-sm">
+                                    <div
+                                        class="w-8 h-8 rounded-lg bg-[#0D9488]/10 flex items-center justify-center text-[#0D9488] font-bold text-sm">
                                         {{ $user->patient->examRequests()->count() }}
                                     </div>
                                     <span class="text-xs font-semibold text-[#64748b]">Demandes d'analyses</span>
                                 </div>
                             </div>
 
-                            <div class="flex items-center justify-between p-3 bg-white border border-[#e2e8f0] rounded-xl shadow-xs">
+                            <div
+                                class="flex items-center justify-between p-3 bg-white border border-[#e2e8f0] rounded-xl shadow-xs">
                                 <div class="flex items-center space-x-3">
-                                    <div class="w-8 h-8 rounded-lg bg-[#0D9488]/10 flex items-center justify-center text-[#0D9488] font-bold text-sm">
+                                    <div
+                                        class="w-8 h-8 rounded-lg bg-[#0D9488]/10 flex items-center justify-center text-[#0D9488] font-bold text-sm">
                                         {{ $user->patient->doctorAccesses()->count() }}
                                     </div>
                                     <span class="text-xs font-semibold text-[#64748b]">Médecins autorisés</span>
@@ -130,8 +150,10 @@
                 <!-- Pending Access Requests Section -->
                 <div class="border-t border-[#e2e8f0] pt-8">
                     <h3 class="text-lg font-bold text-[#1e293b] mb-4 flex items-center">
-                        <svg class="w-5 h-5 text-[#0D9488] mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 10H9m6 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <svg class="w-5 h-5 text-[#0D9488] mr-2" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 4.354a4 4 0 110 5.292M15 10H9m6 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         Demandes d'Accès en Attente
                     </h3>
@@ -143,19 +165,15 @@
                     </div>
                 </div>
 
-                <!-- Section link details -->
-                <div class="bg-teal-50/40 border border-[#0D9488]/10 rounded-2xl p-6 select-none mt-8">
-                    <h4 class="text-xs font-bold text-[#0D9488] uppercase tracking-wider mb-2">Note d'intégration</h4>
-                    <p class="text-xs text-[#64748b] leading-relaxed">
-                        Ce tableau de bord est entièrement dynamique et connecté aux modèles Eloquent de la base de données (<span class="font-mono bg-white px-1 py-0.5 rounded border">App\Models\Patient</span>, <span class="font-mono bg-white px-1 py-0.5 rounded border">App\Models\User</span>). Vos informations d'inscription ont été correctement insérées.
-                    </p>
-                </div>
+
 
                 <!-- Exam Requests Section -->
                 <div class="pt-4">
                     <h3 class="text-lg font-bold text-[#1e293b] mb-4 flex items-center">
-                        <svg class="w-5 h-5 text-[#0D9488] mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        <svg class="w-5 h-5 text-[#0D9488] mr-2" fill="none" stroke="currentColor"
+                            stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                         Vos Demandes d'Analyses
                     </h3>
@@ -171,14 +189,16 @@
     </div>
 
     <!-- Exam Details Modal -->
-    <div id="examDetailsModal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div id="examDetailsModal"
+        class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="glass-card rounded-[20px] max-w-[600px] w-full max-h-[90vh] overflow-y-auto">
             <div class="p-8">
                 <!-- Header -->
                 <div class="flex items-center justify-between mb-6 pb-4 border-b border-[#e2e8f0]/80">
                     <h3 class="text-lg font-bold text-[#1e293b]">Détails de la Demande</h3>
                     <button type="button" class="closeExamModal text-[#94a3b8] hover:text-[#1e293b]">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
@@ -189,19 +209,22 @@
                     <p class="text-xs font-bold text-[#0D9488] uppercase tracking-wider mb-2">Prescrit par</p>
                     <p id="modalDoctorName" class="text-lg font-bold text-[#1e293b]"></p>
                     <p id="modalDoctorSpeciality" class="text-sm text-[#64748b]"></p>
-                    <p id="modalDoctorPhone" class="text-sm text-[#64748b] mt-2"><strong>Tel:</strong> <span id="phoneValue"></span></p>
+                    <p id="modalDoctorPhone" class="text-sm text-[#64748b] mt-2"><strong>Tel:</strong> <span
+                            id="phoneValue"></span></p>
                 </div>
 
                 <!-- Status -->
                 <div class="mb-6">
                     <p class="text-xs font-bold text-[#1e293b] uppercase tracking-wider mb-2">Statut</p>
-                    <span id="modalStatus" class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold text-[#0D9488] bg-[#0D9488]/10 border border-[#0D9488]/20 uppercase"></span>
+                    <span id="modalStatus"
+                        class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold text-[#0D9488] bg-[#0D9488]/10 border border-[#0D9488]/20 uppercase"></span>
                 </div>
 
                 <!-- Clinical Notes -->
                 <div id="clinicalNotesSection" class="mb-6 hidden">
                     <p class="text-xs font-bold text-[#1e293b] uppercase tracking-wider mb-2">Notes Cliniques</p>
-                    <div id="modalClinicalNotes" class="p-3 bg-[#F8FAFC]/50 border border-[#e2e8f0]/60 rounded-xl text-sm text-[#64748b]"></div>
+                    <div id="modalClinicalNotes"
+                        class="p-3 bg-[#F8FAFC]/50 border border-[#e2e8f0]/60 rounded-xl text-sm text-[#64748b]"></div>
                 </div>
 
                 <!-- Exams List -->
@@ -213,7 +236,8 @@
                 </div>
 
                 <!-- Close Button -->
-                <button type="button" class="closeExamModal w-full bg-[#0D9488] hover:bg-[#0a7068] text-white font-bold py-2.5 rounded-xl transition uppercase tracking-wider text-sm">
+                <button type="button"
+                    class="closeExamModal w-full bg-[#0D9488] hover:bg-[#0a7068] text-white font-bold py-2.5 rounded-xl transition uppercase tracking-wider text-sm">
                     Fermer
                 </button>
             </div>
@@ -286,11 +310,13 @@
 
                     // Add event listeners for accept/decline buttons in notification panel
                     document.querySelectorAll('.notif-accept-btn').forEach(btn => {
-                        btn.addEventListener('click', () => respondToAccess(btn.dataset.accessId, 'accept', btn.dataset.notifId));
+                        btn.addEventListener('click', () => respondToAccess(btn.dataset.accessId, 'accept', btn
+                            .dataset.notifId));
                     });
 
                     document.querySelectorAll('.notif-decline-btn').forEach(btn => {
-                        btn.addEventListener('click', () => respondToAccess(btn.dataset.accessId, 'decline', btn.dataset.notifId));
+                        btn.addEventListener('click', () => respondToAccess(btn.dataset.accessId, 'decline', btn
+                            .dataset.notifId));
                     });
                 } else {
                     notificationList.innerHTML = `
@@ -307,7 +333,8 @@
                 updateUnreadCount();
             } catch (error) {
                 console.error('Error loading notifications:', error);
-                notificationList.innerHTML = '<div class="p-4 text-center text-red-500 text-sm">Erreur du chargement</div>';
+                notificationList.innerHTML =
+                    '<div class="p-4 text-center text-red-500 text-sm">Erreur du chargement</div>';
             }
         }
 
@@ -317,7 +344,7 @@
                 const response = await fetch('{{ route('patient.unread-count') }}');
                 const data = await response.json();
                 unreadNotifCount.textContent = data.unread_count;
-                
+
                 if (data.unread_count > 0) {
                     notificationBadge.textContent = data.unread_count;
                     notificationBadge.classList.remove('hidden');
@@ -490,7 +517,8 @@ data-exam-request-id="${request.id}">
                 }
             } catch (error) {
                 console.error('Error loading exam requests:', error);
-                examRequestsList.innerHTML = '<div class="p-4 text-center text-red-500 text-sm">Erreur du chargement</div>';
+                examRequestsList.innerHTML =
+                    '<div class="p-4 text-center text-red-500 text-sm">Erreur du chargement</div>';
             }
         }
 
@@ -538,10 +566,12 @@ data-exam-request-id="${request.id}">
 
                     // Add event listeners for access requests panel
                     document.querySelectorAll('.access-accept-btn').forEach(btn => {
-                        btn.addEventListener('click', () => respondToAccessRequest(btn.dataset.accessId, 'accepted'));
+                        btn.addEventListener('click', () => respondToAccessRequest(btn.dataset.accessId,
+                            'accepted'));
                     });
                     document.querySelectorAll('.access-decline-btn').forEach(btn => {
-                        btn.addEventListener('click', () => respondToAccessRequest(btn.dataset.accessId, 'declined'));
+                        btn.addEventListener('click', () => respondToAccessRequest(btn.dataset.accessId,
+                            'declined'));
                     });
                 } else {
                     accessRequestsList.innerHTML = `
@@ -556,7 +586,8 @@ data-exam-request-id="${request.id}">
                 }
             } catch (error) {
                 console.error('Error loading access requests:', error);
-                document.getElementById('accessRequestsList').innerHTML = '<div class="p-4 text-center text-red-500 text-sm">Erreur du chargement</div>';
+                document.getElementById('accessRequestsList').innerHTML =
+                    '<div class="p-4 text-center text-red-500 text-sm">Erreur du chargement</div>';
             }
         }
 
@@ -646,7 +677,8 @@ data-exam-request-id="${request.id}">
         // Show message helper
         function showMessage(message, type) {
             const alert = document.createElement('div');
-            alert.className = `fixed top-4 right-4 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white p-4 rounded-xl shadow-lg z-50 flex items-center gap-2`;
+            alert.className =
+                `fixed top-4 right-4 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white p-4 rounded-xl shadow-lg z-50 flex items-center gap-2`;
             alert.innerHTML = `
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
