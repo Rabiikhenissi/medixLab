@@ -82,8 +82,8 @@
                 this.color = colors[Math.floor(Math.random() * colors.length)];
                 
                 // Slow ambient drift velocities
-                this.vx = (Math.random() - 0.5) * 0.35;
-                this.vy = (Math.random() - 0.5) * 0.35;
+                this.vx = (Math.random() - 0.5) * 3.9;
+                this.vy = (Math.random() - 0.5) * 3.9;
                 
                 // Track home velocity to return to
                 this.baseVx = this.vx;
@@ -96,8 +96,8 @@
 
             update() {
                 // Return slowly to base velocity (inertia/friction)
-                this.vx += (this.baseVx - this.vx) * 0.05;
-                this.vy += (this.baseVy - this.vy) * 0.05;
+                this.vx += (this.baseVx - this.vx) * 0.12;
+                this.vy += (this.baseVy - this.vy) * 0.12;
 
                 // Mouse interaction
                 if (mouse.x !== null) {

@@ -1,5 +1,5 @@
 <x-layouts.auth>
-    <x-slot:title>Tableau de bord Patient - Medix eSanté</x-slot:title>
+    <x-slot:title>{{ __('Tableau de bord Patient - Medix eSanté') }}</x-slot:title>
 
     <div class="w-full max-w-[800px] mx-auto py-8">
         <div class="glass-card rounded-[20px] p-8 md:p-10 relative overflow-hidden">
@@ -16,7 +16,7 @@
                         </svg>
                     </div>
                     <div>
-                        <h2 class="text-xl font-bold text-[#1e293b]">Espace Patient</h2>
+                        <h2 class="text-xl font-bold text-[#1e293b]">{{ __('Espace Patient') }}</h2>
                         <span
                             class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-bold tracking-wider text-[#0D9488] bg-[#0D9488]/10 border border-[#0D9488]/20 uppercase mt-1">
                             PATIENT
@@ -42,15 +42,14 @@
                         <div id="notificationPanel"
                             class="hidden absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-[#e2e8f0] z-50 overflow-hidden">
                             <div class="bg-gradient-to-r from-[#0D9488] to-[#0a7068] p-4 text-white">
-                                <h3 class="font-bold">Notifications</h3>
-                                <p class="text-xs text-[#0D9488]/80">Vous avez <span id="unreadNotifCount">0</span>
-                                    notification(s)</p>
+                                <h3 class="font-bold">{{ __('Notifications') }}</h3>
+                                <p class="text-xs text-[#0D9488]/80">{!! __('Vous avez :count notification(s)', ['count' => '<span id="unreadNotifCount">0</span>']) !!}</p>
                             </div>
 
                             <div id="notificationList" class="max-h-96 overflow-y-auto">
                                 <!-- Notifications loaded here -->
                                 <div class="p-4 text-center text-[#94a3b8]">
-                                    <p class="text-sm">Chargement des notifications...</p>
+                                    <p class="text-sm">{{ __('Chargement des notifications...') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -59,7 +58,7 @@
                     <form action="{{ route('patient.logout') }}" method="POST">
                         @csrf
                         <x-button type="submit" color="slate" :fullWidth="false" class="!py-1.5 !px-4 !text-xs">
-                            SE DÉCONNECTER
+                            {{ __('SE DÉCONNECTER') }}
                         </x-button>
                     </form>
                 </div>
@@ -70,11 +69,10 @@
                 <!-- Greeting -->
                 <div>
                     <h1 class="text-2xl font-bold text-[#1e293b]">
-                        Bonjour, <span class="text-[#0D9488]">{{ $user->first_name }} {{ $user->last_name }}</span> !
+                        {{ __('Bonjour, ') }}<span class="text-[#0D9488]">{{ $user->first_name }} {{ $user->last_name }}</span> !
                     </h1>
                     <p class="text-sm text-[#64748b] mt-1 font-medium leading-relaxed">
-                        Bienvenue sur votre espace patient sécurisé. Vous pouvez consulter vos demandes d'examens et
-                        informations personnelles.
+                        {{ __("Bienvenue sur votre espace patient sécurisé. Vous pouvez consulter vos demandes d'examens et informations personnelles.") }}
                     </p>
                 </div>
 
@@ -88,25 +86,25 @@
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                             </svg>
-                            Informations Personnelles
+                            {{ __('Informations Personnelles') }}
                         </h3>
                         <div class="space-y-2 text-sm">
                             <div class="flex justify-between py-1 border-b border-[#e2e8f0]/40">
-                                <span class="text-[#64748b] font-medium">Code Unique Patient :</span>
+                                <span class="text-[#64748b] font-medium">{{ __('Code Unique Patient :') }}</span>
                                 <span class="font-bold text-[#1e293b]">{{ $user->patient->patient_code }}</span>
                             </div>
                             <div class="flex justify-between py-1 border-b border-[#e2e8f0]/40">
-                                <span class="text-[#64748b] font-medium">Adresse Email :</span>
+                                <span class="text-[#64748b] font-medium">{{ __('Adresse Email :') }}</span>
                                 <span class="font-semibold text-[#1e293b]">{{ $user->email }}</span>
                             </div>
                             <div class="flex justify-between py-1 border-b border-[#e2e8f0]/40">
-                                <span class="text-[#64748b] font-medium">Téléphone :</span>
+                                <span class="text-[#64748b] font-medium">{{ __('Téléphone :') }}</span>
                                 <span class="font-semibold text-[#1e293b]">{{ $user->phone }}</span>
                             </div>
                             <div class="flex justify-between py-1">
-                                <span class="text-[#64748b] font-medium">Adresse :</span>
+                                <span class="text-[#64748b] font-medium">{{ __('Adresse :') }}</span>
                                 <span
-                                    class="font-semibold text-[#1e293b]">{{ $user->address ?? 'Non renseignée' }}</span>
+                                    class="font-semibold text-[#1e293b]">{{ $user->address ?? __('Non renseignée') }}</span>
                             </div>
                         </div>
                     </div>
@@ -119,7 +117,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
-                            Activité Médicale
+                            {{ __('Activité Médicale') }}
                         </h3>
                         <div class="space-y-4">
                             <div
@@ -129,7 +127,7 @@
                                         class="w-8 h-8 rounded-lg bg-[#0D9488]/10 flex items-center justify-center text-[#0D9488] font-bold text-sm">
                                         {{ $user->patient->examRequests()->count() }}
                                     </div>
-                                    <span class="text-xs font-semibold text-[#64748b]">Demandes d'analyses</span>
+                                    <span class="text-xs font-semibold text-[#64748b]">{{ __("Demandes d'analyses") }}</span>
                                 </div>
                             </div>
 
@@ -140,7 +138,7 @@
                                         class="w-8 h-8 rounded-lg bg-[#0D9488]/10 flex items-center justify-center text-[#0D9488] font-bold text-sm">
                                         {{ $user->patient->doctorAccesses()->count() }}
                                     </div>
-                                    <span class="text-xs font-semibold text-[#64748b]">Médecins autorisés</span>
+                                    <span class="text-xs font-semibold text-[#64748b]">{{ __('Médecins autorisés') }}</span>
                                 </div>
                             </div>
                         </div>
@@ -155,12 +153,12 @@
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M12 4.354a4 4 0 110 5.292M15 10H9m6 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        Demandes d'Accès en Attente
+                        {{ __("Demandes d'Accès en Attente") }}
                     </h3>
                     <div id="accessRequestsList" class="space-y-3">
                         <!-- Access requests loaded here -->
                         <div class="p-4 text-center text-[#94a3b8]">
-                            <p class="text-sm">Chargement des demandes...</p>
+                            <p class="text-sm">{{ __('Chargement des demandes...') }}</p>
                         </div>
                     </div>
                 </div>
@@ -175,12 +173,12 @@
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
-                        Vos Demandes d'Analyses
+                        {{ __("Vos Demandes d'Analyses") }}
                     </h3>
                     <div id="examRequestsList" class="grid grid-cols-1 gap-4">
                         <!-- Exam requests loaded here -->
                         <div class="p-4 text-center text-[#94a3b8]">
-                            <p class="text-sm">Chargement des demandes...</p>
+                            <p class="text-sm">{{ __('Chargement des demandes...') }}</p>
                         </div>
                     </div>
                 </div>
@@ -195,7 +193,7 @@
             <div class="p-8">
                 <!-- Header -->
                 <div class="flex items-center justify-between mb-6 pb-4 border-b border-[#e2e8f0]/80">
-                    <h3 class="text-lg font-bold text-[#1e293b]">Détails de la Demande</h3>
+                    <h3 class="text-lg font-bold text-[#1e293b]">{{ __('Détails de la Demande') }}</h3>
                     <button type="button" class="closeExamModal text-[#94a3b8] hover:text-[#1e293b]">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
                             viewBox="0 0 24 24">
@@ -206,7 +204,7 @@
 
                 <!-- Doctor Info -->
                 <div class="mb-6 p-4 bg-[#0D9488]/10 border border-[#0D9488]/20 rounded-xl">
-                    <p class="text-xs font-bold text-[#0D9488] uppercase tracking-wider mb-2">Prescrit par</p>
+                    <p class="text-xs font-bold text-[#0D9488] uppercase tracking-wider mb-2">{{ __('Prescrit par') }}</p>
                     <p id="modalDoctorName" class="text-lg font-bold text-[#1e293b]"></p>
                     <p id="modalDoctorSpeciality" class="text-sm text-[#64748b]"></p>
                     <p id="modalDoctorPhone" class="text-sm text-[#64748b] mt-2"><strong>Tel:</strong> <span
@@ -215,30 +213,35 @@
 
                 <!-- Status -->
                 <div class="mb-6">
-                    <p class="text-xs font-bold text-[#1e293b] uppercase tracking-wider mb-2">Statut</p>
+                    <p class="text-xs font-bold text-[#1e293b] uppercase tracking-wider mb-2">{{ __('Statut') }}</p>
                     <span id="modalStatus"
                         class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold text-[#0D9488] bg-[#0D9488]/10 border border-[#0D9488]/20 uppercase"></span>
                 </div>
 
                 <!-- Clinical Notes -->
                 <div id="clinicalNotesSection" class="mb-6 hidden">
-                    <p class="text-xs font-bold text-[#1e293b] uppercase tracking-wider mb-2">Notes Cliniques</p>
+                    <p class="text-xs font-bold text-[#1e293b] uppercase tracking-wider mb-2">{{ __('Notes Cliniques') }}</p>
                     <div id="modalClinicalNotes"
                         class="p-3 bg-[#F8FAFC]/50 border border-[#e2e8f0]/60 rounded-xl text-sm text-[#64748b]"></div>
                 </div>
 
                 <!-- Exams List -->
                 <div class="mb-6">
-                    <p class="text-xs font-bold text-[#1e293b] uppercase tracking-wider mb-3">Examens Prescrits</p>
+                    <p class="text-xs font-bold text-[#1e293b] uppercase tracking-wider mb-3">{{ __('Examens Prescrits') }}</p>
                     <div id="modalExamsList" class="space-y-3">
-                        <!-- Exams will be loaded here -->
-                    </div>
+    <!-- Exams will be loaded here -->
+</div>
+<!-- Doctor Interpretation Section (visible after approval) -->
+<div id="modalDoctorInterpretationSection" class="mt-4 hidden">
+    <p class="text-xs font-bold text-[#1e293b] uppercase tracking-wider mb-2">{{ __('Interprétation du Médecin') }}</p>
+    <div id="modalDoctorInterpretation" class="p-3 bg-purple-50/50 border border-[#7C3AED]/10 rounded-lg text-sm text-[#475569]"></div>
+</div>
                 </div>
 
                 <!-- Close Button -->
                 <button type="button"
                     class="closeExamModal w-full bg-[#0D9488] hover:bg-[#0a7068] text-white font-bold py-2.5 rounded-xl transition uppercase tracking-wider text-sm">
-                    Fermer
+                    {{ __('Fermer') }}
                 </button>
             </div>
         </div>
@@ -395,20 +398,22 @@
                 if (data.success && data.exam_requests.length > 0) {
                     examRequestsList.innerHTML = data.exam_requests.map(request => {
                         const statusColors = {
-                            'pending': 'bg-amber-50 border-amber-200',
-                            'collected': 'bg-blue-50 border-blue-200',
-                            'processing': 'bg-purple-50 border-purple-200',
-                            'completed': 'bg-green-50 border-green-200',
-                            'cancelled': 'bg-red-50 border-red-200',
-                        };
+    'pending': 'bg-amber-50 border-amber-200',
+    'assigned': 'bg-teal-50 border-teal-200',
+    'collected': 'bg-blue-50 border-blue-200',
+    'processing': 'bg-purple-50 border-purple-200',
+    'completed': 'bg-green-50 border-green-200',
+    'cancelled': 'bg-red-50 border-red-200',
+};
 
-                        const statusLabels = {
-                            'pending': 'En attente',
-                            'collected': 'Collectée',
-                            'processing': 'En traitement',
-                            'completed': 'Complétée',
-                            'cancelled': 'Annulée',
-                        };
+                       const statusLabels = {
+    'pending': 'En attente',
+    'assigned': 'Laboratoire sélectionné',
+    'collected': 'Collectée',
+    'processing': 'En traitement',
+    'completed': 'Complétée',
+    'cancelled': 'Annulée',
+};
 
                         return `
                             <div class="${statusColors[request.status] || 'bg-[#F8FAFC]/50 border-[#e2e8f0]/60'} border rounded-2xl p-6">
@@ -425,9 +430,70 @@
                                     <strong>${request.exams_count}</strong> examen(s) prescrit(s)
                                 </p>
                                 <p class="text-xs text-[#94a3b8] mb-4">${request.created_at_relative}</p>
-                                <button type="button" class="w-full bg-[#0D9488] hover:bg-[#0a7068] text-white font-bold py-2.5 rounded-xl transition uppercase tracking-wider text-xs viewExamsBtn" data-exam-request-id="${request.id}">
-                                    Voir les Détails
-                                </button>
+${request.laboratory ? `
+
+<div class="
+mt-3
+p-3
+bg-green-50
+border
+border-green-200
+rounded-xl
+text-sm">
+
+<p class="text-green-800 mb-3">
+Laboratoire sélectionné :
+<strong>
+${request.laboratory.name}
+</strong>
+</p>
+
+<a href="/patient/exam-requests/${request.id}/choose-laboratory"
+class="
+block
+text-center
+w-full
+bg-purple-600
+hover:bg-purple-700
+text-white
+font-bold
+py-2
+rounded-lg
+transition
+uppercase
+tracking-wider
+text-xs">
+
+Changer le laboratoire
+
+</a>
+
+</div>
+
+` : `
+<a href="/patient/exam-requests/${request.id}/choose-laboratory"
+class="
+block
+text-center
+w-full
+mt-3
+bg-purple-600
+hover:bg-purple-700
+text-white
+font-bold
+py-2.5
+rounded-xl
+transition
+uppercase
+tracking-wider
+text-xs">
+
+Choisir un laboratoire
+
+</a>
+
+`}
+${request.approved_by_doctor ? `<button type="button" class="viewExamsBtn mt-4 w-full bg-[#0D9488] hover:bg-[#0a7068] text-white font-bold py-2.5 rounded-xl transition uppercase tracking-wider text-xs" data-exam-request-id="${request.id}">Voir les Détails</button>` : `<button type="button" class="mt-4 w-full bg-gray-400 text-white font-bold py-2.5 rounded-xl transition uppercase tracking-wider text-xs" disabled>En attente d'approbation</button>`}
                             </div>
                         `;
                     }).join('');
@@ -563,10 +629,19 @@
                 if (data.success) {
                     const exam = data.exam_request;
 
+                    
                     document.getElementById('modalDoctorName').textContent = `Dr. ${exam.doctor_name}`;
                     document.getElementById('modalDoctorSpeciality').textContent = exam.doctor_speciality;
                     document.getElementById('modalDoctorPhone').textContent = exam.doctor_phone || 'Non disponible';
                     document.getElementById('modalStatus').textContent = exam.status;
+
+                    if (exam.approved_by_doctor) {
+                        document.getElementById('modalDoctorInterpretationSection').classList.remove('hidden');
+                        document.getElementById('modalDoctorInterpretation').textContent = exam.doctor_interpretation || 'Aucune interprétation.';
+                    } else {
+                        document.getElementById('modalDoctorInterpretationSection').classList.add('hidden');
+                    }
+
 
                     if (exam.clinical_notes) {
                         document.getElementById('clinicalNotesSection').classList.remove('hidden');

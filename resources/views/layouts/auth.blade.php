@@ -17,7 +17,7 @@
     </head>
     <body class="bg-[#F8FAFC] text-[#1e293b] antialiased min-h-screen relative overflow-x-hidden font-sans">
         <!-- Reusable Background Animation -->
-        <x-background-animation />
+        <x-background-animation  />
 
         <!-- Main Wrapper -->
         <div class="relative z-10 min-h-screen flex flex-col justify-center items-center p-4 md:p-8">

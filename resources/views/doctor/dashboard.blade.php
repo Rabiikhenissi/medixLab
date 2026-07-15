@@ -3,19 +3,35 @@
 
     <div class="w-full max-w-7xl mx-auto py-8 px-4">
 
+        {{-- Session Messages --}}
+        @if(session('success'))
+            <div
+                class="bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl p-4 mb-6 text-sm font-semibold select-none">
+                {{ session('success') }}
+            </div>
+        @endif
+        @if(session('error'))
+            <div class="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 mb-6 text-sm font-semibold select-none">
+                {{ session('error') }}
+            </div>
+        @endif
+
         {{-- ── Header Bar ── --}}
         <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-10 gap-4 select-none">
             <div class="flex items-center gap-4">
-                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#0066FF] to-[#0052CC] flex items-center justify-center shadow-lg">
-                    <svg class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                <div
+                    class="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#0066FF] to-[#0052CC] flex items-center justify-center shadow-lg">
+                    <svg class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
                     </svg>
                 </div>
                 <div>
                     <h1 class="text-2xl font-bold text-[#1e293b]">
                         Dr. <span class="text-[#0066FF]">{{ $user->first_name }} {{ $user->last_name }}</span>
                     </h1>
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-bold tracking-wider text-[#0066FF] bg-[#0066FF]/10 border border-[#0066FF]/20 uppercase mt-1">
+                    <span
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-bold tracking-wider text-[#0066FF] bg-[#0066FF]/10 border border-[#0066FF]/20 uppercase mt-1">
                         Espace Médecin Connecté
                     </span>
                 </div>
@@ -26,24 +42,19 @@
                 <form id="headerPatientSearchForm" class="flex items-center gap-2">
                     @csrf
                     <div class="relative flex-1">
-                        <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#0066FF]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#0066FF]" fill="none"
+                            stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
-                        <input
-                            type="text"
-                            id="header_patient_code"
-                            placeholder="Rechercher patient par code..."
+                        <input type="text" id="header_patient_code" placeholder="Rechercher patient par code..."
                             class="w-full sm:w-60 pl-10 pr-4 py-2.5 border border-[#e2e8f0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0066FF]/20 focus:border-[#0066FF] transition text-[#1e293b] text-xs bg-white shadow-xs font-semibold"
-                            autocomplete="off"
-                            required
-                        />
+                            autocomplete="off" required />
                     </div>
-                    <button
-                        type="submit"
-                        class="bg-[#0066FF] hover:bg-[#0052CC] text-white font-bold px-4 py-2.5 rounded-xl transition transform hover:scale-[1.02] active:scale-[0.98] shadow-md text-xs uppercase tracking-wider flex items-center gap-1.5 cursor-pointer"
-                    >
+                    <button type="submit"
+                        class="bg-[#0066FF] hover:bg-[#0052CC] text-white font-bold px-4 py-2.5 rounded-xl transition transform hover:scale-[1.02] active:scale-[0.98] shadow-md text-xs uppercase tracking-wider flex items-center gap-1.5 cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6" />
                         </svg>
                         Rechercher
                     </button>
@@ -51,12 +62,11 @@
 
                 <form action="{{ route('doctor.logout') }}" method="POST">
                     @csrf
-                    <button
-                        type="submit"
-                        class="w-full sm:w-auto bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] hover:text-[#1e293b] font-bold px-4 py-2.5 rounded-xl transition text-xs uppercase tracking-wider border border-[#e2e8f0] flex items-center justify-center gap-1.5 cursor-pointer"
-                    >
+                    <button type="submit"
+                        class="w-full sm:w-auto bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] hover:text-[#1e293b] font-bold px-4 py-2.5 rounded-xl transition text-xs uppercase tracking-wider border border-[#e2e8f0] flex items-center justify-center gap-1.5 cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                         </svg>
                         Déconnexion
                     </button>
@@ -72,27 +82,37 @@
 
                 {{-- Statistics Dashboard Cards --}}
                 <div class="grid grid-cols-2 gap-4">
-                    <a href="{{ route('doctor.exam-groups.index') }}" class="relative overflow-hidden p-6 bg-gradient-to-br from-[#0066FF]/5 to-[#0066FF]/10 border border-[#0066FF]/20 rounded-2xl shadow-xs block hover:border-[#0066FF]/40 transition">
-                        <div class="text-3xl font-black text-[#0066FF] mb-1">{{ $user->doctor->examGroups()->count() }}</div>
+                    <a href="{{ route('doctor.exam-groups.index') }}"
+                        class="relative overflow-hidden p-6 bg-gradient-to-br from-[#0066FF]/5 to-[#0066FF]/10 border border-[#0066FF]/20 rounded-2xl shadow-xs block hover:border-[#0066FF]/40 transition">
+                        <div class="text-3xl font-black text-[#0066FF] mb-1">{{ $user->doctor->examGroups()->count() }}
+                        </div>
                         <p class="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Groupes d'Examens</p>
-                        <svg class="absolute -right-3 -bottom-3 w-14 h-14 text-[#0066FF]/10" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>
+                        <svg class="absolute -right-3 -bottom-3 w-14 h-14 text-[#0066FF]/10" fill="currentColor"
+                            viewBox="0 0 24 24">
+                            <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z" />
                         </svg>
                     </a>
-                    <div class="relative overflow-hidden p-6 bg-gradient-to-br from-emerald-500/5 to-emerald-500/10 border border-emerald-500/20 rounded-2xl shadow-xs">
-                        <div class="text-3xl font-black text-emerald-600 mb-1">{{ $user->doctor->examRequests()->count() }}</div>
-                        <p class="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Prescriptions Envoyées</p>
-                        <svg class="absolute -right-3 -bottom-3 w-14 h-14 text-emerald-500/10" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    <div
+                        class="relative overflow-hidden p-6 bg-gradient-to-br from-emerald-500/5 to-emerald-500/10 border border-emerald-500/20 rounded-2xl shadow-xs">
+                        <div class="text-3xl font-black text-emerald-600 mb-1">
+                            {{ $user->doctor->examRequests()->count() }}</div>
+                        <p class="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Prescriptions Envoyées
+                        </p>
+                        <svg class="absolute -right-3 -bottom-3 w-14 h-14 text-emerald-500/10" fill="currentColor"
+                            viewBox="0 0 24 24">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
                 </div>
 
                 {{-- Previous Exams Given by Doctor --}}
                 <div class="glass-card rounded-[20px] p-6 md:p-8 relative overflow-hidden shadow-xs">
-                    <h3 class="text-xs font-bold text-[#64748b] uppercase tracking-widest mb-5 flex items-center gap-2 pb-4 border-b border-[#e2e8f0]/80">
-                        <svg class="w-4 h-4 text-[#0066FF]" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2" />
+                    <h3
+                        class="text-xs font-bold text-[#64748b] uppercase tracking-widest mb-5 flex items-center gap-2 pb-4 border-b border-[#e2e8f0]/80">
+                        <svg class="w-4 h-4 text-[#0066FF]" fill="none" stroke="currentColor" stroke-width="2.2"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2" />
                         </svg>
                         Dernières Prescriptions d'Analyses
                     </h3>
@@ -100,64 +120,74 @@
                     @if($recentExams->count() > 0)
                         <div class="space-y-3 max-h-[460px] overflow-y-auto pr-1">
                             @foreach($recentExams as $examReq)
-                                <div class="bg-white border border-[#e2e8f0]/80 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shadow-xs hover:border-[#0066FF]/25 transition">
-                                    <div>
-                                        <div class="flex items-center gap-2">
-                                            <p class="font-bold text-sm text-[#1e293b]">
-                                                {{ $examReq->patient->user->first_name }} {{ $examReq->patient->user->last_name }}
-                                            </p>
-                                            <span class="text-[10px] text-[#64748b] font-mono bg-[#f1f5f9] px-2 py-0.5 rounded border border-[#e2e8f0]">
-                                                {{ $examReq->patient->patient_code }}
-                                            </span>
-                                        </div>
-                                        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[11px] text-[#64748b]">
-                                            <span class="flex items-center gap-1">
-                                                <svg class="w-3.5 h-3.5 text-[#0066FF]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                                </svg>
-                                                {{ $examReq->created_at->format('d/m/Y à H:i') }}
-                                            </span>
-                                            <span class="flex items-center gap-1 font-semibold text-[#0066FF]">
-                                                {{ $examReq->items->count() }} examen(s)
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center gap-2 self-start sm:self-auto">
-                                        @php
-                                            $statusColors = [
-                                                'pending' => 'text-amber-700 bg-amber-50 border-amber-200',
-                                                'collected' => 'text-blue-700 bg-blue-50 border-blue-200',
-                                                'processing' => 'text-purple-700 bg-purple-50 border-purple-200',
-                                                'completed' => 'text-emerald-700 bg-emerald-50 border-emerald-200',
-                                                'cancelled' => 'text-red-700 bg-red-50 border-red-200',
-                                            ];
-                                            $statusLabels = [
-                                                'pending' => 'En attente',
-                                                'collected' => 'Collecté',
-                                                'processing' => 'Traitement',
-                                                'completed' => 'Complété',
-                                                'cancelled' => 'Annulé',
-                                            ];
-                                            $colorClass = $statusColors[$examReq->status] ?? 'text-[#64748b] bg-[#f1f5f9] border-[#e2e8f0]';
-                                            $label = $statusLabels[$examReq->status] ?? $examReq->status;
-                                        @endphp
-                                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold border uppercase tracking-wider {{ $colorClass }}">
-                                            {{ $label }}
-                                        </span>
+                                                    <div
+                                                        class="bg-white border border-[#e2e8f0]/80 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shadow-xs hover:border-[#0066FF]/25 transition">
+                                                        <div>
+                                                            <div class="flex items-center gap-2">
+                                                                <p class="font-bold text-sm text-[#1e293b]">
+                                                                    {{ $examReq->patient->user->first_name }}
+                                                                    {{ $examReq->patient->user->last_name }}
+                                                                </p>
+                                                                <span
+                                                                    class="text-[10px] text-[#64748b] font-mono bg-[#f1f5f9] px-2 py-0.5 rounded border border-[#e2e8f0]">
+                                                                    {{ $examReq->patient->patient_code }}
+                                                                </span>
+                                                            </div>
+                                                            <div
+                                                                class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[11px] text-[#64748b]">
+                                                                <span class="flex items-center gap-1">
+                                                                    <svg class="w-3.5 h-3.5 text-[#0066FF]" fill="none" stroke="currentColor"
+                                                                        stroke-width="2" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                                    </svg>
+                                                                    {{ $examReq->created_at->format('d/m/Y à H:i') }}
+                                                                </span>
+                                                                <span class="flex items-center gap-1 font-semibold text-[#0066FF]">
+                                                                    {{ $examReq->items->count() }} examen(s)
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="flex items-center gap-2 self-start sm:self-auto">
+                                                            @php
+                                                                $statusColors = [
+                                                                    'pending' => 'text-amber-700 bg-amber-50 border-amber-200',
+                                                                    'collected' => 'text-blue-700 bg-blue-50 border-blue-200',
+                                                                    'processing' => 'text-purple-700 bg-purple-50 border-purple-200',
+                                                                    'completed' => 'text-emerald-700 bg-emerald-50 border-emerald-200',
+                                                                    'cancelled' => 'text-red-700 bg-red-50 border-red-200',
+                                                                ];
+                                                                $statusLabels = [
+                                                                    'pending' => 'En attente',
+                                                                    'collected' => 'Collecté',
+                                                                    'processing' => 'Traitement',
+                                                                    'completed' => 'Complété',
+                                                                    'cancelled' => 'Annulé',
+                                                                ];
+                                                                $colorClass = $statusColors[$examReq->status] ?? 'text-[#64748b] bg-[#f1f5f9] border-[#e2e8f0]';
+                                                                $label = $statusLabels[$examReq->status] ?? $examReq->status;
+                                                            @endphp
+                                 <span
+                                                                class="px-2.5 py-1 rounded-full text-[10px] font-bold border uppercase tracking-wider {{ $colorClass }}">
+                                                                {{ $label }}
+                                                            </span>
 
-                                        <button
-                                            type="button"
-                                            class="inline-flex items-center gap-1 bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] font-bold px-3 py-1.5 rounded-lg border border-[#e2e8f0] text-xs uppercase tracking-wider cursor-pointer viewRequestBtn"
-                                            data-id="{{ $examReq->id }}"
-                                            data-patient="{{ $examReq->patient->user->first_name }} {{ $examReq->patient->user->last_name }}"
-                                            data-date="{{ $examReq->created_at->format('d/m/Y H:i') }}"
-                                            data-notes="{{ $examReq->clinical_notes ?? 'Aucune note clinique' }}"
-                                            data-exams="{{ json_encode($examReq->items->map(fn($it) => $it->exam->name)) }}"
-                                        >
-                                            Voir Détails
-                                        </button>
-                                    </div>
-                                </div>
+                                                            <button type="button"
+                                                                class="inline-flex items-center gap-1 bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] font-bold px-3 py-1.5 rounded-lg border border-[#e2e8f0] text-xs uppercase tracking-wider cursor-pointer viewRequestBtn"
+                                                                data-id="{{ $examReq->id }}"
+                                                                data-patient="{{ $examReq->patient->user->first_name }} {{ $examReq->patient->user->last_name }}"
+                                                                data-date="{{ $examReq->created_at->format('d/m/Y H:i') }}"
+                                                                data-notes="{{ $examReq->clinical_notes ?? 'Aucune note clinique' }}"
+                                                                data-status="{{ $examReq->status }}"
+                                                                data-approved-by-doctor="{{ $examReq->approved_by_doctor ? '1' : '0' }}"
+                                                                data-doctor-interpretation="{{ $examReq->doctor_interpretation }}"
+                                                                data-items-results="{{ json_encode($examReq->items->map(function ($it) {
+                                        return ['exam_name' => $it->exam->name, 'result' => $it->resultLabo ? ['interpretation' => $it->resultLabo->interpretation, 'details' => $it->resultLabo->details] : null]; })) }}"
+                                                                data-exams="{{ json_encode($examReq->items->map(fn($it) => $it->exam->name)) }}">
+                                                                Voir Détails
+                                                            </button>
+                                                        </div>
+                                                    </div>
                             @endforeach
                         </div>
                     @else
@@ -171,27 +201,26 @@
                 <div class="glass-card rounded-[20px] p-6 md:p-8 relative overflow-hidden shadow-xs">
                     <div class="flex items-center justify-between mb-5 pb-4 border-b border-[#e2e8f0]/80">
                         <h3 class="text-xs font-bold text-[#64748b] uppercase tracking-widest flex items-center gap-2">
-                            <svg class="w-4 h-4 text-[#0066FF]" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                            <svg class="w-4 h-4 text-[#0066FF]" fill="none" stroke="currentColor" stroke-width="2.2"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                             </svg>
                             Mes Groupes d'Examens
                         </h3>
                         <div class="flex items-center gap-2">
-                        <a
-                            href="{{ route('doctor.exam-groups.create') }}"
-                            class="bg-[#0066FF] hover:bg-[#0052CC] text-white font-bold px-3 py-1.5 rounded-xl transition text-[10px] uppercase tracking-wider flex items-center gap-1"
-                        >
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                            </svg>
-                            Nouveau
-                        </a>
-                        <a
-                            href="{{ route('doctor.exam-groups.index') }}"
-                            class="bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] font-bold px-3 py-1.5 rounded-xl transition text-[10px] uppercase tracking-wider flex items-center gap-1 border border-[#e2e8f0]"
-                        >
-                            Gérer
-                        </a>
+                            <a href="{{ route('doctor.exam-groups.create') }}"
+                                class="bg-[#0066FF] hover:bg-[#0052CC] text-white font-bold px-3 py-1.5 rounded-xl transition text-[10px] uppercase tracking-wider flex items-center gap-1">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                </svg>
+                                Nouveau
+                            </a>
+                            <a href="{{ route('doctor.exam-groups.index') }}"
+                                class="bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] font-bold px-3 py-1.5 rounded-xl transition text-[10px] uppercase tracking-wider flex items-center gap-1 border border-[#e2e8f0]">
+                                Gérer
+                            </a>
                         </div>
                     </div>
 
@@ -202,13 +231,15 @@
                     @if($doctorGroups->count() > 0)
                         <div class="space-y-3 max-h-[460px] overflow-y-auto pr-1">
                             @foreach($doctorGroups as $group)
-                                <div class="bg-white border border-[#e2e8f0]/80 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shadow-xs hover:border-[#0066FF]/25 transition group-card-item" data-id="{{ $group->id }}">
+                                <div class="bg-white border border-[#e2e8f0]/80 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shadow-xs hover:border-[#0066FF]/25 transition group-card-item"
+                                    data-id="{{ $group->id }}">
                                     <div class="min-w-0 flex-1">
                                         <div class="flex items-center gap-2">
                                             <p class="font-bold text-sm text-[#1e293b] group-name-label">
                                                 {{ $group->name }}
                                             </p>
-                                            <span class="text-[9px] text-[#0066FF] font-bold bg-[#0066FF]/10 px-2 py-0.5 rounded border border-[#0066FF]/20">
+                                            <span
+                                                class="text-[9px] text-[#0066FF] font-bold bg-[#0066FF]/10 px-2 py-0.5 rounded border border-[#0066FF]/20">
                                                 {{ $group->items->count() }} examen(s)
                                             </span>
                                         </div>
@@ -217,22 +248,21 @@
                                         </p>
                                     </div>
                                     <div class="flex items-center gap-1.5 self-start sm:self-auto flex-shrink-0">
-                                        <a
-                                            href="{{ route('doctor.exam-groups.edit', $group->id) }}"
-                                            class="inline-flex items-center gap-1 bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] font-bold px-2.5 py-1.5 rounded-lg border border-[#e2e8f0] text-[10px] uppercase tracking-wider"
-                                        >
+                                        <a href="{{ route('doctor.exam-groups.edit', $group->id) }}"
+                                            class="inline-flex items-center gap-1 bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] font-bold px-2.5 py-1.5 rounded-lg border border-[#e2e8f0] text-[10px] uppercase tracking-wider">
                                             Voir
                                         </a>
-                                        <a
-                                            href="{{ route('doctor.exam-groups.edit', $group->id) }}"
-                                            class="inline-flex items-center gap-1 bg-[#EFF6FF] hover:bg-[#DBEAFE] text-[#0066FF] font-bold px-2.5 py-1.5 rounded-lg border border-[#BFDBFE] text-[10px] uppercase tracking-wider"
-                                        >
+                                        <a href="{{ route('doctor.exam-groups.edit', $group->id) }}"
+                                            class="inline-flex items-center gap-1 bg-[#EFF6FF] hover:bg-[#DBEAFE] text-[#0066FF] font-bold px-2.5 py-1.5 rounded-lg border border-[#BFDBFE] text-[10px] uppercase tracking-wider">
                                             Modifier
                                         </a>
-                                        <form action="{{ route('doctor.exam-groups.destroy', $group->id) }}" method="POST" class="inline" onsubmit="return confirm('Supprimer définitivement « {{ addslashes($group->name) }} » ?');">
+                                        <form action="{{ route('doctor.exam-groups.destroy', $group->id) }}" method="POST"
+                                            class="inline"
+                                            onsubmit="return confirm('Supprimer définitivement « {{ addslashes($group->name) }} » ?');">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="inline-flex items-center gap-1 bg-red-50 hover:bg-red-100 text-red-600 font-bold px-2.5 py-1.5 rounded-lg border border-red-100 text-[10px] uppercase tracking-wider cursor-pointer">
+                                            <button type="submit"
+                                                class="inline-flex items-center gap-1 bg-red-50 hover:bg-red-100 text-red-600 font-bold px-2.5 py-1.5 rounded-lg border border-red-100 text-[10px] uppercase tracking-wider cursor-pointer">
                                                 Supprimer
                                             </button>
                                         </form>
@@ -241,9 +271,12 @@
                             @endforeach
                         </div>
                     @else
-                        <div class="text-center py-10 border border-dashed border-[#cbd5e1] rounded-xl no-groups-placeholder">
-                            <p class="text-xs text-[#94a3b8] italic mb-3">Vous n'avez pas encore créé de groupe d'examens personnalisé.</p>
-                            <a href="{{ route('doctor.exam-groups.create') }}" class="inline-flex items-center gap-1 bg-[#0066FF] hover:bg-[#0052CC] text-white font-bold px-4 py-2 rounded-xl text-[10px] uppercase tracking-wider">
+                        <div
+                            class="text-center py-10 border border-dashed border-[#cbd5e1] rounded-xl no-groups-placeholder">
+                            <p class="text-xs text-[#94a3b8] italic mb-3">Vous n'avez pas encore créé de groupe d'examens
+                                personnalisé.</p>
+                            <a href="{{ route('doctor.exam-groups.create') }}"
+                                class="inline-flex items-center gap-1 bg-[#0066FF] hover:bg-[#0052CC] text-white font-bold px-4 py-2 rounded-xl text-[10px] uppercase tracking-wider">
                                 Créer un groupe
                             </a>
                         </div>
@@ -252,18 +285,23 @@
 
                 {{-- Doctor Profile Info Summary --}}
                 <div class="glass-card rounded-[20px] p-6 relative overflow-hidden shadow-xs">
-                    <h3 class="text-xs font-bold text-[#64748b] uppercase tracking-widest mb-4 flex items-center gap-2 pb-3 border-b border-[#e2e8f0]/80">
-                        <svg class="w-4 h-4 text-[#0066FF]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    <h3
+                        class="text-xs font-bold text-[#64748b] uppercase tracking-widest mb-4 flex items-center gap-2 pb-3 border-b border-[#e2e8f0]/80">
+                        <svg class="w-4 h-4 text-[#0066FF]" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
                         Informations Professionnelles
                     </h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-[#1e293b]">
-                        <div class="flex items-center justify-between p-3 bg-[#F8FAFC] border border-[#e2e8f0] rounded-xl">
+                        <div
+                            class="flex items-center justify-between p-3 bg-[#F8FAFC] border border-[#e2e8f0] rounded-xl">
                             <span class="text-[#64748b] font-medium">CNOM :</span>
                             <span class="font-bold font-mono text-[#0066FF]">{{ $user->doctor->doctor_code }}</span>
                         </div>
-                        <div class="flex items-center justify-between p-3 bg-[#F8FAFC] border border-[#e2e8f0] rounded-xl">
+                        <div
+                            class="flex items-center justify-between p-3 bg-[#F8FAFC] border border-[#e2e8f0] rounded-xl">
                             <span class="text-[#64748b] font-medium">Spécialité :</span>
                             <span class="font-bold capitalize">{{ $user->doctor->speciality }}</span>
                         </div>
@@ -275,12 +313,15 @@
             {{-- Right Column (1/3 width) - Tab/Panel of Previous Patients --}}
             <div class="lg:col-span-1">
                 <div class="glass-card rounded-[20px] p-6 md:p-8 relative overflow-hidden shadow-xs">
-                    
+
                     {{-- Title block --}}
                     <div class="flex items-center gap-2.5 mb-6 pb-4 border-b border-[#e2e8f0]/80">
-                        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#0066FF]/15 to-[#0066FF]/5 flex items-center justify-center flex-shrink-0">
-                            <svg class="w-5 h-5 text-[#0066FF]" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        <div
+                            class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#0066FF]/15 to-[#0066FF]/5 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-5 h-5 text-[#0066FF]" fill="none" stroke="currentColor" stroke-width="2.2"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                             </svg>
                         </div>
                         <div>
@@ -293,25 +334,26 @@
                     @if($recentPatients->count() > 0)
                         <div class="space-y-3 max-h-[480px] overflow-y-auto pr-1">
                             @foreach($recentPatients as $access)
-                                <div class="bg-gradient-to-br from-[#F8FAFC] to-[#EFF6FF]/40 border border-[#e2e8f0] rounded-xl p-4 hover:border-[#0066FF]/35 transition shadow-xs">
+                                <div
+                                    class="bg-gradient-to-br from-[#F8FAFC] to-[#EFF6FF]/40 border border-[#e2e8f0] rounded-xl p-4 hover:border-[#0066FF]/35 transition shadow-xs">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#0066FF] to-[#0052CC] flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-sm">
+                                        <div
+                                            class="w-10 h-10 rounded-full bg-gradient-to-br from-[#0066FF] to-[#0052CC] flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-sm">
                                             {{ strtoupper(substr($access->patient->user->first_name, 0, 1) . substr($access->patient->user->last_name, 0, 1)) }}
                                         </div>
                                         <div class="flex-1 min-w-0">
                                             <p class="font-bold text-xs text-[#1e293b] truncate">
                                                 {{ $access->patient->user->first_name }} {{ $access->patient->user->last_name }}
                                             </p>
-                                            <p class="text-[9px] text-[#64748b] font-mono bg-white px-1.5 py-0.5 rounded border border-[#e2e8f0] inline-block mt-1">
+                                            <p
+                                                class="text-[9px] text-[#64748b] font-mono bg-white px-1.5 py-0.5 rounded border border-[#e2e8f0] inline-block mt-1">
                                                 {{ $access->patient->patient_code }}
                                             </p>
                                         </div>
                                     </div>
                                     <div class="mt-3.5 pt-3 border-t border-[#e2e8f0]/60 flex gap-2">
-                                        <a
-                                            href="{{ route('doctor.select-exams', $access->patient->id) }}"
-                                            class="flex-1 bg-[#0066FF] hover:bg-[#0052CC] text-white font-bold py-2 px-3 rounded-lg text-[10px] uppercase tracking-wider text-center transition transform hover:scale-[1.02] active:scale-[0.98] shadow-xs cursor-pointer block"
-                                        >
+                                        <a href="{{ route('doctor.select-exams', $access->patient->id) }}"
+                                            class="flex-1 bg-[#0066FF] hover:bg-[#0052CC] text-white font-bold py-2 px-3 rounded-lg text-[10px] uppercase tracking-wider text-center transition transform hover:scale-[1.02] active:scale-[0.98] shadow-xs cursor-pointer block">
                                             Prescrire des Examens
                                         </a>
                                     </div>
@@ -332,13 +374,15 @@
     </div>
 
     <!-- Details Modal for Previous Exams -->
-    <div id="requestDetailsModal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="glass-card rounded-[20px] max-w-[500px] w-full shadow-2xl">
+    <div id="requestDetailsModal"
+        class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="glass-card rounded-[20px] max-w-[600px] w-full max-h-[90vh] overflow-y-auto shadow-2xl">
             <div class="p-8">
                 <!-- Header -->
                 <div class="flex items-center justify-between mb-6 pb-4 border-b border-[#e2e8f0]/80">
                     <h3 class="text-base font-bold text-[#1e293b]">Détails de la Prescription</h3>
-                    <button type="button" class="closeDetailsModalBtn text-[#94a3b8] hover:text-[#1e293b] transition cursor-pointer">
+                    <button type="button"
+                        class="closeDetailsModalBtn text-[#94a3b8] hover:text-[#1e293b] transition cursor-pointer">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
@@ -356,19 +400,49 @@
                     </div>
                     <div>
                         <span class="text-[#64748b] font-medium block">Notes cliniques :</span>
-                        <div id="modalNotes" class="p-3 bg-[#F8FAFC] border border-[#e2e8f0] rounded-xl text-[#64748b] leading-relaxed italic mt-1"></div>
+                        <div id="modalNotes"
+                            class="p-3 bg-[#F8FAFC] border border-[#e2e8f0] rounded-xl text-[#64748b] leading-relaxed italic mt-1">
+                        </div>
                     </div>
                     <div>
                         <span class="text-[#64748b] font-medium block mb-2">Examens prescrits :</span>
                         <div id="modalExamsList" class="space-y-1.5 max-h-[180px] overflow-y-auto pr-1"></div>
                     </div>
+
+                    {{-- Lab Results Section --}}
+                    <div id="modalLabResultsSection" class="hidden border-t border-[#e2e8f0]/80 pt-4 space-y-3">
+                        <span class="text-[#64748b] font-bold text-xs uppercase tracking-wider block">Résultats du
+                            Laboratoire :</span>
+                        <div id="modalLabResultsContainer" class="space-y-4"></div>
+                    </div>
+
+                    {{-- Doctor Interpretation Section --}}
+                    <div id="modalDoctorInterpretationSection"
+                        class="hidden border-t border-[#e2e8f0]/80 pt-4 space-y-3">
+                        <span class="text-[#64748b] font-bold text-xs uppercase tracking-wider block">Interprétation &
+                            Validation Médicale :</span>
+
+                        <div id="doctorInterpretationRead"
+                            class="hidden p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 leading-relaxed font-semibold">
+                        </div>
+
+                        <form id="doctorInterpretationForm" method="POST" action="" class="hidden space-y-3">
+                            @csrf
+                            <textarea id="modalDoctorInterpretationInput" name="doctor_interpretation" rows="4"
+                                class="w-full p-4 border border-[#e2e8f0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0066FF]/20 focus:border-[#0066FF] transition text-[#1e293b] text-xs leading-relaxed"
+                                placeholder="Saisissez votre interprétation médicale pour finaliser l'examen..."
+                                required></textarea>
+                            <button type="submit"
+                                class="w-full bg-[#0066FF] hover:bg-[#0052CC] text-white font-bold py-3 rounded-xl transition transform hover:scale-[1.01] active:scale-[0.99] shadow-md uppercase tracking-wider text-xs cursor-pointer text-center">
+                                Soumettre l'interprétation et valider
+                            </button>
+                        </form>
+                    </div>
                 </div>
 
                 <div class="pt-6 border-t border-[#e2e8f0]/80 mt-6 flex justify-end">
-                    <button
-                        type="button"
-                        class="closeDetailsModalBtn bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] font-bold py-2.5 px-5 rounded-xl transition border border-[#e2e8f0] uppercase tracking-wider text-xs cursor-pointer"
-                    >
+                    <button type="button"
+                        class="closeDetailsModalBtn bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] font-bold py-2.5 px-5 rounded-xl transition border border-[#e2e8f0] uppercase tracking-wider text-xs cursor-pointer">
                         Fermer
                     </button>
                 </div>
@@ -377,13 +451,15 @@
     </div>
 
     <!-- Search Results / Access Action Modal (Triggered by Header Search) -->
-    <div id="searchResultModal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div id="searchResultModal"
+        class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="glass-card rounded-[20px] max-w-[460px] w-full shadow-2xl">
             <div class="p-8">
                 <!-- Header -->
                 <div class="flex items-center justify-between mb-6 pb-4 border-b border-[#e2e8f0]/80">
                     <h3 class="text-base font-bold text-[#1e293b]">Patient Trouvé</h3>
-                    <button type="button" class="closeSearchModalBtn text-[#94a3b8] hover:text-[#1e293b] transition cursor-pointer">
+                    <button type="button"
+                        class="closeSearchModalBtn text-[#94a3b8] hover:text-[#1e293b] transition cursor-pointer">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
@@ -393,12 +469,15 @@
                 <!-- Patient Card Details inside Modal -->
                 <div class="bg-gradient-to-br from-[#F8FAFC] to-[#EFF6FF] border border-[#e2e8f0] rounded-2xl p-5 mb-5">
                     <div class="flex items-center gap-3">
-                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-[#0066FF] to-[#0052CC] flex items-center justify-center text-white font-bold text-lg flex-shrink-0 shadow-md">
+                        <div
+                            class="w-12 h-12 rounded-full bg-gradient-to-br from-[#0066FF] to-[#0052CC] flex items-center justify-center text-white font-bold text-lg flex-shrink-0 shadow-md">
                             <span id="searchAvatar">P</span>
                         </div>
                         <div class="flex-1 min-w-0">
                             <h4 id="searchName" class="text-sm font-bold text-[#1e293b] truncate">—</h4>
-                            <p id="searchCodeBadge" class="text-[9px] text-[#0066FF] font-mono bg-[#0066FF]/10 px-2 py-0.5 rounded border border-[#0066FF]/20 inline-block mt-1">—</p>
+                            <p id="searchCodeBadge"
+                                class="text-[9px] text-[#0066FF] font-mono bg-[#0066FF]/10 px-2 py-0.5 rounded border border-[#0066FF]/20 inline-block mt-1">
+                                —</p>
                             <p id="searchEmail" class="text-[11px] text-[#64748b] truncate mt-1"></p>
                             <p id="searchPhone" class="text-[11px] text-[#64748b]"></p>
                         </div>
@@ -407,50 +486,50 @@
 
                 <!-- Action Button logic -->
                 <div class="space-y-2.5">
-                    <button
-                        type="button"
-                        id="requestAccessBtn"
-                        class="w-full bg-[#0066FF] hover:bg-[#0052CC] text-white font-bold py-3 px-4 rounded-xl transition transform hover:scale-[1.02] active:scale-[0.98] shadow-md flex items-center justify-center gap-2 uppercase tracking-wider text-xs cursor-pointer"
-                    >
+                    <button type="button" id="requestAccessBtn"
+                        class="w-full bg-[#0066FF] hover:bg-[#0052CC] text-white font-bold py-3 px-4 rounded-xl transition transform hover:scale-[1.02] active:scale-[0.98] shadow-md flex items-center justify-center gap-2 uppercase tracking-wider text-xs cursor-pointer">
                         Demander l'Accès au Patient
                     </button>
 
-                    <button
-                        type="button"
-                        id="proceedToExamsBtn"
-                        class="hidden w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-4 rounded-xl transition transform hover:scale-[1.02] active:scale-[0.98] shadow-md flex items-center justify-center gap-2 uppercase tracking-wider text-xs cursor-pointer"
-                    >
+                    <button type="button" id="proceedToExamsBtn"
+                        class="hidden w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-4 rounded-xl transition transform hover:scale-[1.02] active:scale-[0.98] shadow-md flex items-center justify-center gap-2 uppercase tracking-wider text-xs cursor-pointer">
                         Prescrire des Examens
                     </button>
 
-                    <div id="accessGrantedMessage" class="hidden p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs">
+                    <div id="accessGrantedMessage"
+                        class="hidden p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs">
                         <div class="flex items-center gap-2">
                             <svg class="w-4 h-4 text-emerald-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                <path fill-rule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                    clip-rule="evenodd" />
                             </svg>
                             <div>
                                 <p class="font-bold text-emerald-800">Accès autorisé ✓</p>
-                                <p class="text-emerald-700 mt-0.5">L'accès à ce patient est accordé. Vous pouvez prescrire.</p>
+                                <p class="text-emerald-700 mt-0.5">L'accès à ce patient est accordé. Vous pouvez
+                                    prescrire.</p>
                             </div>
                         </div>
                     </div>
 
-                    <div id="accessPendingMessage" class="hidden p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-xs">
+                    <div id="accessPendingMessage"
+                        class="hidden p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-xs">
                         <div class="flex items-center gap-2">
-                            <svg class="w-4 h-4 text-amber-600 animate-spin flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            <svg class="w-4 h-4 text-amber-600 animate-spin flex-shrink-0" fill="none"
+                                stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             <div>
                                 <p class="font-bold text-amber-800">Demande en attente</p>
-                                <p class="text-amber-700 mt-0.5">Le patient doit confirmer votre demande sur son compte.</p>
+                                <p class="text-amber-700 mt-0.5">Le patient doit confirmer votre demande sur son compte.
+                                </p>
                             </div>
                         </div>
                     </div>
 
-                    <button
-                        type="button"
-                        class="closeSearchModalBtn w-full bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] font-bold py-2.5 px-4 rounded-xl transition border border-[#e2e8f0] uppercase tracking-wider text-xs cursor-pointer text-center"
-                    >
+                    <button type="button"
+                        class="closeSearchModalBtn w-full bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] font-bold py-2.5 px-4 rounded-xl transition border border-[#e2e8f0] uppercase tracking-wider text-xs cursor-pointer text-center">
                         Annuler
                     </button>
                 </div>
@@ -480,6 +559,83 @@
                         ${exName}
                     </div>
                 `).join('');
+
+                if (dataset.status === 'completed') {
+                    document.getElementById('modalLabResultsSection').classList.remove('hidden');
+                    document.getElementById('modalDoctorInterpretationSection').classList.remove('hidden');
+
+                    const itemsResults = JSON.parse(dataset.itemsResults);
+                    const resultsContainer = document.getElementById('modalLabResultsContainer');
+
+                    resultsContainer.innerHTML = itemsResults.map(item => {
+                        if (!item.result) {
+                            return `
+                                <div class="bg-[#F8FAFC] border border-[#e2e8f0] rounded-xl p-3.5">
+                                    <p class="font-bold text-[#1e293b]">${item.exam_name}</p>
+                                    <p class="text-[#64748b] italic mt-1">Aucun résultat saisi pour cet examen.</p>
+                                </div>
+                            `;
+                        }
+
+                        const detailsRows = item.result.details.map(detail => {
+                            let badgeClass = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                            if (detail.status === 'high') badgeClass = 'bg-red-50 text-red-700 border-red-200';
+                            if (detail.status === 'low') badgeClass = 'bg-amber-50 text-amber-700 border-amber-200';
+
+                            return `
+                                <tr class="border-b border-[#e2e8f0]/40">
+                                    <td class="py-2 pr-2 font-bold text-[#475569]">${detail.parameter}</td>
+                                    <td class="py-2 px-2 text-[#1e293b] font-extrabold">${detail.value}</td>
+                                    <td class="py-2 px-2 text-[10px] text-[#64748b] font-medium">${detail.reference_range || '-'}</td>
+                                    <td class="py-2 pl-2 text-right">
+                                        <span class="inline-flex px-2 py-0.5 rounded-full text-[9px] font-bold border ${badgeClass} uppercase">${detail.status}</span>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('');
+
+                        return `
+                            <div class="bg-[#F8FAFC] border border-[#e2e8f0] rounded-xl p-3.5">
+                                <p class="font-bold text-[#1e293b] text-xs border-b border-[#e2e8f0]/60 pb-2 mb-2">${item.exam_name}</p>
+                                <table class="w-full text-left border-collapse mb-2.5">
+                                    <thead>
+                                        <tr class="text-[9px] text-[#64748b] uppercase tracking-wider font-bold">
+                                            <th class="pb-1.5 pr-2">Paramètre</th>
+                                            <th class="pb-1.5 px-2">Valeur</th>
+                                            <th class="pb-1.5 px-2">Référence</th>
+                                            <th class="pb-1.5 pl-2 text-right">Statut</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${detailsRows}
+                                    </tbody>
+                                </table>
+                                ${item.result.interpretation ? `
+                                    <div class="bg-purple-50/50 border border-[#7C3AED]/10 rounded-lg p-2.5 mt-2">
+                                        <p class="text-[10px] font-bold text-[#7C3AED] uppercase tracking-wider">Interprétation Labo :</p>
+                                        <p class="text-[11px] text-[#475569] mt-0.5 leading-relaxed">${item.result.interpretation}</p>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `;
+                    }).join('');
+
+                    if (dataset.approvedByDoctor === '1') {
+                        document.getElementById('doctorInterpretationRead').classList.remove('hidden');
+                        document.getElementById('doctorInterpretationRead').textContent = dataset.doctorInterpretation || 'Aucune interprétation saisie.';
+                        document.getElementById('doctorInterpretationForm').classList.add('hidden');
+                    } else {
+                        document.getElementById('doctorInterpretationRead').classList.add('hidden');
+                        document.getElementById('doctorInterpretationForm').classList.remove('hidden');
+
+                        const form = document.getElementById('doctorInterpretationForm');
+                        form.action = `/doctor/exam-requests/${dataset.id}/submit-interpretation`;
+                        document.getElementById('modalDoctorInterpretationInput').value = '';
+                    }
+                } else {
+                    document.getElementById('modalLabResultsSection').classList.add('hidden');
+                    document.getElementById('modalDoctorInterpretationSection').classList.add('hidden');
+                }
 
                 detailsModal.classList.remove('hidden');
             });

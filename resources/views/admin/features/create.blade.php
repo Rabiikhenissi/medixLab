@@ -19,7 +19,7 @@
                         <li>{{ $error }}</li>
                     @endforeach
                 </ul>
-            </div>
+            </div>a
         @endif
 
         <form action="{{ route('admin.features.store') }}" method="POST">
@@ -34,8 +34,8 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">Code du Module (Unique)<span class="required-star">*</span></label>
-                    <input type="text" name="code" value="{{ old('code') }}" required
-                        placeholder="Ex: users-management" class="form-control"
+                    <input type="text" name="code" value="{{ old('code') }}" required placeholder="Ex: users-management"
+                        class="form-control"
                         style="font-family:'SF Mono','Consolas',monospace;font-weight:600;letter-spacing:0.5px;">
                 </div>
             </div>
@@ -44,8 +44,8 @@
             <div class="form-row">
                 <div class="form-group">
                     <label class="form-label">Route de Navigation (Nom de route Laravel)</label>
-                    <input type="text" name="route_name" value="{{ old('route_name') }}"
-                        placeholder="Ex: admin.users.index" class="form-control" style="font-family:monospace;">
+                    <input type="text" name="route_name" value="{{ old('route_name') }}" placeholder="Ex: admin.users.index"
+                        class="form-control" style="font-family:monospace;">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Permission requise pour voir ce module (Action code)</label>
@@ -72,8 +72,7 @@
                 <div class="form-group">
                     <label class="form-label">Ordre d'affichage dans la barre de navigation<span
                             class="required-star">*</span></label>
-                    <input type="number" name="order" value="{{ old('order', '0') }}" required min="0"
-                        class="form-control">
+                    <input type="number" name="order" value="{{ old('order', '0') }}" required min="0" class="form-control">
                 </div>
             </div>
 
@@ -131,8 +130,7 @@
 
 
                 @foreach ($icons as $icon)
-                    <button type="button" class="icon-option" data-name="{{ $icon }}"
-                        onclick="selectIcon(this,'{{ $icon }}')">
+                    <button type="button" class="icon-option" data-name="{{ $icon }}" onclick="selectIcon(this,'{{ $icon }}')">
 
 
                         <x-dynamic-component :component="'heroicon-o-' . $icon" class="icon-svg" />
@@ -199,7 +197,7 @@
 
 
         document.getElementById('iconSearch')
-            .addEventListener('input', function() {
+            .addEventListener('input', function () {
 
                 let search = this.value.toLowerCase();
 
@@ -220,7 +218,7 @@
 
             });
 
-        document.addEventListener('keydown', function(e) {
+        document.addEventListener('keydown', function (e) {
 
             if (e.key === "Escape") {
                 closeIconPicker();
