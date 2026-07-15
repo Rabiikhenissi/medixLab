@@ -5,13 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 
-#[Fillable(['doctor_id', 'patient_id', 'labo_id', 'status', 'clinical_notes', 'is_archive'])]
+#[Fillable(['doctor_id', 'patient_id', 'labo_id', 'status', 'clinical_notes', 'doctor_interpretation', 'approved_by_doctor', 'is_archive'])]
 class ExamRequest extends Model
 {
     protected function casts(): array
     {
         return [
             'is_archive' => 'boolean',
+            'approved_by_doctor' => 'boolean',
         ];
     }
     protected $table = 'exam_requests';

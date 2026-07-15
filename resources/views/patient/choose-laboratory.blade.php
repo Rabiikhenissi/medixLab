@@ -27,7 +27,10 @@ Choisir un laboratoire
 
 
 <p class="text-gray-600 mt-2">
-    📍 {{ $lab->address }}
+    📍
+    
+    
+    {{ $lab->address }}
 </p>
 
 
@@ -62,11 +65,11 @@ Choisir un laboratoire
 
 :
 
-{{ $hours->opening_time }}
+{{ $hours->start_time }}
 
 -
 
-{{ $hours->closing_time }}
+{{ $hours->end_time }}
 
 </p>
 

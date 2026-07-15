@@ -102,13 +102,21 @@ class LaboResultController extends Controller
 
 
 
-        // Change request status
+        // Check if all items in this request have results
+        $examRequest = $item->examRequest;
+        $allItemsCompleted = true;
+        foreach ($examRequest->items as $reqItem) {
+            if ($reqItem->id !== $item->id && !$reqItem->resultLabo()->exists()) {
+                $allItemsCompleted = false;
+                break;
+            }
+        }
 
-        $item->update([
-
-            'status'=>'completed'
-
-        ]);
+        if ($allItemsCompleted) {
+            $examRequest->update([
+                'status' => 'completed'
+            ]);
+        }
 
 
 
@@ -169,7 +177,21 @@ public function update(Request $request, ResultLabo $result)
 
     }
 
+    // Check if all items in this request have results
+    $examRequest = $result->examRequestItem->examRequest;
+    $allItemsCompleted = true;
+    foreach ($examRequest->items as $reqItem) {
+        if (!$reqItem->resultLabo()->exists()) {
+            $allItemsCompleted = false;
+            break;
+        }
+    }
 
+    if ($allItemsCompleted) {
+        $examRequest->update([
+            'status' => 'completed'
+        ]);
+    }
 
     return redirect()
         ->route('center.exam-requests')
