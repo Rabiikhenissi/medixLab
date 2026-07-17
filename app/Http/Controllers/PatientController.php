@@ -369,7 +369,7 @@ class PatientController extends Controller
             abort(403);
         }
 
-        if ($examRequest->status !== 'pending') {
+        if (!in_array($examRequest->status, ['pending', 'assigned'])) {
             return redirect()
                 ->route('patient.dashboard')
                 ->with('error', 'Impossible de modifier le laboratoire pour cette prescription.');
@@ -393,23 +393,26 @@ class PatientController extends Controller
     {
         $patient = auth()->user()->patient;
 
-        $examRequest = ExamRequest::findOrFail($id);
+        $examRequest = ExamRequest::with('laboratory')->findOrFail($id);
 
         if (!$patient || $examRequest->patient_id !== $patient->id) {
             abort(403);
         }
 
-        if ($examRequest->status !== 'pending') {
+        if (!in_array($examRequest->status, ['pending', 'assigned'])) {
             return redirect()
                 ->route('patient.dashboard')
                 ->with('error', 'Impossible de modifier le laboratoire pour cette prescription.');
         }
 
-        $laboratories = Labo::all();
+        $laboratories = Labo::with('workingHours')
+            ->where('is_archive', false)
+            ->orderBy('name')
+            ->get();
 
         return view('patient.choose-laboratory', [
-            'examRequest' => $examRequest,
-            'laboratories' => $laboratories
+            'examRequest'   => $examRequest,
+            'laboratories'  => $laboratories,
         ]);
     }
 
