@@ -978,12 +978,12 @@
                         }
                         $href =
                             $feature->route_name && Route::has($feature->route_name)
-                                ? route($feature->route_name)
-                                : '#';
+                            ? route($feature->route_name)
+                            : '#';
                         $style = $feature->code === 'settings' ? 'margin-top: auto;' : '';
                     @endphp
-                    <a href="{{ $href }}" class="sidebar-item {{ $isActive ? 'active' : '' }}"
-                        title="{{ $feature->name }}" style="{{ $style }}">
+                    <a href="{{ $href }}" class="sidebar-item {{ $isActive ? 'active' : '' }}" title="{{ $feature->name }}"
+                        style="{{ $style }}">
                         @if ($feature->icon)
                             <x-dynamic-component :component="'heroicon-o-' . $feature->icon" class="sidebar-icon" />
                         @endif
@@ -1009,10 +1009,12 @@
         <header class="topnav">
             <a href="{{ route('admin.dashboard') }}" class="brand">Medix <span>eSanté</span></a>
             <div class="topnav-right">
+
                 <div class="nav-user-info">
                     <div class="nav-user-name">{{ auth()->user()->first_name }} {{ auth()->user()->last_name }}</div>
                     <div class="nav-user-role">
-                        {{ auth()->user()->group ? auth()->user()->group->name : 'Administrateur' }}</div>
+                        {{ auth()->user()->group ? auth()->user()->group->name : 'Administrateur' }}
+                    </div>
                 </div>
                 <div class="nav-avatar">
                     {{ strtoupper(substr(auth()->user()->first_name, 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name, 0, 1)) }}
@@ -1044,8 +1046,7 @@
                     </div>
                     <button onclick="document.getElementById('success-alert').remove()"
                         style="background:none;border:none;cursor:pointer;color:#94a3b8;padding:0;">
-                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
-                            viewBox="0 0 24 24">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
@@ -1066,8 +1067,7 @@
                     </div>
                     <button onclick="document.getElementById('error-alert').remove()"
                         style="background:none;border:none;cursor:pointer;color:#cbd5e1;padding:0;">
-                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
-                            viewBox="0 0 24 24">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>

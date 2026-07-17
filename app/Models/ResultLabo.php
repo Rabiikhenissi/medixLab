@@ -30,4 +30,17 @@ class ResultLabo extends Model
     {
         return $this->hasMany(ResultLaboDetail::class);
     }
+
+    public function consumables()
+    {
+        return $this->belongsToMany(Consumable::class, 'result_consumables')
+            ->withPivot('quantity_used')
+            ->withTimestamps();
+    }
+
+    public function equipment()
+    {
+        return $this->belongsToMany(Equipment::class, 'result_equipment')
+            ->withTimestamps();
+    }
 }

@@ -48,9 +48,9 @@
                 label="Se souvenir de moi"
             />
 
-            <a href="{{ route('password.request') }}" class="text-xs font-semibold text-[#0066FF] hover:underline">
-                Mot de passe oublié ?
-            </a>
+           <a href="{{ route('doctor.password.request') }}" class="text-xs font-semibold text-[#0066FF] hover:underline">
+    Mot de passe oublié ?
+</a>
         </div>
 
         <!-- Submit Button -->

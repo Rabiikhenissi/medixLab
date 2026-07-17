@@ -1,20 +1,24 @@
 <x-layouts.auth>
-    <x-slot:title>Tableau de bord Patient - Medix eSanté</x-slot:title>
+    <x-slot:title>{{ __('Tableau de bord Patient - Medix eSanté') }}</x-slot:title>
 
-    <div class="w-full max-w-[800px] mx-auto py-8">
+    <div class="w-full max-w-[1400px] mx-auto py-8 px-4">
         <div class="glass-card rounded-[20px] p-8 md:p-10 relative overflow-hidden">
             <!-- Header -->
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-[#e2e8f0]/80 pb-6 mb-8 select-none">
+            <div
+                class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-[#e2e8f0]/80 pb-6 mb-8 select-none">
                 <div class="flex items-center space-x-4 mb-4 sm:mb-0">
-                    <div class="w-12 h-12 rounded-full bg-white border-2 border-[#0D9488] flex items-center justify-center shadow-sm">
-                        <svg class="w-6 h-6 text-[#0D9488]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <div
+                        class="w-12 h-12 rounded-full bg-white border-2 border-[#0D9488] flex items-center justify-center shadow-sm">
+                        <svg class="w-6 h-6 text-[#0D9488]" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M4 20V8l8 7 8-7v12" />
                             <path d="M12 3v4M10 5h4" stroke-width="2.2" stroke="#0D9488" />
                         </svg>
                     </div>
                     <div>
-                        <h2 class="text-xl font-bold text-[#1e293b]">Espace Patient</h2>
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-bold tracking-wider text-[#0D9488] bg-[#0D9488]/10 border border-[#0D9488]/20 uppercase mt-1">
+                        <h2 class="text-xl font-bold text-[#1e293b]">{{ __('Espace Patient') }}</h2>
+                        <span
+                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-bold tracking-wider text-[#0D9488] bg-[#0D9488]/10 border border-[#0D9488]/20 uppercase mt-1">
                             PATIENT
                         </span>
                     </div>
@@ -23,24 +27,29 @@
                 <div class="flex items-center space-x-3">
                     <!-- Notification Bell -->
                     <div class="relative">
-                        <button id="notificationBell" type="button" class="relative p-2 text-[#64748b] hover:text-[#0D9488] transition" title="Notifications">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        <button id="notificationBell" type="button"
+                            class="relative p-2 text-[#64748b] hover:text-[#0D9488] transition" title="Notifications">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                             </svg>
-                            <span id="notificationBadge" class="hidden absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">0</span>
+                            <span id="notificationBadge"
+                                class="hidden absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">0</span>
                         </button>
 
                         <!-- Notification Dropdown -->
-                        <div id="notificationPanel" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-[#e2e8f0] z-50 overflow-hidden">
+                        <div id="notificationPanel"
+                            class="hidden absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-[#e2e8f0] z-50 overflow-hidden">
                             <div class="bg-gradient-to-r from-[#0D9488] to-[#0a7068] p-4 text-white">
-                                <h3 class="font-bold">Notifications</h3>
-                                <p class="text-xs text-[#0D9488]/80">Vous avez <span id="unreadNotifCount">0</span> notification(s)</p>
+                                <h3 class="font-bold">{{ __('Notifications') }}</h3>
+                                <p class="text-xs text-[#0D9488]/80">{!! __('Vous avez :count notification(s)', ['count' => '<span id="unreadNotifCount">0</span>']) !!}</p>
                             </div>
 
                             <div id="notificationList" class="max-h-96 overflow-y-auto">
                                 <!-- Notifications loaded here -->
                                 <div class="p-4 text-center text-[#94a3b8]">
-                                    <p class="text-sm">Chargement des notifications...</p>
+                                    <p class="text-sm">{{ __('Chargement des notifications...') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -49,7 +58,7 @@
                     <form action="{{ route('patient.logout') }}" method="POST">
                         @csrf
                         <x-button type="submit" color="slate" :fullWidth="false" class="!py-1.5 !px-4 !text-xs">
-                            SE DÉCONNECTER
+                            {{ __('SE DÉCONNECTER') }}
                         </x-button>
                     </form>
                 </div>
@@ -60,125 +69,140 @@
                 <!-- Greeting -->
                 <div>
                     <h1 class="text-2xl font-bold text-[#1e293b]">
-                        Bonjour, <span class="text-[#0D9488]">{{ $user->first_name }} {{ $user->last_name }}</span> !
+                        {{ __('Bonjour, ') }}<span class="text-[#0D9488]">{{ $user->first_name }} {{ $user->last_name }}</span> !
                     </h1>
                     <p class="text-sm text-[#64748b] mt-1 font-medium leading-relaxed">
-                        Bienvenue sur votre espace patient sécurisé. Vous pouvez consulter vos demandes d'examens et informations personnelles.
+                        {{ __("Bienvenue sur votre espace patient sécurisé. Vous pouvez consulter vos demandes d'examens et informations personnelles.") }}
                     </p>
                 </div>
 
-                <!-- Info Cards Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
-                    <!-- Profile Info -->
-                    <div class="bg-[#F8FAFC]/50 border border-[#e2e8f0]/60 rounded-2xl p-6">
-                        <h3 class="text-sm font-bold text-[#1e293b] uppercase tracking-wider mb-4 flex items-center">
-                            <svg class="w-4 h-4 text-[#0D9488] mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                            </svg>
-                            Informations Personnelles
-                        </h3>
-                        <div class="space-y-2 text-sm">
-                            <div class="flex justify-between py-1 border-b border-[#e2e8f0]/40">
-                                <span class="text-[#64748b] font-medium">Code Unique Patient :</span>
-                                <span class="font-bold text-[#1e293b]">{{ $user->patient->patient_code }}</span>
-                            </div>
-                            <div class="flex justify-between py-1 border-b border-[#e2e8f0]/40">
-                                <span class="text-[#64748b] font-medium">Adresse Email :</span>
-                                <span class="font-semibold text-[#1e293b]">{{ $user->email }}</span>
-                            </div>
-                            <div class="flex justify-between py-1 border-b border-[#e2e8f0]/40">
-                                <span class="text-[#64748b] font-medium">Téléphone :</span>
-                                <span class="font-semibold text-[#1e293b]">{{ $user->phone }}</span>
-                            </div>
-                            <div class="flex justify-between py-1">
-                                <span class="text-[#64748b] font-medium">Adresse :</span>
-                                <span class="font-semibold text-[#1e293b]">{{ $user->address ?? 'Non renseignée' }}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Medical Activity -->
-                    <div class="bg-[#F8FAFC]/50 border border-[#e2e8f0]/60 rounded-2xl p-6">
-                        <h3 class="text-sm font-bold text-[#1e293b] uppercase tracking-wider mb-4 flex items-center">
-                            <svg class="w-4 h-4 text-[#0D9488] mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            Activité Médicale
-                        </h3>
-                        <div class="space-y-4">
-                            <div class="flex items-center justify-between p-3 bg-white border border-[#e2e8f0] rounded-xl shadow-xs">
-                                <div class="flex items-center space-x-3">
-                                    <div class="w-8 h-8 rounded-lg bg-[#0D9488]/10 flex items-center justify-center text-[#0D9488] font-bold text-sm">
-                                        {{ $user->patient->examRequests()->count() }}
-                                    </div>
-                                    <span class="text-xs font-semibold text-[#64748b]">Demandes d'analyses</span>
+                <!-- Two Column Layout for Wider View and Less Vertical Scrolling -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-4 items-start">
+                    
+                    <!-- Left Column: Patient Profile & Medical Activity (lg:col-span-4) -->
+                    <div class="lg:col-span-4 space-y-6">
+                        <!-- Profile Info -->
+                        <div class="bg-[#F8FAFC]/50 border border-[#e2e8f0]/60 rounded-2xl p-6">
+                            <h3 class="text-sm font-bold text-[#1e293b] uppercase tracking-wider mb-4 flex items-center">
+                                <svg class="w-4 h-4 text-[#0D9488] mr-2" fill="none" stroke="currentColor"
+                                    stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                                </svg>
+                                {{ __('Informations Personnelles') }}
+                            </h3>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between py-1 border-b border-[#e2e8f0]/40">
+                                    <span class="text-[#64748b] font-medium">{{ __('Code Unique Patient :') }}</span>
+                                    <span class="font-bold text-[#1e293b]">{{ $user->patient->patient_code }}</span>
                                 </div>
-                            </div>
-
-                            <div class="flex items-center justify-between p-3 bg-white border border-[#e2e8f0] rounded-xl shadow-xs">
-                                <div class="flex items-center space-x-3">
-                                    <div class="w-8 h-8 rounded-lg bg-[#0D9488]/10 flex items-center justify-center text-[#0D9488] font-bold text-sm">
-                                        {{ $user->patient->doctorAccesses()->count() }}
-                                    </div>
-                                    <span class="text-xs font-semibold text-[#64748b]">Médecins autorisés</span>
+                                <div class="flex justify-between py-1 border-b border-[#e2e8f0]/40">
+                                    <span class="text-[#64748b] font-medium">{{ __('Adresse Email :') }}</span>
+                                    <span class="font-semibold text-[#1e293b]">{{ $user->email }}</span>
+                                </div>
+                                <div class="flex justify-between py-1 border-b border-[#e2e8f0]/40">
+                                    <span class="text-[#64748b] font-medium">{{ __('Téléphone :') }}</span>
+                                    <span class="font-semibold text-[#1e293b]">{{ $user->phone }}</span>
+                                </div>
+                                <div class="flex justify-between py-1">
+                                    <span class="text-[#64748b] font-medium">{{ __('Adresse :') }}</span>
+                                    <span
+                                        class="font-semibold text-[#1e293b]">{{ $user->address ?? __('Non renseignée') }}</span>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                <!-- Pending Access Requests Section -->
-                <div class="border-t border-[#e2e8f0] pt-8">
-                    <h3 class="text-lg font-bold text-[#1e293b] mb-4 flex items-center">
-                        <svg class="w-5 h-5 text-[#0D9488] mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 10H9m6 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        Demandes d'Accès en Attente
-                    </h3>
-                    <div id="accessRequestsList" class="space-y-3">
-                        <!-- Access requests loaded here -->
-                        <div class="p-4 text-center text-[#94a3b8]">
-                            <p class="text-sm">Chargement des demandes...</p>
+                        <!-- Medical Activity -->
+                        <div class="bg-[#F8FAFC]/50 border border-[#e2e8f0]/60 rounded-2xl p-6">
+                            <h3 class="text-sm font-bold text-[#1e293b] uppercase tracking-wider mb-4 flex items-center">
+                                <svg class="w-4 h-4 text-[#0D9488] mr-2" fill="none" stroke="currentColor"
+                                    stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                {{ __('Activité Médicale') }}
+                            </h3>
+                            <div class="space-y-4">
+                                <div
+                                    class="flex items-center justify-between p-3 bg-white border border-[#e2e8f0] rounded-xl shadow-xs">
+                                    <div class="flex items-center space-x-3">
+                                        <div
+                                            class="w-8 h-8 rounded-lg bg-[#0D9488]/10 flex items-center justify-center text-[#0D9488] font-bold text-sm">
+                                            {{ $user->patient->examRequests()->count() }}
+                                        </div>
+                                        <span class="text-xs font-semibold text-[#64748b]">{{ __("Demandes d'analyses") }}</span>
+                                    </div>
+                                </div>
+
+                                <div
+                                    class="flex items-center justify-between p-3 bg-white border border-[#e2e8f0] rounded-xl shadow-xs">
+                                    <div class="flex items-center space-x-3">
+                                        <div
+                                            class="w-8 h-8 rounded-lg bg-[#0D9488]/10 flex items-center justify-center text-[#0D9488] font-bold text-sm">
+                                            {{ $user->patient->doctorAccesses()->count() }}
+                                        </div>
+                                        <span class="text-xs font-semibold text-[#64748b]">{{ __('Médecins autorisés') }}</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Section link details -->
-                <div class="bg-teal-50/40 border border-[#0D9488]/10 rounded-2xl p-6 select-none mt-8">
-                    <h4 class="text-xs font-bold text-[#0D9488] uppercase tracking-wider mb-2">Note d'intégration</h4>
-                    <p class="text-xs text-[#64748b] leading-relaxed">
-                        Ce tableau de bord est entièrement dynamique et connecté aux modèles Eloquent de la base de données (<span class="font-mono bg-white px-1 py-0.5 rounded border">App\Models\Patient</span>, <span class="font-mono bg-white px-1 py-0.5 rounded border">App\Models\User</span>). Vos informations d'inscription ont été correctement insérées.
-                    </p>
-                </div>
+                    <!-- Right Column: Requests & Analyses (lg:col-span-8) -->
+                    <div class="lg:col-span-8 space-y-6">
+                        <!-- Pending Access Requests Section -->
+                        <div class="bg-[#F8FAFC]/30 border border-[#e2e8f0]/60 rounded-2xl p-6">
+                            <h3 class="text-lg font-bold text-[#1e293b] mb-4 flex items-center">
+                                <svg class="w-5 h-5 text-[#0D9488] mr-2" fill="none" stroke="currentColor" stroke-width="2"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M12 4.354a4 4 0 110 5.292M15 10H9m6 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                {{ __("Demandes d'Accès en Attente") }}
+                            </h3>
+                            <div id="accessRequestsList" class="space-y-3">
+                                <!-- Access requests loaded here -->
+                                <div class="p-4 text-center text-[#94a3b8]">
+                                    <p class="text-sm">{{ __('Chargement des demandes...') }}</p>
+                                </div>
+                            </div>
+                        </div>
 
-                <!-- Exam Requests Section -->
-                <div class="pt-4">
-                    <h3 class="text-lg font-bold text-[#1e293b] mb-4 flex items-center">
-                        <svg class="w-5 h-5 text-[#0D9488] mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        Vos Demandes d'Analyses
-                    </h3>
-                    <div id="examRequestsList" class="grid grid-cols-1 gap-4">
-                        <!-- Exam requests loaded here -->
-                        <div class="p-4 text-center text-[#94a3b8]">
-                            <p class="text-sm">Chargement des demandes...</p>
+                        <!-- Exam Requests Section -->
+                        <div class="bg-[#F8FAFC]/30 border border-[#e2e8f0]/60 rounded-2xl p-6">
+                            <h3 class="text-lg font-bold text-[#1e293b] mb-4 flex items-center">
+                                <svg class="w-5 h-5 text-[#0D9488] mr-2" fill="none" stroke="currentColor"
+                                    stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                {{ __("Vos Demandes d'Analyses") }}
+                            </h3>
+                            <div id="examRequestsList" class="grid grid-cols-1 gap-4">
+                                <!-- Exam requests loaded here -->
+                                <div class="p-4 text-center text-[#94a3b8]">
+                                    <p class="text-sm">{{ __('Chargement des demandes...') }}</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Exam Details Modal -->
-    <div id="examDetailsModal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div id="examDetailsModal"
+        class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="glass-card rounded-[20px] max-w-[600px] w-full max-h-[90vh] overflow-y-auto">
             <div class="p-8">
                 <!-- Header -->
                 <div class="flex items-center justify-between mb-6 pb-4 border-b border-[#e2e8f0]/80">
-                    <h3 class="text-lg font-bold text-[#1e293b]">Détails de la Demande</h3>
+                    <h3 class="text-lg font-bold text-[#1e293b]">{{ __('Détails de la Demande') }}</h3>
                     <button type="button" class="closeExamModal text-[#94a3b8] hover:text-[#1e293b]">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
@@ -186,35 +210,44 @@
 
                 <!-- Doctor Info -->
                 <div class="mb-6 p-4 bg-[#0D9488]/10 border border-[#0D9488]/20 rounded-xl">
-                    <p class="text-xs font-bold text-[#0D9488] uppercase tracking-wider mb-2">Prescrit par</p>
+                    <p class="text-xs font-bold text-[#0D9488] uppercase tracking-wider mb-2">{{ __('Prescrit par') }}</p>
                     <p id="modalDoctorName" class="text-lg font-bold text-[#1e293b]"></p>
                     <p id="modalDoctorSpeciality" class="text-sm text-[#64748b]"></p>
-                    <p id="modalDoctorPhone" class="text-sm text-[#64748b] mt-2"><strong>Tel:</strong> <span id="phoneValue"></span></p>
+                    <p id="modalDoctorPhone" class="text-sm text-[#64748b] mt-2"><strong>Tel:</strong> <span
+                            id="phoneValue"></span></p>
                 </div>
 
                 <!-- Status -->
                 <div class="mb-6">
-                    <p class="text-xs font-bold text-[#1e293b] uppercase tracking-wider mb-2">Statut</p>
-                    <span id="modalStatus" class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold text-[#0D9488] bg-[#0D9488]/10 border border-[#0D9488]/20 uppercase"></span>
+                    <p class="text-xs font-bold text-[#1e293b] uppercase tracking-wider mb-2">{{ __('Statut') }}</p>
+                    <span id="modalStatus"
+                        class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold text-[#0D9488] bg-[#0D9488]/10 border border-[#0D9488]/20 uppercase"></span>
                 </div>
 
                 <!-- Clinical Notes -->
                 <div id="clinicalNotesSection" class="mb-6 hidden">
-                    <p class="text-xs font-bold text-[#1e293b] uppercase tracking-wider mb-2">Notes Cliniques</p>
-                    <div id="modalClinicalNotes" class="p-3 bg-[#F8FAFC]/50 border border-[#e2e8f0]/60 rounded-xl text-sm text-[#64748b]"></div>
+                    <p class="text-xs font-bold text-[#1e293b] uppercase tracking-wider mb-2">{{ __('Notes Cliniques') }}</p>
+                    <div id="modalClinicalNotes"
+                        class="p-3 bg-[#F8FAFC]/50 border border-[#e2e8f0]/60 rounded-xl text-sm text-[#64748b]"></div>
                 </div>
 
                 <!-- Exams List -->
                 <div class="mb-6">
-                    <p class="text-xs font-bold text-[#1e293b] uppercase tracking-wider mb-3">Examens Prescrits</p>
+                    <p class="text-xs font-bold text-[#1e293b] uppercase tracking-wider mb-3">{{ __('Examens Prescrits') }}</p>
                     <div id="modalExamsList" class="space-y-3">
-                        <!-- Exams will be loaded here -->
-                    </div>
+    <!-- Exams will be loaded here -->
+</div>
+<!-- Doctor Interpretation Section (visible after approval) -->
+<div id="modalDoctorInterpretationSection" class="mt-4 hidden">
+    <p class="text-xs font-bold text-[#1e293b] uppercase tracking-wider mb-2">{{ __('Interprétation du Médecin') }}</p>
+    <div id="modalDoctorInterpretation" class="p-3 bg-purple-50/50 border border-[#7C3AED]/10 rounded-lg text-sm text-[#475569]"></div>
+</div>
                 </div>
 
                 <!-- Close Button -->
-                <button type="button" class="closeExamModal w-full bg-[#0D9488] hover:bg-[#0a7068] text-white font-bold py-2.5 rounded-xl transition uppercase tracking-wider text-sm">
-                    Fermer
+                <button type="button"
+                    class="closeExamModal w-full bg-[#0D9488] hover:bg-[#0a7068] text-white font-bold py-2.5 rounded-xl transition uppercase tracking-wider text-sm">
+                    {{ __('Fermer') }}
                 </button>
             </div>
         </div>
@@ -253,7 +286,6 @@
                 if (data.success && data.notifications.length > 0) {
                     notificationList.innerHTML = data.notifications.map(notif => {
                         const isAccessRequest = notif.type === 'access_request';
-                        const isExamRequest = notif.type === 'exam_request';
 
                         let actions = '';
                         if (isAccessRequest) {
@@ -284,11 +316,9 @@
                         `;
                     }).join('');
 
-                    // Add event listeners for accept/decline buttons in notification panel
                     document.querySelectorAll('.notif-accept-btn').forEach(btn => {
                         btn.addEventListener('click', () => respondToAccess(btn.dataset.accessId, 'accept', btn.dataset.notifId));
                     });
-
                     document.querySelectorAll('.notif-decline-btn').forEach(btn => {
                         btn.addEventListener('click', () => respondToAccess(btn.dataset.accessId, 'decline', btn.dataset.notifId));
                     });
@@ -303,7 +333,6 @@
                     `;
                 }
 
-                // Update unread count
                 updateUnreadCount();
             } catch (error) {
                 console.error('Error loading notifications:', error);
@@ -317,7 +346,6 @@
                 const response = await fetch('{{ route('patient.unread-count') }}');
                 const data = await response.json();
                 unreadNotifCount.textContent = data.unread_count;
-                
                 if (data.unread_count > 0) {
                     notificationBadge.textContent = data.unread_count;
                     notificationBadge.classList.remove('hidden');
@@ -329,7 +357,7 @@
             }
         }
 
-        // Respond to access request
+        // Respond to access request (from notification panel)
         async function respondToAccess(accessId, action, notifId) {
             try {
                 const response = await fetch('{{ route('patient.respond-access') }}', {
@@ -338,92 +366,237 @@
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                     },
-                    body: JSON.stringify({
-                        access_id: accessId,
-                        action: action,
-                        notification_id: notifId,
-                    }),
+                    body: JSON.stringify({ access_id: accessId, action: action, notification_id: notifId }),
                 });
-
                 const data = await response.json();
-
-                if (data.success) {
-                    showMessage(data.message, 'success');
-                    loadNotifications();
-                } else {
-                    showMessage(data.message, 'error');
-                }
+                if (data.success) { showMessage(data.message, 'success'); loadNotifications(); }
+                else { showMessage(data.message, 'error'); }
             } catch (error) {
                 console.error('Error responding to access:', error);
                 showMessage('Une erreur est survenue', 'error');
             }
         }
 
-        // Load exam requests
+        // ─────────────────────────────────────────────────────────────────
+        // EXAM REQUESTS — Bubble Filters + Pagination
+        // ─────────────────────────────────────────────────────────────────
+        let allExamRequests = [];
+        let activeFilter    = 'all';
+        let currentPage     = 1;
+        const PAGE_SIZE     = 5;
+
+        const statusColors = {
+            'pending':    'bg-amber-50 border-amber-200',
+            'assigned':   'bg-teal-50 border-teal-200',
+            'collected':  'bg-blue-50 border-blue-200',
+            'processing': 'bg-purple-50 border-purple-200',
+            'completed':  'bg-green-50 border-green-200',
+            'cancelled':  'bg-red-50 border-red-200',
+        };
+
+        const statusLabels = {
+            'pending':    'En attente',
+            'assigned':   'Laboratoire sélectionné',
+            'collected':  'Collectée',
+            'processing': 'En traitement',
+            'completed':  'Complétée',
+            'cancelled':  'Annulée',
+        };
+
+        const statusBadgeColors = {
+            'pending':    'text-amber-700 bg-amber-100 border-amber-300',
+            'assigned':   'text-teal-700 bg-teal-100 border-teal-300',
+            'collected':  'text-blue-700 bg-blue-100 border-blue-300',
+            'processing': 'text-purple-700 bg-purple-100 border-purple-300',
+            'completed':  'text-green-700 bg-green-100 border-green-300',
+            'cancelled':  'text-red-700 bg-red-100 border-red-300',
+        };
+
+        const filterDefs = [
+            { key: 'all',        label: 'Toutes',           base: 'text-[#0D9488] bg-[#0D9488]/10 border-[#0D9488]/30', active: 'bg-[#0D9488] text-white border-[#0D9488]' },
+            { key: 'pending',    label: 'En attente',       base: 'text-amber-600 bg-amber-50 border-amber-200',          active: 'bg-amber-500 text-white border-amber-500' },
+            { key: 'assigned',   label: 'Labo sélectionné', base: 'text-teal-600 bg-teal-50 border-teal-200',            active: 'bg-teal-600 text-white border-teal-600' },
+            { key: 'collected',  label: 'Collectée',        base: 'text-blue-600 bg-blue-50 border-blue-200',            active: 'bg-blue-500 text-white border-blue-500' },
+            { key: 'processing', label: 'En traitement',    base: 'text-purple-600 bg-purple-50 border-purple-200',       active: 'bg-purple-500 text-white border-purple-500' },
+            { key: 'completed',  label: 'Complétée',        base: 'text-green-600 bg-green-50 border-green-200',         active: 'bg-green-500 text-white border-green-500' },
+            { key: 'cancelled',  label: 'Annulée',          base: 'text-red-600 bg-red-50 border-red-200',               active: 'bg-red-500 text-white border-red-500' },
+        ];
+
         async function loadExamRequests() {
             try {
                 const response = await fetch('{{ route('patient.get-exam-requests') }}');
-                const data = await response.json();
-
-                if (data.success && data.exam_requests.length > 0) {
-                    examRequestsList.innerHTML = data.exam_requests.map(request => {
-                        const statusColors = {
-                            'pending': 'bg-amber-50 border-amber-200',
-                            'collected': 'bg-blue-50 border-blue-200',
-                            'processing': 'bg-purple-50 border-purple-200',
-                            'completed': 'bg-green-50 border-green-200',
-                            'cancelled': 'bg-red-50 border-red-200',
-                        };
-
-                        const statusLabels = {
-                            'pending': 'En attente',
-                            'collected': 'Collectée',
-                            'processing': 'En traitement',
-                            'completed': 'Complétée',
-                            'cancelled': 'Annulée',
-                        };
-
-                        return `
-                            <div class="${statusColors[request.status] || 'bg-[#F8FAFC]/50 border-[#e2e8f0]/60'} border rounded-2xl p-6">
-                                <div class="flex justify-between items-start mb-3">
-                                    <div>
-                                        <h4 class="font-bold text-[#1e293b]">Dr. ${request.doctor_name}</h4>
-                                        <p class="text-sm text-[#64748b]">${request.doctor_speciality}</p>
-                                    </div>
-                                    <span class="px-3 py-1 text-xs font-bold text-[#0D9488] bg-[#0D9488]/10 border border-[#0D9488]/20 rounded-full uppercase">
-                                        ${statusLabels[request.status]}
-                                    </span>
-                                </div>
-                                <p class="text-xs text-[#64748b] mb-3">
-                                    <strong>${request.exams_count}</strong> examen(s) prescrit(s)
-                                </p>
-                                <p class="text-xs text-[#94a3b8] mb-4">${request.created_at_relative}</p>
-                                <button type="button" class="w-full bg-[#0D9488] hover:bg-[#0a7068] text-white font-bold py-2.5 rounded-xl transition uppercase tracking-wider text-xs viewExamsBtn" data-exam-request-id="${request.id}">
-                                    Voir les Détails
-                                </button>
-                            </div>
-                        `;
-                    }).join('');
-
-                    // Add event listeners for view exams buttons
-                    document.querySelectorAll('.viewExamsBtn').forEach(btn => {
-                        btn.addEventListener('click', () => viewExamDetails(btn.dataset.examRequestId));
-                    });
+                const data     = await response.json();
+                if (data.success) {
+                    allExamRequests = data.exam_requests;
+                    currentPage     = 1;
+                    renderExamRequests();
                 } else {
-                    examRequestsList.innerHTML = `
-                        <div class="p-8 text-center text-[#94a3b8]">
-                            <svg class="w-12 h-12 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            <p class="text-sm font-semibold">Aucune demande d'analyse</p>
-                            <p class="text-xs mt-1">Les demandes d'examens prescrits par vos médecins apparaîtront ici.</p>
-                        </div>
-                    `;
+                    showEmptyExams();
                 }
             } catch (error) {
                 console.error('Error loading exam requests:', error);
                 examRequestsList.innerHTML = '<div class="p-4 text-center text-red-500 text-sm">Erreur du chargement</div>';
             }
+        }
+
+        function getFiltered() {
+            return activeFilter === 'all'
+                ? allExamRequests
+                : allExamRequests.filter(r => r.status === activeFilter);
+        }
+
+        function renderFilterBubbles() {
+            const counts = { all: allExamRequests.length };
+            filterDefs.slice(1).forEach(f => { counts[f.key] = allExamRequests.filter(r => r.status === f.key).length; });
+            const visible = filterDefs.filter(f => f.key === 'all' || counts[f.key] > 0);
+            return `<div class="flex flex-wrap gap-2 mb-5" id="examFilterBubbles">
+                ${visible.map(f => {
+                    const isActive = activeFilter === f.key;
+                    return `<button type="button" data-filter="${f.key}"
+                        class="exam-filter-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all duration-200 select-none cursor-pointer
+                               ${isActive ? f.active + ' shadow-sm scale-105' : f.base + ' hover:scale-105'}">
+                        ${f.label}
+                        <span class="inline-flex items-center justify-center min-w-[1.1rem] h-[1.1rem] px-1 rounded-full text-[10px] font-black
+                                     ${isActive ? 'bg-white/25 text-current' : 'bg-black/10'}">
+                            ${counts[f.key]}
+                        </span>
+                    </button>`;
+                }).join('')}
+            </div>`;
+        }
+
+        function renderExamCard(request) {
+            const cardColor  = statusColors[request.status]      || 'bg-[#F8FAFC]/50 border-[#e2e8f0]/60';
+            const badgeColor = statusBadgeColors[request.status] || 'text-[#0D9488] bg-[#0D9488]/10 border-[#0D9488]/20';
+            const label      = statusLabels[request.status]      || request.status;
+
+            let labSection = '';
+            if (request.laboratory) {
+                labSection = `
+                    <div class="mt-3 p-3 bg-green-50 border border-green-200 rounded-xl text-sm">
+                        <p class="text-green-800 font-medium mb-2">
+                            🏥 <strong>${request.laboratory.name}</strong>
+                            ${request.laboratory.city ? `<span class="text-green-600 font-normal ml-1">— ${request.laboratory.city}</span>` : ''}
+                        </p>
+                        ${(request.status === 'pending' || request.status === 'assigned') ? `
+                        <a href="/patient/exam-requests/${request.id}/choose-laboratory"
+                            class="flex items-center justify-center gap-1.5 w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded-lg transition uppercase tracking-wider text-xs">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                            Changer le laboratoire
+                        </a>` : ''}
+                    </div>`;
+            } else if (request.status === 'pending' || request.status === 'assigned') {
+                labSection = `
+                    <a href="/patient/exam-requests/${request.id}/choose-laboratory"
+                        class="flex items-center justify-center gap-1.5 w-full mt-3 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 rounded-xl transition uppercase tracking-wider text-xs">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                        Choisir un laboratoire
+                    </a>`;
+            }
+
+            const detailBtn = request.approved_by_doctor
+                ? `<button type="button" class="viewExamsBtn mt-4 w-full bg-[#0D9488] hover:bg-[#0a7068] text-white font-bold py-2.5 rounded-xl transition uppercase tracking-wider text-xs" data-exam-request-id="${request.id}">Voir les Détails</button>`
+                : `<button type="button" class="mt-4 w-full bg-gray-300 text-gray-500 font-bold py-2.5 rounded-xl uppercase tracking-wider text-xs cursor-not-allowed" disabled>En attente d'approbation</button>`;
+
+            return `
+                <div class="${cardColor} border rounded-2xl p-5 transition-all duration-200 hover:shadow-md">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h4 class="font-bold text-[#1e293b]">Dr. ${request.doctor_name}</h4>
+                            <p class="text-sm text-[#64748b]">${request.doctor_speciality}</p>
+                        </div>
+                        <span class="px-3 py-1 text-xs font-bold border rounded-full uppercase whitespace-nowrap ${badgeColor}">
+                            ${label}
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-4 text-xs text-[#64748b] mb-2">
+                        <span><strong class="text-[#1e293b]">${request.exams_count}</strong> examen(s)</span>
+                        <span class="text-[#94a3b8]">${request.created_at_relative}</span>
+                    </div>
+                    ${labSection}
+                    ${detailBtn}
+                </div>`;
+        }
+
+        function renderPagination(filtered) {
+            const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+            if (totalPages <= 1) return '';
+            const start = (currentPage - 1) * PAGE_SIZE + 1;
+            const end   = Math.min(currentPage * PAGE_SIZE, filtered.length);
+            const pages = [];
+            for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) pages.push(i);
+            const pageButtons = pages.map(p =>
+                `<button type="button" data-page="${p}" class="exam-page-btn w-8 h-8 rounded-full text-xs font-bold transition-all duration-200
+                       ${p === currentPage ? 'bg-[#0D9488] text-white shadow-sm' : 'text-[#64748b] hover:bg-[#0D9488]/10 hover:text-[#0D9488]'}">${p}</button>`
+            ).join('');
+            return `
+                <div class="flex items-center justify-between mt-5 pt-4 border-t border-[#e2e8f0]/60">
+                    <p class="text-xs text-[#94a3b8] font-medium">${start}–${end} sur ${filtered.length}</p>
+                    <div class="flex items-center gap-1">
+                        <button type="button" id="examPrevBtn" ${currentPage === 1 ? 'disabled' : ''}
+                            class="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200
+                                   ${currentPage === 1 ? 'text-[#cbd5e1] cursor-not-allowed' : 'text-[#64748b] hover:bg-[#0D9488]/10 hover:text-[#0D9488]'}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                        </button>
+                        ${pageButtons}
+                        <button type="button" id="examNextBtn" ${currentPage === totalPages ? 'disabled' : ''}
+                            class="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200
+                                   ${currentPage === totalPages ? 'text-[#cbd5e1] cursor-not-allowed' : 'text-[#64748b] hover:bg-[#0D9488]/10 hover:text-[#0D9488]'}">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
+                </div>`;
+        }
+
+        function renderExamRequests() {
+            const filtered   = getFiltered();
+            const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+            if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
+            const paginated  = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+            if (allExamRequests.length === 0) { showEmptyExams(); return; }
+
+            let html = renderFilterBubbles();
+
+            if (filtered.length === 0) {
+                html += `<div class="p-8 text-center text-[#94a3b8]">
+                    <svg class="w-12 h-12 mx-auto mb-3 opacity-40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    <p class="text-sm font-semibold">Aucune demande pour ce filtre</p>
+                    <p class="text-xs mt-1 opacity-70">Essayez un autre statut</p>
+                </div>`;
+            } else {
+                html += `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">${paginated.map(renderExamCard).join('')}</div>`;
+                html += renderPagination(filtered);
+            }
+
+            examRequestsList.innerHTML = html;
+
+            document.querySelectorAll('.exam-filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => { activeFilter = btn.dataset.filter; currentPage = 1; renderExamRequests(); });
+            });
+            document.querySelectorAll('.exam-page-btn').forEach(btn => {
+                btn.addEventListener('click', () => { currentPage = parseInt(btn.dataset.page); renderExamRequests(); examRequestsList.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+            });
+            const prevBtn = document.getElementById('examPrevBtn');
+            const nextBtn = document.getElementById('examNextBtn');
+            if (prevBtn && currentPage > 1) prevBtn.addEventListener('click', () => { currentPage--; renderExamRequests(); examRequestsList.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+            if (nextBtn && currentPage < Math.ceil(filtered.length / PAGE_SIZE)) nextBtn.addEventListener('click', () => { currentPage++; renderExamRequests(); examRequestsList.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+            document.querySelectorAll('.viewExamsBtn').forEach(btn => {
+                btn.addEventListener('click', () => viewExamDetails(btn.dataset.examRequestId));
+            });
+        }
+
+        function showEmptyExams() {
+            examRequestsList.innerHTML = `
+                <div class="p-8 text-center text-[#94a3b8]">
+                    <svg class="w-12 h-12 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <p class="text-sm font-semibold">Aucune demande d'analyse</p>
+                    <p class="text-xs mt-1">Les demandes d'examens prescrits par vos médecins apparaîtront ici.</p>
+                </div>`;
         }
 
         // Load access requests from doctors
@@ -470,10 +643,12 @@
 
                     // Add event listeners for access requests panel
                     document.querySelectorAll('.access-accept-btn').forEach(btn => {
-                        btn.addEventListener('click', () => respondToAccessRequest(btn.dataset.accessId, 'accepted'));
+                        btn.addEventListener('click', () => respondToAccessRequest(btn.dataset.accessId,
+                            'accepted'));
                     });
                     document.querySelectorAll('.access-decline-btn').forEach(btn => {
-                        btn.addEventListener('click', () => respondToAccessRequest(btn.dataset.accessId, 'declined'));
+                        btn.addEventListener('click', () => respondToAccessRequest(btn.dataset.accessId,
+                            'declined'));
                     });
                 } else {
                     accessRequestsList.innerHTML = `
@@ -488,7 +663,8 @@
                 }
             } catch (error) {
                 console.error('Error loading access requests:', error);
-                document.getElementById('accessRequestsList').innerHTML = '<div class="p-4 text-center text-red-500 text-sm">Erreur du chargement</div>';
+                document.getElementById('accessRequestsList').innerHTML =
+                    '<div class="p-4 text-center text-red-500 text-sm">Erreur du chargement</div>';
             }
         }
 
@@ -532,10 +708,19 @@
                 if (data.success) {
                     const exam = data.exam_request;
 
+                    
                     document.getElementById('modalDoctorName').textContent = `Dr. ${exam.doctor_name}`;
                     document.getElementById('modalDoctorSpeciality').textContent = exam.doctor_speciality;
                     document.getElementById('modalDoctorPhone').textContent = exam.doctor_phone || 'Non disponible';
                     document.getElementById('modalStatus').textContent = exam.status;
+
+                    if (exam.approved_by_doctor) {
+                        document.getElementById('modalDoctorInterpretationSection').classList.remove('hidden');
+                        document.getElementById('modalDoctorInterpretation').textContent = exam.doctor_interpretation || 'Aucune interprétation.';
+                    } else {
+                        document.getElementById('modalDoctorInterpretationSection').classList.add('hidden');
+                    }
+
 
                     if (exam.clinical_notes) {
                         document.getElementById('clinicalNotesSection').classList.remove('hidden');
@@ -578,7 +763,8 @@
         // Show message helper
         function showMessage(message, type) {
             const alert = document.createElement('div');
-            alert.className = `fixed top-4 right-4 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white p-4 rounded-xl shadow-lg z-50 flex items-center gap-2`;
+            alert.className =
+                `fixed top-4 right-4 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white p-4 rounded-xl shadow-lg z-50 flex items-center gap-2`;
             alert.innerHTML = `
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />

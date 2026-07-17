@@ -434,4 +434,43 @@ class DoctorController extends Controller
 
         return view('doctor.exam-groups-create', compact('exams'));
     }
+
+    /**
+     * Submit doctor's interpretation for a completed exam request
+     */
+    public function submitInterpretation(Request $request, ExamRequest $examRequest)
+    {
+        $doctor = auth()->user()->doctor;
+        if (!$doctor || $examRequest->doctor_id !== $doctor->id) {
+            abort(403, 'Action non autorisée.');
+        }
+
+        if ($examRequest->status !== 'completed') {
+            return redirect()
+                ->back()
+                ->with('error', 'Vous ne pouvez pas interpréter un examen non terminé par le laboratoire.');
+        }
+
+        $request->validate([
+            'doctor_interpretation' => 'required|string',
+        ]);
+
+        $examRequest->update([
+            'doctor_interpretation' => $request->doctor_interpretation,
+            'approved_by_doctor' => true,
+        ]);
+
+        // Create notification for patient
+        \App\Models\Notification::create([
+            'user_id'           => $examRequest->patient->user_id,
+            'title'             => 'Résultats d\'examens disponibles',
+            'message'           => 'Dr. ' . $doctor->user->first_name . ' ' . $doctor->user->last_name . ' a validé et interprété vos résultats d\'analyses.',
+            'notification_type' => 'exam_request',
+            'reference_id'      => $examRequest->id,
+        ]);
+
+        return redirect()
+            ->back()
+            ->with('success', 'Interprétation soumise et résultats validés avec succès.');
+    }
 }

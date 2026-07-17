@@ -1,11 +1,11 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\Labo;
+use App\Models\ExamRequest;
 use App\Models\Patient;
 use App\Models\Notification;
 use App\Models\DoctorPatientAccess;
-use App\Models\ExamRequest;
 use App\Models\ExamRequestItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -163,6 +163,7 @@ class PatientController extends Controller
     public function getExamRequests()
     {
         $patient = Auth::user()->patient;
+
         if (!$patient) {
             return response()->json([
                 'success' => false,
@@ -171,35 +172,107 @@ class PatientController extends Controller
             ], 403);
         }
 
+
         $examRequests = ExamRequest::where('patient_id', $patient->id)
-            ->with(['doctor.user', 'items.exam'])
+            ->with([
+                'doctor.user',
+                'items.exam',
+                'items.resultLabo.details',
+                'laboratory'
+            ])
             ->latest('created_at')
             ->limit(50)
             ->get();
 
+
+
         return response()->json([
             'success' => true,
+
             'exam_requests' => $examRequests->map(function ($request) {
-                $exams = $request->items->map(function ($item) {
+
+
+                $exams = $request->items->map(function ($item) use ($request) {
+                    $showResult = $request->status === 'completed' && $request->approved_by_doctor;
                     return [
                         'id' => $item->exam->id,
                         'name' => $item->exam->name,
                         'category' => $item->exam->category,
                         'description' => $item->exam->description,
+                        'result' => ($showResult && $item->resultLabo) ? [
+                            'interpretation' => $item->resultLabo->interpretation,
+                            'details' => $item->resultLabo->details->map(function ($d) {
+                                return [
+                                    'parameter' => $d->parameter,
+                                    'value' => $d->value,
+                                    'status' => $d->status,
+                                    'reference_range' => $d->reference_range,
+                                ];
+                            }),
+                        ] : null,
                     ];
+
                 });
 
+
+
                 return [
+
                     'id' => $request->id,
-                    'doctor_name' => $request->doctor->user->first_name . ' ' . $request->doctor->user->last_name,
-                    'doctor_speciality' => $request->doctor->speciality,
-                    'status' => $request->status,
-                    'clinical_notes' => $request->clinical_notes,
+
+
+                    'doctor_name' =>
+                        $request->doctor->user->first_name
+                        . ' '
+                        .
+                        $request->doctor->user->last_name,
+
+
+                    'doctor_speciality' =>
+                        $request->doctor->speciality,
+
+
+                    'status' =>
+                        $request->status,
+
+                    'approved_by_doctor' =>
+                        $request->approved_by_doctor,
+
+                    'doctor_interpretation' =>
+                        ($request->status === 'completed' && $request->approved_by_doctor) ? $request->doctor_interpretation : null,
+
+
+                    'clinical_notes' =>
+                        $request->clinical_notes,
+
+
+                    'laboratory' => $request->laboratory ? [
+                        'id' => $request->laboratory->id,
+                        'name' => $request->laboratory->name,
+                        'city' => $request->laboratory->city,
+                    ] : null,
+
+
+                    'needs_laboratory_selection' =>
+                        $request->laboratory_id === null,
+
+
                     'exams' => $exams,
-                    'exams_count' => $exams->count(),
-                    'created_at' => $request->created_at->format('d/m/Y H:i'),
-                    'created_at_relative' => $request->created_at->diffForHumans(),
+
+
+                    'exams_count' =>
+                        $exams->count(),
+
+
+                    'created_at' =>
+                        $request->created_at->format('d/m/Y H:i'),
+
+
+                    'created_at_relative' =>
+                        $request->created_at->diffForHumans(),
+
                 ];
+
             }),
         ]);
     }
@@ -224,8 +297,15 @@ class PatientController extends Controller
             ], 403);
         }
 
+        if ($examRequest->status === 'completed' && !$examRequest->approved_by_doctor) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Les résultats de vos analyses sont en cours de validation par votre médecin traitant.',
+            ], 403);
+        }
+
         // Eager load relationships
-        $examRequest->load(['doctor.user', 'items.exam']);
+        $examRequest->load(['doctor.user', 'items.exam', 'items.resultLabo.details']);
 
         $exams = $examRequest->items->map(function ($item) {
             return [
@@ -235,6 +315,17 @@ class PatientController extends Controller
                 'description' => $item->exam->description,
                 'normal_range' => $item->exam->default_normal_range,
                 'preparation' => $item->exam->preparation_instructions,
+                'result' => $item->resultLabo ? [
+                    'interpretation' => $item->resultLabo->interpretation,
+                    'details' => $item->resultLabo->details->map(function ($d) {
+                        return [
+                            'parameter' => $d->parameter,
+                            'value' => $d->value,
+                            'status' => $d->status,
+                            'reference_range' => $d->reference_range,
+                        ];
+                    }),
+                ] : null,
             ];
         });
 
@@ -247,6 +338,8 @@ class PatientController extends Controller
                 'doctor_speciality' => $examRequest->doctor->speciality,
                 'status' => $examRequest->status,
                 'clinical_notes' => $examRequest->clinical_notes,
+                'doctor_interpretation' => $examRequest->doctor_interpretation,
+                'approved_by_doctor' => $examRequest->approved_by_doctor,
                 'exams' => $exams,
                 'created_at' => $examRequest->created_at->format('d/m/Y H:i'),
             ],
@@ -265,4 +358,63 @@ class PatientController extends Controller
         }
         return 'general';
     }
+    /**
+     * Show laboratories for an exam request
+     */
+    public function assignLaboratory(Request $request, ExamRequest $examRequest)
+    {
+        $patient = auth()->user()->patient;
+
+        if (!$patient || $examRequest->patient_id !== $patient->id) {
+            abort(403);
+        }
+
+        if (!in_array($examRequest->status, ['pending', 'assigned'])) {
+            return redirect()
+                ->route('patient.dashboard')
+                ->with('error', 'Impossible de modifier le laboratoire pour cette prescription.');
+        }
+
+        $request->validate([
+            'labo_id' => 'required|exists:labos,id'
+        ]);
+
+        $examRequest->update([
+            'labo_id' => $request->labo_id,
+            'status' => 'assigned'
+        ]);
+
+        return redirect()
+            ->route('patient.dashboard')
+            ->with('success', 'Laboratoire sélectionné avec succès.');
+    }
+
+    public function chooseLaboratory($id)
+    {
+        $patient = auth()->user()->patient;
+
+        $examRequest = ExamRequest::with('laboratory')->findOrFail($id);
+
+        if (!$patient || $examRequest->patient_id !== $patient->id) {
+            abort(403);
+        }
+
+        if (!in_array($examRequest->status, ['pending', 'assigned'])) {
+            return redirect()
+                ->route('patient.dashboard')
+                ->with('error', 'Impossible de modifier le laboratoire pour cette prescription.');
+        }
+
+        $laboratories = Labo::with('workingHours')
+            ->where('is_archive', false)
+            ->orderBy('name')
+            ->get();
+
+        return view('patient.choose-laboratory', [
+            'examRequest'   => $examRequest,
+            'laboratories'  => $laboratories,
+        ]);
+    }
+
+
 }

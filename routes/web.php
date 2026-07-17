@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\LaboResultController;
 
 /*
 |--------------------------------------------------------------------------
@@ -10,6 +11,8 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\AuthController;
 
+
+
 // Landing Selection Portal
 Route::get('/', function () {
     return redirect()->route('home');
@@ -18,10 +21,14 @@ Route::get('/', function () {
 Route::get('/home', function () {
     if (auth()->check()) {
         $user = auth()->user();
-        if ($user->admin) return redirect()->route('admin.dashboard');
-        if ($user->doctor) return redirect()->route('doctor.dashboard');
-        if ($user->patient) return redirect()->route('patient.dashboard');
-        if ($user->staff) return redirect()->route('center.dashboard');
+        if ($user->admin)
+            return redirect()->route('admin.dashboard');
+        if ($user->doctor)
+            return redirect()->route('doctor.dashboard');
+        if ($user->patient)
+            return redirect()->route('patient.dashboard');
+        if ($user->staff)
+            return redirect()->route('center.dashboard');
     }
     return view('portal');
 })->name('home');
@@ -78,7 +85,7 @@ Route::prefix('doctor')->name('doctor.')->group(function () {
                 ->limit(20)
                 ->get();
             $recentExams = \App\Models\ExamRequest::where('doctor_id', $doctor->id)
-                ->with(['patient.user', 'items.exam'])
+                ->with(['patient.user', 'items.exam', 'items.resultLabo.details'])
                 ->latest('created_at')
                 ->limit(20)
                 ->get();
@@ -92,6 +99,7 @@ Route::prefix('doctor')->name('doctor.')->group(function () {
         Route::post('/request-access', [\App\Http\Controllers\DoctorController::class, 'requestAccess'])->name('request-access');
         Route::get('/exams-selection/{patient}', [\App\Http\Controllers\DoctorController::class, 'selectExams'])->name('select-exams');
         Route::post('/create-exam-request', [\App\Http\Controllers\DoctorController::class, 'createExamRequest'])->name('create-exam-request');
+        Route::post('/exam-requests/{examRequest}/submit-interpretation', [\App\Http\Controllers\DoctorController::class, 'submitInterpretation'])->name('submit-interpretation');
         Route::post('/apply-exam-group', [\App\Http\Controllers\DoctorController::class, 'applyExamGroup'])->name('apply-exam-group');
 
         // Exam Groups CRUD (dedicated pages)
@@ -160,16 +168,36 @@ Route::prefix('patient')->name('patient.')->group(function () {
         Route::get('/access-requests', [\App\Http\Controllers\PatientController::class, 'getAccessRequests'])->name('get-access-requests');
 
         // Patient Exam Requests Routes
-        Route::get('/exam-requests', [\App\Http\Controllers\PatientController::class, 'getExamRequests'])->name('get-exam-requests');
-        Route::get('/exam-requests/{examRequest}', [\App\Http\Controllers\PatientController::class, 'getExamRequest'])->name('exam-request-detail');
+        Route::get('/exam-requests', [\App\Http\Controllers\PatientController::class, 'getExamRequests'])
+            ->name('get-exam-requests');
+
+        Route::get('/exam-requests/{examRequest}', [\App\Http\Controllers\PatientController::class, 'getExamRequest'])
+            ->name('exam-request-detail');
+
+
+        // Patient chooses laboratory
+        Route::get(
+            '/exam-requests/{examRequest}/choose-laboratory',
+            [\App\Http\Controllers\PatientController::class, 'chooseLaboratory']
+        )
+            ->name('choose-laboratory');
+
+
+        Route::post(
+            '/exam-requests/{examRequest}/assign-laboratory',
+            [\App\Http\Controllers\PatientController::class, 'assignLaboratory']
+        )
+            ->name('assign-laboratory');
 
         Route::post('/logout', [AuthController::class, 'logout'])->defaults('role', 'patient')->name('logout');
     });
 });
 
-/// Medical Center Authentication Pages
+// Medical Center Authentication Pages
 Route::prefix('center')->name('center.')->group(function () {
 
+
+    // Guest Center Routes
     Route::middleware('guest')->group(function () {
 
         Route::get('/login', fn() => view('center.login'))
@@ -177,6 +205,7 @@ Route::prefix('center')->name('center.')->group(function () {
 
         Route::post('/login', [AuthController::class, 'login'])
             ->defaults('role', 'center');
+
 
         Route::get('/register', fn() => view('center.register'))
             ->name('register');
@@ -190,13 +219,16 @@ Route::prefix('center')->name('center.')->group(function () {
             ->defaults('role', 'center')
             ->name('password.request');
 
+
         Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])
             ->defaults('role', 'center')
             ->name('password.email');
 
+
         Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])
             ->defaults('role', 'center')
             ->name('password.reset');
+
 
         Route::post('/reset-password', [AuthController::class, 'resetPassword'])
             ->defaults('role', 'center')
@@ -205,22 +237,178 @@ Route::prefix('center')->name('center.')->group(function () {
     });
 
 
-    Route::middleware('auth')->group(function () {
-        Route::get('/dashboard', function () {
-            // Verify they are staff
-            if (!auth()->user()->staff) {
-                return redirect()->route('home');
-            }
-            return view('center.dashboard', ['user' => auth()->user()]);
-        })->name('dashboard');
 
-        Route::post('/logout', [AuthController::class, 'logout'])->defaults('role', 'center')->name('logout');
+
+
+    // Authenticated Center Routes
+    Route::middleware('auth')->group(function () {
+
+
+        // Dashboard
+        Route::get(
+            '/dashboard',
+            [\App\Http\Controllers\CenterController::class, 'dashboard']
+        )->name('dashboard');
+
+
+
+        // Exam Requests
+        Route::get(
+            '/exam-requests',
+            [\App\Http\Controllers\CenterController::class, 'examRequests']
+        )->name('exam-requests');
+
+
+        Route::post(
+            '/exam-requests/{examRequest}/claim',
+            [\App\Http\Controllers\CenterController::class, 'claimExamRequest']
+        )->name('exam-requests.claim');
+
+
+
+
+        // ==========================
+        // LAB RESULTS
+        // ==========================
+
+
+        Route::get(
+            '/results/{item}/create',
+            [LaboResultController::class, 'create']
+        )->name('results.create');
+
+
+        Route::post(
+            '/results/{item}',
+            [LaboResultController::class, 'store']
+        )->name('results.store');
+
+
+        Route::get(
+            '/results/{result}/edit',
+            [LaboResultController::class, 'edit']
+        )->name('results.edit');
+
+
+        Route::put(
+            '/results/{result}',
+            [LaboResultController::class, 'update']
+        )->name('results.update');
+
+
+
+
+
+        // Working Hours
+
+        Route::get(
+            '/working-hours',
+            [\App\Http\Controllers\CenterController::class, 'workingHours']
+        )->name('working-hours');
+
+
+        Route::post(
+            '/working-hours/update',
+            [\App\Http\Controllers\CenterController::class, 'updateWorkingHours']
+        )->name('working-hours.update');
+
+
+        Route::post(
+            '/working-hours/exceptions',
+            [\App\Http\Controllers\CenterController::class, 'addException']
+        )->name('working-hours.exceptions.store');
+
+
+        Route::delete(
+            '/working-hours/exceptions/{workingHour}',
+            [\App\Http\Controllers\CenterController::class, 'deleteException']
+        )->name('working-hours.exceptions.destroy');
+
+
+
+
+
+        // Consumables & Stock
+
+        Route::get(
+            '/consumables',
+            [\App\Http\Controllers\CenterController::class, 'consumables']
+        )->name('consumables');
+
+
+        Route::post(
+            '/consumables',
+            [\App\Http\Controllers\CenterController::class, 'storeConsumable']
+        )->name('consumables.store');
+
+
+        Route::put(
+            '/consumables/{consumable}',
+            [\App\Http\Controllers\CenterController::class, 'updateConsumable']
+        )->name('consumables.update');
+
+
+        Route::post(
+            '/consumables/{consumable}/move',
+            [\App\Http\Controllers\CenterController::class, 'addStockMovement']
+        )->name('consumables.move');
+
+
+
+
+
+        // Equipment
+
+        Route::get(
+            '/equipment',
+            [\App\Http\Controllers\CenterController::class, 'equipment']
+        )->name('equipment');
+
+
+        Route::post(
+            '/equipment',
+            [\App\Http\Controllers\CenterController::class, 'storeEquipment']
+        )->name('equipment.store');
+
+
+        Route::put(
+            '/equipment/{equipment}',
+            [\App\Http\Controllers\CenterController::class, 'updateEquipment']
+        )->name('equipment.update');
+
+
+        Route::post(
+            '/equipment/{equipment}/maintenance',
+            [\App\Http\Controllers\CenterController::class, 'storeMaintenance']
+        )->name('equipment.maintenance.store');
+
+
+        Route::put(
+            '/equipment/maintenance/{maintenance}',
+            [\App\Http\Controllers\CenterController::class, 'updateMaintenance']
+        )->name('equipment.maintenance.update');
+
+
+
+
+
+        // Logout
+
+        Route::post(
+            '/logout',
+            [AuthController::class, 'logout']
+        )
+            ->defaults('role', 'center')
+            ->name('logout');
+
     });
+
 });
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\GroupController;
+use App\Http\Controllers\Admin\ExamController;
 
 // Admin Pages
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -228,8 +416,34 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
         Route::post('/exams', [AdminController::class, 'storeExam'])->name('exams.store');
         Route::put('/exams/{exam}', [AdminController::class, 'updateExam'])->name('exams.update');
-        Route::patch('/exams/{exam}/archive', [AdminController::class, 'archiveExam'])->name('exams.archive');
-        Route::post('/logout', [AuthController::class, 'logout'])->defaults('role', 'admin')->name('logout');
+        // Exams CRUD
+        Route::get('/exams', [AdminController::class, 'exams'])->name('exams.index');
+
+        Route::get('/exams/create', [AdminController::class, 'createExam'])
+            ->name('exams.create');
+
+        Route::post('/exams', [AdminController::class, 'storeExam'])
+            ->name('exams.store');
+
+        Route::get('/exams/{exam}/edit', [AdminController::class, 'editExam'])
+            ->name('exams.edit');
+        Route::get('/exams/{exam}', [AdminController::class, 'showExam'])
+            ->name('exams.show');
+        Route::put('/exams/{exam}', [AdminController::class, 'updateExam'])
+            ->name('exams.update');
+
+        Route::patch('/exams/{exam}/archive', [AdminController::class, 'archiveExam'])
+            ->name('exams.archive');
+        Route::match(['get', 'post'], '/logout', [AuthController::class, 'logout'])
+            ->defaults('role', 'admin')
+            ->name('logout');
+        // Laboratories CRUD
+        Route::get('/laboratories', [\App\Http\Controllers\LaboratoryController::class, 'index'])->name('laboratories.index')->middleware('permission:view-laboratories');
+        Route::get('/laboratories/create', [\App\Http\Controllers\LaboratoryController::class, 'create'])->name('laboratories.create')->middleware('permission:add-laboratory');
+        Route::post('/laboratories', [\App\Http\Controllers\LaboratoryController::class, 'store'])->name('laboratories.store')->middleware('permission:add-laboratory');
+        Route::get('/laboratories/{laboratory}/edit', [\App\Http\Controllers\LaboratoryController::class, 'edit'])->name('laboratories.edit')->middleware('permission:modify-laboratory');
+        Route::put('/laboratories/{laboratory}', [\App\Http\Controllers\LaboratoryController::class, 'update'])->name('laboratories.update')->middleware('permission:modify-laboratory');
+        Route::delete('/laboratories/{laboratory}', [\App\Http\Controllers\LaboratoryController::class, 'destroy'])->name('laboratories.destroy')->middleware('permission:delete-laboratory');
 
         // Users CRUD
         Route::get('/users', [UserController::class, 'index'])->name('users.index')->middleware('permission:view-users');
