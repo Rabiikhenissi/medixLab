@@ -30,12 +30,9 @@ class DatabaseSeeder extends Seeder
             );
         }
 
-        // 2. Call the permission seeder
-        $this->call(PermissionSeeder::class);
-        // Run seeders
+        // 2. Call seeders
         $this->call([
-            PermissionSeeder::class,
-            ExamSeeder::class,   // <-- Add this
+            FrenchLaboratoryDataSeeder::class,
         ]);
         // 3. Assign all permissions to the admin group
         $adminGroup = Group::where('code', 'admin')->first();
