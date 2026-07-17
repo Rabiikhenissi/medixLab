@@ -46,6 +46,40 @@ class DatabaseSeeder extends Seeder
             $adminGroup->actions()->sync($allActionIds);
         }
 
+        // Assign specific permissions to the doctor group
+        $doctorGroup = Group::where('code', 'doctor')->first();
+        if ($doctorGroup) {
+            $doctorActionIds = Action::whereIn('code', [
+                'view-doctor-dashboard',
+                'view-patient-search',
+                'view-doctor-exam-groups'
+            ])->pluck('id');
+            $doctorGroup->actions()->sync($doctorActionIds);
+        }
+
+        // Assign specific permissions to the patient group
+        $patientGroup = Group::where('code', 'patient')->first();
+        if ($patientGroup) {
+            $patientActionIds = Action::whereIn('code', [
+                'view-patient-dashboard',
+                'view-patient-exam-requests'
+            ])->pluck('id');
+            $patientGroup->actions()->sync($patientActionIds);
+        }
+
+        // Assign specific permissions to the center group
+        $centerGroup = Group::where('code', 'center')->first();
+        if ($centerGroup) {
+            $centerActionIds = Action::whereIn('code', [
+                'view-center-dashboard',
+                'view-center-exam-requests',
+                'view-center-working-hours',
+                'view-center-consumables',
+                'view-center-equipment'
+            ])->pluck('id');
+            $centerGroup->actions()->sync($centerActionIds);
+        }
+
         // 4. Ensure there is at least one admin user in DB
         $adminGroup = Group::where('code', 'admin')->first();
         $adminUser = User::where('email', 'admin@medix.com')->first();

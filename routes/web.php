@@ -471,6 +471,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Actions management (nested under Features)
         Route::post('/features/{feature}/actions', [\App\Http\Controllers\FeatureController::class, 'storeAction'])->name('features.actions.store')->middleware('permission:edit-features');
+        Route::put('/actions/{action}', [\App\Http\Controllers\FeatureController::class, 'updateAction'])->name('actions.update')->middleware('permission:edit-features');
         Route::delete('/actions/{action}', [\App\Http\Controllers\FeatureController::class, 'destroyAction'])->name('actions.destroy')->middleware('permission:edit-features');
     });
 });
@@ -478,4 +479,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 // Location routes (AJAX API endpoints)
 Route::get('/countries', [\App\Http\Controllers\LocationController::class, 'getCountries'])->name('countries.index');
 Route::get('/countries/{country}/states', [\App\Http\Controllers\LocationController::class, 'getStates'])->name('countries.states');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [\App\Http\Controllers\UserController::class, 'profile'])->name('profile');
+    Route::put('/profile', [\App\Http\Controllers\UserController::class, 'updateProfile'])->name('profile.update');
+});
 

@@ -35,12 +35,16 @@ class AppServiceProvider extends ServiceProvider
                 ->view('emails.reset-password', ['url' => $url]);
         });
         
-        \Illuminate\Support\Facades\View::composer('layouts.admin', function ($view) {
+        $sidebarFeaturesComposer = function ($view) {
             $sidebarFeatures = \App\Models\Feature::where('is_archive', false)
                 ->where('is_sidebar', true)
                 ->orderBy('order', 'asc')
                 ->get();
             $view->with('sidebarFeatures', $sidebarFeatures);
-        });
+        };
+
+        \Illuminate\Support\Facades\View::composer('layouts.admin', $sidebarFeaturesComposer);
+        \Illuminate\Support\Facades\View::composer('components.layouts.auth', $sidebarFeaturesComposer);
+        \Illuminate\Support\Facades\View::composer('layouts.center', $sidebarFeaturesComposer);
     }
 }

@@ -162,6 +162,132 @@ class PermissionSeeder extends Seeder
                 ]
             ],
 
+            // Doctor Features
+            [
+                'name' => 'Tableau de bord Docteur',
+                'code' => 'doctor-dashboard',
+                'route_name' => 'doctor.dashboard',
+                'icon' => 'home',
+                'is_sidebar' => true,
+                'order' => 101,
+                'view_permission' => 'view-doctor-dashboard',
+                'actions' => [
+                    ['code' => 'view-doctor-dashboard', 'name' => 'View doctor dashboard'],
+                ]
+            ],
+            [
+                'name' => 'Rechercher Patient',
+                'code' => 'doctor-patient-search',
+                'route_name' => 'doctor.patient-search',
+                'icon' => 'magnifying-glass',
+                'is_sidebar' => true,
+                'order' => 102,
+                'view_permission' => 'view-patient-search',
+                'actions' => [
+                    ['code' => 'view-patient-search', 'name' => 'Search patient'],
+                ]
+            ],
+            [
+                'name' => 'Groupes d\'examens',
+                'code' => 'doctor-exam-groups',
+                'route_name' => 'doctor.exam-groups.index',
+                'icon' => 'folder',
+                'is_sidebar' => true,
+                'order' => 103,
+                'view_permission' => 'view-doctor-exam-groups',
+                'actions' => [
+                    ['code' => 'view-doctor-exam-groups', 'name' => 'Manage doctor exam groups'],
+                ]
+            ],
+
+            // Patient Features
+            [
+                'name' => 'Tableau de bord Patient',
+                'code' => 'patient-dashboard',
+                'route_name' => 'patient.dashboard',
+                'icon' => 'home',
+                'is_sidebar' => true,
+                'order' => 201,
+                'view_permission' => 'view-patient-dashboard',
+                'actions' => [
+                    ['code' => 'view-patient-dashboard', 'name' => 'View patient dashboard'],
+                ]
+            ],
+            [
+                'name' => 'Mes Analyses',
+                'code' => 'patient-exam-requests',
+                'route_name' => 'patient.get-exam-requests',
+                'icon' => 'document-text',
+                'is_sidebar' => true,
+                'order' => 202,
+                'view_permission' => 'view-patient-exam-requests',
+                'actions' => [
+                    ['code' => 'view-patient-exam-requests', 'name' => 'View patient exam requests'],
+                ]
+            ],
+
+            // Center Features
+            [
+                'name' => 'Tableau de bord Etablissement',
+                'code' => 'center-dashboard',
+                'route_name' => 'center.dashboard',
+                'icon' => 'home',
+                'is_sidebar' => true,
+                'order' => 301,
+                'view_permission' => 'view-center-dashboard',
+                'actions' => [
+                    ['code' => 'view-center-dashboard', 'name' => 'View center dashboard'],
+                ]
+            ],
+            [
+                'name' => 'Demandes d\'analyses',
+                'code' => 'center-exam-requests',
+                'route_name' => 'center.exam-requests',
+                'icon' => 'document-text',
+                'is_sidebar' => true,
+                'order' => 302,
+                'view_permission' => 'view-center-exam-requests',
+                'actions' => [
+                    ['code' => 'view-center-exam-requests', 'name' => 'View center exam requests'],
+                ]
+            ],
+            [
+                'name' => 'Horaires',
+                'code' => 'center-working-hours',
+                'route_name' => 'center.working-hours',
+                'icon' => 'clock',
+                'is_sidebar' => true,
+                'order' => 303,
+                'view_permission' => 'view-center-working-hours',
+                'actions' => [
+                    ['code' => 'view-center-working-hours', 'name' => 'View center working hours'],
+                ]
+            ],
+            [
+                'name' => 'Stock & Consommables',
+                'code' => 'center-consumables',
+                'route_name' => 'center.consumables',
+                'icon' => 'beaker',
+                'is_sidebar' => true,
+                'order' => 304,
+                'view_permission' => 'view-center-consumables',
+                'actions' => [
+                    ['code' => 'view-center-consumables', 'name' => 'View center consumables'],
+                ]
+            ],
+            [
+                'name' => 'Equipements & Maintenance',
+                'code' => 'center-equipment',
+                'route_name' => 'center.equipment',
+                'icon' => 'wrench',
+                'is_sidebar' => true,
+                'order' => 305,
+                'view_permission' => 'view-center-equipment',
+                'actions' => [
+                    ['code' => 'view-center-equipment', 'name' => 'View center equipment'],
+                ]
+            ],
+
         ];
 
 
