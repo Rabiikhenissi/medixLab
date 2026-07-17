@@ -107,6 +107,48 @@
                 </button>
 
             </div>
+            <!-- Actions Section -->
+            <div style="margin-top: 32px; border-top: 1px solid #f1f5f9; padding-top: 24px;">
+                <h3 class="data-title" style="margin-top: 0; margin-bottom: 20px; font-size: 15px;">
+                    Actions Habilitées pour ce Nouveau Module
+                </h3>
+
+                <div style="display: flex; gap: 16px; margin-bottom: 16px;">
+                    <div style="flex: 1;">
+                        <label class="form-label" style="font-size: 12px; margin-bottom: 4px;">Nom de l'Action</label>
+                        <input type="text" id="new-action-name" placeholder="Ex: Lire Examens" class="form-control" style="width:100%;">
+                    </div>
+                    <div style="flex: 1;">
+                        <label class="form-label" style="font-size: 12px; margin-bottom: 4px;">Code de l'Action</label>
+                        <input type="text" id="new-action-code" placeholder="Ex: view-exams" class="form-control" style="width:100%; font-family: monospace;">
+                    </div>
+                    <div style="display: flex; align-items: flex-end;">
+                        <button type="button" onclick="addClientAction()" class="btn-submit" style="padding: 10px 16px; font-size: 13px; white-space: nowrap;">
+                            Ajouter
+                        </button>
+                    </div>
+                </div>
+
+                <div class="data-section" style="margin-bottom: 0;">
+                    <table class="data-table" id="client-actions-table">
+                        <thead>
+                            <tr>
+                                <th>Nom de l'Action</th>
+                                <th>Code de l'Action</th>
+                                <th style="text-align:right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="client-actions-list">
+                            <tr id="empty-actions-row">
+                                <td colspan="3" style="text-align: center; color: #94a3b8; font-style: italic; padding: 20px;">
+                                    Aucune action définie pour le moment.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
                 <a href="{{ route('admin.features.index') }}" class="btn-cancel">Annuler</a>
                 <button type="submit" class="btn-submit">Enregistrer les modifications</button>
@@ -225,5 +267,149 @@
             }
 
         });
+
+        // Client-side actions management
+        let clientActions = [];
+        let editIndex = -1;
+
+        function slugify(text) {
+            return text.toString().toLowerCase()
+                .replace(/\s+/g, '-')           // Replace spaces with -
+                .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
+                .replace(/\-\-+/g, '-')         // Replace multiple - with single -
+                .replace(/^-+/, '')             // Trim - from start of text
+                .replace(/-+$/, '');            // Trim - from end of text
+        }
+
+        function addClientAction() {
+            const nameInput = document.getElementById('new-action-name');
+            const codeInput = document.getElementById('new-action-code');
+            const name = nameInput.value.trim();
+            const code = slugify(codeInput.value.trim());
+
+            if (!name || !code) {
+                alert('Veuillez remplir le nom et le code de l\'action.');
+                return;
+            }
+
+            // Check duplicate code
+            if (clientActions.some(act => act.code === code)) {
+                alert('Ce code d\'action est déjà ajouté dans la liste.');
+                return;
+            }
+
+            clientActions.push({ name, code });
+            nameInput.value = '';
+            codeInput.value = '';
+            renderClientActions();
+        }
+
+        function deleteClientAction(index) {
+            clientActions.splice(index, 1);
+            renderClientActions();
+        }
+
+        function editClientAction(index) {
+            editIndex = index;
+            renderClientActions();
+        }
+
+        function cancelEditClientAction() {
+            editIndex = -1;
+            renderClientActions();
+        }
+
+        function saveClientAction(index) {
+            const nameInput = document.getElementById(`edit-act-name-${index}`);
+            const codeInput = document.getElementById(`edit-act-code-${index}`);
+            const name = nameInput.value.trim();
+            const code = slugify(codeInput.value.trim());
+
+            if (!name || !code) {
+                alert('Le nom et le code ne peuvent pas être vides.');
+                return;
+            }
+
+            // Check duplicate code in other items
+            if (clientActions.some((act, idx) => act.code === code && idx !== index)) {
+                alert('Ce code d\'action est déjà utilisé dans une autre action.');
+                return;
+            }
+
+            clientActions[index] = { name, code };
+            editIndex = -1;
+            renderClientActions();
+        }
+
+        function renderClientActions() {
+            const tbody = document.getElementById('client-actions-list');
+            tbody.innerHTML = '';
+
+            if (clientActions.length === 0) {
+                tbody.innerHTML = `
+                    <tr id="empty-actions-row">
+                        <td colspan="3" style="text-align: center; color: #94a3b8; font-style: italic; padding: 20px;">
+                            Aucune action définie pour le moment.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            clientActions.forEach((action, index) => {
+                if (editIndex === index) {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td colspan="3">
+                                <div style="display: flex; gap: 12px; align-items: center; width: 100%; padding: 4px 0;">
+                                    <div style="flex: 1;">
+                                        <input type="text" id="edit-act-name-${index}" value="${action.name}" class="form-control" style="width:100%; padding: 6px 10px; font-size:13px;">
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <input type="text" id="edit-act-code-${index}" value="${action.code}" class="form-control" style="width:100%; padding: 6px 10px; font-size:13px; font-family: monospace;">
+                                    </div>
+                                    <div style="display: flex; gap: 6px;">
+                                        <button type="submit" style="display:none;"></button>
+                                        <button type="button" onclick="saveClientAction(${index})" class="btn-submit" style="padding: 6px 12px; font-size: 12px; white-space: nowrap;">
+                                            Enregistrer
+                                        </button>
+                                        <button type="button" onclick="cancelEditClientAction()" class="btn-cancel" style="padding: 6px 12px; font-size: 12px; white-space: nowrap;">
+                                            Annuler
+                                        </button>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td style="font-weight: 600; font-size: 13px; color: #1e293b;">
+                                ${action.name}
+                                <input type="hidden" name="actions[${index}][name]" value="${action.name}">
+                            </td>
+                            <td>
+                                <span class="exam-code" style="color: #4f46e5; background: #e0e7ff;">${action.code}</span>
+                                <input type="hidden" name="actions[${index}][code]" value="${action.code}">
+                            </td>
+                            <td style="text-align:right;">
+                                <div style="display:flex;align-items:center;justify-content:flex-end;gap:6px;">
+                                    <button type="button" onclick="editClientAction(${index})" class="table-action-btn" title="Modifier" style="background:none;border:none;cursor:pointer;padding:4px;color:#64748b;">
+                                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:16px;height:16px;">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                        </svg>
+                                    </button>
+                                    <button type="button" onclick="deleteClientAction(${index})" class="table-action-btn archive-btn" title="Supprimer" style="background:none;border:none;cursor:pointer;padding:4px;color:#ef4444;">
+                                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:16px;height:16px;">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }
+            });
+        }
     </script>
 @endsection
