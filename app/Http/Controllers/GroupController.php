@@ -160,4 +160,18 @@ class GroupController extends Controller
 
         return redirect()->route('admin.groups.index')->with('success', $message);
     }
+
+    /**
+     * Permanently remove the specified group from storage.
+     */
+    public function forceDelete(Group $group)
+    {
+        if ($group->users()->exists()) {
+            return redirect()->route('admin.groups.index')->with('error', 'Impossible de supprimer ce rôle car il est attribué à des utilisateurs.');
+        }
+
+        $group->delete();
+
+        return redirect()->route('admin.groups.index')->with('success', 'Rôle supprimé définitivement.');
+    }
 }
