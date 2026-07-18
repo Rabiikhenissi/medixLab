@@ -258,6 +258,21 @@ class UserController extends Controller
     }
 
     /**
+     * Permanently remove the specified user from storage.
+     */
+    public function forceDelete(User $user)
+    {
+        // Don't let users delete themselves
+        if (auth()->id() === $user->id) {
+            return redirect()->route('admin.users.index')->with('error', 'Vous ne pouvez pas supprimer votre propre compte.');
+        }
+
+        $user->delete();
+
+        return redirect()->route('admin.users.index')->with('success', 'Utilisateur supprimé définitivement.');
+    }
+
+    /**
      * Show the user profile page.
      */
     public function profile()

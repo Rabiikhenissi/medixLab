@@ -190,6 +190,16 @@ class FeatureController extends Controller
     }
 
     /**
+     * Permanently remove the specified feature from storage.
+     */
+    public function forceDelete(Feature $feature)
+    {
+        $feature->delete();
+
+        return redirect()->route('admin.features.index')->with('success', 'Module supprimé définitivement.');
+    }
+
+    /**
      * Store a newly created action under this feature.
      */
     public function storeAction(Request $request, Feature $feature)

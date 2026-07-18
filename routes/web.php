@@ -434,6 +434,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::patch('/exams/{exam}/archive', [AdminController::class, 'archiveExam'])
             ->name('exams.archive');
+        Route::delete('/exams/{exam}/force', [AdminController::class, 'forceDeleteExam'])
+            ->name('exams.force-delete');
         Route::match(['get', 'post'], '/logout', [AuthController::class, 'logout'])
             ->defaults('role', 'admin')
             ->name('logout');
@@ -444,6 +446,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/laboratories/{laboratory}/edit', [\App\Http\Controllers\LaboratoryController::class, 'edit'])->name('laboratories.edit')->middleware('permission:modify-laboratory');
         Route::put('/laboratories/{laboratory}', [\App\Http\Controllers\LaboratoryController::class, 'update'])->name('laboratories.update')->middleware('permission:modify-laboratory');
         Route::delete('/laboratories/{laboratory}', [\App\Http\Controllers\LaboratoryController::class, 'destroy'])->name('laboratories.destroy')->middleware('permission:delete-laboratory');
+        Route::delete('/laboratories/{laboratory}/force', [\App\Http\Controllers\LaboratoryController::class, 'forceDelete'])->name('laboratories.force-delete')->middleware('permission:delete-laboratory');
 
         // Users CRUD
         Route::get('/users', [UserController::class, 'index'])->name('users.index')->middleware('permission:view-users');
@@ -452,6 +455,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit')->middleware('permission:edit-users');
         Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update')->middleware('permission:edit-users');
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy')->middleware('permission:delete-users');
+        Route::delete('/users/{user}/force', [UserController::class, 'forceDelete'])->name('users.force-delete')->middleware('permission:delete-users');
 
         // Groups CRUD
         Route::get('/groups', [GroupController::class, 'index'])->name('groups.index')->middleware('permission:view-groups');
@@ -460,6 +464,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/groups/{group}/edit', [GroupController::class, 'edit'])->name('groups.edit')->middleware('permission:edit-groups');
         Route::put('/groups/{group}', [GroupController::class, 'update'])->name('groups.update')->middleware('permission:edit-groups');
         Route::delete('/groups/{group}', [GroupController::class, 'destroy'])->name('groups.destroy')->middleware('permission:delete-groups');
+        Route::delete('/groups/{group}/force', [GroupController::class, 'forceDelete'])->name('groups.force-delete')->middleware('permission:delete-groups');
 
         // Features CRUD
         Route::get('/features', [\App\Http\Controllers\FeatureController::class, 'index'])->name('features.index')->middleware('permission:view-features');
@@ -468,6 +473,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/features/{feature}/edit', [\App\Http\Controllers\FeatureController::class, 'edit'])->name('features.edit')->middleware('permission:edit-features');
         Route::put('/features/{feature}', [\App\Http\Controllers\FeatureController::class, 'update'])->name('features.update')->middleware('permission:edit-features');
         Route::delete('/features/{feature}', [\App\Http\Controllers\FeatureController::class, 'destroy'])->name('features.destroy')->middleware('permission:delete-features');
+        Route::delete('/features/{feature}/force', [\App\Http\Controllers\FeatureController::class, 'forceDelete'])->name('features.force-delete')->middleware('permission:delete-features');
 
         // Actions management (nested under Features)
         Route::post('/features/{feature}/actions', [\App\Http\Controllers\FeatureController::class, 'storeAction'])->name('features.actions.store')->middleware('permission:edit-features');

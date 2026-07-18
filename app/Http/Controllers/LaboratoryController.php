@@ -109,4 +109,14 @@ class LaboratoryController extends Controller
 
         return redirect()->route('admin.laboratories.index')->with('success', $message);
     }
+
+    /**
+     * Permanently remove the specified laboratory from storage.
+     */
+    public function forceDelete(Labo $laboratory)
+    {
+        $laboratory->delete();
+
+        return redirect()->route('admin.laboratories.index')->with('success', 'Laboratoire supprimé définitivement.');
+    }
 }
