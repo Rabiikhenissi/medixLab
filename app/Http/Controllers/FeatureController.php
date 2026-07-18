@@ -71,6 +71,9 @@ class FeatureController extends Controller
             'is_sidebar' => 'required|boolean',
             'order' => 'required|integer|min:0',
             'view_permission' => 'nullable|string|max:255',
+            'actions' => 'nullable|array',
+            'actions.*.name' => 'required|string|max:255',
+            'actions.*.code' => 'required|string|max:255',
         ]);
 
         $code = Str::slug($data['code']);
@@ -79,7 +82,30 @@ class FeatureController extends Controller
             return back()->withErrors(['code' => 'Ce code de module est déjà utilisé.'])->withInput();
         }
 
-        Feature::create([
+        $actionsData = [];
+        if (!empty($request->input('actions'))) {
+            $actionCodes = [];
+            foreach ($request->input('actions') as $actionInput) {
+                if (empty($actionInput['name']) || empty($actionInput['code'])) {
+                    continue;
+                }
+                $actionCode = Str::slug($actionInput['code']);
+                if (in_array($actionCode, $actionCodes)) {
+                    return back()->withErrors(['actions' => 'Les codes d\'actions soumis doivent être uniques.'])->withInput();
+                }
+                if (Action::where('code', $actionCode)->exists()) {
+                    return back()->withErrors(['actions' => "Le code d'action '{$actionCode}' est déjà utilisé."])->withInput();
+                }
+                $actionCodes[] = $actionCode;
+                $actionsData[] = [
+                    'name' => $actionInput['name'],
+                    'code' => $actionCode,
+                    'is_archive' => false,
+                ];
+            }
+        }
+
+        $feature = Feature::create([
             'name' => $data['name'],
             'code' => $code,
             'route_name' => $data['route_name'] ?: null,
@@ -89,6 +115,10 @@ class FeatureController extends Controller
             'view_permission' => $data['view_permission'] ?: null,
             'is_archive' => false,
         ]);
+
+        foreach ($actionsData as $act) {
+            $feature->actions()->create($act);
+        }
 
         return redirect()->route('admin.features.index')->with('success', 'Module créé avec succès.');
     }
@@ -186,16 +216,36 @@ class FeatureController extends Controller
     }
 
     /**
-     * Archive/Restore the specified action.
+     * Update the specified action.
+     */
+    public function updateAction(Request $request, Action $action)
+    {
+        $data = $request->validate([
+            'action_name' => 'required|string|max:255',
+            'action_code' => 'required|string|max:255',
+        ]);
+
+        $actionCode = Str::slug($data['action_code']);
+
+        if (Action::where('code', $actionCode)->where('id', '!=', $action->id)->exists()) {
+            return back()->withErrors(['action_code' => 'Ce code d\'action est déjà utilisé.'])->withInput();
+        }
+
+        $action->update([
+            'name' => $data['action_name'],
+            'code' => $actionCode,
+        ]);
+
+        return back()->with('success', 'Action mise à jour avec succès.');
+    }
+
+    /**
+     * Remove the specified action from storage.
      */
     public function destroyAction(Action $action)
     {
-        $action->update(['is_archive' => !$action->is_archive]);
+        $action->delete();
 
-        $message = $action->is_archive
-            ? 'Action archivée avec succès.'
-            : 'Action restaurée avec succès.';
-
-        return back()->with('success', $message);
+        return back()->with('success', 'Action supprimée définitivement avec succès.');
     }
 }

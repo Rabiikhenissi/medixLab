@@ -181,13 +181,12 @@
                         <tr>
                             <th>Nom</th>
                             <th>Code unique</th>
-                            <th>Statut</th>
                             <th style="text-align:right;">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($actions as $action)
-                            <tr class="{{ $action->is_archive ? 'archived' : '' }}">
+                            <tr id="row-view-{{ $action->id }}">
                                 <td style="font-weight: 600; font-size: 13px; color: #1e293b;">
                                     {{ $action->name }}
                                 </td>
@@ -195,45 +194,58 @@
                                     <span class="exam-code"
                                         style="color: #4f46e5; background: #e0e7ff;">{{ $action->code }}</span>
                                 </td>
-                                <td>
-                                    @if ($action->is_archive)
-                                        <span class="status-badge status-archived"><span
-                                                class="dot"></span>Archive</span>
-                                    @else
-                                        <span class="status-badge status-active"><span class="dot"></span>Actif</span>
-                                    @endif
-                                </td>
                                 <td style="text-align:right;">
-                                    <form action="{{ route('admin.actions.destroy', $action) }}" method="POST"
-                                        style="display:inline;margin:0;"
-                                        onsubmit="return confirm('{{ $action->is_archive ? 'Restaurer cette action ?' : 'Archiver cette action ?' }}')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit"
-                                            class="table-action-btn {{ $action->is_archive ? 'restore-btn' : 'archive-btn' }}"
-                                            title="{{ $action->is_archive ? 'Restaurer' : 'Archiver' }}">
-                                            @if ($action->is_archive)
+                                    <div style="display:flex;align-items:center;justify-content:flex-end;gap:6px;">
+                                        <button type="button" onclick="showEditForm({{ $action->id }})" class="table-action-btn" title="Modifier" style="background:none;border:none;cursor:pointer;padding:4px;color:#64748b;">
+                                            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:16px;height:16px;">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                            </svg>
+                                        </button>
+                                        <form action="{{ route('admin.actions.destroy', $action) }}" method="POST"
+                                            style="display:inline;margin:0;"
+                                            onsubmit="return confirm('Supprimer définitivement cette action ?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit"
+                                                class="table-action-btn archive-btn"
+                                                title="Supprimer">
                                                 <svg fill="none" stroke="currentColor" stroke-width="2"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
-                                                </svg>
-                                            @else
-                                                <svg fill="none" stroke="currentColor" stroke-width="2"
-                                                    viewBox="0 0 24 24">
+                                                    viewBox="0 0 24 24" style="width:16px;height:16px;">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
                                                         d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                 </svg>
-                                            @endif
-                                        </button>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr id="row-edit-{{ $action->id }}" style="display:none;">
+                                <td colspan="3">
+                                    <form action="{{ route('admin.actions.update', $action) }}" method="POST" style="display: flex; gap: 12px; align-items: center; width: 100%; padding: 4px 0;">
+                                        @csrf
+                                        @method('PUT')
+                                        <div style="flex: 1;">
+                                            <input type="text" name="action_name" value="{{ $action->name }}" required class="form-control" style="width:100%; padding: 6px 10px; font-size:13px;">
+                                        </div>
+                                        <div style="flex: 1;">
+                                            <input type="text" name="action_code" value="{{ $action->code }}" required class="form-control" style="width:100%; padding: 6px 10px; font-size:13px; font-family: monospace;">
+                                        </div>
+                                        <div style="display: flex; gap: 6px;">
+                                            <button type="submit" class="btn-submit" style="padding: 6px 12px; font-size: 12px; white-space: nowrap;">
+                                                Enregistrer
+                                            </button>
+                                            <button type="button" onclick="hideEditForm({{ $action->id }})" class="btn-cancel" style="padding: 6px 12px; font-size: 12px; white-space: nowrap;">
+                                                Annuler
+                                            </button>
+                                        </div>
                                     </form>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4"
+                                <td colspan="3"
                                     style="text-align: center; color: #94a3b8; font-style: italic; padding: 20px;">
-                                    Aucune action definie pour ce module.
+                                    Aucune action définie pour ce module.
                                 </td>
                             </tr>
                         @endforelse
@@ -344,6 +356,16 @@
                     });
 
             });
+
+        function showEditForm(id) {
+            document.getElementById(`row-view-${id}`).style.display = 'none';
+            document.getElementById(`row-edit-${id}`).style.display = 'table-row';
+        }
+
+        function hideEditForm(id) {
+            document.getElementById(`row-view-${id}`).style.display = 'table-row';
+            document.getElementById(`row-edit-${id}`).style.display = 'none';
+        }
     </script>
 
 @endsection
