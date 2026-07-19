@@ -5,7 +5,8 @@
     'placeholder' => '',
     'required' => false,
     'value' => '',
-    'options' => []
+    'options' => [],
+    'showStrength' => false,
 ])
 
 <div class="w-full">
@@ -40,7 +41,7 @@
         @else
             <input type="{{ $type }}" name="{{ $name }}" id="{{ $name }}" placeholder="{{ $placeholder }}" value="{{ $value }}" @if($required) required @endif
                 class="custom-input w-full px-4 py-2.5 bg-[#F8FAFC] border border-[#e2e8f0] rounded-xl text-sm text-[#1e293b] placeholder-[#94a3b8] focus:outline-none focus:bg-white">
-            @if($type === 'password' && $name === 'password')
+            @if($type === 'password' && $showStrength)
                 <div class="mt-2 text-xs font-semibold text-gray-500">
                     <div class="flex items-center gap-1.5">
                         <span class="text-[10px] uppercase text-[#64748b] tracking-wider select-none">Sécurité :</span>

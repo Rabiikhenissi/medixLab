@@ -6,8 +6,9 @@ use App\Models\ExamRequestItem;
 use App\Models\ResultLabo;
 use App\Models\ResultLaboDetail;
 use App\Models\Consumable;
-use App\Models\Equipment;
 use App\Models\StockMovement;
+use App\Services\ExamRequestService;
+use App\Services\StockService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -79,7 +80,7 @@ class LaboResultController extends Controller
                 // 1. Revert previous stock movements & quantities
                 foreach ($result->consumables as $oldConsumable) {
                     $qtyUsed = $oldConsumable->pivot->quantity_used;
-                    \App\Services\StockService::add($oldConsumable, $qtyUsed, "Annulation / Mise à jour du résultat d'examen #" . $result->id);
+                    StockService::add($oldConsumable, $qtyUsed, "Annulation / Mise à jour du résultat d'examen #" . $result->id);
                 }
 
                 // Remove old details, consumables and equipment
@@ -117,7 +118,7 @@ class LaboResultController extends Controller
                     $quantityUsed = (int)$cData['quantity'];
 
                     $consumable = Consumable::findOrFail($consumableId);
-                    \App\Services\StockService::deduct($consumable, $quantityUsed, "Utilisé pour le résultat d'examen #" . $result->id);
+                    StockService::deduct($consumable, $quantityUsed, "Utilisé pour le résultat d'examen #" . $result->id);
 
                     // Attach to result
                     $result->consumables()->attach($consumableId, [
@@ -138,7 +139,7 @@ class LaboResultController extends Controller
         });
 
         // Check if all items in this request have results using ExamRequestService
-        \App\Services\ExamRequestService::checkCompletion($item->examRequest);
+        ExamRequestService::checkCompletion($item->examRequest);
 
         return redirect()
             ->route('center.exam-requests')
@@ -275,31 +276,7 @@ class LaboResultController extends Controller
             }
         });
 
-        // Check if all items in this request have results
-        $examRequest = $result->examRequestItem->examRequest;
-        $allItemsCompleted = true;
-        foreach ($examRequest->items as $reqItem) {
-            if (!$reqItem->resultLabo()->exists()) {
-                $allItemsCompleted = false;
-                break;
-            }
-        }
-
-        if ($allItemsCompleted) {
-            $examRequest->update([
-                'status' => 'completed'
-            ]);
-
-            if ($examRequest->doctor && $examRequest->doctor->user) {
-                \App\Models\Notification::create([
-                    'user_id' => $examRequest->doctor->user->id,
-                    'title' => 'Analyses complétées',
-                    'message' => 'Toutes les analyses demandées pour le patient ' . $examRequest->patient->user->first_name . ' ' . $examRequest->patient->user->last_name . ' sont terminées. Vous pouvez maintenant consulter les résultats.',
-                    'notification_type' => 'exam_request',
-                    'reference_id' => $examRequest->id,
-                ]);
-            }
-        }
+        ExamRequestService::checkCompletion($result->examRequestItem->examRequest);
 
         return redirect()
             ->route('center.exam-requests')

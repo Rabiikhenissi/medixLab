@@ -1106,6 +1106,7 @@
         </div><!-- /page-content -->
     </div><!-- /layout -->
     @yield('scripts')
+    <x-loading-overlay />
 </body>
 
 </html>

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Labo;
 use App\Models\Consumable;
 use App\Models\Equipment;
 use App\Models\EquipmentMaintenance;
@@ -466,7 +465,7 @@ public function examRequests()
 {
     $lab = auth()->user()->staff->laboratory;
 
-    $requests = \App\Models\ExamRequest::where('labo_id', $lab->id)
+    $requests = ExamRequest::where('labo_id', $lab->id)
         ->with([
             'patient.user',
             'doctor.user',
@@ -479,7 +478,7 @@ public function examRequests()
 }
 
 
-public function claimExamRequest(\App\Models\ExamRequest $examRequest)
+public function claimExamRequest(ExamRequest $examRequest)
 {
     $lab = auth()->user()->staff->laboratory;
 

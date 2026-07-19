@@ -12,6 +12,8 @@ Espace <span style="color:#0066ff;">Administrateur</span>
 Gérez la plateforme et supervisez les activités de Medix eSanté.
 @endsection
 
+@section('content')
+
 <!-- Import Chart.js (Task 3.1) -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 

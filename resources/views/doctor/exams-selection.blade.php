@@ -1,7 +1,8 @@
-<x-layouts.auth>
+<x-layouts.doctor>
     <x-slot:title>Sélectionner les Examens - Medix eSanté</x-slot:title>
 
-    <div class="w-full max-w-7xl mx-auto py-8 px-4">
+    @section('content')
+    <div class="w-full max-w-7xl mx-auto">
         <div class="glass-card rounded-[20px] p-6 md:p-8 relative overflow-hidden shadow-xs select-none">
             
             <!-- Header -->
@@ -447,4 +448,5 @@
 
         updateCount();
     </script>
-</x-layouts.auth>
+    @endsection
+</x-layouts.doctor>

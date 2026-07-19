@@ -1,7 +1,8 @@
-<x-layouts.auth>
+<x-layouts.patient>
     <x-slot:title>{{ __('Tableau de bord Patient - Medix eSanté') }}</x-slot:title>
 
-    <div class="w-full max-w-[1400px] mx-auto py-8 px-4">
+    @section('content')
+    <div class="w-full max-w-[1400px] mx-auto">
         <div class="glass-card rounded-[20px] p-8 md:p-10 relative overflow-hidden">
             <!-- Header -->
             <div
@@ -59,21 +60,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <a href="{{ route('patient.medical-history') }}"
-                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-[#0D9488] bg-[#0D9488]/10 border border-[#0D9488]/20 hover:bg-[#0D9488] hover:text-white transition uppercase tracking-wider"
-                       title="Voir l'historique médical complet">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        Historique
-                    </a>
-                    <form action="{{ route('patient.logout') }}" method="POST">
-                        @csrf
-                        <x-button type="submit" color="slate" :fullWidth="false" class="!py-1.5 !px-4 !text-xs">
-                            {{ __('SE DÉCONNECTER') }}
-                        </x-button>
-                    </form>
                 </div>
             </div>
 
@@ -881,4 +867,5 @@
         // Refresh access requests every 15 seconds
         setInterval(loadAccessRequests, 15000);
     </script>
-</x-layouts.auth>
+    @endsection
+</x-layouts.patient>

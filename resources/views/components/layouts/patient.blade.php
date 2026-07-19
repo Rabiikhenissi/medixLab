@@ -4,23 +4,17 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-
-    <title>{{ $title ?? 'Medix eSanté' }}</title>
+    <title>@yield('title', 'Espace Patient') - Medix eSanté</title>
 
     <!-- Google Fonts: Outfit & Instrument Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Outfit:wght@100..900&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Outfit:wght@100..900&display=swap" rel="stylesheet">
 
-    <!-- Styles / Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
-        /* ── Unified Auth Shell ────────────────────────────── */
-        body.auth-shell {
+        body.patient-shell {
             margin: 0;
             padding: 0;
             display: flex;
@@ -29,7 +23,7 @@
         }
 
         /* ── SIDEBAR ──────────────────────────────────────── */
-        .auth-sidebar {
+        .patient-sidebar {
             width: 64px;
             background: #ffffff;
             border-right: 1px solid #e8eef4;
@@ -46,10 +40,10 @@
             flex-shrink: 0;
         }
 
-        .auth-sidebar-logo {
+        .patient-sidebar-logo {
             width: 38px;
             height: 38px;
-            background: linear-gradient(135deg, #0066ff, #00aaff);
+            background: linear-gradient(135deg, #0D9488, #0a7068);
             border-radius: 10px;
             display: flex;
             align-items: center;
@@ -58,7 +52,7 @@
             flex-shrink: 0;
         }
 
-        .auth-sidebar-nav {
+        .patient-sidebar-nav {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -67,7 +61,7 @@
             width: 100%;
         }
 
-        .auth-sidebar-item {
+        .patient-sidebar-item {
             width: 40px;
             height: 40px;
             border-radius: 10px;
@@ -81,23 +75,23 @@
             position: relative;
         }
 
-        .auth-sidebar-item:hover {
-            background: #f1f5f9;
-            color: #475569;
+        .patient-sidebar-item:hover {
+            background: #f0fdfa;
+            color: #0D9488;
         }
 
-        .auth-sidebar-item.active {
-            background: linear-gradient(135deg, #0066ff15, #0066ff08);
-            color: #0066ff;
-            border-left: 2px solid #0066ff;
+        .patient-sidebar-item.active {
+            background: rgba(13, 148, 136, 0.08);
+            color: #0D9488;
+            border-left: 2px solid #0D9488;
         }
 
-        .auth-sidebar-item svg {
+        .patient-sidebar-item svg {
             width: 20px;
             height: 20px;
         }
 
-        .auth-sidebar-bottom {
+        .patient-sidebar-bottom {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -107,7 +101,7 @@
         }
 
         /* ── TOP NAV ──────────────────────────────────────── */
-        .auth-topnav {
+        .patient-topnav {
             position: fixed;
             top: 0;
             left: 64px;
@@ -125,7 +119,7 @@
             box-shadow: 0 1px 8px rgba(0, 0, 0, 0.04);
         }
 
-        .auth-topnav .brand {
+        .patient-topnav .brand {
             font-size: 16px;
             font-weight: 800;
             color: #0f172a;
@@ -133,36 +127,36 @@
             letter-spacing: -0.3px;
         }
 
-        .auth-topnav .brand span {
-            color: #0066ff;
+        .patient-topnav .brand span {
+            color: #0D9488;
         }
 
-        .auth-topnav .topnav-right {
+        .patient-topnav .topnav-right {
             display: flex;
             align-items: center;
             gap: 12px;
         }
 
-        .auth-topnav .nav-user-name {
+        .patient-topnav .nav-user-name {
             font-size: 13px;
             font-weight: 700;
             color: #0f172a;
             line-height: 1.2;
         }
 
-        .auth-topnav .nav-user-role {
+        .patient-topnav .nav-user-role {
             font-size: 10px;
-            color: #0066ff;
+            color: #0D9488;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.4px;
         }
 
-        .auth-topnav .nav-avatar {
+        .patient-topnav .nav-avatar {
             width: 34px;
             height: 34px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #0066ff, #00aaff);
+            background: linear-gradient(135deg, #0D9488, #0a7068);
             color: white;
             font-weight: 700;
             font-size: 12px;
@@ -174,7 +168,7 @@
             text-decoration: none;
         }
 
-        .auth-topnav .btn-logout {
+        .patient-topnav .btn-logout {
             width: 34px;
             height: 34px;
             border-radius: 8px;
@@ -188,123 +182,103 @@
             transition: all 0.2s;
         }
 
-        .auth-topnav .btn-logout:hover {
+        .patient-topnav .btn-logout:hover {
             background: #fee2e2;
             color: #ef4444;
             border-color: #fca5a5;
         }
 
-        .auth-topnav .btn-logout svg {
+        .patient-topnav .btn-logout svg {
             width: 16px;
             height: 16px;
         }
 
         /* ── MAIN CONTENT ──────────────────────────────────── */
-        .auth-main {
+        .patient-main {
             margin-left: 64px;
             padding-top: 58px;
             min-height: 100vh;
             width: calc(100% - 64px);
-            display: flex;
-            flex-direction: column;
         }
 
-        .auth-content {
-            flex: 1;
-            padding: 0;
+        .patient-content-wrapper {
+            padding: 24px 32px;
         }
 
         @media (max-width: 640px) {
-            .auth-topnav .nav-user-name,
-            .auth-topnav .nav-user-role {
+            .patient-topnav .nav-user-name,
+            .patient-topnav .nav-user-role {
                 display: none;
+            }
+            .patient-content-wrapper {
+                padding: 16px;
             }
         }
     </style>
+
+    @yield('styles')
 </head>
 
-<body class="auth-shell antialiased text-[#1e293b] font-sans">
+<body class="patient-shell antialiased text-[#1e293b] font-sans">
+
     <!-- ══ SIDEBAR ══ -->
-    @auth
-    <aside class="auth-sidebar">
-        <div class="auth-sidebar-logo">
+    <aside class="patient-sidebar">
+        <div class="patient-sidebar-logo">
             <svg width="20" height="20" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.315 48.315 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z" />
+                    d="M4 20V8l8 7 8-7v12" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v4M10 5h4" stroke-width="2.2" />
             </svg>
         </div>
 
-        <nav class="auth-sidebar-nav">
-            @foreach ($sidebarFeatures ?? [] as $feature)
-                @if (!$feature->view_permission || auth()->user()->hasPermission($feature->view_permission))
-                    @php
-                        $isActive = false;
-                        if ($feature->route_name && \Illuminate\Support\Facades\Route::has($feature->route_name)) {
-                            $routePattern = str_replace('.index', '.*', $feature->route_name);
-                            $isActive = request()->routeIs($feature->route_name) || request()->routeIs($routePattern);
-                        }
-                        $href = $feature->route_name && \Illuminate\Support\Facades\Route::has($feature->route_name)
-                            ? route($feature->route_name)
-                            : '#';
-                    @endphp
-                    <a href="{{ $href }}"
-                       class="auth-sidebar-item {{ $isActive ? 'active' : '' }}"
-                       title="{{ $feature->name }}">
-                        @if ($feature->icon)
-                            <x-dynamic-component :component="'heroicon-o-' . $feature->icon" style="width:20px;height:20px;" />
-                        @else
-                            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:20px;height:20px;">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                            </svg>
-                        @endif
-                    </a>
-                @endif
-            @endforeach
+        <nav class="patient-sidebar-nav">
+            @php
+                $currentRoute = request()->route()->getName();
+            @endphp
+
+            <!-- Dashboard -->
+            <a href="{{ route('patient.dashboard') }}"
+               class="patient-sidebar-item {{ $currentRoute === 'patient.dashboard' ? 'active' : '' }}"
+               title="Tableau de bord">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:20px;height:20px;">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75" />
+                </svg>
+            </a>
+
+            <!-- Medical History -->
+            <a href="{{ route('patient.medical-history') }}"
+               class="patient-sidebar-item {{ $currentRoute === 'patient.medical-history' ? 'active' : '' }}"
+               title="Historique Médical">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:20px;height:20px;">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                </svg>
+            </a>
         </nav>
 
-        <div class="auth-sidebar-bottom">
-            <!-- Profile -->
-            <a href="{{ route('profile') }}" class="auth-sidebar-item" title="Mon Profil">
+        <div class="patient-sidebar-bottom">
+            <a href="{{ route('profile') }}" class="patient-sidebar-item" title="Mon Profil">
                 <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:20px;height:20px;">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
             </a>
         </div>
     </aside>
-    @endauth
 
     <!-- ══ TOP NAV ══ -->
-    @auth
-    <nav class="auth-topnav">
-        @php
-            $dashboardRoute = 'home';
-            if (auth()->user()->doctor) $dashboardRoute = 'doctor.dashboard';
-            elseif (auth()->user()->patient) $dashboardRoute = 'patient.dashboard';
-            elseif (auth()->user()->staff) $dashboardRoute = 'center.dashboard';
-            elseif (auth()->user()->admin) $dashboardRoute = 'admin.dashboard';
-
-            $logoutRoute = 'admin.logout';
-            if (auth()->user()->doctor) $logoutRoute = 'doctor.logout';
-            elseif (auth()->user()->patient) $logoutRoute = 'patient.logout';
-            elseif (auth()->user()->staff) $logoutRoute = 'center.logout';
-        @endphp
-        <a href="{{ route($dashboardRoute) }}" class="brand">Medix <span>eSanté</span></a>
+    <nav class="patient-topnav">
+        <a href="{{ route('patient.dashboard') }}" class="brand">Medix <span>eSanté</span></a>
 
         <div class="topnav-right">
             <div>
                 <div class="nav-user-name">{{ auth()->user()->first_name }} {{ auth()->user()->last_name }}</div>
-                <div class="nav-user-role">
-                    @if(auth()->user()->doctor) Médecin
-                    @elseif(auth()->user()->patient) Patient
-                    @elseif(auth()->user()->staff) Établissement
-                    @else {{ auth()->user()->group?->name ?? 'Utilisateur' }}
-                    @endif
-                </div>
+                <div class="nav-user-role">Patient</div>
             </div>
             <a href="{{ route('profile') }}" class="nav-avatar" title="Mon Profil">
                 {{ strtoupper(substr(auth()->user()->first_name, 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name, 0, 1)) }}
             </a>
-            <form action="{{ route($logoutRoute) }}" method="POST" style="margin:0;padding:0;">
+            <form action="{{ route('patient.logout') }}" method="POST" style="margin:0;padding:0;">
                 @csrf
                 <button type="submit" class="btn-logout" title="Se déconnecter">
                     <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -315,22 +289,56 @@
             </form>
         </div>
     </nav>
-    @endauth
 
     <!-- ══ MAIN CONTENT ══ -->
-    @auth
-    <main class="auth-main">
-        <div class="auth-content">
-            {{ $slot }}
+    <main class="patient-main">
+        <div class="patient-content-wrapper">
+
+            <!-- Session Alerts -->
+            @if (session('success'))
+                <div class="flex items-center justify-between bg-[#f0fdf4] border border-[#bbf7d0] rounded-xl p-4 mb-6 text-sm text-[#166534] font-medium"
+                    id="patient-success-alert">
+                    <div class="flex items-center space-x-2">
+                        <svg class="w-5 h-5 text-[#16a34a]" fill="none" stroke="currentColor" stroke-width="2.5"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                        </svg>
+                        <span>{{ session('success') }}</span>
+                    </div>
+                    <button onclick="document.getElementById('patient-success-alert').remove()"
+                        class="text-[#94a3b8] hover:text-[#475569] transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div class="flex items-center justify-between bg-[#fff1f2] border border-[#fecaca] rounded-xl p-4 mb-6 text-sm text-[#dc2626] font-medium"
+                    id="patient-error-alert">
+                    <div class="flex items-center space-x-2">
+                        <svg class="w-5 h-5 text-[#ef4444]" fill="none" stroke="currentColor" stroke-width="2.5"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                        </svg>
+                        <span>{{ session('error') }}</span>
+                    </div>
+                    <button onclick="document.getElementById('patient-error-alert').remove()"
+                        class="text-[#cbd5e1] hover:text-[#94a3b8] transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            @endif
+
+            @yield('content')
         </div>
     </main>
-    @else
-    {{-- Guest layout (login/register pages) - no sidebar --}}
-    <x-background-animation />
-    <div class="relative z-10 min-h-screen flex flex-col justify-center items-center p-4 md:p-8 w-full">
-        {{ $slot }}
-    </div>
-    @endauth
+
+    @yield('scripts')
     <x-loading-overlay />
 </body>
 

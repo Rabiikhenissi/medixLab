@@ -1,20 +1,8 @@
-<x-layouts.auth>
+<x-layouts.doctor>
     <x-slot:title>Tableau de bord Médecin - Medix eSanté</x-slot:title>
 
-    <div class="w-full max-w-7xl mx-auto py-8 px-4">
-
-        {{-- Session Messages --}}
-        @if(session('success'))
-            <div
-                class="bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl p-4 mb-6 text-sm font-semibold select-none">
-                {{ session('success') }}
-            </div>
-        @endif
-        @if(session('error'))
-            <div class="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 mb-6 text-sm font-semibold select-none">
-                {{ session('error') }}
-            </div>
-        @endif
+    @section('content')
+    <div class="w-full max-w-7xl mx-auto">
 
         {{-- ── Header Bar ── --}}
         <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-10 gap-4 select-none">
@@ -57,18 +45,6 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6" />
                         </svg>
                         Rechercher
-                    </button>
-                </form>
-
-                <form action="{{ route('doctor.logout') }}" method="POST">
-                    @csrf
-                    <button type="submit"
-                        class="w-full sm:w-auto bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] hover:text-[#1e293b] font-bold px-4 py-2.5 rounded-xl transition text-xs uppercase tracking-wider border border-[#e2e8f0] flex items-center justify-center gap-1.5 cursor-pointer">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                        </svg>
-                        Déconnexion
                     </button>
                 </form>
             </div>
@@ -826,4 +802,5 @@
             setTimeout(() => toast.remove(), 2500);
         }
     </script>
-</x-layouts.auth>
+    @endsection
+</x-layouts.doctor>
