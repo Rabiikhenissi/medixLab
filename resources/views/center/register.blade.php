@@ -99,6 +99,7 @@
                 label="Mot de passe"
                 placeholder="••••••••"
                 :required="true"
+                :show-strength="true"
             />
 
             <!-- Confirm Password -->

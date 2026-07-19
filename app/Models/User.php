@@ -71,11 +71,6 @@ class User extends Authenticatable
             return false;
         }
 
-        // Admin group gets all permissions automatically
-        if ($this->group->code === 'admin') {
-            return true;
-        }
-
         if (!$this->group->relationLoaded('actions')) {
             $this->group->load('actions');
         }

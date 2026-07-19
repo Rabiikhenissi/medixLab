@@ -1,7 +1,8 @@
-<x-layouts.auth>
+<x-layouts.patient>
     <x-slot:title>{{ __('Tableau de bord Patient - Medix eSanté') }}</x-slot:title>
 
-    <div class="w-full max-w-[1400px] mx-auto py-8 px-4">
+    @section('content')
+    <div class="w-full max-w-[1400px] mx-auto">
         <div class="glass-card rounded-[20px] p-8 md:p-10 relative overflow-hidden">
             <!-- Header -->
             <div
@@ -897,4 +898,5 @@
         // Refresh access requests every 15 seconds
         setInterval(loadAccessRequests, 15000);
     </script>
-</x-layouts.auth>
+    @endsection
+</x-layouts.patient>

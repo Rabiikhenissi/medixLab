@@ -331,6 +331,7 @@
         {{ $slot }}
     </div>
     @endauth
+    <x-loading-overlay />
 </body>
 
 </html>

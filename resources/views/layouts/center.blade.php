@@ -439,6 +439,7 @@
     </main>
 
     @yield('scripts')
+    <x-loading-overlay />
 
     <script>
         // ── Notifications ──

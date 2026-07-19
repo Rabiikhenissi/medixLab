@@ -1,7 +1,8 @@
-<x-layouts.auth>
+<x-layouts.patient>
     <x-slot:title>Historique Médical — Medix eSanté</x-slot:title>
 
-    <div class="w-full max-w-[1100px] mx-auto py-8 px-4">
+    @section('content')
+    <div class="w-full max-w-[1100px] mx-auto">
         <div class="glass-card rounded-[20px] p-8 md:p-10 relative overflow-hidden">
 
             {{-- Header --}}
@@ -213,4 +214,5 @@
 
         </div>
     </div>
-</x-layouts.auth>
+    @endsection
+</x-layouts.patient>

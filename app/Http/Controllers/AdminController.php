@@ -27,11 +27,10 @@ class AdminController extends Controller
 
         $stats = [
 
-            'total_exams' => Exam::where(function($q){
+            'total_exams' => Exam::where(function ($q) {
 
                 $q->where('is_archive', false)
-                  ->orWhereNull('is_archive');
-
+                    ->orWhereNull('is_archive');
             })->count(),
 
 
@@ -108,9 +107,9 @@ class AdminController extends Controller
 
         return view('admin.dashboard',[
 
-            'user'=>auth()->user(),
+            'user' => auth()->user(),
 
-            'stats'=>$stats,
+            'stats' => $stats,
             'statusDistribution' => $statusDistribution,
             'topExams' => $topExams,
             'chartData' => $chartData,
@@ -120,7 +119,6 @@ class AdminController extends Controller
             'todayPrescriptions' => $todayPrescriptions,
 
         ]);
-
     }
 
 
@@ -149,9 +147,9 @@ class AdminController extends Controller
 
         $showArchived = $request->boolean('show_archived');
 
-        $search = $request->input('search','');
+        $search = $request->input('search', '');
 
-        $category = $request->input('category','');
+        $category = $request->input('category', '');
 
 
 
@@ -162,47 +160,39 @@ class AdminController extends Controller
 
 
 
-        if(!$showArchived)
-        {
+        if (!$showArchived) {
 
-            $query->where(function($q){
+            $query->where(function ($q) {
 
-                $q->where('is_archive',false)
-                  ->orWhereNull('is_archive');
-
+                $q->where('is_archive', false)
+                    ->orWhereNull('is_archive');
             });
-
         }
 
 
 
 
 
-        if($search)
-        {
+        if ($search) {
 
-            $query->where(function($q) use($search){
+            $query->where(function ($q) use ($search) {
 
-                $q->where('name','like',"%{$search}%")
-                  ->orWhere('code','like',"%{$search}%")
-                  ->orWhere('description','like',"%{$search}%");
-
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('code', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
             });
-
         }
 
 
 
 
 
-        if($category)
-        {
+        if ($category) {
 
             $query->where(
                 'category',
                 $category
             );
-
         }
 
 
@@ -210,7 +200,7 @@ class AdminController extends Controller
 
 
         $exams = $query
-            ->orderBy('created_at','desc')
+            ->orderBy('created_at', 'desc')
             ->paginate(10)
             ->appends($request->query());
 
@@ -218,18 +208,17 @@ class AdminController extends Controller
 
 
 
-        return view('admin.exams.index',[
+        return view('admin.exams.index', [
 
-            'exams'=>$exams,
+            'exams' => $exams,
 
-            'showArchived'=>$showArchived,
+            'showArchived' => $showArchived,
 
-            'search'=>$search,
+            'search' => $search,
 
-            'selectedCategory'=>$category,
+            'selectedCategory' => $category,
 
         ]);
-
     }
 
 
@@ -249,7 +238,6 @@ class AdminController extends Controller
 
 
         return view('admin.exams.create');
-
     }
 
 
@@ -275,7 +263,6 @@ class AdminController extends Controller
             'admin.exams.edit',
             compact('exam')
         );
-
     }
 
 
@@ -300,37 +287,36 @@ class AdminController extends Controller
     {
 
 
-        if(!auth()->user()->admin)
-        {
+        if (!auth()->user()->admin) {
             abort(403);
         }
 
 
 
-        $data=$request->validate([
+        $data = $request->validate([
 
 
-            'code'=>'required|string|max:255|unique:exams',
+            'code' => 'required|string|max:255|unique:exams',
 
-            'name'=>'required|string|max:255',
+            'name' => 'required|string|max:255',
 
-            'category'=>'required|in:biochemistry,hematology,microbiology,immunology,urinalysis,other',
+            'category' => 'required|in:biochemistry,hematology,microbiology,immunology,urinalysis,other',
 
-            'description'=>'nullable|string',
+            'description' => 'nullable|string',
 
-            'default_normal_range'=>'nullable|string|max:255',
+            'default_normal_range' => 'nullable|string|max:255',
 
-            'preparation_instructions'=>'nullable|string',
+            'preparation_instructions' => 'nullable|string',
 
 
 
-            'parameters'=>'nullable|array',
+            'parameters' => 'nullable|array',
 
-            'parameters.*.name'=>'required|string|max:255',
+            'parameters.*.name' => 'required|string|max:255',
 
-            'parameters.*.unit'=>'nullable|string|max:255',
+            'parameters.*.unit' => 'nullable|string|max:255',
 
-            'parameters.*.normal_range'=>'nullable|string|max:255',
+            'parameters.*.normal_range' => 'nullable|string|max:255',
 
         ]);
 
@@ -338,7 +324,7 @@ class AdminController extends Controller
 
 
 
-        $data['is_archive']=false;
+        $data['is_archive'] = false;
 
 
 
@@ -348,31 +334,26 @@ class AdminController extends Controller
 
 
 
-        if($request->has('parameters'))
-        {
+        if ($request->has('parameters')) {
 
 
-            foreach($request->parameters as $parameter)
-            {
+            foreach ($request->parameters as $parameter) {
 
 
                 ExamParameter::create([
 
-                    'exam_id'=>$exam->id,
+                    'exam_id' => $exam->id,
 
-                    'name'=>$parameter['name'],
+                    'name' => $parameter['name'],
 
-                    'unit'=>$parameter['unit'] ?? null,
+                    'unit' => $parameter['unit'] ?? null,
 
-                    'normal_range'=>$parameter['normal_range'] ?? null,
+                    'normal_range' => $parameter['normal_range'] ?? null,
 
-                    'is_archive'=>false,
+                    'is_archive' => false,
 
                 ]);
-
-
             }
-
         }
 
 
@@ -388,7 +369,6 @@ class AdminController extends Controller
                 'success',
                 'Examen créé avec succès.'
             );
-
     }
 
 
@@ -403,8 +383,7 @@ class AdminController extends Controller
     {
 
 
-        if(!auth()->user()->admin)
-        {
+        if (!auth()->user()->admin) {
             abort(403);
         }
 
@@ -412,20 +391,20 @@ class AdminController extends Controller
 
 
 
-        $data=$request->validate([
+        $data = $request->validate([
 
 
-            'code'=>'required|string|max:255|unique:exams,code,'.$exam->id,
+            'code' => 'required|string|max:255|unique:exams,code,' . $exam->id,
 
-            'name'=>'required|string|max:255',
+            'name' => 'required|string|max:255',
 
-            'category'=>'required|in:biochemistry,hematology,microbiology,immunology,urinalysis,other',
+            'category' => 'required|in:biochemistry,hematology,microbiology,immunology,urinalysis,other',
 
-            'description'=>'nullable|string',
+            'description' => 'nullable|string',
 
-            'default_normal_range'=>'nullable|string|max:255',
+            'default_normal_range' => 'nullable|string|max:255',
 
-            'preparation_instructions'=>'nullable|string',
+            'preparation_instructions' => 'nullable|string',
 
 
         ]);
@@ -449,7 +428,6 @@ class AdminController extends Controller
                 'success',
                 'Examen mis à jour avec succès.'
             );
-
     }
 
 
@@ -459,29 +437,27 @@ class AdminController extends Controller
 
 
 
-public function showExam(Exam $exam)
-{
-    if(!auth()->user()->admin)
+    public function showExam(Exam $exam)
     {
-        abort(403);
+        if (!auth()->user()->admin) {
+            abort(403);
+        }
+
+
+        $exam->load('parameters');
+
+
+        return view('admin.exams.show', [
+
+            'exam' => $exam
+
+        ]);
     }
-
-
-    $exam->load('parameters');
-
-
-    return view('admin.exams.show', [
-
-        'exam'=>$exam
-
-    ]);
-}
     public function archiveExam(Exam $exam)
     {
 
 
-        if(!auth()->user()->admin)
-        {
+        if (!auth()->user()->admin) {
             abort(403);
         }
 
@@ -491,7 +467,7 @@ public function showExam(Exam $exam)
 
         $exam->update([
 
-            'is_archive'=>!$exam->is_archive
+            'is_archive' => !$exam->is_archive
 
         ]);
 
@@ -505,15 +481,13 @@ public function showExam(Exam $exam)
 
             ->with(
                 'success',
-                'Statut de l’examen modifié.'
+                'Statut de l\'examen modifié.'
             );
-
     }
 
     public function forceDeleteExam(Exam $exam)
     {
-        if(!auth()->user()->admin)
-        {
+        if (!auth()->user()->admin) {
             abort(403);
         }
 
@@ -523,7 +497,4 @@ public function showExam(Exam $exam)
             ->route('admin.exams.index')
             ->with('success', 'Examen supprimé définitivement.');
     }
-
-
-
 }

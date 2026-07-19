@@ -1,5 +1,7 @@
-<x-layouts.auth>
+<x-layouts.patient>
 <x-slot:title>Choisir un laboratoire — Medix eSanté</x-slot:title>
+
+@section('content')
 
 <style>
     .lab-card {
@@ -409,5 +411,5 @@
     // Initial render
     render();
 </script>
-
-</x-layouts.auth>
+@endsection
+</x-layouts.patient>

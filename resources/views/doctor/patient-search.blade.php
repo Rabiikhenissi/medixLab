@@ -1,7 +1,8 @@
-<x-layouts.auth>
+<x-layouts.doctor>
     <x-slot:title>Rechercher un Patient - Medix eSanté</x-slot:title>
 
-    <div class="w-full max-w-[620px] mx-auto py-8">
+    @section('content')
+    <div class="w-full max-w-[620px] mx-auto">
         <div class="glass-card rounded-[20px] p-8 md:p-10 relative overflow-hidden">
 
             {{-- Header --}}
@@ -250,7 +251,7 @@
                         accessGrantedMsg.classList.remove('hidden');
                         proceedToExamsBtn.classList.remove('hidden');
                         proceedToExamsBtn.onclick = () => {
-                            window.location.href = `{{ route('doctor.select-exams', '') }}/${currentPatientId}`;
+                            window.location.href = `/doctor/exams-selection/${currentPatientId}`;
                         };
                     } else if (data.access_status === 'pending') {
                         requestAccessBtn.classList.add('hidden');
@@ -291,7 +292,7 @@
                         accessGrantedMsg.classList.remove('hidden');
                         proceedToExamsBtn.classList.remove('hidden');
                         proceedToExamsBtn.onclick = () => {
-                            window.location.href = `{{ route('doctor.select-exams', '') }}/${currentPatientId}`;
+                            window.location.href = `/doctor/exams-selection/${currentPatientId}`;
                         };
                         showToast('Accès autorisé !', 'success');
                     } else {
@@ -333,4 +334,5 @@
             setTimeout(() => el.remove(), 3000);
         }
     </script>
-</x-layouts.auth>
+    @endsection
+</x-layouts.doctor>

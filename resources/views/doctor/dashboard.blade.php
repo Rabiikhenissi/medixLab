@@ -1,20 +1,8 @@
-<x-layouts.auth>
+<x-layouts.doctor>
     <x-slot:title>Tableau de bord Médecin - Medix eSanté</x-slot:title>
 
-    <div class="w-full max-w-7xl mx-auto py-8 px-4">
-
-        {{-- Session Messages --}}
-        @if(session('success'))
-            <div
-                class="bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl p-4 mb-6 text-sm font-semibold select-none">
-                {{ session('success') }}
-            </div>
-        @endif
-        @if(session('error'))
-            <div class="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 mb-6 text-sm font-semibold select-none">
-                {{ session('error') }}
-            </div>
-        @endif
+    @section('content')
+    <div class="w-full max-w-7xl mx-auto">
 
         {{-- ── Header Bar ── --}}
         <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-10 gap-4 select-none">
@@ -1026,4 +1014,5 @@
             window.history.replaceState({}, '', window.location.pathname);
         }
     </script>
-</x-layouts.auth>
+    @endsection
+</x-layouts.doctor>
