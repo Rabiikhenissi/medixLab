@@ -576,15 +576,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::patch('/exams/{exam}/archive', [AdminController::class, 'archiveExam'])
             ->name('exams.archive');
-
-        // Available Exams CRUD
-        Route::get('/available-exams', [AvailableExamController::class, 'index'])->name('available-exams.index');
-        Route::get('/available-exams/create', [AvailableExamController::class, 'create'])->name('available-exams.create');
-        Route::post('/available-exams', [AvailableExamController::class, 'store'])->name('available-exams.store');
-        Route::get('/available-exams/{availableExam}/edit', [AvailableExamController::class, 'edit'])->name('available-exams.edit');
-        Route::put('/available-exams/{availableExam}', [AvailableExamController::class, 'update'])->name('available-exams.update');
-        Route::patch('/available-exams/{availableExam}/archive', [AvailableExamController::class, 'archive'])->name('available-exams.archive');
-
+        Route::delete('/exams/{exam}/force', [AdminController::class, 'forceDeleteExam'])
+            ->name('exams.force-delete');
         Route::match(['get', 'post'], '/logout', [AuthController::class, 'logout'])
             ->defaults('role', 'admin')
             ->name('logout');
@@ -595,6 +588,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/laboratories/{laboratory}/edit', [\App\Http\Controllers\LaboratoryController::class, 'edit'])->name('laboratories.edit')->middleware('permission:modify-laboratory');
         Route::put('/laboratories/{laboratory}', [\App\Http\Controllers\LaboratoryController::class, 'update'])->name('laboratories.update')->middleware('permission:modify-laboratory');
         Route::delete('/laboratories/{laboratory}', [\App\Http\Controllers\LaboratoryController::class, 'destroy'])->name('laboratories.destroy')->middleware('permission:delete-laboratory');
+        Route::delete('/laboratories/{laboratory}/force', [\App\Http\Controllers\LaboratoryController::class, 'forceDelete'])->name('laboratories.force-delete')->middleware('permission:delete-laboratory');
 
         // Users CRUD
         Route::get('/users', [UserController::class, 'index'])->name('users.index')->middleware('permission:view-users');
@@ -603,6 +597,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit')->middleware('permission:edit-users');
         Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update')->middleware('permission:edit-users');
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy')->middleware('permission:delete-users');
+        Route::delete('/users/{user}/force', [UserController::class, 'forceDelete'])->name('users.force-delete')->middleware('permission:delete-users');
 
         // Groups CRUD
         Route::get('/groups', [GroupController::class, 'index'])->name('groups.index')->middleware('permission:view-groups');
@@ -611,6 +606,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/groups/{group}/edit', [GroupController::class, 'edit'])->name('groups.edit')->middleware('permission:edit-groups');
         Route::put('/groups/{group}', [GroupController::class, 'update'])->name('groups.update')->middleware('permission:edit-groups');
         Route::delete('/groups/{group}', [GroupController::class, 'destroy'])->name('groups.destroy')->middleware('permission:delete-groups');
+        Route::delete('/groups/{group}/force', [GroupController::class, 'forceDelete'])->name('groups.force-delete')->middleware('permission:delete-groups');
 
         // Features CRUD
         Route::get('/features', [\App\Http\Controllers\FeatureController::class, 'index'])->name('features.index')->middleware('permission:view-features');
@@ -619,9 +615,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/features/{feature}/edit', [\App\Http\Controllers\FeatureController::class, 'edit'])->name('features.edit')->middleware('permission:edit-features');
         Route::put('/features/{feature}', [\App\Http\Controllers\FeatureController::class, 'update'])->name('features.update')->middleware('permission:edit-features');
         Route::delete('/features/{feature}', [\App\Http\Controllers\FeatureController::class, 'destroy'])->name('features.destroy')->middleware('permission:delete-features');
+        Route::delete('/features/{feature}/force', [\App\Http\Controllers\FeatureController::class, 'forceDelete'])->name('features.force-delete')->middleware('permission:delete-features');
 
         // Actions management (nested under Features)
         Route::post('/features/{feature}/actions', [\App\Http\Controllers\FeatureController::class, 'storeAction'])->name('features.actions.store')->middleware('permission:edit-features');
+        Route::put('/actions/{action}', [\App\Http\Controllers\FeatureController::class, 'updateAction'])->name('actions.update')->middleware('permission:edit-features');
         Route::delete('/actions/{action}', [\App\Http\Controllers\FeatureController::class, 'destroyAction'])->name('actions.destroy')->middleware('permission:edit-features');
     });
 });
@@ -636,4 +634,9 @@ Route::middleware('auth')->prefix('profile')->name('profile.')->group(function (
 // Location routes (AJAX API endpoints)
 Route::get('/countries', [\App\Http\Controllers\LocationController::class, 'getCountries'])->name('countries.index');
 Route::get('/countries/{country}/states', [\App\Http\Controllers\LocationController::class, 'getStates'])->name('countries.states');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [\App\Http\Controllers\UserController::class, 'profile'])->name('profile');
+    Route::put('/profile', [\App\Http\Controllers\UserController::class, 'updateProfile'])->name('profile.update');
+});
 

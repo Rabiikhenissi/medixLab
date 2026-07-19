@@ -510,6 +510,20 @@ public function showExam(Exam $exam)
 
     }
 
+    public function forceDeleteExam(Exam $exam)
+    {
+        if(!auth()->user()->admin)
+        {
+            abort(403);
+        }
+
+        $exam->delete();
+
+        return redirect()
+            ->route('admin.exams.index')
+            ->with('success', 'Examen supprimé définitivement.');
+    }
+
 
 
 }

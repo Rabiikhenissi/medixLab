@@ -256,4 +256,80 @@ class UserController extends Controller
 
         return redirect()->route('admin.users.index')->with('success', $message);
     }
+
+    /**
+     * Permanently remove the specified user from storage.
+     */
+    public function forceDelete(User $user)
+    {
+        // Don't let users delete themselves
+        if (auth()->id() === $user->id) {
+            return redirect()->route('admin.users.index')->with('error', 'Vous ne pouvez pas supprimer votre propre compte.');
+        }
+
+        $user->delete();
+
+        return redirect()->route('admin.users.index')->with('success', 'Utilisateur supprimé définitivement.');
+    }
+
+    /**
+     * Show the user profile page.
+     */
+    public function profile()
+    {
+        $user = auth()->user();
+        return view('profile', compact('user'));
+    }
+
+    /**
+     * Update the user profile.
+     */
+    public function updateProfile(Request $request)
+    {
+        $user = auth()->user();
+
+        $rules = [
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'phone' => 'nullable|string|max:255',
+            'address' => 'nullable|string',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'password' => 'nullable|string|min:8|confirmed',
+        ];
+
+        // Specific rules based on role
+        if ($user->doctor) {
+            $rules['speciality'] = 'required|string|max:255';
+        } elseif ($user->patient) {
+            $rules['blood_group'] = 'nullable|in:A+,A-,B+,B-,AB+,AB-,O+,O-';
+        }
+
+        $data = $request->validate($rules);
+
+        // Update basic info
+        $user->first_name = $data['first_name'];
+        $user->last_name = $data['last_name'];
+        $user->email = $data['email'];
+        $user->phone = $data['phone'] ?? null;
+        $user->address = $data['address'] ?? null;
+
+        if (!empty($data['password'])) {
+            $user->password = Hash::make($data['password']);
+        }
+
+        $user->save();
+
+        // Update role-specific info
+        if ($user->doctor) {
+            $user->doctor->update([
+                'speciality' => $data['speciality'],
+            ]);
+        } elseif ($user->patient) {
+            $user->patient->update([
+                'blood_group' => $data['blood_group'] ?? null,
+            ]);
+        }
+
+        return back()->with('success', 'Profil mis à jour avec succès.');
+    }
 }

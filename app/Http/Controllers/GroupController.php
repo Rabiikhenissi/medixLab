@@ -93,9 +93,7 @@ class GroupController extends Controller
      */
     public function edit(Group $group)
     {
-        if (in_array($group->code, $this->systemGroups)) {
-            return redirect()->route('admin.groups.index')->with('error', 'Ce rôle système ne peut pas être modifié.');
-        }
+
 
         $features = Feature::with(['actions' => function ($q) {
             $q->where('is_archive', false)->orWhereNull('is_archive');
@@ -115,9 +113,7 @@ class GroupController extends Controller
      */
     public function update(Request $request, Group $group)
     {
-        if (in_array($group->code, $this->systemGroups)) {
-            return redirect()->route('admin.groups.index')->with('error', 'Ce rôle système ne peut pas être modifié.');
-        }
+
 
         $data = $request->validate([
             'name' => 'required|string|max:255',
@@ -148,9 +144,7 @@ class GroupController extends Controller
      */
     public function destroy(Group $group)
     {
-        if (in_array($group->code, $this->systemGroups)) {
-            return redirect()->route('admin.groups.index')->with('error', 'Ce rôle système ne peut pas être supprimé.');
-        }
+
 
         // Check if group is assigned to active users
         if ($group->users()->exists()) {
@@ -165,5 +159,19 @@ class GroupController extends Controller
             : 'Rôle restauré avec succès.';
 
         return redirect()->route('admin.groups.index')->with('success', $message);
+    }
+
+    /**
+     * Permanently remove the specified group from storage.
+     */
+    public function forceDelete(Group $group)
+    {
+        if ($group->users()->exists()) {
+            return redirect()->route('admin.groups.index')->with('error', 'Impossible de supprimer ce rôle car il est attribué à des utilisateurs.');
+        }
+
+        $group->delete();
+
+        return redirect()->route('admin.groups.index')->with('success', 'Rôle supprimé définitivement.');
     }
 }
