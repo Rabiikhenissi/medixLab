@@ -8,6 +8,11 @@ use App\Models\Doctor;
 use App\Models\ExamParameter;
 use Illuminate\Http\Request;
 
+use App\Models\Labo;
+use App\Models\ExamRequest;
+use App\Models\ExamRequestItem;
+use Illuminate\Support\Carbon;
+
 class AdminController extends Controller
 {
 
@@ -34,11 +39,49 @@ class AdminController extends Controller
 
 
             'total_doctors' => Doctor::count(),
+            'total_laboratories' => Labo::where('is_archive', false)->count(),
+            'total_exam_requests' => ExamRequest::count(),
 
 
             'archived_exams' => Exam::where('is_archive', true)->count(),
 
         ];
+
+        // 1. Status distribution
+        $statusDistribution = [
+            'pending' => ExamRequest::where('status', 'pending')->count(),
+            'assigned' => ExamRequest::where('status', 'assigned')->count(),
+            'collected' => ExamRequest::where('status', 'collected')->count(),
+            'processing' => ExamRequest::where('status', 'processing')->count(),
+            'completed' => ExamRequest::where('status', 'completed')->count(),
+            'cancelled' => ExamRequest::where('status', 'cancelled')->count(),
+        ];
+
+        // 2. Top 5 most prescribed exams
+        $topExams = ExamRequestItem::select('exam_id', \DB::raw('count(*) as count'))
+            ->groupBy('exam_id')
+            ->orderByDesc('count')
+            ->limit(5)
+            ->with('exam')
+            ->get();
+
+        // 3. Requests volume over the last 15 days (daily volume)
+        $dailyVolume = ExamRequest::where('created_at', '>=', Carbon::now()->subDays(14)->startOfDay())
+            ->selectRaw('DATE(created_at) as date, count(*) as count')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->pluck('count', 'date')
+            ->toArray();
+
+        $chartData = [];
+        for ($i = 14; $i >= 0; $i--) {
+            $dateString = Carbon::now()->subDays($i)->toDateString();
+            $label = Carbon::now()->subDays($i)->format('d M');
+            $chartData[] = [
+                'label' => $label,
+                'count' => $dailyVolume[$dateString] ?? 0
+            ];
+        }
 
 
 
@@ -47,6 +90,9 @@ class AdminController extends Controller
             'user'=>auth()->user(),
 
             'stats'=>$stats,
+            'statusDistribution' => $statusDistribution,
+            'topExams' => $topExams,
+            'chartData' => $chartData,
 
         ]);
 

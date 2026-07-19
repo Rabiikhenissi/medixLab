@@ -8,10 +8,12 @@ use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\Staff;
 use App\Models\Labo;
+use App\Services\CodeGeneratorService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Auth\Events\PasswordReset;
 
@@ -60,6 +62,9 @@ class AuthController extends Controller
                 ])->withInput($request->only('email', 'remember'));
             }
 
+            // Track last login time
+            $user->update(['last_login_at' => now()]);
+
             return redirect()->intended(route($role . '.dashboard'));
         }
 
@@ -79,29 +84,37 @@ class AuthController extends Controller
                 'last_name' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users',
                 'phone' => 'required|string|max:255',
-                'cnom_id' => 'required|string|max:255|unique:doctors,doctor_code',
                 'specialty' => 'required|string|max:255',
                 'address' => 'nullable|string',
                 'password' => 'required|string|min:8|confirmed',
             ]);
 
-            $group = Group::firstOrCreate(['code' => 'doctor'], ['name' => 'Doctor']);
+            $user = DB::transaction(function () use ($data) {
+                $group = Group::firstOrCreate(['code' => 'doctor'], ['name' => 'Doctor']);
 
-            $user = User::create([
-                'first_name' => $data['first_name'],
-                'last_name' => $data['last_name'],
-                'email' => $data['email'],
-                'phone' => $data['phone'],
-                'address' => $data['address'] ?? null,
-                'password' => Hash::make($data['password']),
-                'group_id' => $group->id,
-            ]);
+                $user = User::create([
+                    'first_name' => $data['first_name'],
+                    'last_name' => $data['last_name'],
+                    'email' => $data['email'],
+                    'phone' => $data['phone'],
+                    'address' => $data['address'] ?? null,
+                    'password' => Hash::make($data['password']),
+                    'group_id' => $group->id,
+                ]);
 
-            Doctor::create([
-                'user_id' => $user->id,
-                'speciality' => $data['specialty'],
-                'doctor_code' => $data['cnom_id'],
-            ]);
+                // Create doctor with temporary unique code
+                $doctor = Doctor::create([
+                    'user_id' => $user->id,
+                    'speciality' => $data['specialty'],
+                    'doctor_code' => 'TEMP-' . Str::random(10),
+                ]);
+
+                // Generate real unique code using database ID and update
+                $realCode = CodeGeneratorService::generateDoctorCode($doctor->id, $data['specialty']);
+                $doctor->update(['doctor_code' => $realCode]);
+
+                return $user;
+            });
 
             Auth::login($user);
             return redirect()->route('doctor.dashboard');
@@ -120,26 +133,32 @@ class AuthController extends Controller
                 'password' => 'required|string|min:8|confirmed',
             ]);
 
-            $group = Group::firstOrCreate(['code' => 'patient'], ['name' => 'Patient']);
+            $user = DB::transaction(function () use ($data) {
+                $group = Group::firstOrCreate(['code' => 'patient'], ['name' => 'Patient']);
 
-            $user = User::create([
-                'first_name' => $data['first_name'],
-                'last_name' => $data['last_name'],
-                'email' => $data['email'],
-                'phone' => $data['phone'],
-                'address' => $data['address'] ?? null,
-                'password' => Hash::make($data['password']),
-                'group_id' => $group->id,
-            ]);
+                $user = User::create([
+                    'first_name' => $data['first_name'],
+                    'last_name' => $data['last_name'],
+                    'email' => $data['email'],
+                    'phone' => $data['phone'],
+                    'address' => $data['address'] ?? null,
+                    'password' => Hash::make($data['password']),
+                    'group_id' => $group->id,
+                ]);
 
-            $timestamp = date('YmdHis');
-            $patientCode = $data['country'] . $data['state_code'] . $timestamp;
+                // Create patient with temporary unique code
+                $patient = Patient::create([
+                    'user_id' => $user->id,
+                    'patient_code' => 'TEMP-' . Str::random(10),
+                    'blood_group' => $data['blood_group'] ?? null,
+                ]);
 
-            Patient::create([
-                'user_id' => $user->id,
-                'patient_code' => $patientCode,
-                'blood_group' => $data['blood_group'] ?? null,
-            ]);
+                // Generate real unique code using database ID and country
+                $realCode = CodeGeneratorService::generatePatientCode($patient->id, $data['country']);
+                $patient->update(['patient_code' => $realCode]);
+
+                return $user;
+            });
 
             Auth::login($user);
             return redirect()->route('patient.dashboard');
@@ -156,35 +175,44 @@ class AuthController extends Controller
                 'password' => 'required|string|min:8|confirmed',
             ]);
 
-            $labo = Labo::create([
-                'name' => $data['center_name'],
-                'email' => $data['email'],
-                'phone' => $data['phone'],
-                'city' => $data['city'],
-                'address' => $data['address'] ?? null,
-            ]);
+            $user = DB::transaction(function () use ($data) {
+                $labo = Labo::create([
+                    'name' => $data['center_name'],
+                    'email' => $data['email'],
+                    'phone' => $data['phone'],
+                    'city' => $data['city'],
+                    'address' => $data['address'] ?? null,
+                ]);
 
-            $names = explode(' ', trim($data['responsible']), 2);
-            $firstName = $names[0];
-            $lastName = $names[1] ?? 'Responsable';
+                $names = explode(' ', trim($data['responsible']), 2);
+                $firstName = $names[0];
+                $lastName = $names[1] ?? 'Responsable';
 
-            $group = Group::firstOrCreate(['code' => 'center'], ['name' => 'Medical Center']);
+                $group = Group::firstOrCreate(['code' => 'center'], ['name' => 'Medical Center']);
 
-            $user = User::create([
-                'first_name' => $firstName,
-                'last_name' => $lastName,
-                'email' => $data['email'],
-                'phone' => $data['phone'],
-                'address' => $data['address'] ?? null,
-                'password' => Hash::make($data['password']),
-                'group_id' => $group->id,
-            ]);
+                $user = User::create([
+                    'first_name' => $firstName,
+                    'last_name' => $lastName,
+                    'email' => $data['email'],
+                    'phone' => $data['phone'],
+                    'address' => $data['address'] ?? null,
+                    'password' => Hash::make($data['password']),
+                    'group_id' => $group->id,
+                ]);
 
-            Staff::create([
-                'user_id' => $user->id,
-                'laboratory_id' => $labo->id,
-                'staff_code' => 'STF-' . strtoupper(Str::random(8)),
-            ]);
+                // Create staff with temporary unique code
+                $staff = Staff::create([
+                    'user_id' => $user->id,
+                    'laboratory_id' => $labo->id,
+                    'staff_code' => 'TEMP-' . Str::random(10),
+                ]);
+
+                // Generate real unique code using staff ID and lab name
+                $realCode = CodeGeneratorService::generateStaffCode($staff->id, $labo->name);
+                $staff->update(['staff_code' => $realCode]);
+
+                return $user;
+            });
 
             Auth::login($user);
             return redirect()->route('center.dashboard');

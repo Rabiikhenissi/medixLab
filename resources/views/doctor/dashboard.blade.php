@@ -115,7 +115,31 @@
                                 d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2" />
                         </svg>
                         Dernières Prescriptions d'Analyses
-                    </h3>
+                        {{-- Search & Filter Form (Task 4.2) --}}
+                    <form action="{{ route('doctor.dashboard') }}" method="GET" class="mb-5 flex flex-col sm:flex-row items-center gap-3">
+                        <div class="relative flex-1 w-full">
+                            <input type="text" name="search" value="{{ $search }}" placeholder="Rechercher par nom de patient ou code..." 
+                                   class="w-full pl-4 pr-10 py-2.5 border border-[#e2e8f0] rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#0066FF]/20 focus:border-[#0066FF] transition text-[#1e293b] bg-white shadow-xs" />
+                            @if($search)
+                                <a href="{{ route('doctor.dashboard', ['status' => $status]) }}" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </a>
+                            @endif
+                        </div>
+                        <div class="w-full sm:w-48">
+                            <select name="status" onchange="this.form.submit()" class="w-full px-3 py-2.5 border border-[#e2e8f0] rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#0066FF]/20 focus:border-[#0066FF] bg-white text-[#1e293b] cursor-pointer shadow-xs">
+                                <option value="all" {{ $status == 'all' || !$status ? 'selected' : '' }}>Tous les statuts</option>
+                                <option value="pending" {{ $status == 'pending' ? 'selected' : '' }}>En attente</option>
+                                <option value="collected" {{ $status == 'collected' ? 'selected' : '' }}>Collecté</option>
+                                <option value="processing" {{ $status == 'processing' ? 'selected' : '' }}>En cours</option>
+                                <option value="completed" {{ $status == 'completed' ? 'selected' : '' }}>Complété</option>
+                                <option value="cancelled" {{ $status == 'cancelled' ? 'selected' : '' }}>Annulé</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="w-full sm:w-auto bg-[#0066FF] hover:bg-[#0052CC] text-white font-bold px-5 py-2.5 rounded-xl text-xs uppercase tracking-wider transition">Filtrer</button>
+                    </form>
 
                     @if($recentExams->count() > 0)
                         <div class="space-y-3 max-h-[460px] overflow-y-auto pr-1">
@@ -166,8 +190,8 @@
                                                                 ];
                                                                 $colorClass = $statusColors[$examReq->status] ?? 'text-[#64748b] bg-[#f1f5f9] border-[#e2e8f0]';
                                                                 $label = $statusLabels[$examReq->status] ?? $examReq->status;
-                                                            @endphp
-                                 <span
+                                                             @endphp
+                                                            <span
                                                                 class="px-2.5 py-1 rounded-full text-[10px] font-bold border uppercase tracking-wider {{ $colorClass }}">
                                                                 {{ $label }}
                                                             </span>
@@ -182,7 +206,7 @@
                                                                 data-approved-by-doctor="{{ $examReq->approved_by_doctor ? '1' : '0' }}"
                                                                 data-doctor-interpretation="{{ $examReq->doctor_interpretation }}"
                                                                 data-items-results="{{ json_encode($examReq->items->map(function ($it) {
-                                        return ['exam_name' => $it->exam->name, 'result' => $it->resultLabo ? ['interpretation' => $it->resultLabo->interpretation, 'details' => $it->resultLabo->details] : null]; })) }}"
+                                         return ['exam_name' => $it->exam->name, 'result' => $it->resultLabo ? ['interpretation' => $it->resultLabo->interpretation, 'details' => $it->resultLabo->details] : null]; })) }}"
                                                                 data-exams="{{ json_encode($examReq->items->map(fn($it) => $it->exam->name)) }}">
                                                                 Voir Détails
                                                             </button>
@@ -190,9 +214,12 @@
                                                     </div>
                             @endforeach
                         </div>
+                        <div class="mt-4">
+                            {{ $recentExams->links() }}
+                        </div>
                     @else
                         <div class="text-center py-10 border border-dashed border-[#cbd5e1] rounded-xl">
-                            <p class="text-xs text-[#94a3b8] italic">Vous n'avez pas encore prescrit d'examens.</p>
+                            <p class="text-xs text-[#94a3b8] italic">Aucune prescription ne correspond aux critères.</p>
                         </div>
                     @endif
                 </div>
@@ -440,7 +467,11 @@
                     </div>
                 </div>
 
-                <div class="pt-6 border-t border-[#e2e8f0]/80 mt-6 flex justify-end">
+                <div class="pt-6 border-t border-[#e2e8f0]/80 mt-6 flex justify-end gap-3">
+                    <button type="button" id="modalDoctorPrintBtn"
+                        class="hidden bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2.5 px-5 rounded-xl transition uppercase tracking-wider text-xs cursor-pointer">
+                        🖨 Imprimer Résultats
+                    </button>
                     <button type="button"
                         class="closeDetailsModalBtn bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] font-bold py-2.5 px-5 rounded-xl transition border border-[#e2e8f0] uppercase tracking-wider text-xs cursor-pointer">
                         Fermer
@@ -563,6 +594,10 @@
                 if (dataset.status === 'completed') {
                     document.getElementById('modalLabResultsSection').classList.remove('hidden');
                     document.getElementById('modalDoctorInterpretationSection').classList.remove('hidden');
+                    document.getElementById('modalDoctorPrintBtn').classList.remove('hidden');
+                    document.getElementById('modalDoctorPrintBtn').onclick = () => {
+                        window.location.href = `/doctor/exam-requests/${dataset.id}/print?auto=1`;
+                    };
 
                     const itemsResults = JSON.parse(dataset.itemsResults);
                     const resultsContainer = document.getElementById('modalLabResultsContainer');
@@ -635,6 +670,7 @@
                 } else {
                     document.getElementById('modalLabResultsSection').classList.add('hidden');
                     document.getElementById('modalDoctorInterpretationSection').classList.add('hidden');
+                    document.getElementById('modalDoctorPrintBtn').classList.add('hidden');
                 }
 
                 detailsModal.classList.remove('hidden');

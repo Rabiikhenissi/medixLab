@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use App\Models\Traits\ActiveScoped;
 
 #[Fillable(['labo_id', 'name', 'unit', 'quantity', 'min_quantity', 'is_archive'])]
 class Consumable extends Model
 {
+    use ActiveScoped;
     protected function casts(): array
     {
         return [
