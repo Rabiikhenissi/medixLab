@@ -130,6 +130,8 @@ class AuthController extends Controller
                 'country' => 'required|string|max:255',
                 'state_code' => 'required|string|max:255',
                 'blood_group' => 'nullable|in:A+,A-,B+,B-,AB+,AB-,O+,O-',
+                'birth_date' => 'nullable|date',
+                'gender' => 'nullable|in:M,F',
                 'password' => 'required|string|min:8|confirmed',
             ]);
 
@@ -151,6 +153,10 @@ class AuthController extends Controller
                     'user_id' => $user->id,
                     'patient_code' => 'TEMP-' . Str::random(10),
                     'blood_group' => $data['blood_group'] ?? null,
+                    'date_of_birth' => $data['birth_date'] ?? null,
+                    'gender' => $data['gender'] ?? null,
+                    'country' => $data['country'],
+                    'state_code' => $data['state_code'],
                 ]);
 
                 // Generate real unique code using database ID and country

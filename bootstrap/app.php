@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectGuestsTo(fn () => route('home'));
         $middleware->alias([
             'permission' => \App\Http\Middleware\CheckPermission::class,
+            'admin'      => \App\Http\Middleware\EnsureIsAdmin::class,
             'doctor'     => \App\Http\Middleware\EnsureIsDoctor::class,
             'patient'    => \App\Http\Middleware\EnsureIsPatient::class,
             'center'     => \App\Http\Middleware\EnsureIsCenter::class,

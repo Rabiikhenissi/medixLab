@@ -28,7 +28,17 @@ class AppServiceProvider extends ServiceProvider
 
         // Customise the branded password-reset email
         ResetPassword::toMailUsing(function ($notifiable, string $token) {
-            $url = url('/patient/reset-password/' . $token . '?email=' . urlencode($notifiable->email));
+            if ($notifiable->doctor) {
+                $role = 'doctor';
+            } elseif ($notifiable->patient) {
+                $role = 'patient';
+            } elseif ($notifiable->staff) {
+                $role = 'center';
+            } else {
+                $role = 'patient';
+            }
+
+            $url = url("/{$role}/reset-password/" . $token . '?email=' . urlencode($notifiable->email));
 
             return (new \Illuminate\Notifications\Messages\MailMessage)
                 ->subject('Réinitialisation de votre mot de passe — Medix eSanté')
