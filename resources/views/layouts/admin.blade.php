@@ -199,7 +199,6 @@
         .page-content {
             padding: 36px 36px 48px;
             flex: 1;
-            max-width: 1300px;
             width: 100%;
         }
 
@@ -1016,7 +1015,7 @@
                         {{ auth()->user()->group ? auth()->user()->group->name : 'Administrateur' }}
                     </div>
                 </div>
-                <div class="nav-avatar">
+                <div class="nav-avatar" onclick="window.location='{{ route('profile.show') }}'" style="cursor:pointer;" title="Mon profil">
                     {{ strtoupper(substr(auth()->user()->first_name, 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name, 0, 1)) }}
                 </div>
                 <form action="{{ route('admin.logout') }}" method="POST" class="m-0 p-0">

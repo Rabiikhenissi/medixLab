@@ -60,6 +60,29 @@
                     </button>
                 </form>
 
+                {{-- Notification Bell --}}
+                <div class="relative" id="doctorNotifWrapper">
+                    <button onclick="doctorToggleNotifPanel()" class="relative w-10 h-10 bg-white border border-[#e2e8f0] rounded-xl flex items-center justify-center hover:bg-[#f8fafc] transition cursor-pointer">
+                        <svg class="w-5 h-5 text-[#64748b]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                        </svg>
+                        <span id="doctorNotifBadge" class="hidden absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">0</span>
+                    </button>
+                    <div id="doctorNotifPanel" class="hidden absolute right-0 top-12 w-80 bg-white border border-[#e2e8f0] rounded-2xl shadow-2xl z-50 overflow-hidden">
+                        <div class="flex items-center justify-between px-4 py-3 border-b border-[#f1f5f9]">
+                            <span class="text-xs font-bold text-[#1e293b] uppercase tracking-wider">Notifications</span>
+                            <button onclick="doctorMarkAllRead()" class="text-[10px] font-bold text-[#0066FF] hover:underline cursor-pointer">Tout marquer lu</button>
+                        </div>
+                        <div id="doctorNotifList" class="max-h-72 overflow-y-auto divide-y divide-[#f1f5f9]">
+                            <div class="px-4 py-6 text-center text-xs text-[#94a3b8]">Chargement...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="{{ route('profile.show') }}" class="w-10 h-10 bg-gradient-to-br from-[#0066FF] to-[#0052CC] rounded-xl flex items-center justify-center text-white text-xs font-bold hover:shadow-lg transition cursor-pointer" title="Mon profil">
+                    {{ strtoupper(substr($user->first_name, 0, 1)) }}{{ strtoupper(substr($user->last_name, 0, 1)) }}
+                </a>
+
                 <form action="{{ route('doctor.logout') }}" method="POST">
                     @csrf
                     <button type="submit"
@@ -102,6 +125,42 @@
                             viewBox="0 0 24 24">
                             <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
+                    </div>
+                </div>
+
+                {{-- ── Statistics & Analytics ── --}}
+                <div class="glass-card rounded-[20px] p-6 md:p-8 relative overflow-hidden shadow-xs">
+                    <h3 class="text-xs font-bold text-[#64748b] uppercase tracking-widest mb-5 flex items-center gap-2 pb-4 border-b border-[#e2e8f0]/80">
+                        <svg class="w-4 h-4 text-[#0066FF]" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        Statistiques & Analytiques
+                    </h3>
+
+                    {{-- Stat Cards --}}
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="bg-gradient-to-br from-[#0066FF]/5 to-[#0066FF]/10 border border-[#0066FF]/20 rounded-2xl p-5 relative overflow-hidden">
+                            <div class="text-3xl font-black text-[#0066FF] mb-1">{{ $uniquePatientsCount }}</div>
+                            <p class="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Patients Uniques</p>
+                            <svg class="absolute -right-3 -bottom-3 w-14 h-14 text-[#0066FF]/10" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                        </div>
+                        <div class="bg-gradient-to-br from-emerald-500/5 to-emerald-500/10 border border-emerald-500/20 rounded-2xl p-5 relative overflow-hidden">
+                            <div class="text-3xl font-black text-emerald-600 mb-1">{{ $completionRate }}%</div>
+                            <p class="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Taux Complétion</p>
+                            <svg class="absolute -right-3 -bottom-3 w-14 h-14 text-emerald-500/10" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    {{-- Monthly Prescriptions Bar Chart --}}
+                    <div class="bg-white border border-[#e2e8f0]/80 rounded-2xl p-5">
+                        <p class="text-[11px] font-bold text-[#64748b] uppercase tracking-wider mb-4">Prescriptions Mensuelles (6 derniers mois)</p>
+                        <div style="height: 220px;">
+                            <canvas id="doctorMonthlyChart"></canvas>
+                        </div>
                     </div>
                 </div>
 
@@ -568,6 +627,48 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Monthly Prescriptions Bar Chart
+        const monthlyData = @json($chartData);
+        new Chart(document.getElementById('doctorMonthlyChart'), {
+            type: 'bar',
+            data: {
+                labels: monthlyData.map(d => d.label),
+                datasets: [{
+                    label: 'Prescriptions',
+                    data: monthlyData.map(d => d.count),
+                    backgroundColor: 'rgba(0, 102, 255, 0.75)',
+                    hoverBackgroundColor: 'rgba(0, 102, 255, 0.9)',
+                    borderColor: '#0066ff',
+                    borderWidth: 1,
+                    borderRadius: 6,
+                    maxBarThickness: 40
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { family: 'Inter', size: 10 } }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            font: { family: 'Inter', size: 10 }
+                        },
+                        grid: { color: '#f1f5f9' }
+                    }
+                }
+            }
+        });
+    </script>
     <script>
         // Modal logic for previous exam details
         const detailsModal = document.getElementById('requestDetailsModal');
@@ -824,6 +925,105 @@
             toast.innerHTML = `<svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg><span>${message}</span>`;
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 2500);
+        }
+
+        // ── Notifications ──
+        const doctorNotifRoutes = {
+            list: '{{ route("doctor.get-notifications") }}',
+            unreadCount: '{{ route("doctor.unread-count") }}',
+            markRead: '{{ route("doctor.mark-as-read", "__ID__") }}',
+            markAllRead: '{{ route("doctor.mark-all-read") }}'
+        };
+
+        function doctorToggleNotifPanel() {
+            const panel = document.getElementById('doctorNotifPanel');
+            panel.classList.toggle('hidden');
+            if (!panel.classList.contains('hidden')) {
+                doctorLoadNotifications();
+            }
+        }
+
+        async function doctorLoadNotifications() {
+            try {
+                const res = await fetch(doctorNotifRoutes.list);
+                const data = await res.json();
+                const list = document.getElementById('doctorNotifList');
+                if (data.notifications.length === 0) {
+                    list.innerHTML = '<div class="px-4 py-6 text-center text-xs text-[#94a3b8]">Aucune notification</div>';
+                    return;
+                }
+                list.innerHTML = data.notifications.map(n => `
+                    <div class="px-4 py-3 hover:bg-[#f8fafc] transition cursor-pointer ${n.is_read ? '' : 'bg-[#eff6ff]/50'}" onclick="doctorMarkRead(${n.id}, this)">
+                        <div class="flex items-start gap-2">
+                            <div class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${n.is_read ? 'bg-[#cbd5e1]' : 'bg-[#0066FF]'}"></div>
+                            <div class="flex-1 min-w-0">
+                                <div class="text-xs font-bold text-[#1e293b]">${n.title}</div>
+                                <div class="text-[11px] text-[#64748b] mt-0.5 line-clamp-2">${n.message}</div>
+                                <div class="text-[10px] text-[#94a3b8] mt-1">${n.created_at}</div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) {
+                console.error('Notification load error:', e);
+            }
+        }
+
+        async function doctorUpdateUnreadBadge() {
+            try {
+                const res = await fetch(doctorNotifRoutes.unreadCount);
+                const data = await res.json();
+                const badge = document.getElementById('doctorNotifBadge');
+                if (data.unread_count > 0) {
+                    badge.textContent = data.unread_count > 99 ? '99+' : data.unread_count;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            } catch (e) {}
+        }
+
+        async function doctorMarkRead(id, el) {
+            try {
+                await fetch(doctorNotifRoutes.markRead.replace('__ID__', id), {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+                });
+                doctorUpdateUnreadBadge();
+                doctorLoadNotifications();
+            } catch (e) {}
+        }
+
+        async function doctorMarkAllRead() {
+            try {
+                await fetch(doctorNotifRoutes.markAllRead, {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+                });
+                doctorUpdateUnreadBadge();
+                doctorLoadNotifications();
+            } catch (e) {}
+        }
+
+        // Close panel on outside click
+        document.addEventListener('click', function(e) {
+            const wrapper = document.getElementById('doctorNotifWrapper');
+            if (wrapper && !wrapper.contains(e.target)) {
+                document.getElementById('doctorNotifPanel').classList.add('hidden');
+            }
+        });
+
+        // Initial load + auto-refresh
+        doctorUpdateUnreadBadge();
+        setInterval(doctorUpdateUnreadBadge, 15000);
+
+        // Auto-search from QR code scan
+        const urlParams = new URLSearchParams(window.location.search);
+        const scanCode = urlParams.get('scan');
+        if (scanCode) {
+            document.getElementById('header_patient_code').value = scanCode;
+            headerPatientSearchForm.dispatchEvent(new Event('submit'));
+            window.history.replaceState({}, '', window.location.pathname);
         }
     </script>
 </x-layouts.auth>

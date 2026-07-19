@@ -95,9 +95,33 @@
                     </div>
 
 
-                    <form action="{{ route('center.logout') }}" method="POST">
-                        @csrf
-                        <x-button type="submit" color="slate" :fullWidth="false"
+                    <div class="flex items-center gap-3">
+                        {{-- Notification Bell --}}
+                        <div class="relative" id="centerNotifWrapper">
+                            <button onclick="centerToggleNotifPanel()" class="relative w-10 h-10 bg-white border border-[#e2e8f0] rounded-xl flex items-center justify-center hover:bg-[#f8fafc] transition cursor-pointer">
+                                <svg class="w-5 h-5 text-[#64748b]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                                </svg>
+                                <span id="centerNotifBadge" class="hidden absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">0</span>
+                            </button>
+                            <div id="centerNotifPanel" class="hidden absolute right-0 top-12 w-80 bg-white border border-[#e2e8f0] rounded-2xl shadow-2xl z-50 overflow-hidden">
+                                <div class="flex items-center justify-between px-4 py-3 border-b border-[#f1f5f9]">
+                                    <span class="text-xs font-bold text-[#1e293b] uppercase tracking-wider">Notifications</span>
+                                    <button onclick="centerMarkAllRead()" class="text-[10px] font-bold text-[#7C3AED] hover:underline cursor-pointer">Tout marquer lu</button>
+                                </div>
+                                <div id="centerNotifList" class="max-h-72 overflow-y-auto divide-y divide-[#f1f5f9]">
+                                    <div class="px-4 py-6 text-center text-xs text-[#94a3b8]">Chargement...</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <a href="{{ route('profile.show') }}" class="w-10 h-10 bg-gradient-to-br from-[#7C3AED] to-[#5B21B6] rounded-xl flex items-center justify-center text-white text-xs font-bold hover:shadow-lg transition cursor-pointer" title="Mon profil">
+                            {{ strtoupper(substr(auth()->user()->first_name, 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name, 0, 1)) }}
+                        </a>
+
+                        <form action="{{ route('center.logout') }}" method="POST">
+                            @csrf
+                            <x-button type="submit" color="slate" :fullWidth="false"
                             class="!py-2 !px-4 !text-xs font-bold uppercase tracking-wider">
                             SE DÉCONNECTER
                         </x-button>
@@ -219,6 +243,96 @@
     </div>
 
     @yield('scripts')
+
+    <script>
+        // ── Notifications ──
+        const centerNotifRoutes = {
+            list: '{{ route("center.get-notifications") }}',
+            unreadCount: '{{ route("center.unread-count") }}',
+            markRead: '{{ route("center.mark-as-read", "__ID__") }}',
+            markAllRead: '{{ route("center.mark-all-read") }}'
+        };
+
+        function centerToggleNotifPanel() {
+            const panel = document.getElementById('centerNotifPanel');
+            panel.classList.toggle('hidden');
+            if (!panel.classList.contains('hidden')) {
+                centerLoadNotifications();
+            }
+        }
+
+        async function centerLoadNotifications() {
+            try {
+                const res = await fetch(centerNotifRoutes.list);
+                const data = await res.json();
+                const list = document.getElementById('centerNotifList');
+                if (data.notifications.length === 0) {
+                    list.innerHTML = '<div class="px-4 py-6 text-center text-xs text-[#94a3b8]">Aucune notification</div>';
+                    return;
+                }
+                list.innerHTML = data.notifications.map(n => `
+                    <div class="px-4 py-3 hover:bg-[#f8fafc] transition cursor-pointer ${n.is_read ? '' : 'bg-[#faf5ff]/50'}" onclick="centerMarkRead(${n.id}, this)">
+                        <div class="flex items-start gap-2">
+                            <div class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${n.is_read ? 'bg-[#cbd5e1]' : 'bg-[#7C3AED]'}"></div>
+                            <div class="flex-1 min-w-0">
+                                <div class="text-xs font-bold text-[#1e293b]">${n.title}</div>
+                                <div class="text-[11px] text-[#64748b] mt-0.5 line-clamp-2">${n.message}</div>
+                                <div class="text-[10px] text-[#94a3b8] mt-1">${n.created_at}</div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) {
+                console.error('Notification load error:', e);
+            }
+        }
+
+        async function centerUpdateUnreadBadge() {
+            try {
+                const res = await fetch(centerNotifRoutes.unreadCount);
+                const data = await res.json();
+                const badge = document.getElementById('centerNotifBadge');
+                if (data.unread_count > 0) {
+                    badge.textContent = data.unread_count > 99 ? '99+' : data.unread_count;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            } catch (e) {}
+        }
+
+        async function centerMarkRead(id, el) {
+            try {
+                await fetch(centerNotifRoutes.markRead.replace('__ID__', id), {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+                });
+                centerUpdateUnreadBadge();
+                centerLoadNotifications();
+            } catch (e) {}
+        }
+
+        async function centerMarkAllRead() {
+            try {
+                await fetch(centerNotifRoutes.markAllRead, {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+                });
+                centerUpdateUnreadBadge();
+                centerLoadNotifications();
+            } catch (e) {}
+        }
+
+        document.addEventListener('click', function(e) {
+            const wrapper = document.getElementById('centerNotifWrapper');
+            if (wrapper && !wrapper.contains(e.target)) {
+                document.getElementById('centerNotifPanel').classList.add('hidden');
+            }
+        });
+
+        centerUpdateUnreadBadge();
+        setInterval(centerUpdateUnreadBadge, 15000);
+    </script>
 </body>
 
 </html>
