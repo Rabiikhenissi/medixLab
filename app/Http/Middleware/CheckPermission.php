@@ -24,11 +24,6 @@ class CheckPermission
 
         $user = auth()->user();
 
-        // Must be an admin user
-        if (!$user->admin) {
-            return redirect()->route('home');
-        }
-
         // Must have the specific permission
         if (!$user->hasPermission($permission)) {
             abort(403, 'Vous n\'avez pas la permission requise.');

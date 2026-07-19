@@ -1007,7 +1007,22 @@
 
         <!-- TOP NAV -->
         <header class="topnav">
-            <a href="{{ route('admin.dashboard') }}" class="brand">Medix <span>eSanté</span></a>
+            @php
+                $dashboardRoute = 'home';
+                if (auth()->check()) {
+                    if (auth()->user()->admin) $dashboardRoute = 'admin.dashboard';
+                    elseif (auth()->user()->doctor) $dashboardRoute = 'doctor.dashboard';
+                    elseif (auth()->user()->patient) $dashboardRoute = 'patient.dashboard';
+                    elseif (auth()->user()->staff) $dashboardRoute = 'center.dashboard';
+                }
+                $logoutRoute = 'admin.logout';
+                if (auth()->check()) {
+                    if (auth()->user()->doctor) $logoutRoute = 'doctor.logout';
+                    elseif (auth()->user()->patient) $logoutRoute = 'patient.logout';
+                    elseif (auth()->user()->staff) $logoutRoute = 'center.logout';
+                }
+            @endphp
+            <a href="{{ route($dashboardRoute) }}" class="brand">Medix <span>eSanté</span></a>
             <div class="topnav-right">
 
                 <div class="nav-user-info">
@@ -1016,10 +1031,10 @@
                         {{ auth()->user()->group ? auth()->user()->group->name : 'Administrateur' }}
                     </div>
                 </div>
-                <div class="nav-avatar">
+                <a href="{{ route('profile') }}" class="nav-avatar" title="Mon Profil" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">
                     {{ strtoupper(substr(auth()->user()->first_name, 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name, 0, 1)) }}
-                </div>
-                <form action="{{ route('admin.logout') }}" method="POST" class="m-0 p-0">
+                </a>
+                <form action="{{ route($logoutRoute) }}" method="POST" class="m-0 p-0">
                     @csrf
                     <button type="submit" class="btn-logout" title="Se déconnecter">
                         <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
