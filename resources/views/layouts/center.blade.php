@@ -440,6 +440,96 @@
 
     @yield('scripts')
     <x-loading-overlay />
+
+    <script>
+        // ── Notifications ──
+        const centerNotifRoutes = {
+            list: '{{ route("center.get-notifications") }}',
+            unreadCount: '{{ route("center.unread-count") }}',
+            markRead: '{{ route("center.mark-as-read", "__ID__") }}',
+            markAllRead: '{{ route("center.mark-all-read") }}'
+        };
+
+        function centerToggleNotifPanel() {
+            const panel = document.getElementById('centerNotifPanel');
+            panel.classList.toggle('hidden');
+            if (!panel.classList.contains('hidden')) {
+                centerLoadNotifications();
+            }
+        }
+
+        async function centerLoadNotifications() {
+            try {
+                const res = await fetch(centerNotifRoutes.list);
+                const data = await res.json();
+                const list = document.getElementById('centerNotifList');
+                if (data.notifications.length === 0) {
+                    list.innerHTML = '<div class="px-4 py-6 text-center text-xs text-[#94a3b8]">Aucune notification</div>';
+                    return;
+                }
+                list.innerHTML = data.notifications.map(n => `
+                    <div class="px-4 py-3 hover:bg-[#f8fafc] transition cursor-pointer ${n.is_read ? '' : 'bg-[#faf5ff]/50'}" onclick="centerMarkRead(${n.id}, this)">
+                        <div class="flex items-start gap-2">
+                            <div class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${n.is_read ? 'bg-[#cbd5e1]' : 'bg-[#7C3AED]'}"></div>
+                            <div class="flex-1 min-w-0">
+                                <div class="text-xs font-bold text-[#1e293b]">${n.title}</div>
+                                <div class="text-[11px] text-[#64748b] mt-0.5 line-clamp-2">${n.message}</div>
+                                <div class="text-[10px] text-[#94a3b8] mt-1">${n.created_at}</div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) {
+                console.error('Notification load error:', e);
+            }
+        }
+
+        async function centerUpdateUnreadBadge() {
+            try {
+                const res = await fetch(centerNotifRoutes.unreadCount);
+                const data = await res.json();
+                const badge = document.getElementById('centerNotifBadge');
+                if (data.unread_count > 0) {
+                    badge.textContent = data.unread_count > 99 ? '99+' : data.unread_count;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            } catch (e) {}
+        }
+
+        async function centerMarkRead(id, el) {
+            try {
+                await fetch(centerNotifRoutes.markRead.replace('__ID__', id), {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+                });
+                centerUpdateUnreadBadge();
+                centerLoadNotifications();
+            } catch (e) {}
+        }
+
+        async function centerMarkAllRead() {
+            try {
+                await fetch(centerNotifRoutes.markAllRead, {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+                });
+                centerUpdateUnreadBadge();
+                centerLoadNotifications();
+            } catch (e) {}
+        }
+
+        document.addEventListener('click', function(e) {
+            const wrapper = document.getElementById('centerNotifWrapper');
+            if (wrapper && !wrapper.contains(e.target)) {
+                document.getElementById('centerNotifPanel').classList.add('hidden');
+            }
+        });
+
+        centerUpdateUnreadBadge();
+        setInterval(centerUpdateUnreadBadge, 15000);
+    </script>
 </body>
 
 </html>

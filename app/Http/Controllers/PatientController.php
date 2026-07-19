@@ -532,4 +532,24 @@ class PatientController extends Controller
         ]);
     }
 
+    /**
+     * Cancel an exam request (only if not completed)
+     */
+    public function cancelExamRequest(ExamRequest $examRequest)
+    {
+        $patient = auth()->user()->patient;
+
+        if ($examRequest->patient_id !== $patient->id) {
+            abort(403);
+        }
+
+        if (in_array($examRequest->status, ['completed', 'cancelled'])) {
+            return back()->with('error', 'Impossible d\'annuler cette demande.');
+        }
+
+        $examRequest->update(['status' => 'cancelled']);
+
+        return back()->with('success', 'Demande d\'examen annulée.');
+    }
+
 }

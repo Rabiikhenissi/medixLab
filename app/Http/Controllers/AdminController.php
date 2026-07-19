@@ -84,7 +84,28 @@ class AdminController extends Controller
 
 
 
-        return view('admin.dashboard', [
+        // 4. Recent prescriptions (last 5)
+        $recentPrescriptions = ExamRequest::with(['doctor.user', 'patient.user', 'laboratory'])
+            ->latest()
+            ->limit(5)
+            ->get();
+
+        // 5. Labs per city
+        $labsPerCity = Labo::where('is_archive', false)
+            ->selectRaw('city, count(*) as count')
+            ->groupBy('city')
+            ->orderByDesc('count')
+            ->limit(5)
+            ->pluck('count', 'city')
+            ->toArray();
+
+        // 6. Active labs count
+        $activeLabs = Labo::where('is_archive', false)->count();
+
+        // 7. Today's prescriptions count
+        $todayPrescriptions = ExamRequest::whereDate('created_at', Carbon::today())->count();
+
+        return view('admin.dashboard',[
 
             'user' => auth()->user(),
 
@@ -92,6 +113,10 @@ class AdminController extends Controller
             'statusDistribution' => $statusDistribution,
             'topExams' => $topExams,
             'chartData' => $chartData,
+            'recentPrescriptions' => $recentPrescriptions,
+            'labsPerCity' => $labsPerCity,
+            'activeLabs' => $activeLabs,
+            'todayPrescriptions' => $todayPrescriptions,
 
         ]);
     }

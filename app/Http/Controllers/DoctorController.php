@@ -15,6 +15,73 @@ use Illuminate\Support\Facades\Auth;
 class DoctorController extends Controller
 {
     /**
+     * Get all notifications for doctor
+     */
+    public function getNotifications()
+    {
+        $user = Auth::user();
+        $notifications = Notification::forUser($user->id)
+            ->latest('created_at')
+            ->limit(50)
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'notifications' => $notifications->map(function ($notification) {
+                return [
+                    'id' => $notification->id,
+                    'title' => $notification->title,
+                    'message' => $notification->message,
+                    'is_read' => $notification->is_read,
+                    'type' => $notification->notification_type ?? 'general',
+                    'reference_id' => $notification->reference_id,
+                    'created_at' => $notification->created_at->diffForHumans(),
+                ];
+            }),
+        ]);
+    }
+
+    /**
+     * Get unread notification count
+     */
+    public function getUnreadCount()
+    {
+        $user = Auth::user();
+        $count = Notification::forUser($user->id)->unread()->count();
+
+        return response()->json([
+            'success' => true,
+            'unread_count' => $count,
+        ]);
+    }
+
+    /**
+     * Mark notification as read
+     */
+    public function markAsRead(Notification $notification)
+    {
+        if ($notification->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $notification->update(['is_read' => true]);
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Mark all notifications as read
+     */
+    public function markAllAsRead()
+    {
+        Notification::where('user_id', Auth::id())
+            ->where('is_read', false)
+            ->where('is_archive', false)
+            ->update(['is_read' => true]);
+
+        return response()->json(['success' => true]);
+    }
+    /**
      * Show patient search page
      */
     public function patientSearch()
@@ -482,5 +549,25 @@ class DoctorController extends Controller
         $examRequest->load(['doctor.user', 'patient.user', 'laboratory', 'items.exam', 'items.resultLabo.details']);
 
         return view('patient.print-exam-request', compact('examRequest'));
+    }
+
+    /**
+     * Cancel an exam request (only if not completed)
+     */
+    public function cancelExamRequest(ExamRequest $examRequest)
+    {
+        $doctor = auth()->user()->doctor;
+
+        if ($examRequest->doctor_id !== $doctor->id) {
+            abort(403);
+        }
+
+        if (in_array($examRequest->status, ['completed', 'cancelled'])) {
+            return back()->with('error', 'Impossible d\'annuler cette demande.');
+        }
+
+        $examRequest->update(['status' => 'cancelled']);
+
+        return back()->with('success', 'Demande d\'examen annulée.');
     }
 }

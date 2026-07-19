@@ -333,6 +333,48 @@
         </div>
     </div>
 
+    <!-- Revenue & Top Exams -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Revenue -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+            <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Revenus Estimés
+            </h3>
+            <div class="text-4xl font-black text-green-600 mb-2">
+                {{ number_format($revenue ?? 0, 2) }} DT
+            </div>
+            <p class="text-xs text-slate-500">Total des examens complétés (tarifs configurés)</p>
+        </div>
+
+        <!-- Top Exams -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+            <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-[#7C3AED]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75z"/>
+                </svg>
+                Top 5 Examens Demandés
+            </h3>
+            @if($topExams->count() > 0)
+                <div class="space-y-3">
+                    @foreach($topExams as $i => $exam)
+                        <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+                            <span class="w-7 h-7 rounded-lg bg-[#7C3AED]/10 flex items-center justify-center text-[#7C3AED] font-bold text-xs">{{ $i + 1 }}</span>
+                            <span class="flex-1 text-sm font-semibold text-slate-700">{{ $exam->name }}</span>
+                            <span class="text-xs font-bold text-[#7C3AED] bg-[#7C3AED]/10 px-2 py-1 rounded">{{ $exam->count }}</span>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <p class="text-sm text-slate-400 italic">Aucune donnée disponible.</p>
+            @endif
+        </div>
+
+    </div>
+
 </div>
 
 

@@ -42,6 +42,34 @@
     @endif
 
 
+    <!-- Search & Filter -->
+    <form method="GET" class="flex flex-wrap items-end gap-3 mb-4">
+        <div class="flex flex-col gap-1">
+            <label class="text-[10px] font-bold text-[#64748b] uppercase tracking-wider">Recherche</label>
+            <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Nom patient, médecin, n° demande..."
+                class="border border-[#e2e8f0] rounded-xl px-4 py-2.5 text-sm text-[#1e293b] placeholder:text-[#94a3b8] focus:border-[#0066ff] focus:ring-1 focus:ring-[#0066ff] outline-none w-64">
+        </div>
+        <div class="flex flex-col gap-1">
+            <label class="text-[10px] font-bold text-[#64748b] uppercase tracking-wider">Statut</label>
+            <select name="status" class="border border-[#e2e8f0] rounded-xl px-4 py-2.5 text-sm text-[#1e293b] focus:border-[#0066ff] focus:ring-1 focus:ring-[#0066ff] outline-none">
+                <option value="">Tous</option>
+                <option value="pending" {{ ($status ?? '') === 'pending' ? 'selected' : '' }}>En attente</option>
+                <option value="assigned" {{ ($status ?? '') === 'assigned' ? 'selected' : '' }}>Assignée</option>
+                <option value="collected" {{ ($status ?? '') === 'collected' ? 'selected' : '' }}>Collectée</option>
+                <option value="processing" {{ ($status ?? '') === 'processing' ? 'selected' : '' }}>En traitement</option>
+                <option value="completed" {{ ($status ?? '') === 'completed' ? 'selected' : '' }}>Terminée</option>
+                <option value="cancelled" {{ ($status ?? '') === 'cancelled' ? 'selected' : '' }}>Annulée</option>
+            </select>
+        </div>
+        <button type="submit" class="bg-[#0066ff] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#0052cc] transition">
+            Filtrer
+        </button>
+        @if(($search ?? '') || ($status ?? ''))
+            <a href="{{ route('center.exam-requests') }}" class="text-sm text-[#64748b] hover:text-[#0066ff] font-medium px-3 py-2.5">
+                Réinitialiser
+            </a>
+        @endif
+    </form>
 
 
     <!-- Table -->

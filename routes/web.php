@@ -112,8 +112,51 @@ Route::prefix('doctor')->name('doctor.')->group(function () {
                 ->paginate(10)
                 ->withQueryString();
 
-            return view('doctor.dashboard', compact('user', 'recentPatients', 'recentExams', 'search', 'status'));
+            // Analytics: monthly prescriptions for last 6 months
+            $monthlyPrescriptions = \App\Models\ExamRequest::where('doctor_id', $doctor->id)
+                ->where('created_at', '>=', now()->subMonths(5)->startOfMonth())
+                ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month_key, DATE_FORMAT(created_at, '%b %Y') as label, COUNT(*) as count")
+                ->groupBy('month_key', 'label')
+                ->orderBy('month_key')
+                ->get();
+
+            $allMonths = collect();
+            for ($i = 5; $i >= 0; $i--) {
+                $d = now()->subMonths($i);
+                $allMonths->push([
+                    'key'   => $d->format('Y-m'),
+                    'label' => $d->format('M Y'),
+                    'count' => 0,
+                ]);
+            }
+            $chartData = $allMonths->map(function ($m) use ($monthlyPrescriptions) {
+                $found = $monthlyPrescriptions->firstWhere('key', $m['key']);
+                $m['count'] = $found ? $found->count : 0;
+                return $m;
+            })->values();
+
+            // Analytics: unique patients seen
+            $uniquePatientsCount = \App\Models\ExamRequest::where('doctor_id', $doctor->id)
+                ->distinct('patient_id')
+                ->count('patient_id');
+
+            // Analytics: completion rate
+            $totalRequests = \App\Models\ExamRequest::where('doctor_id', $doctor->id)->count();
+            $completedRequests = \App\Models\ExamRequest::where('doctor_id', $doctor->id)
+                ->where('status', 'completed')
+                ->count();
+            $completionRate = $totalRequests > 0 ? round(($completedRequests / $totalRequests) * 100) : 0;
+
+            return view('doctor.dashboard', compact(
+                'user', 'recentPatients', 'recentExams', 'search', 'status',
+                'chartData', 'uniquePatientsCount', 'completionRate'
+            ));
         })->name('dashboard');
+
+        // QR Code scan → auto-search patient
+        Route::get('/scan/{code}', function ($code) {
+            return redirect()->route('doctor.dashboard', ['scan' => $code]);
+        })->name('scan-patient');
 
         // Doctor Interface Routes
         Route::get('/patient-search', [\App\Http\Controllers\DoctorController::class, 'patientSearch'])->name('patient-search');
@@ -136,6 +179,16 @@ Route::prefix('doctor')->name('doctor.')->group(function () {
         // PDF / Print export for a completed exam request (Task 3.2)
         Route::get('/exam-requests/{examRequest}/print', [\App\Http\Controllers\DoctorController::class, 'printExamRequest'])
             ->name('print-exam-request');
+
+        // Cancel exam request
+        Route::post('/exam-requests/{examRequest}/cancel', [\App\Http\Controllers\DoctorController::class, 'cancelExamRequest'])
+            ->name('cancel-exam-request');
+
+        // Notifications
+        Route::get('/notifications', [\App\Http\Controllers\DoctorController::class, 'getNotifications'])->name('get-notifications');
+        Route::get('/notifications/unread-count', [\App\Http\Controllers\DoctorController::class, 'getUnreadCount'])->name('unread-count');
+        Route::post('/notifications/{notification}/read', [\App\Http\Controllers\DoctorController::class, 'markAsRead'])->name('mark-as-read');
+        Route::post('/notifications/read-all', [\App\Http\Controllers\DoctorController::class, 'markAllAsRead'])->name('mark-all-read');
 
         Route::post('/logout', [AuthController::class, 'logout'])->defaults('role', 'doctor')->name('logout');
     });
@@ -181,12 +234,48 @@ Route::prefix('patient')->name('patient.')->group(function () {
 
     Route::middleware(['auth', 'patient'])->group(function () {
         Route::get('/dashboard', function () {
-            // Verify they are a patient
             if (!auth()->user()->patient) {
                 return redirect()->route('home');
             }
             return view('patient.dashboard', ['user' => auth()->user()]);
         })->name('dashboard');
+
+        Route::get('/analytics', function () {
+            if (!auth()->user()->patient) {
+                return redirect()->route('home');
+            }
+            $user = auth()->user();
+            $patient = $user->patient;
+
+            $statusCounts = $patient->examRequests()
+                ->selectRaw('status, count(*) as count')
+                ->groupBy('status')
+                ->pluck('count', 'status')
+                ->toArray();
+
+            $monthlyData = $patient->examRequests()
+                ->where('created_at', '>=', now()->subMonths(6))
+                ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month, count(*) as count")
+                ->groupBy('month')
+                ->orderBy('month')
+                ->pluck('count', 'month')
+                ->toArray();
+
+            $chartData = collect();
+            for ($i = 5; $i >= 0; $i--) {
+                $key = now()->subMonths($i)->format('Y-m');
+                $chartData->push([
+                    'label' => now()->subMonths($i)->format('M'),
+                    'count' => $monthlyData[$key] ?? 0,
+                ]);
+            }
+
+            return view('patient.analytics', [
+                'user' => $user,
+                'statusCounts' => $statusCounts,
+                'chartData' => $chartData,
+            ]);
+        })->name('analytics');
 
         // Patient Notification Routes
         Route::get('/notifications', [\App\Http\Controllers\PatientController::class, 'getNotifications'])->name('get-notifications');
@@ -226,6 +315,10 @@ Route::prefix('patient')->name('patient.')->group(function () {
         // PDF / Print export for a completed exam request (Task 3.2)
         Route::get('/exam-requests/{examRequest}/print', [\App\Http\Controllers\PatientController::class, 'printExamRequest'])
             ->name('print-exam-request');
+
+        // Cancel exam request
+        Route::post('/exam-requests/{examRequest}/cancel', [\App\Http\Controllers\PatientController::class, 'cancelExamRequest'])
+            ->name('cancel-exam-request');
 
         Route::post('/logout', [AuthController::class, 'logout'])->defaults('role', 'patient')->name('logout');
     });
@@ -302,6 +395,11 @@ Route::prefix('center')->name('center.')->group(function () {
             '/exam-requests/{examRequest}/claim',
             [\App\Http\Controllers\CenterController::class, 'claimExamRequest']
         )->name('exam-requests.claim');
+
+        Route::post(
+            '/exam-requests/{examRequest}/collect',
+            [\App\Http\Controllers\CenterController::class, 'collectExamRequest']
+        )->name('exam-requests.collect');
 
 
 
@@ -431,6 +529,12 @@ Route::prefix('center')->name('center.')->group(function () {
 
 
 
+        // Notifications
+        Route::get('/notifications', [\App\Http\Controllers\CenterController::class, 'getNotifications'])->name('get-notifications');
+        Route::get('/notifications/unread-count', [\App\Http\Controllers\CenterController::class, 'getUnreadCount'])->name('unread-count');
+        Route::post('/notifications/{notification}/read', [\App\Http\Controllers\CenterController::class, 'markAsRead'])->name('mark-as-read');
+        Route::post('/notifications/read-all', [\App\Http\Controllers\CenterController::class, 'markAllAsRead'])->name('mark-all-read');
+
         // Logout
 
         Route::post(
@@ -448,10 +552,11 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\Admin\ExamController;
+use App\Http\Controllers\Admin\AvailableExamController;
 
 // Admin Pages
 Route::prefix('admin')->name('admin.')->group(function () {
-    Route::middleware('auth')->group(function () {
+    Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
         // Exams CRUD
         Route::get('/exams', [AdminController::class, 'exams'])->name('exams.index');
@@ -519,12 +624,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 });
 
+// Profile routes (any authenticated user)
+Route::middleware('auth')->prefix('profile')->name('profile.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\ProfileController::class, 'show'])->name('show');
+    Route::put('/', [\App\Http\Controllers\ProfileController::class, 'update'])->name('update');
+    Route::put('/password', [\App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('password');
+});
+
 // Location routes (AJAX API endpoints)
 Route::get('/countries', [\App\Http\Controllers\LocationController::class, 'getCountries'])->name('countries.index');
 Route::get('/countries/{country}/states', [\App\Http\Controllers\LocationController::class, 'getStates'])->name('countries.states');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [\App\Http\Controllers\UserController::class, 'profile'])->name('profile');
-    Route::put('/profile', [\App\Http\Controllers\UserController::class, 'updateProfile'])->name('profile.update');
+    // Old profile routes removed — using ProfileController routes above
 });
 

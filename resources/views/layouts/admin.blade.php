@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'Espace Administrateur') - Medix eSanté</title>
 
-    <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
@@ -199,7 +198,6 @@
         .page-content {
             padding: 36px 36px 48px;
             flex: 1;
-            max-width: 1300px;
             width: 100%;
         }
 
@@ -1031,7 +1029,7 @@
                         {{ auth()->user()->group ? auth()->user()->group->name : 'Administrateur' }}
                     </div>
                 </div>
-                <a href="{{ route('profile') }}" class="nav-avatar" title="Mon Profil" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">
+                <a href="{{ route('profile.show') }}" class="nav-avatar" title="Mon Profil" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">
                     {{ strtoupper(substr(auth()->user()->first_name, 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name, 0, 1)) }}
                 </a>
                 <form action="{{ route($logoutRoute) }}" method="POST" class="m-0 p-0">
