@@ -185,6 +185,33 @@
 
             <!-- Page Content -->
             <div class="mt-4">
+                <!-- Breadcrumbs (Task 4.7) -->
+                <div class="flex items-center space-x-2 text-[10px] uppercase tracking-wider font-extrabold text-[#64748b] bg-[#f8fafc]/40 px-4 py-2.5 rounded-xl border border-[#e2e8f0]/40 mb-6 select-none">
+                    <span class="text-[#7C3AED]">Espace Labo</span>
+                    <svg class="w-3 h-3 text-[#94a3b8]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+                    @if($route === 'center.dashboard')
+                        <span class="text-[#1e293b]">Tableau de Bord</span>
+                    @elseif($route === 'center.working-hours')
+                        <span class="text-[#1e293b]">Horaires & Exceptions</span>
+                    @elseif($route === 'center.consumables')
+                        <span class="text-[#1e293b]">Stock & Consommables</span>
+                    @elseif($route === 'center.equipment')
+                        <span class="text-[#1e293b]">Équipements & Maintenance</span>
+                    @elseif($route === 'center.exam-requests')
+                        <span class="text-[#1e293b]">Demandes d'Analyses</span>
+                    @elseif(str_contains($route, 'results.create'))
+                        <a href="{{ route('center.exam-requests') }}" class="hover:text-[#7C3AED] transition">Demandes d'Analyses</a>
+                        <svg class="w-3 h-3 text-[#94a3b8]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+                        <span class="text-[#1e293b]">Saisir les Résultats</span>
+                    @elseif(str_contains($route, 'results.edit'))
+                        <a href="{{ route('center.exam-requests') }}" class="hover:text-[#7C3AED] transition">Demandes d'Analyses</a>
+                        <svg class="w-3 h-3 text-[#94a3b8]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+                        <span class="text-[#1e293b]">Modifier les Résultats</span>
+                    @else
+                        <span class="text-[#1e293b]">{{ ucfirst(str_replace(['center.', '-'], ['', ' '], $route)) }}</span>
+                    @endif
+                </div>
+
                 @yield('content')
             </div>
         </div>

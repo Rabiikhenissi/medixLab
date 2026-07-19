@@ -7,9 +7,11 @@ use App\Models\Consumable;
 use App\Models\Equipment;
 use App\Models\EquipmentMaintenance;
 use App\Models\WorkingHours;
+use App\Models\ExamRequest;
 use App\Models\StockMovement;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon;
 
 class CenterController extends Controller
 {
@@ -36,15 +38,42 @@ class CenterController extends Controller
 
         // Retrieve statistics
         $stats = [
-            'equipment_count' => $lab->equipment()->count(),
-            'consumables_count' => $lab->consumables()->count(),
-            'low_stock_count' => $lab->consumables()->whereColumn('quantity', '<=', 'min_quantity')->count(),
+            'equipment_count'          => $lab->equipment()->count(),
+            'consumables_count'        => $lab->consumables()->count(),
+            'low_stock_count'          => $lab->consumables()->whereColumn('quantity', '<=', 'min_quantity')->count(),
             'active_maintenance_count' => EquipmentMaintenance::whereIn('equipment_id', $lab->equipment()->pluck('id'))
                 ->whereIn('status', ['pending', 'in_progress'])
                 ->count(),
         ];
 
-        return view('center.dashboard', compact('user', 'stats'));
+        // Workload stats (Task 3.9) ─ per-status counts for this lab
+        $workload = [
+            'pending'    => $lab->examRequests()->where('status', 'pending')->count(),
+            'assigned'   => $lab->examRequests()->where('status', 'assigned')->count(),
+            'collected'  => $lab->examRequests()->where('status', 'collected')->count(),
+            'processing' => $lab->examRequests()->where('status', 'processing')->count(),
+            'completed'  => $lab->examRequests()->where('status', 'completed')->count(),
+            'cancelled'  => $lab->examRequests()->where('status', 'cancelled')->count(),
+            'total'      => $lab->examRequests()->count(),
+        ];
+
+        // Daily request volume for the last 7 days
+        $dailyVolume = $lab->examRequests()
+            ->where('created_at', '>=', Carbon::now()->subDays(6)->startOfDay())
+            ->selectRaw('DATE(created_at) as day, COUNT(*) as count')
+            ->groupBy('day')
+            ->orderBy('day')
+            ->pluck('count', 'day')
+            ->toArray();
+
+        // Fill missing days with 0
+        $last7Days = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = Carbon::now()->subDays($i)->toDateString();
+            $last7Days[$date] = $dailyVolume[$date] ?? 0;
+        }
+
+        return view('center.dashboard', compact('user', 'stats', 'workload', 'last7Days'));
     }
 
     /**
@@ -441,10 +470,10 @@ public function examRequests()
         ->with([
             'patient.user',
             'doctor.user',
-            'items.exam'
+            'items.exam',
         ])
         ->latest()
-        ->get();
+        ->paginate(15);
 
     return view('center.exam-requests', compact('requests'));
 }

@@ -370,6 +370,9 @@
         /* APPLY GROUP */
         document.getElementById('modalApplyGroupBtn').onclick = async () => {
             if (isSubmitting) return;
+            if (!confirm(`Voulez-vous vraiment prescrire le groupe d'examens « ${activeGroupName} » à ce patient ?`)) {
+                return;
+            }
             lockUI();
             await sendGroupRequest();
         };
@@ -403,6 +406,9 @@
         /* CONFIRM REQUEST */
         document.getElementById('confirmSubmitBtn').onclick = async () => {
             if (isSubmitting) return;
+            if (!confirm("Voulez-vous vraiment envoyer cette demande de prescription d'examens ?")) {
+                return;
+            }
             lockUI();
 
             try {

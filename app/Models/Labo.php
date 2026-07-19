@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use App\Models\Traits\ActiveScoped;
 
 #[Fillable(['name', 'address', 'city', 'phone', 'email', 'is_archive'])]
 class Labo extends Model
 {
+    use ActiveScoped;
     protected function casts(): array
     {
         return [

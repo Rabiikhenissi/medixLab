@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use App\Models\Traits\ActiveScoped;
 
 #[Fillable(['code', 'name', 'category', 'description', 'default_normal_range', 'preparation_instructions', 'is_archive'])]
 class Exam extends Model
 {
+    use ActiveScoped;
 
 protected function casts(): array
 {

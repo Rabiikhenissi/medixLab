@@ -25,25 +25,14 @@
             :required="true"
         />
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Authorization Number -->
-            <x-input
-                type="text"
-                name="auth_number"
-                label="Numéro d'autorisation"
-                placeholder="ex. AUT-98765"
-                :required="true"
-            />
-
-            <!-- Responsible Person -->
-            <x-input
-                type="text"
-                name="responsible"
-                label="Responsable"
-                placeholder="ex. Dr. Ahmed Ben Ali"
-                :required="true"
-            />
-        </div>
+        <!-- Responsible Person -->
+        <x-input
+            type="text"
+            name="responsible"
+            label="Responsable"
+            placeholder="ex. Dr. Ahmed Ben Ali"
+            :required="true"
+        />
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Email -->

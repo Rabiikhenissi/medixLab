@@ -158,15 +158,8 @@ class DoctorController extends Controller
     /**
      * Create exam request with selected exams
      */
-    public function createExamRequest(Request $request)
+    public function createExamRequest(\App\Http\Requests\CreateExamRequestFormRequest $request)
     {
-        $request->validate([
-            'patient_id' => 'required|exists:patients,id',
-            'exam_ids' => 'required|array|min:1',
-            'exam_ids.*' => 'exists:exams,id',
-            'clinical_notes' => 'nullable|string|max:500',
-        ]);
-
         $doctor = Auth::user()->doctor;
         $patient = Patient::findOrFail($request->patient_id);
 
@@ -183,31 +176,12 @@ class DoctorController extends Controller
             ], 403);
         }
 
-        // Create exam request
-        $examRequest = ExamRequest::create([
-            'doctor_id' => $doctor->id,
-            'patient_id' => $patient->id,
-            'status' => 'pending',
-            'clinical_notes' => $request->clinical_notes,
-        ]);
-
-        // Add exam items to the request
-        foreach ($request->exam_ids as $examId) {
-            ExamRequestItem::create([
-                'exam_request_id' => $examRequest->id,
-                'exam_id' => $examId,
-            ]);
-        }
-
-        // Create notification for patient
-        $examsCount = count($request->exam_ids);
-        Notification::create([
-            'user_id' => $patient->user_id,
-            'title' => 'Nouvelle demande d\'analyses',
-            'message' => 'Dr. ' . $doctor->user->first_name . ' ' . $doctor->user->last_name . ' vous a prescrit ' . $examsCount . ' examen(s). Consultez les détails dans vos demandes.',
-            'notification_type' => 'exam_request',
-            'reference_id' => $examRequest->id,
-        ]);
+        $examRequest = \App\Services\ExamRequestService::create(
+            $doctor,
+            $patient,
+            $request->exam_ids,
+            $request->clinical_notes
+        );
 
         return response()->json([
             'success' => true,
@@ -393,27 +367,31 @@ class DoctorController extends Controller
             ], 403);
         }
 
-        $examRequest = ExamRequest::create([
-            'doctor_id'      => $doctor->id,
-            'patient_id'     => $patient->id,
-            'status'         => 'pending',
-            'clinical_notes' => $request->clinical_notes,
-        ]);
-
-        foreach ($examGroup->exams as $exam) {
-            ExamRequestItem::create([
-                'exam_request_id' => $examRequest->id,
-                'exam_id'         => $exam->id,
+        $examRequest = \Illuminate\Support\Facades\DB::transaction(function () use ($doctor, $patient, $examGroup, $request) {
+            $examRequest = ExamRequest::create([
+                'doctor_id'      => $doctor->id,
+                'patient_id'     => $patient->id,
+                'status'         => 'pending',
+                'clinical_notes' => $request->clinical_notes,
             ]);
-        }
 
-        Notification::create([
-            'user_id'           => $patient->user_id,
-            'title'             => 'Nouvelle demande d\'analyses',
-            'message'           => 'Dr. ' . $doctor->user->first_name . ' ' . $doctor->user->last_name . ' vous a prescrit le groupe « ' . $examGroup->name . ' » (' . $examGroup->items->count() . ' examen(s)).',
-            'notification_type' => 'exam_request',
-            'reference_id'      => $examRequest->id,
-        ]);
+            foreach ($examGroup->exams as $exam) {
+                ExamRequestItem::create([
+                    'exam_request_id' => $examRequest->id,
+                    'exam_id'         => $exam->id,
+                ]);
+            }
+
+            Notification::create([
+                'user_id'           => $patient->user_id,
+                'title'             => 'Nouvelle demande d\'analyses',
+                'message'           => 'Dr. ' . $doctor->user->first_name . ' ' . $doctor->user->last_name . ' vous a prescrit le groupe « ' . $examGroup->name . ' » (' . $examGroup->items->count() . ' examen(s)).',
+                'notification_type' => 'exam_request',
+                'reference_id'      => $examRequest->id,
+            ]);
+
+            return $examRequest;
+        });
 
         return response()->json([
             'success'         => true,
@@ -472,5 +450,39 @@ class DoctorController extends Controller
         return redirect()
             ->back()
             ->with('success', 'Interprétation soumise et résultats validés avec succès.');
+    }
+
+    /**
+     * Doctor's "My Patients" — all patients with active access + recent history
+     */
+    public function myPatients()
+    {
+        $doctor = auth()->user()->doctor;
+
+        $accesses = DoctorPatientAccess::where('doctor_id', $doctor->id)
+            ->where('access_status', 'granted')
+            ->with(['patient.user', 'patient.examRequests' => function ($q) use ($doctor) {
+                $q->where('doctor_id', $doctor->id)->latest()->limit(5);
+            }])
+            ->latest('updated_at')
+            ->get();
+
+        return view('doctor.my-patients', compact('accesses'));
+    }
+
+    /**
+     * Print / PDF export of a completed exam request (Task 3.2)
+     */
+    public function printExamRequest(ExamRequest $examRequest)
+    {
+        $doctor = auth()->user()->doctor;
+
+        if (!$doctor || $examRequest->doctor_id !== $doctor->id) {
+            abort(403);
+        }
+
+        $examRequest->load(['doctor.user', 'patient.user', 'laboratory', 'items.exam', 'items.resultLabo.details']);
+
+        return view('patient.print-exam-request', compact('examRequest'));
     }
 }

@@ -42,6 +42,7 @@ Route::prefix('doctor')->name('doctor.')->group(function () {
             ->name('login');
 
         Route::post('/login', [AuthController::class, 'login'])
+            ->middleware('throttle:login')
             ->defaults('role', 'doctor');
 
         Route::get('/register', fn() => view('doctor.register'))
@@ -69,7 +70,7 @@ Route::prefix('doctor')->name('doctor.')->group(function () {
             ->name('password.update');
     });
 
-    Route::middleware('auth')->group(function () {
+    Route::middleware(['auth', 'doctor'])->group(function () {
         Route::get('/dashboard', function () {
             $user = auth()->user();
             // Verify they are a doctor
@@ -84,13 +85,34 @@ Route::prefix('doctor')->name('doctor.')->group(function () {
                 ->latest('updated_at')
                 ->limit(20)
                 ->get();
-            $recentExams = \App\Models\ExamRequest::where('doctor_id', $doctor->id)
-                ->with(['patient.user', 'items.exam', 'items.resultLabo.details'])
-                ->latest('created_at')
-                ->limit(20)
-                ->get();
 
-            return view('doctor.dashboard', compact('user', 'recentPatients', 'recentExams'));
+            // Search / Filter on Exam Requests (Task 4.2)
+            $search = request('search');
+            $status = request('status');
+
+            $query = \App\Models\ExamRequest::where('doctor_id', $doctor->id)
+                ->with(['patient.user', 'items.exam', 'items.resultLabo.details']);
+
+            if ($status && $status !== 'all') {
+                $query->where('status', $status);
+            }
+
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->whereHas('patient.user', function ($qp) use ($search) {
+                        $qp->where('first_name', 'like', "%{$search}%")
+                           ->orWhere('last_name', 'like', "%{$search}%");
+                    })->orWhereHas('patient', function ($qp) use ($search) {
+                        $qp->where('patient_code', 'like', "%{$search}%");
+                    });
+                });
+            }
+
+            $recentExams = $query->latest('created_at')
+                ->paginate(10)
+                ->withQueryString();
+
+            return view('doctor.dashboard', compact('user', 'recentPatients', 'recentExams', 'search', 'status'));
         })->name('dashboard');
 
         // Doctor Interface Routes
@@ -99,6 +121,7 @@ Route::prefix('doctor')->name('doctor.')->group(function () {
         Route::post('/request-access', [\App\Http\Controllers\DoctorController::class, 'requestAccess'])->name('request-access');
         Route::get('/exams-selection/{patient}', [\App\Http\Controllers\DoctorController::class, 'selectExams'])->name('select-exams');
         Route::post('/create-exam-request', [\App\Http\Controllers\DoctorController::class, 'createExamRequest'])->name('create-exam-request');
+        Route::get('/my-patients', [\App\Http\Controllers\DoctorController::class, 'myPatients'])->name('my-patients');
         Route::post('/exam-requests/{examRequest}/submit-interpretation', [\App\Http\Controllers\DoctorController::class, 'submitInterpretation'])->name('submit-interpretation');
         Route::post('/apply-exam-group', [\App\Http\Controllers\DoctorController::class, 'applyExamGroup'])->name('apply-exam-group');
 
@@ -109,6 +132,10 @@ Route::prefix('doctor')->name('doctor.')->group(function () {
         Route::get('/exam-groups/{examGroup}/edit', [\App\Http\Controllers\DoctorController::class, 'examGroupsEdit'])->name('exam-groups.edit');
         Route::put('/exam-groups/{examGroup}', [\App\Http\Controllers\DoctorController::class, 'examGroupsUpdate'])->name('exam-groups.update');
         Route::delete('/exam-groups/{examGroup}', [\App\Http\Controllers\DoctorController::class, 'examGroupsDestroy'])->name('exam-groups.destroy');
+
+        // PDF / Print export for a completed exam request (Task 3.2)
+        Route::get('/exam-requests/{examRequest}/print', [\App\Http\Controllers\DoctorController::class, 'printExamRequest'])
+            ->name('print-exam-request');
 
         Route::post('/logout', [AuthController::class, 'logout'])->defaults('role', 'doctor')->name('logout');
     });
@@ -123,6 +150,7 @@ Route::prefix('patient')->name('patient.')->group(function () {
             ->name('login');
 
         Route::post('/login', [AuthController::class, 'login'])
+            ->middleware('throttle:login')
             ->defaults('role', 'patient');
 
         Route::get('/register', fn() => view('patient.register'))
@@ -151,7 +179,7 @@ Route::prefix('patient')->name('patient.')->group(function () {
 
     });
 
-    Route::middleware('auth')->group(function () {
+    Route::middleware(['auth', 'patient'])->group(function () {
         Route::get('/dashboard', function () {
             // Verify they are a patient
             if (!auth()->user()->patient) {
@@ -164,7 +192,9 @@ Route::prefix('patient')->name('patient.')->group(function () {
         Route::get('/notifications', [\App\Http\Controllers\PatientController::class, 'getNotifications'])->name('get-notifications');
         Route::get('/notifications/unread-count', [\App\Http\Controllers\PatientController::class, 'getUnreadCount'])->name('unread-count');
         Route::post('/notifications/{notification}/read', [\App\Http\Controllers\PatientController::class, 'markAsRead'])->name('mark-as-read');
+        Route::post('/notifications/read-all', [\App\Http\Controllers\PatientController::class, 'markAllAsRead'])->name('mark-all-read');
         Route::post('/access-request/respond', [\App\Http\Controllers\PatientController::class, 'respondToAccessRequest'])->name('respond-access');
+        Route::post('/access-request/revoke', [\App\Http\Controllers\PatientController::class, 'revokeAccess'])->name('revoke-access');
         Route::get('/access-requests', [\App\Http\Controllers\PatientController::class, 'getAccessRequests'])->name('get-access-requests');
 
         // Patient Exam Requests Routes
@@ -189,6 +219,14 @@ Route::prefix('patient')->name('patient.')->group(function () {
         )
             ->name('assign-laboratory');
 
+        // Medical History Timeline (Task 3.5)
+        Route::get('/medical-history', [\App\Http\Controllers\PatientController::class, 'medicalHistory'])
+            ->name('medical-history');
+
+        // PDF / Print export for a completed exam request (Task 3.2)
+        Route::get('/exam-requests/{examRequest}/print', [\App\Http\Controllers\PatientController::class, 'printExamRequest'])
+            ->name('print-exam-request');
+
         Route::post('/logout', [AuthController::class, 'logout'])->defaults('role', 'patient')->name('logout');
     });
 });
@@ -204,6 +242,7 @@ Route::prefix('center')->name('center.')->group(function () {
             ->name('login');
 
         Route::post('/login', [AuthController::class, 'login'])
+            ->middleware('throttle:login')
             ->defaults('role', 'center');
 
 
@@ -241,7 +280,7 @@ Route::prefix('center')->name('center.')->group(function () {
 
 
     // Authenticated Center Routes
-    Route::middleware('auth')->group(function () {
+    Route::middleware(['auth', 'center'])->group(function () {
 
 
         // Dashboard
@@ -414,8 +453,6 @@ use App\Http\Controllers\Admin\ExamController;
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('auth')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
-        Route::post('/exams', [AdminController::class, 'storeExam'])->name('exams.store');
-        Route::put('/exams/{exam}', [AdminController::class, 'updateExam'])->name('exams.update');
         // Exams CRUD
         Route::get('/exams', [AdminController::class, 'exams'])->name('exams.index');
 
