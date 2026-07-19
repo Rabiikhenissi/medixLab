@@ -1029,7 +1029,7 @@
                         {{ auth()->user()->group ? auth()->user()->group->name : 'Administrateur' }}
                     </div>
                 </div>
-                <a href="{{ route('profile') }}" class="nav-avatar" title="Mon Profil" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">
+                <a href="{{ route('profile.show') }}" class="nav-avatar" title="Mon Profil" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">
                     {{ strtoupper(substr(auth()->user()->first_name, 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name, 0, 1)) }}
                 </a>
                 <form action="{{ route($logoutRoute) }}" method="POST" class="m-0 p-0">
