@@ -23,7 +23,7 @@
 Medix eSanté is fully deployed and ready for live inspection. Click the badge below to access the hosted platform:
 
 <div align="center">
-  <a href="https://demo.medixesante.com" target="_blank" style="text-decoration:none;">
+  <a href="https://medixlab.alwaysdata.net" target="_blank" style="text-decoration:none;">
     <img src="https://img.shields.io/badge/🚀%20ACCÉDER%20À%20LA%20DEMO%20LIVE-DEMO.MEDIXESANTE.COM-0D9488?style=for-the-badge&logo=rocket" alt="Live Demo Badge" height="40">
   </a>
 </div>
