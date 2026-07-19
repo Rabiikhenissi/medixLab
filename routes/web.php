@@ -636,7 +636,6 @@ Route::get('/countries', [\App\Http\Controllers\LocationController::class, 'getC
 Route::get('/countries/{country}/states', [\App\Http\Controllers\LocationController::class, 'getStates'])->name('countries.states');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [\App\Http\Controllers\UserController::class, 'profile'])->name('profile');
-    Route::put('/profile', [\App\Http\Controllers\UserController::class, 'updateProfile'])->name('profile.update');
+    // Old profile routes removed — using ProfileController routes above
 });
 
