@@ -6,6 +6,7 @@ use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\Exam;
 use App\Models\ExamGroup;
+use App\Models\ExamGroupItem;
 use App\Models\ExamRequest;
 use App\Models\DoctorPatientAccess;
 use App\Models\Notification;
@@ -476,6 +477,45 @@ class DoctorController extends Controller
             ->get();
 
         return view('doctor.exam-groups-create', compact('exams'));
+    }
+
+    /**
+     * Store a new exam group via API (JSON) — used from exams-selection page
+     */
+    public function storeExamGroupApi(Request $request)
+    {
+        $request->validate([
+            'name'        => 'required|string|max:255',
+            'description' => 'nullable|string|max:500',
+            'exam_ids'    => 'required|array|min:1',
+            'exam_ids.*'  => 'exists:exams,id',
+        ]);
+
+        $doctor = Auth::user()->doctor;
+
+        $examGroup = ExamGroup::create([
+            'doctor_id'   => $doctor->id,
+            'name'        => $request->name,
+            'description' => $request->description,
+        ]);
+
+        foreach ($request->exam_ids as $examId) {
+            ExamGroupItem::create([
+                'exam_group_id' => $examGroup->id,
+                'exam_id'       => $examId,
+            ]);
+        }
+
+        return response()->json([
+            'success'   => true,
+            'message'   => 'Groupe « ' . $examGroup->name . ' » créé avec succès.',
+            'group'     => [
+                'id'          => $examGroup->id,
+                'name'        => $examGroup->name,
+                'description' => $examGroup->description,
+                'exam_count'  => count($request->exam_ids),
+            ],
+        ]);
     }
 
     /**

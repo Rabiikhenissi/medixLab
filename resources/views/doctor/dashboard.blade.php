@@ -46,6 +46,13 @@
                         </svg>
                         Rechercher
                     </button>
+                    <button type="button" id="openQrScannerBtn"
+                        class="bg-white border border-[#e2e8f0] hover:border-[#0066FF]/40 hover:bg-[#EFF6FF]/40 text-[#0066FF] font-bold w-10 h-10 rounded-xl transition flex items-center justify-center shadow-xs cursor-pointer flex-shrink-0"
+                        title="Scanner un QR Code patient">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                        </svg>
+                    </button>
                 </form>
 
                 {{-- Notification Bell --}}
@@ -615,6 +622,32 @@
         </div>
     </div>
 
+    <!-- QR Code Scanner Modal -->
+    <div id="qrScannerOverlay" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+        <div class="glass-card rounded-[20px] w-full max-w-md overflow-hidden shadow-2xl">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-[#e2e8f0]/80">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#0066FF]/15 to-[#0066FF]/5 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-[#0066FF]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-sm font-bold text-[#1e293b]">Scanner QR Code Patient</h3>
+                </div>
+                <button id="closeQrScannerBtn" class="text-[#94a3b8] hover:text-[#1e293b] transition cursor-pointer">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="p-4">
+                <div id="qrReaderRegion" class="rounded-xl overflow-hidden bg-black min-h-[260px]"></div>
+                <p id="qrScannerStatus" class="text-center text-[11px] text-[#64748b] mt-3 font-semibold">Pointez la caméra vers le QR Code du patient...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         // Monthly Prescriptions Bar Chart
@@ -1000,6 +1033,54 @@
                 document.getElementById('doctorNotifPanel').classList.add('hidden');
             }
         });
+
+        // ── QR Code Camera Scanner ──
+        let qrCodeScanner = null;
+
+        document.getElementById('openQrScannerBtn').addEventListener('click', () => {
+            document.getElementById('qrScannerOverlay').classList.remove('hidden');
+            startQrScanner();
+        });
+
+        document.getElementById('closeQrScannerBtn').addEventListener('click', stopQrScanner);
+
+        document.getElementById('qrScannerOverlay').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) stopQrScanner();
+        });
+
+        function startQrScanner() {
+            const statusEl = document.getElementById('qrScannerStatus');
+            statusEl.textContent = 'Initialisation de la caméra...';
+
+            qrCodeScanner = new Html5Qrcode('qrReaderRegion');
+            qrCodeScanner.start(
+                { facingMode: 'environment' },
+                { fps: 10, qrbox: { width: 220, height: 220 } },
+                (decodedText) => {
+                    stopQrScanner();
+                    let code = decodedText.trim();
+                    if (code.includes('/')) {
+                        const parts = code.split('/');
+                        code = parts[parts.length - 1];
+                    }
+                    document.getElementById('header_patient_code').value = code;
+                    headerPatientSearchForm.dispatchEvent(new Event('submit'));
+                },
+                () => {}
+            ).catch(() => {
+                statusEl.textContent = 'Caméra indisponible. Veuillez scanner manuellement.';
+            });
+        }
+
+        function stopQrScanner() {
+            if (qrCodeScanner) {
+                qrCodeScanner.stop().then(() => {
+                    qrCodeScanner.clear();
+                    qrCodeScanner = null;
+                }).catch(() => { qrCodeScanner = null; });
+            }
+            document.getElementById('qrScannerOverlay').classList.add('hidden');
+        }
 
         // Initial load + auto-refresh
         doctorUpdateUnreadBadge();
