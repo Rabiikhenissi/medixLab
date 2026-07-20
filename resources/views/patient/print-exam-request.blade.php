@@ -250,7 +250,7 @@
             <tbody>
                 @foreach($item->resultLabo->details as $detail)
                 <tr>
-                    <td style="font-weight:600">{{ $detail->parameter }}</td>
+                    <td style="font-weight:600">{{ $detail->parameter }}@if($detail->unit) <span style="font-size:9px;color:#7C3AED;background:rgba(124,58,237,0.1);padding:1px 4px;border-radius:3px;border:1px solid rgba(124,58,237,0.2)">{{ $detail->unit }}</span>@endif</td>
                     <td style="font-weight:700">{{ $detail->value }}</td>
                     <td style="color:#94a3b8">{{ $detail->reference_range ?? '—' }}</td>
                     <td>

@@ -66,6 +66,9 @@
                     <div class="flex-1 min-w-0">
                         <span class="text-sm font-bold text-[#1e293b] block truncate">
                             {{ $parameter->name }}
+                            @if($parameter->unit)
+                                <span class="text-[10px] font-semibold text-[#7C3AED] bg-[#7C3AED]/10 px-1.5 py-0.5 rounded border border-[#7C3AED]/20 ml-1.5">{{ $parameter->unit }}</span>
+                            @endif
                         </span>
                         @if($parameter->normal_range)
                             <span class="inline-flex items-center text-[10px] text-[#64748b] mt-1 bg-[#F8FAFC] border border-[#e2e8f0] px-2 py-0.5 rounded-md font-medium">
@@ -74,6 +77,7 @@
                         @endif
                         <input type="hidden" name="parameters[{{ $index }}][name]" value="{{ $parameter->name }}">
                         <input type="hidden" name="parameters[{{ $index }}][range]" value="{{ $parameter->normal_range }}">
+                        <input type="hidden" name="parameters[{{ $index }}][unit]" value="{{ $parameter->unit ?? '' }}">
                     </div>
 
                     <div class="flex items-center gap-3">

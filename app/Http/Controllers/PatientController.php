@@ -5,6 +5,7 @@ use App\Models\ExamRequest;
 use App\Models\Patient;
 use App\Models\Notification;
 use App\Models\DoctorPatientAccess;
+use App\Models\Labo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 

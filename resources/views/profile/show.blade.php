@@ -437,6 +437,14 @@ Gérez vos informations personnelles et votre carte digitale.
                         <label>Code médecin</label>
                         <input type="text" class="readonly" value="{{ $user->doctor->doctor_code }}" readonly>
                     </div>
+                    <div class="form-field">
+                        <label>Latitude</label>
+                        <input type="number" step="any" name="latitude" value="{{ old('latitude', $user->doctor->latitude) }}" placeholder="Ex: 36.7538">
+                    </div>
+                    <div class="form-field">
+                        <label>Longitude</label>
+                        <input type="number" step="any" name="longitude" value="{{ old('longitude', $user->doctor->longitude) }}" placeholder="Ex: 3.0588">
+                    </div>
                     @endif
 
                     @if($user->patient)
@@ -476,6 +484,14 @@ Gérez vos informations personnelles et votre carte digitale.
                     <div class="form-field">
                         <label>Établissement</label>
                         <input type="text" class="readonly" value="{{ $user->staff->laboratory->name }}" readonly>
+                    </div>
+                    <div class="form-field">
+                        <label>Latitude du labo</label>
+                        <input type="number" step="any" name="latitude" value="{{ old('latitude', $user->staff->laboratory->latitude) }}" placeholder="Ex: 36.7538">
+                    </div>
+                    <div class="form-field">
+                        <label>Longitude du labo</label>
+                        <input type="number" step="any" name="longitude" value="{{ old('longitude', $user->staff->laboratory->longitude) }}" placeholder="Ex: 3.0588">
                     </div>
                     @endif
                     @endif

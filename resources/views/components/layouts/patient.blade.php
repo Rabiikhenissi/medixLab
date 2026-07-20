@@ -4,6 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Espace Patient') - Medix eSanté</title>
 
     <!-- Google Fonts: Outfit & Instrument Sans -->
@@ -205,14 +206,61 @@
             padding: 24px 32px;
         }
 
-        @media (max-width: 640px) {
-            .patient-topnav .nav-user-name,
-            .patient-topnav .nav-user-role {
+        @media (max-width: 768px) {
+            .patient-sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                z-index: 300;
+            }
+            .patient-sidebar.open {
+                transform: translateX(0);
+            }
+            .patient-sidebar-overlay {
                 display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.4);
+                z-index: 250;
+            }
+            .patient-sidebar-overlay.open {
+                display: block;
+            }
+            .patient-topnav {
+                left: 0;
+            }
+            .patient-main {
+                margin-left: 0;
+                width: 100%;
             }
             .patient-content-wrapper {
                 padding: 16px;
             }
+            .patient-topnav .nav-user-name,
+            .patient-topnav .nav-user-role {
+                display: none;
+            }
+            .mobile-menu-btn {
+                display: flex !important;
+            }
+        }
+        @media (max-width: 640px) {
+            .patient-content-wrapper {
+                padding: 12px;
+            }
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #64748b;
+            flex-shrink: 0;
         }
     </style>
 
@@ -221,8 +269,11 @@
 
 <body class="patient-shell antialiased text-[#1e293b] font-sans">
 
+    <!-- Mobile Sidebar Overlay -->
+    <div class="patient-sidebar-overlay" id="patientSidebarOverlay" onclick="togglePatientSidebar()"></div>
+
     <!-- ══ SIDEBAR ══ -->
-    <aside class="patient-sidebar">
+    <aside class="patient-sidebar" id="patientSidebar">
         <div class="patient-sidebar-logo">
             <svg width="20" height="20" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -271,6 +322,11 @@
         <a href="{{ route('patient.dashboard') }}" class="brand">Medix <span>eSanté</span></a>
 
         <div class="topnav-right">
+            <button class="mobile-menu-btn" onclick="togglePatientSidebar()" aria-label="Menu">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
+                </svg>
+            </button>
             <div>
                 <div class="nav-user-name">{{ auth()->user()->first_name }} {{ auth()->user()->last_name }}</div>
                 <div class="nav-user-role">Patient</div>
@@ -355,6 +411,12 @@
         </div>
     </main>
 
+    <script>
+        function togglePatientSidebar() {
+            document.getElementById('patientSidebar').classList.toggle('open');
+            document.getElementById('patientSidebarOverlay').classList.toggle('open');
+        }
+    </script>
     @yield('scripts')
     <x-loading-overlay />
 </body>

@@ -741,7 +741,7 @@
 
                             return `
                                 <tr class="border-b border-[#e2e8f0]/40">
-                                    <td class="py-2 pr-2 font-bold text-[#475569]">${detail.parameter}</td>
+                                    <td class="py-2 pr-2 font-bold text-[#475569]">${detail.parameter}${detail.unit ? ` <span class="text-[9px] font-semibold text-[#7C3AED] bg-[#7C3AED]/10 px-1 py-0.5 rounded border border-[#7C3AED]/20">${detail.unit}</span>` : ''}</td>
                                     <td class="py-2 px-2 text-[#1e293b] font-extrabold">${detail.value}</td>
                                     <td class="py-2 px-2 text-[10px] text-[#64748b] font-medium">${detail.reference_range || '-'}</td>
                                     <td class="py-2 pl-2 text-right">
