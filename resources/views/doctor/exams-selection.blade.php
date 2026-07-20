@@ -433,9 +433,17 @@
         /* APPLY GROUP */
         document.getElementById('modalApplyGroupBtn').onclick = async () => {
             if (isSubmitting) return;
-            if (!confirm(`Voulez-vous vraiment prescrire le groupe d'examens « ${activeGroupName} » à ce patient ?`)) {
-                return;
-            }
+            const result = await Swal.fire({
+                title: 'Appliquer le groupe',
+                text: `Voulez-vous prescrire le groupe « ${activeGroupName} » à ce patient ?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#0066FF',
+                cancelButtonColor: '#94a3b8',
+                confirmButtonText: 'Oui, prescrire',
+                cancelButtonText: 'Annuler'
+            });
+            if (!result.isConfirmed) return;
             lockUI();
             await sendGroupRequest();
         };
@@ -451,27 +459,38 @@
                     body: JSON.stringify({
                         patient_id: patientId,
                         exam_group_id: activeGroupId,
-                        clinical_notes: document.getElementById('clinicalNotes').value
+                        clinical_notes: document.getElementById('clinicalNotes')?.value || ''
                     })
                 });
 
                 const data = await response.json();
                 if (data.success) {
                     window.location.href = '{{ route('doctor.dashboard') }}';
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Erreur', text: data.message || 'Une erreur est survenue.', confirmButtonColor: '#0066FF' });
+                    unlockUI();
                 }
             } catch (e) {
-                alert("Une erreur est survenue");
-                isSubmitting = false;
-                document.querySelectorAll("button,input,textarea").forEach(x => x.disabled = false);
+                console.error(e);
+                Swal.fire({ icon: 'error', title: 'Erreur', text: 'Une erreur est survenue. Veuillez réessayer.', confirmButtonColor: '#0066FF' });
+                unlockUI();
             }
         }
 
         /* CONFIRM REQUEST */
         document.getElementById('confirmSubmitBtn').onclick = async () => {
             if (isSubmitting) return;
-            if (!confirm("Voulez-vous vraiment envoyer cette demande de prescription d'examens ?")) {
-                return;
-            }
+            const result = await Swal.fire({
+                title: 'Confirmer la prescription',
+                text: "Voulez-vous envoyer cette demande de prescription d'examens ?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#10b981',
+                cancelButtonColor: '#94a3b8',
+                confirmButtonText: 'Confirmer',
+                cancelButtonText: 'Annuler'
+            });
+            if (!result.isConfirmed) return;
             lockUI();
 
             try {
@@ -493,15 +512,19 @@
                     window.location.href = '{{ route('doctor.dashboard') }}';
                 }
             } catch (e) {
-                alert("Une erreur est survenue");
-                isSubmitting = false;
-                document.querySelectorAll("button,input,textarea").forEach(x => x.disabled = false);
+                Swal.fire({ icon: 'error', title: 'Erreur', text: 'Une erreur est survenue.', confirmButtonColor: '#0066FF' });
+                unlockUI();
             }
         };
 
         function lockUI() {
             isSubmitting = true;
             document.querySelectorAll("button,input,textarea").forEach(x => x.disabled = true);
+        }
+
+        function unlockUI() {
+            isSubmitting = false;
+            document.querySelectorAll("button,input,textarea").forEach(x => x.disabled = false);
         }
 
         /* SAVE AS GROUP */
@@ -542,17 +565,26 @@
 
                 const data = await response.json();
                 if (data.success) {
-                    alert(data.message);
-                    window.location.reload();
+                    Swal.fire({ icon: 'success', title: 'Succès', text: data.message, confirmButtonColor: '#0066FF' }).then(() => {
+                        const previouslySelected = [...selectedExamIds];
+                        window.location.reload();
+                        window.addEventListener('load', () => {
+                            previouslySelected.forEach(id => {
+                                const cb = document.querySelector(`.exam-checkbox[value="${id}"]`);
+                                if (cb) {
+                                    cb.checked = true;
+                                    cb.dispatchEvent(new Event('change'));
+                                }
+                            });
+                        });
+                    });
                 } else {
-                    alert(data.message || 'Une erreur est survenue.');
-                    isSubmitting = false;
-                    document.querySelectorAll("button,input,textarea").forEach(x => x.disabled = false);
+                    Swal.fire({ icon: 'error', title: 'Erreur', text: data.message || 'Une erreur est survenue.', confirmButtonColor: '#0066FF' });
+                    unlockUI();
                 }
             } catch (e) {
-                alert('Une erreur est survenue lors de la création du groupe.');
-                isSubmitting = false;
-                document.querySelectorAll("button,input,textarea").forEach(x => x.disabled = false);
+                Swal.fire({ icon: 'error', title: 'Erreur', text: 'Une erreur est survenue lors de la création du groupe.', confirmButtonColor: '#0066FF' });
+                unlockUI();
             }
         };
 

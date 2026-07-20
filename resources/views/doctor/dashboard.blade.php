@@ -339,7 +339,7 @@
                                         </a>
                                         <form action="{{ route('doctor.exam-groups.destroy', $group->id) }}" method="POST"
                                             class="inline"
-                                            onsubmit="return confirm('Supprimer définitivement « {{ addslashes($group->name) }} » ?');">
+                                            onsubmit="return swalConfirmSubmit(this, 'Supprimer définitivement « {{ addslashes($group->name) }} » ?');">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit"
@@ -870,6 +870,12 @@
                     } else if (data.access_status === 'pending') {
                         requestAccessBtn.classList.add('hidden');
                         accessPendingMessage.classList.remove('hidden');
+                    } else if (data.access_status === 'blocked') {
+                        requestAccessBtn.classList.add('hidden');
+                        proceedToExamsBtn.classList.add('hidden');
+                        accessGrantedMessage.classList.add('hidden');
+                        accessPendingMessage.classList.add('hidden');
+                        showSuccessToast('Vous êtes bloqué par ce patient.', 'error');
                     }
 
                     searchResultModal.classList.remove('hidden');

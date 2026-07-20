@@ -124,7 +124,7 @@
                                 <!-- Archive/Restore Form -->
                                 <form action="{{ route('admin.features.destroy', $feature) }}" method="POST"
                                     style="display:inline;margin:0;"
-                                    onsubmit="return confirm('{{ $feature->is_archive ? 'Restaurer ce module ?' : 'Archiver ce module ?' }}')">
+                                    onsubmit="return swalConfirmSubmit(this, '{{ $feature->is_archive ? 'Restaurer ce module ?' : 'Archiver ce module ?' }}')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit"
@@ -145,7 +145,7 @@
                                 </form>
                                 @if($feature->is_archive)
                                     <form action="{{ route('admin.features.force-delete', $feature) }}" method="POST" style="display:inline;margin:0;"
-                                          onsubmit="return confirm('Supprimer définitivement ce module ? Cette action est irréversible.')">
+                                          onsubmit="return swalConfirmSubmit(this, 'Supprimer définitivement ce module ? Cette action est irréversible.')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="table-action-btn delete-btn" title="Supprimer définitivement">

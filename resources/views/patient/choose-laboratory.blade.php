@@ -1,8 +1,8 @@
 <x-layouts.patient>
 <x-slot:title>Choisir un laboratoire — Medix eSanté</x-slot:title>
 
-@section('content')
-
+@section('styles')
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
     .lab-card {
         transition: transform 0.18s ease, box-shadow 0.18s ease;
@@ -21,6 +21,13 @@
     .city-bubble:hover { transform: scale(1.05); }
     .city-bubble.active { transform: scale(1.05); }
 </style>
+@endsection
+
+@section('content')
+
+@php
+    $labsWithCoords = $laboratories->filter(fn($lab) => $lab->latitude && $lab->longitude);
+@endphp
 
 <div class="w-full max-w-[900px] mx-auto py-8 px-4">
 
@@ -30,8 +37,15 @@
         <svg class="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
         </svg>
-        Retour au tableau de bord
+        Retour au tableau de board
     </a>
+
+    {{-- Map section (outside glass-card so tiles render properly) --}}
+    @if($labsWithCoords->count() > 0)
+    <div class="mb-6 rounded-2xl overflow-hidden border border-[#e2e8f0] shadow-xs" style="height: 320px;">
+        <div id="labMap" style="width:100%;height:100%;"></div>
+    </div>
+    @endif
 
     <div class="glass-card rounded-[20px] p-8 md:p-10 relative overflow-hidden">
 
@@ -113,17 +127,6 @@
         </div>
         @endif
 
-        {{-- Map section --}}
-        @php
-            $labsWithCoords = $laboratories->filter(fn($lab) => $lab->latitude && $lab->longitude);
-        @endphp
-        @if($labsWithCoords->count() > 0)
-        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-        <div class="mb-6 rounded-2xl overflow-hidden border border-[#e2e8f0] shadow-xs" style="height: 280px;">
-            <div id="labMap" style="width:100%;height:100%;"></div>
-        </div>
-        @endif
-
         {{-- Lab grid --}}
         <div id="labGrid" class="grid md:grid-cols-2 gap-4">
             @foreach($laboratories as $lab)
@@ -138,7 +141,8 @@
                 data-name="{{ strtolower($lab->name) }}"
                 data-city="{{ strtolower($lab->city ?? '') }}"
                 data-city-exact="{{ $lab->city ?? '' }}"
-                data-compat="{{ $isFullyCompatible ? '1' : '0' }}">
+                data-compat="{{ $isFullyCompatible ? '1' : '0' }}"
+                data-lab-id="{{ $lab->id }}">
 
                 {{-- Lab Header --}}
                 <div class="flex items-start gap-3 mb-3">
@@ -251,7 +255,7 @@
                                 {{ $ae->exam->name }}
                             </span>
                             @if($ae->price)
-                            <span class="font-bold text-[#0D9488]">{{ number_format($ae->price, 2) }} DZD</span>
+                            <span class="font-bold text-[#0D9488]">{{ number_format($ae->price, 2) }} TND</span>
                             @endif
                         </div>
                         @endforeach
@@ -261,6 +265,16 @@
 
                 {{-- Spacer --}}
                 <div class="flex-1"></div>
+
+                {{-- Map button --}}
+                <button type="button" onclick="openLabOnMap({{ $lab->id }})"
+                    class="w-full flex items-center justify-center gap-2 mb-2 bg-blue-50 hover:bg-blue-100 text-blue-600 font-bold py-2 rounded-xl transition-all duration-200 text-xs border border-blue-200">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    Voir sur la carte
+                </button>
 
                 {{-- Action button --}}
                 <form method="POST" action="{{ route('patient.assign-laboratory', $examRequest) }}">
@@ -423,38 +437,66 @@
     render();
 </script>
 
+@endsection
+
+@section('scripts')
+<script>
+    window.openLabOnMap = function() {
+        Swal.fire({ icon: 'info', title: 'Localisation', text: 'Chargement de la carte en cours...', confirmButtonColor: '#0D9488' });
+    };
+</script>
 @if($labsWithCoords->count() > 0)
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const labs = @json($labsWithCoords->map(fn($lab) => [
+    (function() {
+        var labs = {!! json_encode($labsWithCoords->map(fn($lab) => [
             'id' => $lab->id,
             'name' => $lab->name,
             'city' => $lab->city ?? '',
             'address' => $lab->address ?? '',
             'lat' => (float)$lab->latitude,
             'lng' => (float)$lab->longitude,
-        ]));
+        ])->values()->toArray()) !!};
 
         if (labs.length === 0) return;
 
-        const map = L.map('labMap').setView([labs[0].lat, labs[0].lng], 12);
+        var mapEl = document.getElementById('labMap');
+        if (!mapEl) return;
+
+        var map = L.map('labMap').setView([labs[0].lat, labs[0].lng], 12);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap'
         }).addTo(map);
 
-        const markers = [];
-        labs.forEach(lab => {
-            const marker = L.marker([lab.lat, lab.lng]).addTo(map)
-                .bindPopup(`<div style="font-family:Inter,sans-serif"><b>${lab.name}</b><br><span style="font-size:11px;color:#64748b">${lab.address ? lab.address + '<br>' : ''}${lab.city}</span></div>`);
-            markers.push(marker);
+        var markers = {};
+        var allMarkers = [];
+        labs.forEach(function(lab) {
+            var marker = L.marker([lab.lat, lab.lng]).addTo(map)
+                .bindPopup('<div style="font-family:Inter,sans-serif"><b>' + lab.name + '</b><br><span style="font-size:11px;color:#64748b">' + (lab.address ? lab.address + '<br>' : '') + lab.city + '</span></div>');
+            markers[lab.id] = marker;
+            allMarkers.push(marker);
         });
 
         if (labs.length > 1) {
-            const group = L.featureGroup(markers);
+            var group = L.featureGroup(allMarkers);
             map.fitBounds(group.getBounds().pad(0.1));
         }
-    });
+
+        setTimeout(function() { map.invalidateSize(); }, 200);
+
+        window.openLabOnMap = function(labId) {
+            if (markers[labId]) {
+                document.getElementById('labMap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(function() {
+                    map.invalidateSize();
+                    map.setView(markers[labId].getLatLng(), 15);
+                    markers[labId].openPopup();
+                }, 400);
+            } else {
+                Swal.fire({ icon: 'info', title: 'Localisation', text: 'Ce laboratoire n\'a pas de position géographique enregistrée.', confirmButtonColor: '#0D9488' });
+            }
+        };
+    })();
 </script>
 @endif
 @endsection

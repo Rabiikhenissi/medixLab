@@ -115,6 +115,13 @@ class DoctorController extends Controller
             ->where('patient_id', $patient->id)
             ->first();
 
+        if ($access && $access->access_status === 'blocked') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vous ne pouvez pas accéder à ce patient.',
+            ], 403);
+        }
+
         return response()->json([
             'success' => true,
             'patient' => [
@@ -150,6 +157,13 @@ class DoctorController extends Controller
             ->first();
 
         if ($existingAccess) {
+            if ($existingAccess->access_status === 'blocked') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Vous ne pouvez pas demander l\'accès à ce patient.',
+                ], 403);
+            }
+
             if ($existingAccess->access_status === 'pending') {
                 return response()->json([
                     'success' => false,
@@ -412,7 +426,7 @@ class DoctorController extends Controller
 
         $doctor  = Auth::user()->doctor;
         $patient = Patient::findOrFail($request->patient_id);
-        $examGroup = ExamGroup::findOrFail($request->exam_group_id);
+        $examGroup = ExamGroup::with('exams')->findOrFail($request->exam_group_id);
 
         if ($examGroup->doctor_id !== $doctor->id) {
             return response()->json([
@@ -421,9 +435,19 @@ class DoctorController extends Controller
             ], 403);
         }
 
+        if ($examGroup->exams->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ce groupe ne contient aucun examen.',
+            ], 422);
+        }
+
         $access = DoctorPatientAccess::where('doctor_id', $doctor->id)
             ->where('patient_id', $patient->id)
             ->where('access_status', 'granted')
+            ->where(function ($q) {
+                $q->whereNull('expires_at')->orWhere('expires_at', '>', now());
+            })
             ->first();
 
         if (!$access) {
@@ -432,6 +456,8 @@ class DoctorController extends Controller
                 'message' => 'Vous n\'avez pas accès à ce patient.',
             ], 403);
         }
+
+        $examCount = $examGroup->exams->count();
 
         $examRequest = \Illuminate\Support\Facades\DB::transaction(function () use ($doctor, $patient, $examGroup, $request) {
             $examRequest = ExamRequest::create([
@@ -451,7 +477,7 @@ class DoctorController extends Controller
             Notification::create([
                 'user_id'           => $patient->user_id,
                 'title'             => 'Nouvelle demande d\'analyses',
-                'message'           => 'Dr. ' . $doctor->user->first_name . ' ' . $doctor->user->last_name . ' vous a prescrit le groupe « ' . $examGroup->name . ' » (' . $examGroup->items->count() . ' examen(s)).',
+                'message'           => 'Dr. ' . $doctor->user->first_name . ' ' . $doctor->user->last_name . ' vous a prescrit le groupe « ' . $examGroup->name . ' » (' . $examCount . ' examen(s)).',
                 'notification_type' => 'exam_request',
                 'reference_id'      => $examRequest->id,
             ]);

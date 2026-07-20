@@ -117,7 +117,7 @@
                                     </div>
                                 </div>
                                 
-                                <form action="{{ route('center.working-hours.exceptions.destroy', $exception) }}" method="POST" onsubmit="return confirm('Supprimer cette exception de fermeture ?')">
+                                <form action="{{ route('center.working-hours.exceptions.destroy', $exception) }}" method="POST" onsubmit="return swalConfirmSubmit(this, 'Supprimer cette exception de fermeture ?')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition">
