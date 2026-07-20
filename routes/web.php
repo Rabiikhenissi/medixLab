@@ -536,6 +536,13 @@ Route::prefix('center')->name('center.')->group(function () {
         Route::post('/notifications/{notification}/read', [\App\Http\Controllers\CenterController::class, 'markAsRead'])->name('mark-as-read');
         Route::post('/notifications/read-all', [\App\Http\Controllers\CenterController::class, 'markAllAsRead'])->name('mark-all-read');
 
+        // Available Exams (Center-side)
+        Route::get('/available-exams', [\App\Http\Controllers\CenterController::class, 'availableExams'])->name('available-exams');
+        Route::post('/available-exams', [\App\Http\Controllers\CenterController::class, 'storeAvailableExam'])->name('available-exams.store');
+        Route::put('/available-exams/{availableExam}', [\App\Http\Controllers\CenterController::class, 'updateAvailableExam'])->name('available-exams.update');
+        Route::post('/available-exams/{availableExam}/toggle', [\App\Http\Controllers\CenterController::class, 'toggleAvailableExam'])->name('available-exams.toggle');
+        Route::delete('/available-exams/{availableExam}', [\App\Http\Controllers\CenterController::class, 'destroyAvailableExam'])->name('available-exams.destroy');
+
         // Logout
 
         Route::post(

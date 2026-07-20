@@ -173,7 +173,7 @@
                                                         <div class="mt-2 space-y-1">
                                                             @foreach ($item->resultLabo->details as $detail)
                                                                 <div class="flex items-center justify-between text-xs">
-                                                                    <span class="text-[#475569] font-medium">{{ $detail->parameter }}</span>
+                                                                    <span class="text-[#475569] font-medium">{{ $detail->parameter }}@if($detail->unit) <span class="text-[9px] font-semibold text-[#7C3AED] bg-[#7C3AED]/10 px-1 py-0.5 rounded border border-[#7C3AED]/20">{{ $detail->unit }}</span>@endif</span>
                                                                     <div class="flex items-center gap-2">
                                                                         <span class="font-bold {{ $detail->status === 'normal' ? 'text-green-600' : ($detail->status === 'high' ? 'text-red-600' : 'text-amber-600') }}">
                                                                             {{ $detail->value }}

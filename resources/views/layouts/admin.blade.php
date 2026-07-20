@@ -4,6 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Espace Administrateur') - Medix eSanté</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -907,17 +908,67 @@
 
         /* ── RESPONSIVE ───────────────────────────────────────── */
         @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                z-index: 200;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.4);
+                z-index: 190;
+            }
+            .sidebar-overlay.open {
+                display: block;
+            }
+            .layout {
+                margin-left: 0;
+            }
+            .topnav {
+                left: 0;
+                padding: 0 16px;
+            }
+            .page-content {
+                padding: 20px 16px 32px;
+            }
             .stats-grid {
                 grid-template-columns: 1fr;
             }
-
             .filter-input {
-                width: 180px;
+                width: 100%;
             }
-
+            .filters-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
             .form-row {
                 grid-template-columns: 1fr;
             }
+            .nav-user-info {
+                display: none;
+            }
+            .mobile-menu-btn {
+                display: flex !important;
+            }
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #64748b;
+            flex-shrink: 0;
         }
 
         @keyframes fadeInUp {
@@ -956,8 +1007,11 @@
 
 <body>
 
+    <!-- Mobile Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
     <!-- ══════════════════════════════════════════ SIDEBAR -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="adminSidebar">
         <div class="sidebar-logo">
             <svg width="20" height="20" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -1021,6 +1075,11 @@
                 }
             @endphp
             <a href="{{ route($dashboardRoute) }}" class="brand">Medix <span>eSanté</span></a>
+            <button class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Menu">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
+                </svg>
+            </button>
             <div class="topnav-right">
 
                 <div class="nav-user-info">
@@ -1126,6 +1185,13 @@
 
         </div><!-- /page-content -->
     </div><!-- /layout -->
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('adminSidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('open');
+        }
+    </script>
     @yield('scripts')
     <x-loading-overlay />
 </body>

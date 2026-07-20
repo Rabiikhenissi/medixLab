@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use App\Models\Traits\ActiveScoped;
 
-#[Fillable(['name', 'address', 'city', 'phone', 'email', 'is_archive'])]
+#[Fillable(['name', 'address', 'city', 'phone', 'email', 'latitude', 'longitude', 'is_archive'])]
 class Labo extends Model
 {
     use ActiveScoped;

@@ -9,6 +9,8 @@ use App\Models\WorkingHours;
 use App\Models\ExamRequest;
 use App\Models\StockMovement;
 use App\Models\Notification;
+use App\Models\AvailableExam;
+use App\Models\Exam;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -626,5 +628,98 @@ public function markAllAsRead()
         ->update(['is_read' => true]);
 
     return response()->json(['success' => true]);
+}
+
+// ==========================
+// AVAILABLE EXAMS (Center-side)
+// ==========================
+
+public function availableExams()
+{
+    $lab = auth()->user()->staff->laboratory;
+    $availableExams = AvailableExam::where('labo_id', $lab->id)
+        ->where('is_archive', false)
+        ->with('exam')
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+    $allExams = Exam::where('is_archive', false)
+        ->orWhereNull('is_archive')
+        ->orderBy('name')
+        ->get();
+
+    return view('center.available-exams', compact('availableExams', 'allExams', 'lab'));
+}
+
+public function storeAvailableExam(Request $request)
+{
+    $lab = auth()->user()->staff->laboratory;
+
+    $data = $request->validate([
+        'exam_id' => 'required|exists:exams,id',
+        'price' => 'required|numeric|min:0',
+    ]);
+
+    $exists = AvailableExam::where('labo_id', $lab->id)
+        ->where('exam_id', $data['exam_id'])
+        ->where('is_archive', false)
+        ->exists();
+
+    if ($exists) {
+        return back()->with('error', 'Cet examen est déjà configuré pour votre laboratoire.');
+    }
+
+    AvailableExam::create([
+        'labo_id' => $lab->id,
+        'exam_id' => $data['exam_id'],
+        'price' => $data['price'],
+        'is_active' => true,
+    ]);
+
+    return back()->with('success', 'Examen disponible ajouté avec succès.');
+}
+
+public function updateAvailableExam(Request $request, AvailableExam $availableExam)
+{
+    $lab = auth()->user()->staff->laboratory;
+
+    if ($availableExam->labo_id !== $lab->id) {
+        abort(403);
+    }
+
+    $data = $request->validate([
+        'price' => 'required|numeric|min:0',
+        'is_active' => 'boolean',
+    ]);
+
+    $availableExam->update($data);
+
+    return back()->with('success', 'Examen disponible mis à jour.');
+}
+
+public function toggleAvailableExam(AvailableExam $availableExam)
+{
+    $lab = auth()->user()->staff->laboratory;
+
+    if ($availableExam->labo_id !== $lab->id) {
+        abort(403);
+    }
+
+    $availableExam->update(['is_active' => !$availableExam->is_active]);
+
+    return back()->with('success', 'Statut modifié.');
+}
+
+public function destroyAvailableExam(AvailableExam $availableExam)
+{
+    $lab = auth()->user()->staff->laboratory;
+
+    if ($availableExam->labo_id !== $lab->id) {
+        abort(403);
+    }
+
+    $availableExam->update(['is_archive' => true]);
+
+    return back()->with('success', 'Examen retiré de la liste.');
 }
 }
