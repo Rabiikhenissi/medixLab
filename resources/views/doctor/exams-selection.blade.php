@@ -188,6 +188,14 @@
                         </button>
 
                         <button
+                            id="saveAsGroupBtn"
+                            disabled
+                            class="w-full py-3 rounded-xl bg-white border border-[#0066FF]/30 hover:bg-[#EFF6FF]/40 text-[#0066FF] font-bold transition transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-45 disabled:scale-100 text-xs uppercase tracking-wider shadow-xs cursor-pointer"
+                        >
+                            Sauvegarder en groupe
+                        </button>
+
+                        <button
                             id="cancelBtn"
                             class="w-full py-3 rounded-xl bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] font-bold transition border border-[#e2e8f0] text-xs uppercase tracking-wider cursor-pointer"
                         >
@@ -272,6 +280,59 @@
         </div>
     </div>
 
+    <!-- SAVE AS GROUP MODAL -->
+    <div id="saveGroupModal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="glass-card rounded-[20px] max-w-md w-full p-8 shadow-2xl">
+            <div class="flex justify-between items-center mb-6 pb-4 border-b border-[#e2e8f0]/80">
+                <h3 class="text-base font-bold text-[#1e293b]">
+                    Sauvegarder comme groupe
+                </h3>
+                <button class="closeSaveGroupModalBtn text-[#94a3b8] hover:text-[#1e293b] text-xl cursor-pointer">
+                    ×
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[10px] font-bold text-[#64748b] uppercase tracking-widest block mb-1.5">Nom du groupe *</label>
+                    <input
+                        id="saveGroupName"
+                        type="text"
+                        placeholder="Ex: Bilan hépatique complet"
+                        maxlength="255"
+                        required
+                        class="w-full border border-[#e2e8f0] rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-[#0066FF]/20 focus:border-[#0066FF] transition text-[#1e293b] font-semibold bg-white"
+                    >
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-[#64748b] uppercase tracking-widest block mb-1.5">Description</label>
+                    <textarea
+                        id="saveGroupDesc"
+                        rows="3"
+                        maxlength="500"
+                        placeholder="Description du groupe (optionnel)..."
+                        class="w-full border border-[#e2e8f0] rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-[#0066FF]/20 focus:border-[#0066FF] transition text-[#1e293b] font-semibold bg-white resize-none"
+                    ></textarea>
+                </div>
+                <div id="saveGroupExamsPreview" class="text-xs text-[#64748b]"></div>
+            </div>
+
+            <div class="flex gap-3 mt-6 pt-4 border-t border-[#e2e8f0]/80">
+                <button
+                    id="confirmSaveGroupBtn"
+                    class="flex-1 bg-[#0066FF] hover:bg-[#0052CC] text-white rounded-xl py-2.5 font-bold transition transform hover:scale-[1.02] active:scale-[0.98] text-xs uppercase tracking-wider shadow-md cursor-pointer"
+                >
+                    Enregistrer
+                </button>
+                <button
+                    class="closeSaveGroupModalBtn flex-1 bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] font-bold rounded-xl py-2.5 transition border border-[#e2e8f0] text-xs uppercase tracking-wider cursor-pointer"
+                >
+                    Annuler
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const patientId = {{ $patient->id }};
         let selectedExamIds = [];
@@ -313,6 +374,7 @@
             selectedExamIds = [...document.querySelectorAll('.exam-checkbox:checked')].map(x => x.value);
             document.getElementById('selectedCount').innerText = selectedExamIds.length;
             document.getElementById('confirmBtn').disabled = selectedExamIds.length === 0;
+            document.getElementById('saveAsGroupBtn').disabled = selectedExamIds.length === 0;
         }
 
         /* CONFIRM MODAL */
@@ -441,6 +503,58 @@
             isSubmitting = true;
             document.querySelectorAll("button,input,textarea").forEach(x => x.disabled = true);
         }
+
+        /* SAVE AS GROUP */
+        document.getElementById('saveAsGroupBtn').addEventListener('click', () => {
+            const list = document.getElementById('saveGroupExamsPreview');
+            list.innerHTML = '<span class="font-bold text-[#1e293b]">' + selectedExamIds.length + '</span> examen(s) seront inclus dans ce groupe.';
+            document.getElementById('saveGroupName').value = '';
+            document.getElementById('saveGroupDesc').value = '';
+            document.getElementById('saveGroupModal').classList.remove('hidden');
+        });
+
+        document.querySelectorAll('.closeSaveGroupModalBtn').forEach(btn => {
+            btn.onclick = () => document.getElementById('saveGroupModal').classList.add('hidden');
+        });
+
+        document.getElementById('confirmSaveGroupBtn').onclick = async () => {
+            const name = document.getElementById('saveGroupName').value.trim();
+            if (!name) {
+                document.getElementById('saveGroupName').focus();
+                return;
+            }
+            if (isSubmitting) return;
+            lockUI();
+
+            try {
+                const response = await fetch('{{ route('doctor.api.store-exam-group') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        description: document.getElementById('saveGroupDesc').value.trim(),
+                        exam_ids: selectedExamIds.map(Number)
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert(data.message);
+                    window.location.reload();
+                } else {
+                    alert(data.message || 'Une erreur est survenue.');
+                    isSubmitting = false;
+                    document.querySelectorAll("button,input,textarea").forEach(x => x.disabled = false);
+                }
+            } catch (e) {
+                alert('Une erreur est survenue lors de la création du groupe.');
+                isSubmitting = false;
+                document.querySelectorAll("button,input,textarea").forEach(x => x.disabled = false);
+            }
+        };
 
         document.getElementById('cancelBtn').onclick = () => {
             window.location.href = '{{ route('doctor.dashboard') }}';

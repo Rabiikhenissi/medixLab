@@ -167,6 +167,7 @@ Route::prefix('doctor')->name('doctor.')->group(function () {
         Route::get('/my-patients', [\App\Http\Controllers\DoctorController::class, 'myPatients'])->name('my-patients');
         Route::post('/exam-requests/{examRequest}/submit-interpretation', [\App\Http\Controllers\DoctorController::class, 'submitInterpretation'])->name('submit-interpretation');
         Route::post('/apply-exam-group', [\App\Http\Controllers\DoctorController::class, 'applyExamGroup'])->name('apply-exam-group');
+        Route::post('/api/exam-groups', [\App\Http\Controllers\DoctorController::class, 'storeExamGroupApi'])->name('api.store-exam-group');
 
         // Exam Groups CRUD (dedicated pages)
         Route::get('/exam-groups', [\App\Http\Controllers\DoctorController::class, 'examGroupsIndex'])->name('exam-groups.index');
