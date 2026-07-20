@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use App\Models\Traits\ActiveScoped;
 
 #[Fillable(['user_id', 'title', 'message', 'is_read', 'is_archive', 'notification_type', 'reference_id'])]
 class Notification extends Model
 {
+    use ActiveScoped;
     protected function casts(): array
     {
         return [

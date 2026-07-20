@@ -6,8 +6,9 @@ use App\Models\ExamRequestItem;
 use App\Models\ResultLabo;
 use App\Models\ResultLaboDetail;
 use App\Models\Consumable;
-use App\Models\Equipment;
 use App\Models\StockMovement;
+use App\Services\ExamRequestService;
+use App\Services\StockService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -58,22 +59,8 @@ class LaboResultController extends Controller
 
 
 
-    public function store(Request $request, ExamRequestItem $item)
+    public function store(\App\Http\Requests\StoreResultFormRequest $request, ExamRequestItem $item)
     {
-        $request->validate([
-            'interpretation' => 'nullable|string',
-            'parameters' => 'required|array',
-            'parameters.*.name' => 'required|string',
-            'parameters.*.value' => 'required|string',
-            'parameters.*.status' => 'required|in:normal,high,low',
-            'parameters.*.range' => 'nullable|string',
-            'consumables' => 'nullable|array',
-            'consumables.*.id' => 'required|exists:consumables,id',
-            'consumables.*.quantity' => 'required|integer|min:1',
-            'equipment' => 'nullable|array',
-            'equipment.*' => 'required|exists:equipment,id',
-        ]);
-
         $lab = auth()->user()->staff;
         $result = null;
 
@@ -93,15 +80,7 @@ class LaboResultController extends Controller
                 // 1. Revert previous stock movements & quantities
                 foreach ($result->consumables as $oldConsumable) {
                     $qtyUsed = $oldConsumable->pivot->quantity_used;
-                    $oldConsumable->quantity += $qtyUsed;
-                    $oldConsumable->save();
-
-                    StockMovement::create([
-                        'consumable_id' => $oldConsumable->id,
-                        'quantity_change' => $qtyUsed,
-                        'type' => 'in',
-                        'reason' => "Annulation / Mise à jour du résultat d'examen #" . $result->id,
-                    ]);
+                    StockService::add($oldConsumable, $qtyUsed, "Annulation / Mise à jour du résultat d'examen #" . $result->id);
                 }
 
                 // Remove old details, consumables and equipment
@@ -139,17 +118,7 @@ class LaboResultController extends Controller
                     $quantityUsed = (int)$cData['quantity'];
 
                     $consumable = Consumable::findOrFail($consumableId);
-                    // Deduct stock
-                    $consumable->quantity = max(0, $consumable->quantity - $quantityUsed);
-                    $consumable->save();
-
-                    // Create stock movement
-                    StockMovement::create([
-                        'consumable_id' => $consumable->id,
-                        'quantity_change' => $quantityUsed,
-                        'type' => 'out',
-                        'reason' => "Utilisé pour le résultat d'examen #" . $result->id,
-                    ]);
+                    StockService::deduct($consumable, $quantityUsed, "Utilisé pour le résultat d'examen #" . $result->id);
 
                     // Attach to result
                     $result->consumables()->attach($consumableId, [
@@ -169,21 +138,8 @@ class LaboResultController extends Controller
             }
         });
 
-        // Check if all items in this request have results
-        $examRequest = $item->examRequest;
-        $allItemsCompleted = true;
-        foreach ($examRequest->items as $reqItem) {
-            if ($reqItem->id !== $item->id && !$reqItem->resultLabo()->exists()) {
-                $allItemsCompleted = false;
-                break;
-            }
-        }
-
-        if ($allItemsCompleted) {
-            $examRequest->update([
-                'status' => 'completed'
-            ]);
-        }
+        // Check if all items in this request have results using ExamRequestService
+        ExamRequestService::checkCompletion($item->examRequest);
 
         return redirect()
             ->route('center.exam-requests')
@@ -320,21 +276,7 @@ class LaboResultController extends Controller
             }
         });
 
-        // Check if all items in this request have results
-        $examRequest = $result->examRequestItem->examRequest;
-        $allItemsCompleted = true;
-        foreach ($examRequest->items as $reqItem) {
-            if (!$reqItem->resultLabo()->exists()) {
-                $allItemsCompleted = false;
-                break;
-            }
-        }
-
-        if ($allItemsCompleted) {
-            $examRequest->update([
-                'status' => 'completed'
-            ]);
-        }
+        ExamRequestService::checkCompletion($result->examRequestItem->examRequest);
 
         return redirect()
             ->route('center.exam-requests')

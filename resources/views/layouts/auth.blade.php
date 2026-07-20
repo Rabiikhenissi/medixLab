@@ -23,5 +23,6 @@
         <div class="relative z-10 min-h-screen flex flex-col justify-center items-center p-4 md:p-8">
             {{ $slot }}
         </div>
+        <x-loading-overlay />
     </body>
 </html>

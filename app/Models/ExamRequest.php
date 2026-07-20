@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use App\Models\Traits\ActiveScoped;
 
 #[Fillable(['doctor_id', 'patient_id', 'labo_id', 'status', 'clinical_notes', 'doctor_interpretation', 'approved_by_doctor', 'is_archive'])]
 class ExamRequest extends Model
 {
+    use ActiveScoped;
     protected function casts(): array
     {
         return [

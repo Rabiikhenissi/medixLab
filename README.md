@@ -1,58 +1,149 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
-
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <img src="public/images/readme_banner.png" width="100%" alt="Medix eSanté Banner" style="border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);">
 </p>
 
-## About Laravel
+# 🏥 Medix eSanté (MedixLab)
+### *The Ultimate Connected Healthcare Ecosystem & Medical Analysis Platform*
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+<div align="center">
+  
+  [![Laravel](https://img.shields.io/badge/Laravel-11.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)](https://laravel.com)
+  [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.x-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
+  [![PHP](https://img.shields.io/badge/PHP-8.2%2B-777BB4?style=for-the-badge&logo=php&logoColor=white)](https://php.net)
+  [![License](https://img.shields.io/badge/License-MIT-000000?style=for-the-badge)](LICENSE)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+</div>
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 🌐 Hosted Live Demo & Preview
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Medix eSanté is fully deployed and ready for live inspection. Click the badge below to access the hosted platform:
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+<div align="center">
+  <a href="https://medixlab.alwaysdata.net" target="_blank" style="text-decoration:none;">
+    <img src="https://img.shields.io/badge/🚀%20ACCÉDER%20À%20LA%20DEMO%20LIVE-DEMO.MEDIXESANTE.COM-0D9488?style=for-the-badge&logo=rocket" alt="Live Demo Badge" height="40">
+  </a>
+</div>
 
-## Agentic Development
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
 
+## 🌟 Value Proposition (Why MedixLab?)
+
+MedixLab is designed to be sold as a **SaaS solution** or **on-premise enterprise software** for healthcare groups, hospital networks, or independent laboratories. 
+
+*   **Unified Workflows**: Eliminates paper clutter by digitalizing the entire prescription-to-result loop.
+*   **Secure Access Control**: Protects patients' private medical data through a state-of-the-art consent system where patients hold the keys to their record access.
+*   **Resource Optimization**: Features integrated inventory tracking and equipment maintenance tools to keep labs running with zero downtime.
+*   **Premium User Experience**: Designed with modern visual principles, including responsive interfaces, soft gradients, glassmorphism elements, and micro-animations.
+
+---
+
+## 👥 Integrated Portals & Roles
+
+### 1. 🩸 Patient Portal
+An intuitive dashboard focused on transparency, simplicity, and ease of use:
+*   **Visual Progress Stepper**: Track the status of every prescription in real-time (`Prescription` ➔ `Lab Choose` ➔ `Collected` ➔ `In Progress` ➔ `Completed`).
+*   **Smart Laboratory Selector**: Filter labs by city, check if they offer all required exams in the prescription, and preview transparent pricing breakdown before booking.
+*   **Medical History Timeline**: A complete chronological list of all past exam requests, lab parameters, normal/high/low reference flags, and doctor interpretations.
+*   **PDF Export & Print**: Generate professional, print-optimized clinical reports with a single click.
+*   **Security Control Center**: Review active doctor authorizations, set expiration dates, and revoke doctor access instantly.
+
+### 2. 🥼 Doctor Portal
+A clinical workstation designed to minimize admin overhead:
+*   **My Patients Directory**: Instantly access active patient medical folders and view their complete clinical history.
+*   **Request Access**: Request authorization to view new patient files using secure unique patient codes.
+*   **Smart Prescription System**: Create custom prescriptions or apply custom pre-saved **Exam Groups** (e.g. "Bilan Hépatique", "Bilan Lipidique") with custom clinical notes.
+*   **Clinical Validation**: Review detailed lab values and submit professional interpretations to patients instantly.
+
+### 3. 🔬 Medical Laboratory (Center) Portal
+A functional center operations dashboard:
+*   **Live Workload Overview**: Analyze real-time statistics of pending requests and view a 7-day dynamic daily request chart.
+*   **Result Capture Board**: Enter parameters, flags, and values with automatic normal/abnormal bounds highlighting.
+*   **Stock & Consumables Manager**: Real-time inventory tracking with threshold indicators. Sends immediate internal notifications when stock drops below the minimum limit.
+*   **Equipment & Maintenance Log**: Monitor equipment status and track scheduled maintenance to ensure lab reliability.
+*   **Custom Schedule & Calendar**: Set weekly working hours and exception holidays/closures easily.
+
+### 4. 🔑 Admin Portal
+A platform control center to oversee operations:
+*   **Interactive Analytics Board**: Visual Chart.js charts representing 15-day volume trends, request status distributions, and Top 5 most prescribed exams.
+*   **Catalogs Management**: Manage, update, or archive the list of available medical exams and reference values.
+*   **User & Laboratory Registrations**: Fully audit user roles, laboratory networks, and staff permissions.
+
+---
+
+## 🛠 Tech Stack & Architecture
+
+- **Backend Framework**: Laravel 11.x (PHP 8.2+)
+- **Frontend Architecture**: TailwindCSS 3.x, Vanilla JavaScript (Fast, responsive, zero-bloat compilation).
+- **Database**: Relational Database (MySQL, PostgreSQL, or SQLite).
+- **Charting & Visuals**: Chart.js for interactive analytics.
+- **Code Organization**: Clean separation of concerns with dedicated **Service layers** (`ExamRequestService`, `NotificationService`, `StockService`) and strict Form Requests validation.
+- **Security & Reliability**:
+  - Rate limiting on authentication routes.
+  - Password strength validation bar in registration forms.
+  - Multi-step DB writes wrapped in transactions.
+  - Anti-collision generator for medical codes (CNOM, Staff ID, Patient Identifier).
+
+---
+
+## 💾 Installation & Setup
+
+Follow these steps to run MedixLab locally:
+
+### 1. Prerequisites
+Ensure you have **PHP 8.2+**, **Composer**, and **Node.js** installed on your machine.
+
+### 2. Clone the Repository
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone https://github.com/your-repo/medixLab.git
+cd medixLab
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### 3. Install Dependencies
+```bash
+composer install
+npm install
+```
 
-## Contributing
+### 4. Environment Configuration
+Copy the environment template and set your database credentials:
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Configure your `.env` database details:
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_DATABASE=medixlab
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
-## Code of Conduct
+*Note: Default mailer `MAIL_MAILER` is set to `log`. Sent emails are logged in `storage/logs/laravel.log` for easy testing without an SMTP server.*
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 5. Run Migrations & Seeders
+Populate the database with sample exams, parameters, and roles:
+```bash
+php artisan migrate:fresh --seed
+```
 
-## Security Vulnerabilities
+### 6. Build Assets & Start Server
+Run the dev server and vite bundler:
+```bash
+# In terminal 1
+npm run dev
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# In terminal 2
+php artisan serve
+```
+Visit the app at `https://medixlab.alwaysdata.net/`.
 
-## License
+---
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## 🔒 Security & Privacy Compliance
+MedixLab takes security seriously. Patient identifiers are generated using collision-free mathematical sequences (e.g. ID-based checksum codes) rather than public timestamps. No doctor can read a patient's historical analysis without explicit authorization from the patient. Access tokens expire automatically after 6 months to guarantee maximum user data protection.

@@ -1,12 +1,10 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Models\Labo;
 use App\Models\ExamRequest;
 use App\Models\Patient;
 use App\Models\Notification;
 use App\Models\DoctorPatientAccess;
-use App\Models\ExamRequestItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -77,6 +75,22 @@ class PatientController extends Controller
     }
 
     /**
+     * Mark all notifications as read for the authenticated patient
+     */
+    public function markAllAsRead()
+    {
+        Notification::where('user_id', Auth::id())
+            ->where('is_read', false)
+            ->where('is_archive', false)
+            ->update(['is_read' => true]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Toutes les notifications marquées comme lues.',
+        ]);
+    }
+
+    /**
      * Get pending access requests for patient
      */
     public function getAccessRequests()
@@ -141,11 +155,14 @@ class PatientController extends Controller
             ], 403);
         }
 
-        // Normalize action (accept/accepted -> granted, decline/declined -> revoked)
+        // Normalize action and set expiry on grant
         $action = $request->action;
         if (in_array($action, ['accept', 'accepted'])) {
-            $access->update(['access_status' => 'granted']);
-            $message = 'Accès accordé au médecin';
+            $access->update([
+                'access_status' => 'granted',
+                'expires_at'    => now()->addMonths(6),
+            ]);
+            $message = 'Accès accordé au médecin (valable 6 mois)';
         } else {
             $access->update(['access_status' => 'revoked']);
             $message = 'Demande d\'accès refusée';
@@ -154,6 +171,51 @@ class PatientController extends Controller
         return response()->json([
             'success' => true,
             'message' => $message,
+        ]);
+    }
+
+    /**
+     * Revoke doctor access
+     */
+    public function revokeAccess(Request $request)
+    {
+        $request->validate([
+            'access_id' => 'required|exists:doctor_patient_access,id',
+        ]);
+
+        $user = Auth::user();
+        $patient = $user->patient;
+
+        if (!$patient) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Profil patient non trouvé.',
+            ], 403);
+        }
+
+        $access = DoctorPatientAccess::findOrFail($request->access_id);
+
+        if ($access->patient_id !== $patient->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized',
+            ], 403);
+        }
+
+        $access->update(['access_status' => 'revoked']);
+
+        // Create notification for doctor
+        Notification::create([
+            'user_id' => $access->doctor->user->id,
+            'title' => 'Accès révoqué',
+            'message' => 'Le patient ' . $user->first_name . ' ' . $user->last_name . ' a révoqué votre accès à son dossier médical.',
+            'notification_type' => 'general',
+            'reference_id' => $access->id,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Accès révoqué avec succès.',
         ]);
     }
 
@@ -393,7 +455,7 @@ class PatientController extends Controller
     {
         $patient = auth()->user()->patient;
 
-        $examRequest = ExamRequest::with('laboratory')->findOrFail($id);
+        $examRequest = ExamRequest::with(['laboratory', 'items.exam'])->findOrFail($id);
 
         if (!$patient || $examRequest->patient_id !== $patient->id) {
             abort(403);
@@ -405,16 +467,89 @@ class PatientController extends Controller
                 ->with('error', 'Impossible de modifier le laboratoire pour cette prescription.');
         }
 
-        $laboratories = Labo::with('workingHours')
+        // IDs of exams required by this prescription
+        $requiredExamIds = $examRequest->items->pluck('exam_id')->toArray();
+
+        $laboratories = Labo::with(['workingHours', 'availableExams.exam'])
             ->where('is_archive', false)
             ->orderBy('name')
             ->get();
 
         return view('patient.choose-laboratory', [
-            'examRequest'   => $examRequest,
-            'laboratories'  => $laboratories,
+            'examRequest'     => $examRequest,
+            'laboratories'    => $laboratories,
+            'requiredExamIds' => $requiredExamIds,
         ]);
     }
 
+
+    /**
+     * Print/PDF export of a completed exam request (Task 3.2)
+     */
+    public function printExamRequest(ExamRequest $examRequest)
+    {
+        $patient = auth()->user()->patient;
+
+        if (!$patient || $examRequest->patient_id !== $patient->id) {
+            abort(403);
+        }
+
+        if ($examRequest->status !== 'completed' || !$examRequest->approved_by_doctor) {
+            return redirect()->route('patient.dashboard')
+                ->with('error', 'Le rapport n\'est disponible que pour les demandes complétées et approuvées.');
+        }
+
+        $examRequest->load(['doctor.user', 'patient.user', 'laboratory', 'items.exam', 'items.resultLabo.details']);
+
+        return view('patient.print-exam-request', compact('examRequest'));
+    }
+
+    /**
+     * Medical history timeline for the patient (Task 3.5)
+     */
+    public function medicalHistory()
+    {
+        $patient = auth()->user()->patient;
+
+        if (!$patient) {
+            return redirect()->route('patient.dashboard');
+        }
+
+        $examRequests = ExamRequest::where('patient_id', $patient->id)
+            ->with([
+                'doctor.user',
+                'laboratory',
+                'items.exam',
+                'items.resultLabo.details',
+            ])
+            ->latest('created_at')
+            ->get();
+
+        return view('patient.medical-history', [
+            'user'         => auth()->user(),
+            'patient'      => $patient,
+            'examRequests' => $examRequests,
+        ]);
+    }
+
+    /**
+     * Cancel an exam request (only if not completed)
+     */
+    public function cancelExamRequest(ExamRequest $examRequest)
+    {
+        $patient = auth()->user()->patient;
+
+        if ($examRequest->patient_id !== $patient->id) {
+            abort(403);
+        }
+
+        if (in_array($examRequest->status, ['completed', 'cancelled'])) {
+            return back()->with('error', 'Impossible d\'annuler cette demande.');
+        }
+
+        $examRequest->update(['status' => 'cancelled']);
+
+        return back()->with('success', 'Demande d\'examen annulée.');
+    }
 
 }

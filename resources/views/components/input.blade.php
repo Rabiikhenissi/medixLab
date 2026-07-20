@@ -5,7 +5,8 @@
     'placeholder' => '',
     'required' => false,
     'value' => '',
-    'options' => []
+    'options' => [],
+    'showStrength' => false,
 ])
 
 <div class="w-full">
@@ -40,6 +41,70 @@
         @else
             <input type="{{ $type }}" name="{{ $name }}" id="{{ $name }}" placeholder="{{ $placeholder }}" value="{{ $value }}" @if($required) required @endif
                 class="custom-input w-full px-4 py-2.5 bg-[#F8FAFC] border border-[#e2e8f0] rounded-xl text-sm text-[#1e293b] placeholder-[#94a3b8] focus:outline-none focus:bg-white">
+            @if($type === 'password' && $showStrength)
+                <div class="mt-2 text-xs font-semibold text-gray-500">
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-[10px] uppercase text-[#64748b] tracking-wider select-none">Sécurité :</span>
+                        <div class="flex-1 h-1.5 bg-gray-250 rounded-full overflow-hidden flex gap-0.5">
+                            <div id="password-strength-bar-1" class="h-full w-1/4 rounded-full transition-all duration-300 bg-gray-200"></div>
+                            <div id="password-strength-bar-2" class="h-full w-1/4 rounded-full transition-all duration-300 bg-gray-200"></div>
+                            <div id="password-strength-bar-3" class="h-full w-1/4 rounded-full transition-all duration-300 bg-gray-200"></div>
+                            <div id="password-strength-bar-4" class="h-full w-1/4 rounded-full transition-all duration-300 bg-gray-200"></div>
+                        </div>
+                        <span id="password-strength-label" class="text-[10px] font-bold text-[#64748b] select-none min-w-[60px] text-right">Très faible</span>
+                    </div>
+                </div>
+                <script>
+                    document.addEventListener('DOMContentLoaded', () => {
+                        const passInput = document.getElementById('password');
+                        if (!passInput) return;
+
+                        const bars = [
+                            document.getElementById('password-strength-bar-1'),
+                            document.getElementById('password-strength-bar-2'),
+                            document.getElementById('password-strength-bar-3'),
+                            document.getElementById('password-strength-bar-4')
+                        ];
+                        const label = document.getElementById('password-strength-label');
+
+                        passInput.addEventListener('input', () => {
+                            const val = passInput.value;
+                            let score = 0;
+                            if (val.length >= 6) score++;
+                            if (/[a-z]/.test(val) && /[A-Z]/.test(val)) score++;
+                            if (/\d/.test(val)) score++;
+                            if (/[^A-Za-z0-9]/.test(val)) score++;
+
+                            bars.forEach((b, idx) => {
+                                b.style.backgroundColor = '#e5e7eb';
+                                if (idx < score) {
+                                    if (score === 1) b.style.backgroundColor = '#ef4444'; // Red
+                                    else if (score === 2) b.style.backgroundColor = '#f59e0b'; // Amber
+                                    else if (score === 3) b.style.backgroundColor = '#3b82f6'; // Blue
+                                    else if (score === 4) b.style.backgroundColor = '#10b981'; // Green
+                                }
+                            });
+
+                            if (val.length === 0) {
+                                label.textContent = 'Très faible';
+                                label.style.color = '#64748b';
+                            } else if (score === 1) {
+                                label.textContent = 'Faible';
+                                label.style.color = '#ef4444';
+                            } else if (score === 2) {
+                                label.textContent = 'Moyen';
+                                label.style.color = '#f59e0b';
+                            } else if (score === 3) {
+                                label.textContent = 'Fort';
+                                label.style.color = '#3b82f6';
+                            } else if (score === 4) {
+                                label.textContent = 'Très fort';
+                                label.style.color = '#10b981';
+                            }
+                        });
+                    });
+                </script>
+            @endif
         @endif
     @else
         <div class="flex items-center">

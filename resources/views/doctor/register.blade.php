@@ -57,14 +57,7 @@
             />
         </div>
 
-        <!-- CNOM ID -->
-        <x-input
-            type="text"
-            name="cnom_id"
-            label="ID Docteur (CNOM)"
-            placeholder="ex. DOC12345"
-            :required="true"
-        />
+
 
         <!-- Specialty -->
         <x-input
@@ -135,6 +128,7 @@
                 label="Mot de passe"
                 placeholder="••••••••"
                 :required="true"
+                :show-strength="true"
             />
 
             <!-- Confirm Password -->

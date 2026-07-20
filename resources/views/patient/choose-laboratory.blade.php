@@ -1,5 +1,7 @@
-<x-layouts.auth>
+<x-layouts.patient>
 <x-slot:title>Choisir un laboratoire — Medix eSanté</x-slot:title>
+
+@section('content')
 
 <style>
     .lab-card {
@@ -62,7 +64,7 @@
             </p>
         </div>
 
-        {{-- Search + Count --}}
+        {{-- Search + Compat filter + Count --}}
         <div class="flex flex-col sm:flex-row gap-3 mb-5">
             <div class="relative flex-1">
                 <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94a3b8]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -71,7 +73,17 @@
                 <input type="text" id="labSearchInput" placeholder="Rechercher un laboratoire..."
                     class="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-[#e2e8f0] bg-white focus:outline-none focus:ring-2 focus:ring-[#0D9488]/30 focus:border-[#0D9488] transition text-[#1e293b]">
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-3">
+                @if(count($requiredExamIds) > 0)
+                <label class="flex items-center gap-2 cursor-pointer select-none" title="N'afficher que les labs couvrant tous vos examens">
+                    <div class="relative">
+                        <input type="checkbox" id="compatFilter" class="sr-only peer">
+                        <div class="w-9 h-5 bg-[#e2e8f0] rounded-full peer-checked:bg-[#0D9488] transition-colors duration-200"></div>
+                        <div class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200 peer-checked:translate-x-4"></div>
+                    </div>
+                    <span class="text-xs font-bold text-[#475569] whitespace-nowrap">Labs compatibles uniquement</span>
+                </label>
+                @endif
                 <span id="labResultCount" class="text-sm text-[#94a3b8] font-medium whitespace-nowrap">
                     {{ count($laboratories) }} laboratoire(s)
                 </span>
@@ -104,10 +116,18 @@
         {{-- Lab grid --}}
         <div id="labGrid" class="grid md:grid-cols-2 gap-4">
             @foreach($laboratories as $lab)
+            @php
+                $labAvailableExamIds = $lab->availableExams->where('is_active', true)->pluck('exam_id')->toArray();
+                $coveredCount        = count(array_intersect($requiredExamIds, $labAvailableExamIds));
+                $totalRequired       = count($requiredExamIds);
+                $isFullyCompatible   = $totalRequired === 0 || $coveredCount === $totalRequired;
+                $compatPct           = $totalRequired > 0 ? round($coveredCount / $totalRequired * 100) : 100;
+            @endphp
             <div class="lab-card bg-white border border-[#e2e8f0] rounded-2xl p-5 flex flex-col"
                 data-name="{{ strtolower($lab->name) }}"
                 data-city="{{ strtolower($lab->city ?? '') }}"
-                data-city-exact="{{ $lab->city ?? '' }}">
+                data-city-exact="{{ $lab->city ?? '' }}"
+                data-compat="{{ $isFullyCompatible ? '1' : '0' }}">
 
                 {{-- Lab Header --}}
                 <div class="flex items-start gap-3 mb-3">
@@ -121,6 +141,18 @@
                             <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
                             {{ $lab->city }}
                         </span>
+                        @endif
+                        {{-- Exam compatibility badge (Task 3.4) --}}
+                        @if ($totalRequired > 0)
+                        <div class="mt-2 flex items-center gap-1.5">
+                            <div class="flex-1 bg-slate-100 rounded-full h-1.5">
+                                <div class="h-1.5 rounded-full {{ $isFullyCompatible ? 'bg-green-500' : ($coveredCount > 0 ? 'bg-amber-400' : 'bg-red-400') }} transition-all"
+                                     style="width: {{ $compatPct }}%"></div>
+                            </div>
+                            <span class="text-[10px] font-bold whitespace-nowrap {{ $isFullyCompatible ? 'text-green-600' : ($coveredCount > 0 ? 'text-amber-600' : 'text-red-500') }}">
+                                {{ $coveredCount }}/{{ $totalRequired }} examens
+                            </span>
+                        </div>
                         @endif
                     </div>
                 </div>
@@ -191,6 +223,31 @@
                 </details>
                 @endif
 
+                {{-- Available exams & prices (Task 3.4) --}}
+                @php
+                    $matchingExams = $lab->availableExams
+                        ->where('is_active', true)
+                        ->filter(fn($ae) => in_array($ae->exam_id, $requiredExamIds));
+                @endphp
+                @if($matchingExams->count() > 0)
+                <div class="mb-4">
+                    <p class="text-[10px] font-bold text-[#1e293b] uppercase tracking-wider mb-1.5">Examens disponibles pour cette prescription :</p>
+                    <div class="space-y-1">
+                        @foreach($matchingExams as $ae)
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="text-[#475569] font-medium flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>
+                                {{ $ae->exam->name }}
+                            </span>
+                            @if($ae->price)
+                            <span class="font-bold text-[#0D9488]">{{ number_format($ae->price, 2) }} DZD</span>
+                            @endif
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+
                 {{-- Spacer --}}
                 <div class="flex-1"></div>
 
@@ -233,6 +290,7 @@
     let labCurrentPage   = 1;
     let activeCityFilter = 'all';
     let searchTerm       = '';
+    let compatOnly       = false;
 
     const allCards = Array.from(document.querySelectorAll('.lab-card'));
     const labGrid  = document.getElementById('labGrid');
@@ -242,11 +300,22 @@
     const labBtns  = document.getElementById('labPageButtons');
     const labCount = document.getElementById('labResultCount');
 
+    // Compatibility toggle
+    const compatToggle = document.getElementById('compatFilter');
+    if (compatToggle) {
+        compatToggle.addEventListener('change', () => {
+            compatOnly     = compatToggle.checked;
+            labCurrentPage = 1;
+            render();
+        });
+    }
+
     function getVisible() {
         return allCards.filter(card => {
-            const nameMatch = card.dataset.name.includes(searchTerm);
-            const cityMatch = activeCityFilter === 'all' || card.dataset.cityExact === activeCityFilter;
-            return nameMatch && cityMatch;
+            const nameMatch   = card.dataset.name.includes(searchTerm);
+            const cityMatch   = activeCityFilter === 'all' || card.dataset.cityExact === activeCityFilter;
+            const compatMatch = !compatOnly || card.dataset.compat === '1';
+            return nameMatch && cityMatch && compatMatch;
         });
     }
 
@@ -342,5 +411,5 @@
     // Initial render
     render();
 </script>
-
-</x-layouts.auth>
+@endsection
+</x-layouts.patient>

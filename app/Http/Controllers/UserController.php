@@ -4,6 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Group;
+use App\Models\Labo;
+use App\Models\Admin;
+use App\Models\Doctor;
+use App\Models\Patient;
+use App\Models\Staff;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
@@ -58,7 +63,7 @@ class UserController extends Controller
     public function create()
     {
         $groups = Group::where('is_archive', false)->orWhereNull('is_archive')->orderBy('name', 'asc')->get();
-        $laboratories = \App\Models\Labo::where('is_archive', false)->orWhereNull('is_archive')->orderBy('name', 'asc')->get();
+        $laboratories = Labo::where('is_archive', false)->orWhereNull('is_archive')->orderBy('name', 'asc')->get();
 
         return view('admin.users.create', [
             'groups' => $groups,
@@ -100,13 +105,13 @@ class UserController extends Controller
             // If the assigned role code is 'admin', also create a record in the admins table
             $group = Group::find($data['group_id']);
             if ($group && $group->code === 'admin') {
-                \App\Models\Admin::create([
+                Admin::create([
                     'user_id' => $user->id,
                 ]);
             }
             // If the role code is 'doctor', create doctor record
             elseif ($group && $group->code === 'doctor') {
-                \App\Models\Doctor::create([
+                Doctor::create([
                     'user_id' => $user->id,
                     'doctor_code' => 'DOC-' . strtoupper(\Illuminate\Support\Str::random(6)),
                     'speciality' => 'Généraliste',
@@ -114,14 +119,14 @@ class UserController extends Controller
             }
             // If patient
             elseif ($group && $group->code === 'patient') {
-                \App\Models\Patient::create([
+                Patient::create([
                     'user_id' => $user->id,
                     'patient_code' => 'PAT-' . strtoupper(\Illuminate\Support\Str::random(6)),
                 ]);
             }
             // If Medical Center
             elseif ($group && $group->code === 'center') {
-                \App\Models\Staff::create([
+                Staff::create([
                     'user_id' => $user->id,
                     'laboratory_id' => $request->input('laboratory_id'),
                     'staff_code' => 'STF-' . strtoupper(\Illuminate\Support\Str::random(8)),
@@ -138,7 +143,7 @@ class UserController extends Controller
     public function edit(User $user)
     {
         $groups = Group::where('is_archive', false)->orWhereNull('is_archive')->orderBy('name', 'asc')->get();
-        $laboratories = \App\Models\Labo::where('is_archive', false)->orWhereNull('is_archive')->orderBy('name', 'asc')->get();
+        $laboratories = Labo::where('is_archive', false)->orWhereNull('is_archive')->orderBy('name', 'asc')->get();
 
         return view('admin.users.edit', [
             'user' => $user,
@@ -189,33 +194,33 @@ class UserController extends Controller
             if ($oldGroup && $newGroup && $oldGroup->code !== $newGroup->code) {
                 // Delete old roles records
                 if ($oldGroup->code === 'admin') {
-                    \App\Models\Admin::where('user_id', $user->id)->delete();
+                    Admin::where('user_id', $user->id)->delete();
                 } elseif ($oldGroup->code === 'doctor') {
-                    \App\Models\Doctor::where('user_id', $user->id)->delete();
+                    Doctor::where('user_id', $user->id)->delete();
                 } elseif ($oldGroup->code === 'patient') {
-                    \App\Models\Patient::where('user_id', $user->id)->delete();
+                    Patient::where('user_id', $user->id)->delete();
                 } elseif ($oldGroup->code === 'center') {
-                    \App\Models\Staff::where('user_id', $user->id)->delete();
+                    Staff::where('user_id', $user->id)->delete();
                 }
 
                 // Create new role record
                 if ($newGroup->code === 'admin') {
-                    \App\Models\Admin::firstOrCreate(['user_id' => $user->id]);
+                    Admin::firstOrCreate(['user_id' => $user->id]);
                 } elseif ($newGroup->code === 'doctor') {
-                    \App\Models\Doctor::firstOrCreate([
+                    Doctor::firstOrCreate([
                         'user_id' => $user->id
                     ], [
                         'doctor_code' => 'DOC-' . strtoupper(\Illuminate\Support\Str::random(6)),
                         'speciality' => 'Généraliste',
                     ]);
                 } elseif ($newGroup->code === 'patient') {
-                    \App\Models\Patient::firstOrCreate([
+                    Patient::firstOrCreate([
                         'user_id' => $user->id
                     ], [
                         'patient_code' => 'PAT-' . strtoupper(\Illuminate\Support\Str::random(6)),
                     ]);
                 } elseif ($newGroup->code === 'center') {
-                    \App\Models\Staff::firstOrCreate([
+                    Staff::firstOrCreate([
                         'user_id' => $user->id
                     ], [
                         'laboratory_id' => $request->input('laboratory_id'),
@@ -224,7 +229,7 @@ class UserController extends Controller
                 }
             } elseif ($newGroup && $newGroup->code === 'center') {
                 // If group is center and hasn't changed, sync the laboratory_id
-                \App\Models\Staff::updateOrCreate(
+                Staff::updateOrCreate(
                     ['user_id' => $user->id],
                     [
                         'laboratory_id' => $request->input('laboratory_id'),

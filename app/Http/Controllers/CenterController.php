@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Labo;
 use App\Models\Consumable;
 use App\Models\Equipment;
 use App\Models\EquipmentMaintenance;
 use App\Models\WorkingHours;
+use App\Models\ExamRequest;
 use App\Models\StockMovement;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Carbon;
 
 class CenterController extends Controller
 {
@@ -36,15 +39,62 @@ class CenterController extends Controller
 
         // Retrieve statistics
         $stats = [
-            'equipment_count' => $lab->equipment()->count(),
-            'consumables_count' => $lab->consumables()->count(),
-            'low_stock_count' => $lab->consumables()->whereColumn('quantity', '<=', 'min_quantity')->count(),
+            'equipment_count'          => $lab->equipment()->count(),
+            'consumables_count'        => $lab->consumables()->count(),
+            'low_stock_count'          => $lab->consumables()->whereColumn('quantity', '<=', 'min_quantity')->count(),
             'active_maintenance_count' => EquipmentMaintenance::whereIn('equipment_id', $lab->equipment()->pluck('id'))
                 ->whereIn('status', ['pending', 'in_progress'])
                 ->count(),
         ];
 
-        return view('center.dashboard', compact('user', 'stats'));
+        // Workload stats (Task 3.9) ─ per-status counts for this lab
+        $workload = [
+            'pending'    => $lab->examRequests()->where('status', 'pending')->count(),
+            'assigned'   => $lab->examRequests()->where('status', 'assigned')->count(),
+            'collected'  => $lab->examRequests()->where('status', 'collected')->count(),
+            'processing' => $lab->examRequests()->where('status', 'processing')->count(),
+            'completed'  => $lab->examRequests()->where('status', 'completed')->count(),
+            'cancelled'  => $lab->examRequests()->where('status', 'cancelled')->count(),
+            'total'      => $lab->examRequests()->count(),
+        ];
+
+        // Daily request volume for the last 7 days
+        $dailyVolume = $lab->examRequests()
+            ->where('created_at', '>=', Carbon::now()->subDays(6)->startOfDay())
+            ->selectRaw('DATE(created_at) as day, COUNT(*) as count')
+            ->groupBy('day')
+            ->orderBy('day')
+            ->pluck('count', 'day')
+            ->toArray();
+
+        // Fill missing days with 0
+        $last7Days = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = Carbon::now()->subDays($i)->toDateString();
+            $last7Days[$date] = $dailyVolume[$date] ?? 0;
+        }
+
+        // Top requested exams for this lab
+        $topExams = $lab->examRequests()
+            ->join('exam_request_items', 'exam_requests.id', '=', 'exam_request_items.exam_request_id')
+            ->join('exams', 'exam_request_items.exam_id', '=', 'exams.id')
+            ->select('exams.name', \DB::raw('count(*) as count'))
+            ->groupBy('exams.name')
+            ->orderByDesc('count')
+            ->limit(5)
+            ->get();
+
+        // Revenue estimate (completed exams only)
+        $revenue = $lab->examRequests()
+            ->where('status', 'completed')
+            ->join('exam_request_items', 'exam_requests.id', '=', 'exam_request_items.exam_request_id')
+            ->join('available_exams', function ($j) use ($lab) {
+                $j->on('exam_request_items.exam_id', '=', 'available_exams.exam_id')
+                  ->where('available_exams.labo_id', '=', $lab->id);
+            })
+            ->sum('available_exams.price');
+
+        return view('center.dashboard', compact('user', 'stats', 'workload', 'last7Days', 'topExams', 'revenue'));
     }
 
     /**
@@ -433,24 +483,45 @@ class CenterController extends Controller
         return back()->with('success', 'État de maintenance mis à jour avec succès.');
     }
 
-public function examRequests()
+public function examRequests(Request $request)
 {
     $lab = auth()->user()->staff->laboratory;
 
-    $requests = \App\Models\ExamRequest::where('labo_id', $lab->id)
+    $search = $request->input('search', '');
+    $status = $request->input('status', '');
+
+    $query = \App\Models\ExamRequest::where('labo_id', $lab->id)
         ->with([
             'patient.user',
             'doctor.user',
-            'items.exam'
-        ])
-        ->latest()
-        ->get();
+            'items.exam',
+        ]);
 
-    return view('center.exam-requests', compact('requests'));
+    if ($search) {
+        $query->where(function ($q) use ($search) {
+            $q->whereHas('patient.user', function ($q2) use ($search) {
+                $q2->where('first_name', 'like', "%{$search}%")
+                    ->orWhere('last_name', 'like', "%{$search}%");
+            })
+            ->orWhereHas('doctor.user', function ($q2) use ($search) {
+                $q2->where('first_name', 'like', "%{$search}%")
+                    ->orWhere('last_name', 'like', "%{$search}%");
+            })
+            ->orWhere('request_number', 'like', "%{$search}%");
+        });
+    }
+
+    if ($status) {
+        $query->where('status', $status);
+    }
+
+    $requests = $query->latest()->paginate(15)->appends($request->query());
+
+    return view('center.exam-requests', compact('requests', 'search', 'status'));
 }
 
 
-public function claimExamRequest(\App\Models\ExamRequest $examRequest)
+public function claimExamRequest(ExamRequest $examRequest)
 {
     $lab = auth()->user()->staff->laboratory;
 
@@ -467,5 +538,93 @@ public function claimExamRequest(\App\Models\ExamRequest $examRequest)
     ]);
 
     return back()->with('success', 'La demande est maintenant en traitement.');
+}
+
+/**
+ * Mark an exam request as collected (sample collected from patient)
+ */
+public function collectExamRequest(ExamRequest $examRequest)
+{
+    $lab = auth()->user()->staff->laboratory;
+
+    if ($examRequest->labo_id !== $lab->id) {
+        abort(403);
+    }
+
+    if ($examRequest->status !== 'assigned') {
+        return back()->with('error', 'Cette demande ne peut plus être marquée comme collectée.');
+    }
+
+    $examRequest->update(['status' => 'collected']);
+
+    return back()->with('success', 'Échantillon collecté. Vous pouvez commencer le traitement.');
+}
+
+/**
+ * Get all notifications for center staff
+ */
+public function getNotifications()
+{
+    $user = Auth::user();
+    $notifications = Notification::forUser($user->id)
+        ->latest('created_at')
+        ->limit(50)
+        ->get();
+
+    return response()->json([
+        'success' => true,
+        'notifications' => $notifications->map(function ($notification) {
+            return [
+                'id' => $notification->id,
+                'title' => $notification->title,
+                'message' => $notification->message,
+                'is_read' => $notification->is_read,
+                'type' => $notification->notification_type ?? 'general',
+                'reference_id' => $notification->reference_id,
+                'created_at' => $notification->created_at->diffForHumans(),
+            ];
+        }),
+    ]);
+}
+
+/**
+ * Get unread notification count
+ */
+public function getUnreadCount()
+{
+    $user = Auth::user();
+    $count = Notification::forUser($user->id)->unread()->count();
+
+    return response()->json([
+        'success' => true,
+        'unread_count' => $count,
+    ]);
+}
+
+/**
+ * Mark notification as read
+ */
+public function markAsRead(Notification $notification)
+{
+    if ($notification->user_id !== Auth::id()) {
+        abort(403);
+    }
+
+    $notification->update(['is_read' => true]);
+
+    return response()->json(['success' => true]);
+}
+
+/**
+ * Mark all notifications as read
+ */
+public function markAllAsRead()
+{
+    Notification::where('user_id', Auth::id())
+        ->where('is_read', false)
+        ->where('is_archive', false)
+        ->update(['is_read' => true]);
+
+    return response()->json(['success' => true]);
 }
 }

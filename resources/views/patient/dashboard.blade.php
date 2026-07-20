@@ -1,7 +1,8 @@
-<x-layouts.auth>
+<x-layouts.patient>
     <x-slot:title>{{ __('Tableau de bord Patient - Medix eSanté') }}</x-slot:title>
 
-    <div class="w-full max-w-[1400px] mx-auto py-8 px-4">
+    @section('content')
+    <div class="w-full max-w-[1400px] mx-auto">
         <div class="glass-card rounded-[20px] p-8 md:p-10 relative overflow-hidden">
             <!-- Header -->
             <div
@@ -41,9 +42,14 @@
                         <!-- Notification Dropdown -->
                         <div id="notificationPanel"
                             class="hidden absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-[#e2e8f0] z-50 overflow-hidden">
-                            <div class="bg-gradient-to-r from-[#0D9488] to-[#0a7068] p-4 text-white">
-                                <h3 class="font-bold">{{ __('Notifications') }}</h3>
-                                <p class="text-xs text-[#0D9488]/80">{!! __('Vous avez :count notification(s)', ['count' => '<span id="unreadNotifCount">0</span>']) !!}</p>
+                            <div class="bg-gradient-to-r from-[#0D9488] to-[#0a7068] p-4 text-white flex justify-between items-center">
+                                <div>
+                                    <h3 class="font-bold text-sm">{{ __('Notifications') }}</h3>
+                                    <p class="text-[10px] text-[#ffffff]/90">{!! __('Vous avez :count notification(s)', ['count' => '<span id="unreadNotifCount">0</span>']) !!}</p>
+                                </div>
+                                <button id="markAllReadBtn" type="button" class="text-[10px] font-bold underline text-white hover:text-teal-200 transition cursor-pointer">
+                                    {{ __('Tout marquer lu') }}
+                                </button>
                             </div>
 
                             <div id="notificationList" class="max-h-96 overflow-y-auto">
@@ -55,6 +61,30 @@
                         </div>
                     </div>
 
+                    <a href="{{ route('profile.show') }}"
+                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-[#0D9488] bg-[#0D9488]/10 border border-[#0D9488]/20 hover:bg-[#0D9488] hover:text-white transition uppercase tracking-wider"
+                       title="Mon profil">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                        </svg>
+                        Profil
+                    </a>
+                    <a href="{{ route('patient.analytics') }}"
+                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-[#0D9488] bg-[#0D9488]/10 border border-[#0D9488]/20 hover:bg-[#0D9488] hover:text-white transition uppercase tracking-wider"
+                       title="Mes statistiques">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75z"/>
+                        </svg>
+                        Stats
+                    </a>
+                    <a href="{{ route('patient.medical-history') }}"
+                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-[#0D9488] bg-[#0D9488]/10 border border-[#0D9488]/20 hover:bg-[#0D9488] hover:text-white transition uppercase tracking-wider"
+                       title="Voir l'historique médical complet">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Historique
+                    </a>
                     <form action="{{ route('patient.logout') }}" method="POST">
                         @csrf
                         <x-button type="submit" color="slate" :fullWidth="false" class="!py-1.5 !px-4 !text-xs">
@@ -244,11 +274,20 @@
 </div>
                 </div>
 
-                <!-- Close Button -->
-                <button type="button"
-                    class="closeExamModal w-full bg-[#0D9488] hover:bg-[#0a7068] text-white font-bold py-2.5 rounded-xl transition uppercase tracking-wider text-sm">
-                    {{ __('Fermer') }}
-                </button>
+                <!-- Close + Print Buttons -->
+                <div class="flex gap-3">
+                    <button type="button" id="modalPrintBtn"
+                        class="flex-1 flex items-center justify-center gap-2 bg-[#F8FAFC] hover:bg-[#e2e8f0] border border-[#e2e8f0] text-[#475569] font-bold py-2.5 rounded-xl transition uppercase tracking-wider text-xs">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                        </svg>
+                        Exporter PDF
+                    </button>
+                    <button type="button"
+                        class="closeExamModal flex-1 bg-[#0D9488] hover:bg-[#0a7068] text-white font-bold py-2.5 rounded-xl transition uppercase tracking-wider text-sm">
+                        {{ __('Fermer') }}
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -276,6 +315,28 @@
                 notificationPanel.classList.add('hidden');
             }
         });
+
+        const markAllReadBtn = document.getElementById('markAllReadBtn');
+        if (markAllReadBtn) {
+            markAllReadBtn.addEventListener('click', async () => {
+                try {
+                    const response = await fetch('{{ route('patient.mark-all-read') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        }
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        showMessage(data.message, 'success');
+                        loadNotifications();
+                    }
+                } catch (error) {
+                    console.error('Error marking all as read:', error);
+                }
+            });
+        }
 
         // Load and display notifications
         async function loadNotifications() {
@@ -465,6 +526,51 @@
             </div>`;
         }
 
+        /* ── Status stepper helper (Task 3.8) ─────────────────────────────── */
+        const STATUS_STEPS = [
+            { key: 'pending',    icon: '📋', label: 'Prescription' },
+            { key: 'assigned',   icon: '🏥', label: 'Labo choisi'  },
+            { key: 'collected',  icon: '🩸', label: 'Collectée'    },
+            { key: 'processing', icon: '🔬', label: 'En traitement'},
+            { key: 'completed',  icon: '✅', label: 'Résultats'    },
+        ];
+
+        function renderStatusStepper(status) {
+            if (status === 'cancelled') {
+                return `<div class="my-3 flex items-center gap-2 text-xs font-bold text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
+                    <span>❌</span><span>Demande annulée</span>
+                </div>`;
+            }
+            const currentIdx = STATUS_STEPS.findIndex(s => s.key === status);
+            const dots = STATUS_STEPS.map((step, idx) => {
+                const done    = idx <= currentIdx;
+                const current = idx === currentIdx;
+                const dotCls  = done
+                    ? 'bg-[#0D9488] border-[#0D9488] text-white shadow-sm shadow-[#0D9488]/30'
+                    : 'bg-white border-[#cbd5e1] text-[#94a3b8]';
+                const labelCls = current
+                    ? 'text-[#0D9488] font-extrabold'
+                    : done
+                        ? 'text-[#475569] font-semibold'
+                        : 'text-[#94a3b8]';
+                const lineCls  = idx < STATUS_STEPS.length - 1
+                    ? (idx < currentIdx ? 'bg-[#0D9488]' : 'bg-[#e2e8f0]')
+                    : 'hidden';
+                return `
+                    <div class="flex flex-col items-center relative" style="min-width:0;flex:1">
+                        <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center text-[10px] ${dotCls} transition-all duration-300">
+                            ${done ? (current ? step.icon : '✓') : ''}
+                        </div>
+                        <span class="text-[9px] mt-1 text-center leading-tight ${labelCls}">${step.label}</span>
+                        ${idx < STATUS_STEPS.length - 1
+                            ? `<div class="absolute top-3 left-[calc(50%+12px)] right-[calc(-50%+12px)] h-0.5 ${lineCls} -translate-y-1/2 transition-all duration-300" style="z-index:0"></div>`
+                            : ''}
+                    </div>`;
+            }).join('');
+
+            return `<div class="flex items-start mt-3 mb-1 px-1 relative">${dots}</div>`;
+        }
+
         function renderExamCard(request) {
             const cardColor  = statusColors[request.status]      || 'bg-[#F8FAFC]/50 border-[#e2e8f0]/60';
             const badgeColor = statusBadgeColors[request.status] || 'text-[#0D9488] bg-[#0D9488]/10 border-[#0D9488]/20';
@@ -509,10 +615,11 @@
                             ${label}
                         </span>
                     </div>
-                    <div class="flex items-center gap-4 text-xs text-[#64748b] mb-2">
+                    <div class="flex items-center gap-4 text-xs text-[#64748b] mb-1">
                         <span><strong class="text-[#1e293b]">${request.exams_count}</strong> examen(s)</span>
                         <span class="text-[#94a3b8]">${request.created_at_relative}</span>
                     </div>
+                    ${renderStatusStepper(request.status)}
                     ${labSection}
                     ${detailBtn}
                 </div>`;
@@ -745,6 +852,11 @@
                         </div>
                     `).join('');
 
+                    // Set up print button redirection
+                    document.getElementById('modalPrintBtn').onclick = () => {
+                        window.location.href = `/patient/exam-requests/${examRequestId}/print?auto=1`;
+                    };
+
                     examDetailsModal.classList.remove('hidden');
                 }
             } catch (error) {
@@ -786,4 +898,5 @@
         // Refresh access requests every 15 seconds
         setInterval(loadAccessRequests, 15000);
     </script>
-</x-layouts.auth>
+    @endsection
+</x-layouts.patient>

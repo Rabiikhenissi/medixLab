@@ -11,7 +11,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Notifications\Messages\MailMessage;
 
-#[Fillable(['first_name', 'last_name', 'email', 'password', 'phone', 'group_id', 'address', 'is_archive'])]
+#[Fillable(['first_name', 'last_name', 'email', 'password', 'phone', 'group_id', 'address', 'is_archive', 'last_login_at'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -69,11 +69,6 @@ class User extends Authenticatable
     {
         if (!$this->group) {
             return false;
-        }
-
-        // Admin group gets all permissions automatically
-        if ($this->group->code === 'admin') {
-            return true;
         }
 
         if (!$this->group->relationLoaded('actions')) {

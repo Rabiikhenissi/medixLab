@@ -1,5 +1,7 @@
-<x-layouts.auth>
-    <meta name="title" content="Groupes d'Examens – Medix eSanté">
+<x-layouts.doctor>
+    <x-slot:title>Groupes d'Examens – Medix eSanté</x-slot:title>
+
+    @section('content')
 
     <style>
         .glass-card {
@@ -392,4 +394,5 @@
             });
         }
     </script>
-</x-layouts.auth>
+    @endsection
+</x-layouts.doctor>
