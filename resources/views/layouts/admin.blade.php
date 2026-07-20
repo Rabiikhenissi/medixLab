@@ -1087,6 +1087,29 @@
                 </div>
             @endif
 
+            @php $adminRoute = request()->route()->getName(); @endphp
+            <div class="flex items-center gap-2 text-[10px] uppercase tracking-wider font-extrabold text-[#64748b] bg-[#f8fafc]/40 px-4 py-2.5 rounded-xl border border-[#e2e8f0]/40 mb-6 select-none">
+                <a href="{{ route('admin.dashboard') }}" class="hover:text-[#0066ff] transition">Espace Admin</a>
+                <svg class="w-3 h-3 text-[#94a3b8]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+                @if($adminRoute === 'admin.dashboard')
+                    <span class="text-[#1e293b]">Tableau de Bord</span>
+                @elseif($adminRoute === 'admin.users.index')
+                    <span class="text-[#1e293b]">Utilisateurs</span>
+                @elseif($adminRoute === 'admin.laboratories.index')
+                    <span class="text-[#1e293b]">Établissements</span>
+                @elseif($adminRoute === 'admin.exams.index')
+                    <span class="text-[#1e293b]">Examens</span>
+                @elseif($adminRoute === 'admin.available-exams.index')
+                    <a href="{{ route('admin.exams.index') }}" class="hover:text-[#0066ff] transition">Examens</a>
+                    <svg class="w-3 h-3 text-[#94a3b8]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+                    <span class="text-[#1e293b]">Examens Disponibles</span>
+                @elseif($adminRoute === 'profile.show')
+                    <span class="text-[#1e293b]">Mon Profil</span>
+                @else
+                    <span class="text-[#1e293b]">{{ ucfirst(str_replace(['admin.', '-'], ['', ' '], $adminRoute)) }}</span>
+                @endif
+            </div>
+
             <!-- Page Header -->
             <div class="page-header anim">
                 <div>

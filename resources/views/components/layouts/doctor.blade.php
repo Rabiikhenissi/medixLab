@@ -279,7 +279,7 @@
         </nav>
 
         <div class="doctor-sidebar-bottom">
-            <a href="{{ route('profile') }}" class="doctor-sidebar-item" title="Mon Profil">
+            <a href="{{ route('profile.show') }}" class="doctor-sidebar-item" title="Mon Profil">
                 <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:20px;height:20px;">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
@@ -296,7 +296,7 @@
                 <div class="nav-user-name">{{ auth()->user()->first_name }} {{ auth()->user()->last_name }}</div>
                 <div class="nav-user-role">Médecin</div>
             </div>
-            <a href="{{ route('profile') }}" class="nav-avatar" title="Mon Profil">
+            <a href="{{ route('profile.show') }}" class="nav-avatar" title="Mon Profil">
                 {{ strtoupper(substr(auth()->user()->first_name, 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name, 0, 1)) }}
             </a>
             <form action="{{ route('doctor.logout') }}" method="POST" style="margin:0;padding:0;">
@@ -354,6 +354,27 @@
                     </button>
                 </div>
             @endif
+
+            @php $doctorRoute = request()->route()->getName(); @endphp
+            <div class="flex items-center gap-2 text-[10px] uppercase tracking-wider font-extrabold text-[#64748b] bg-[#f8fafc]/40 px-4 py-2.5 rounded-xl border border-[#e2e8f0]/40 mb-6 select-none">
+                <a href="{{ route('doctor.dashboard') }}" class="hover:text-[#0066FF] transition">Espace Médecin</a>
+                <svg class="w-3 h-3 text-[#94a3b8]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+                @if($doctorRoute === 'doctor.dashboard')
+                    <span class="text-[#1e293b]">Tableau de Bord</span>
+                @elseif(str_starts_with($doctorRoute, 'doctor.exam-groups'))
+                    <span class="text-[#1e293b]">Groupes d'Examens</span>
+                @elseif($doctorRoute === 'doctor.my-patients')
+                    <span class="text-[#1e293b]">Mes Patients</span>
+                @elseif($doctorRoute === 'doctor.patient-search')
+                    <a href="{{ route('doctor.my-patients') }}" class="hover:text-[#0066FF] transition">Mes Patients</a>
+                    <svg class="w-3 h-3 text-[#94a3b8]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+                    <span class="text-[#1e293b]">Rechercher Patient</span>
+                @elseif($doctorRoute === 'profile.show')
+                    <span class="text-[#1e293b]">Mon Profil</span>
+                @else
+                    <span class="text-[#1e293b]">{{ ucfirst(str_replace(['doctor.', '-'], ['', ' '], $doctorRoute)) }}</span>
+                @endif
+            </div>
 
             @yield('content')
         </div>
