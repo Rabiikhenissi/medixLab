@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LaboResultController;
+use App\Http\Controllers\MachineController;
 
 /*
 |--------------------------------------------------------------------------
@@ -437,6 +438,20 @@ Route::prefix('center')->name('center.')->group(function () {
             [LaboResultController::class, 'update']
         )->name('results.update');
 
+
+        // ==========================
+        // Machine Integration (HL7)
+        // ==========================
+
+        Route::post(
+            '/machine/send/{item}',
+            [MachineController::class, 'sendToMachine']
+        )->name('machine.send');
+
+        Route::get(
+            '/machine/status',
+            [MachineController::class, 'status']
+        )->name('machine.status');
 
 
 
