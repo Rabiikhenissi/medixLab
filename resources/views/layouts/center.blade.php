@@ -210,14 +210,74 @@
             padding: 24px 32px;
         }
 
-        @media (max-width: 640px) {
-            .center-topnav .nav-user-name,
-            .center-topnav .nav-user-role {
+        @media (max-width: 768px) {
+            .center-sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                z-index: 300;
+            }
+            .center-sidebar.open {
+                transform: translateX(0);
+            }
+            .center-sidebar-overlay {
                 display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.4);
+                z-index: 250;
+            }
+            .center-sidebar-overlay.open {
+                display: block;
+            }
+            .center-topnav {
+                left: 0;
+            }
+            .center-main {
+                margin-left: 0;
+                width: 100%;
             }
             .center-content-wrapper {
                 padding: 16px;
             }
+            .center-topnav .nav-user-name,
+            .center-topnav .nav-user-role {
+                display: none;
+            }
+            .mobile-menu-btn {
+                display: flex !important;
+            }
+            .flex.gap-2.border-b {
+                overflow-x: auto;
+                flex-wrap: nowrap;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+            }
+            .flex.gap-2.border-b::-webkit-scrollbar {
+                display: none;
+            }
+            .flex.gap-2.border-b > a {
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+        }
+        @media (max-width: 640px) {
+            .center-content-wrapper {
+                padding: 12px;
+            }
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #64748b;
+            flex-shrink: 0;
         }
     </style>
 
@@ -226,8 +286,11 @@
 
 <body class="center-shell antialiased text-[#1e293b] font-sans">
 
+    <!-- Mobile Sidebar Overlay -->
+    <div class="center-sidebar-overlay" id="centerSidebarOverlay" onclick="toggleCenterSidebar()"></div>
+
     <!-- ══ SIDEBAR ══ -->
-    <aside class="center-sidebar">
+    <aside class="center-sidebar" id="centerSidebar">
         <div class="center-sidebar-logo">
             <svg width="20" height="20" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -262,6 +325,15 @@
                     </a>
                 @endif
             @endforeach
+
+            {{-- Available Exams Management --}}
+            <a href="{{ route('center.available-exams') }}"
+               class="center-sidebar-item {{ request()->routeIs('center.available-exams*') ? 'active' : '' }}"
+               title="Examens Disponibles">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:20px;height:20px;">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                </svg>
+            </a>
         </nav>
 
         <div class="center-sidebar-bottom">
@@ -278,6 +350,30 @@
         <a href="{{ route('center.dashboard') }}" class="brand">Medix <span>eSanté</span></a>
 
         <div class="topnav-right">
+            <button class="mobile-menu-btn" onclick="toggleCenterSidebar()" aria-label="Menu">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
+                </svg>
+            </button>
+            {{-- Notification Bell --}}
+            <div class="relative" id="centerNotifWrapper">
+                <button onclick="centerToggleNotifPanel()" class="relative w-10 h-10 bg-white border border-[#e2e8f0] rounded-xl flex items-center justify-center hover:bg-[#f8fafc] transition cursor-pointer">
+                    <svg class="w-5 h-5 text-[#64748b]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                    </svg>
+                    <span id="centerNotifBadge" class="hidden absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">0</span>
+                </button>
+                <div id="centerNotifPanel" class="hidden absolute right-0 top-12 w-80 bg-white border border-[#e2e8f0] rounded-2xl shadow-2xl z-50 overflow-hidden">
+                    <div class="flex items-center justify-between px-4 py-3 border-b border-[#f1f5f9]">
+                        <span class="text-xs font-bold text-[#1e293b] uppercase tracking-wider">Notifications</span>
+                        <button onclick="centerMarkAllRead()" class="text-[10px] font-bold text-[#7C3AED] hover:underline cursor-pointer">Tout marquer lu</button>
+                    </div>
+                    <div id="centerNotifList" class="max-h-72 overflow-y-auto divide-y divide-[#f1f5f9]">
+                        <div class="px-4 py-6 text-center text-xs text-[#94a3b8]">Chargement...</div>
+                    </div>
+                </div>
+            </div>
+
             <div>
                 <div class="nav-user-name">{{ auth()->user()->first_name }} {{ auth()->user()->last_name }}</div>
                 <div class="nav-user-role">Établissement</div>
@@ -446,6 +542,12 @@
     @yield('scripts')
     <x-loading-overlay />
 
+    <script>
+        function toggleCenterSidebar() {
+            document.getElementById('centerSidebar').classList.toggle('open');
+            document.getElementById('centerSidebarOverlay').classList.toggle('open');
+        }
+    </script>
     <script>
         // ── Notifications ──
         const centerNotifRoutes = {

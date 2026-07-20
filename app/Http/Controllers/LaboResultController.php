@@ -107,6 +107,7 @@ class LaboResultController extends Controller
                     'value'=>$parameter['value'],
                     'status'=>$parameter['status'],
                     'reference_range'=>$parameter['range'],
+                    'unit'=>$parameter['unit'] ?? null,
                     'is_archive'=>false
                 ]);
             }
@@ -235,6 +236,7 @@ class LaboResultController extends Controller
                     'value'=>$parameter['value'],
                     'status'=>$parameter['status'],
                     'reference_range'=>$parameter['range'],
+                    'unit'=>$parameter['unit'] ?? null,
                     'is_archive'=>false
                 ]);
             }

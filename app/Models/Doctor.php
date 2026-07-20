@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use App\Models\Traits\ActiveScoped;
 
-#[Fillable(['user_id', 'speciality', 'doctor_code', 'is_archive'])]
+#[Fillable(['user_id', 'speciality', 'doctor_code', 'latitude', 'longitude', 'is_archive'])]
 class Doctor extends Model
 {
     use ActiveScoped;

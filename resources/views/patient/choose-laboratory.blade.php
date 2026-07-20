@@ -113,6 +113,17 @@
         </div>
         @endif
 
+        {{-- Map section --}}
+        @php
+            $labsWithCoords = $laboratories->filter(fn($lab) => $lab->latitude && $lab->longitude);
+        @endphp
+        @if($labsWithCoords->count() > 0)
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+        <div class="mb-6 rounded-2xl overflow-hidden border border-[#e2e8f0] shadow-xs" style="height: 280px;">
+            <div id="labMap" style="width:100%;height:100%;"></div>
+        </div>
+        @endif
+
         {{-- Lab grid --}}
         <div id="labGrid" class="grid md:grid-cols-2 gap-4">
             @foreach($laboratories as $lab)
@@ -411,5 +422,40 @@
     // Initial render
     render();
 </script>
+
+@if($labsWithCoords->count() > 0)
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const labs = @json($labsWithCoords->map(fn($lab) => [
+            'id' => $lab->id,
+            'name' => $lab->name,
+            'city' => $lab->city ?? '',
+            'address' => $lab->address ?? '',
+            'lat' => (float)$lab->latitude,
+            'lng' => (float)$lab->longitude,
+        ]));
+
+        if (labs.length === 0) return;
+
+        const map = L.map('labMap').setView([labs[0].lat, labs[0].lng], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap'
+        }).addTo(map);
+
+        const markers = [];
+        labs.forEach(lab => {
+            const marker = L.marker([lab.lat, lab.lng]).addTo(map)
+                .bindPopup(`<div style="font-family:Inter,sans-serif"><b>${lab.name}</b><br><span style="font-size:11px;color:#64748b">${lab.address ? lab.address + '<br>' : ''}${lab.city}</span></div>`);
+            markers.push(marker);
+        });
+
+        if (labs.length > 1) {
+            const group = L.featureGroup(markers);
+            map.fitBounds(group.getBounds().pad(0.1));
+        }
+    });
+</script>
+@endif
 @endsection
 </x-layouts.patient>

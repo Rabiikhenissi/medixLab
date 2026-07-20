@@ -63,10 +63,16 @@
             </h4>
 
             @foreach($result->details as $index => $detail)
+                @php
+                    $matchingParam = $result->examRequestItem->exam->parameters->firstWhere('name', $detail->parameter);
+                @endphp
                 <div class="bg-white border border-[#e2e8f0] rounded-2xl p-5 shadow-xs hover:border-[#7C3AED]/30 transition flex flex-col md:flex-row md:items-center gap-4">
                     <div class="flex-1 min-w-0">
                         <span class="text-sm font-bold text-[#1e293b] block truncate">
                             {{ $detail->parameter }}
+                            @if($detail->unit || ($matchingParam && $matchingParam->unit))
+                                <span class="text-[10px] font-semibold text-[#7C3AED] bg-[#7C3AED]/10 px-1.5 py-0.5 rounded border border-[#7C3AED]/20 ml-1.5">{{ $detail->unit ?? $matchingParam->unit }}</span>
+                            @endif
                         </span>
                         @if($detail->reference_range)
                             <span class="inline-flex items-center text-[10px] text-[#64748b] mt-1 bg-[#F8FAFC] border border-[#e2e8f0] px-2 py-0.5 rounded-md font-medium">
@@ -75,6 +81,7 @@
                         @endif
                         <input type="hidden" name="parameters[{{ $index }}][name]" value="{{ $detail->parameter }}">
                         <input type="hidden" name="parameters[{{ $index }}][range]" value="{{ $detail->reference_range }}">
+                        <input type="hidden" name="parameters[{{ $index }}][unit]" value="{{ $detail->unit ?? ($matchingParam->unit ?? '') }}">
                     </div>
 
                     <div class="flex items-center gap-3">
