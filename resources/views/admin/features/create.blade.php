@@ -288,13 +288,13 @@
             const code = slugify(codeInput.value.trim());
 
             if (!name || !code) {
-                alert('Veuillez remplir le nom et le code de l\'action.');
+                Swal.fire({ icon: 'warning', title: 'Attention', text: 'Veuillez remplir le nom et le code de l\'action.', confirmButtonColor: '#0066FF' });
                 return;
             }
 
             // Check duplicate code
             if (clientActions.some(act => act.code === code)) {
-                alert('Ce code d\'action est déjà ajouté dans la liste.');
+                Swal.fire({ icon: 'warning', title: 'Attention', text: 'Ce code d\'action est déjà ajouté dans la liste.', confirmButtonColor: '#0066FF' });
                 return;
             }
 
@@ -326,13 +326,13 @@
             const code = slugify(codeInput.value.trim());
 
             if (!name || !code) {
-                alert('Le nom et le code ne peuvent pas être vides.');
+                Swal.fire({ icon: 'warning', title: 'Attention', text: 'Le nom et le code ne peuvent pas être vides.', confirmButtonColor: '#0066FF' });
                 return;
             }
 
             // Check duplicate code in other items
             if (clientActions.some((act, idx) => act.code === code && idx !== index)) {
-                alert('Ce code d\'action est déjà utilisé dans une autre action.');
+                Swal.fire({ icon: 'warning', title: 'Attention', text: 'Ce code d\'action est déjà utilisé dans une autre action.', confirmButtonColor: '#0066FF' });
                 return;
             }
 

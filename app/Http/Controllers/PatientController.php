@@ -127,6 +127,37 @@ class PatientController extends Controller
     }
 
     /**
+     * Get granted doctors for patient (so patient can revoke/block)
+     */
+    public function getGrantedDoctors()
+    {
+        $patient = Auth::user()->patient;
+        if (!$patient) {
+            return response()->json(['success' => false, 'granted' => []], 403);
+        }
+
+        $granted = DoctorPatientAccess::where('patient_id', $patient->id)
+            ->where('access_status', 'granted')
+            ->with('doctor.user')
+            ->latest('updated_at')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'granted' => $granted->map(function ($access) {
+                return [
+                    'access_id'    => $access->id,
+                    'doctor_id'    => $access->doctor_id,
+                    'doctor_name'  => $access->doctor->user->first_name . ' ' . $access->doctor->user->last_name,
+                    'speciality'   => $access->doctor->speciality ?? '',
+                    'expires_at'   => $access->expires_at ? $access->expires_at->format('d/m/Y') : null,
+                    'granted_at'   => $access->updated_at->diffForHumans(),
+                ];
+            }),
+        ]);
+    }
+
+    /**
      * Handle access request decision (accept/decline)
      */
     public function respondToAccessRequest(Request $request)
@@ -163,10 +194,16 @@ class PatientController extends Controller
                 'access_status' => 'granted',
                 'expires_at'    => now()->addMonths(6),
             ]);
-            $message = 'Accès accordé au médecin (valable 6 mois)';
+            $message = 'Accès accordé au médecin (valide 6 mois)';
         } else {
             $access->update(['access_status' => 'revoked']);
             $message = 'Demande d\'accès refusée';
+        }
+
+        if ($request->has('notification_id')) {
+            Notification::where('id', $request->notification_id)
+                ->where('user_id', $user->id)
+                ->update(['is_read' => true]);
         }
 
         return response()->json([
@@ -217,6 +254,100 @@ class PatientController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Accès révoqué avec succès.',
+        ]);
+    }
+
+    /**
+     * Block a doctor — doctor can no longer see this patient in search or past patients
+     */
+    public function blockDoctor(Request $request)
+    {
+        $request->validate([
+            'doctor_id' => 'required|exists:doctors,id',
+        ]);
+
+        $user    = Auth::user();
+        $patient = $user->patient;
+        if (!$patient) {
+            return response()->json(['success' => false, 'message' => 'Profil patient non trouvé.'], 403);
+        }
+
+        $access = DoctorPatientAccess::where('doctor_id', $request->doctor_id)
+            ->where('patient_id', $patient->id)
+            ->first();
+
+        if ($access) {
+            $access->update(['access_status' => 'blocked']);
+        } else {
+            DoctorPatientAccess::create([
+                'doctor_id'     => $request->doctor_id,
+                'patient_id'    => $patient->id,
+                'access_status' => 'blocked',
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Médecin bloqué avec succès.',
+        ]);
+    }
+
+    /**
+     * Unblock a doctor
+     */
+    public function unblockDoctor(Request $request)
+    {
+        $request->validate([
+            'doctor_id' => 'required|exists:doctors,id',
+        ]);
+
+        $user    = Auth::user();
+        $patient = $user->patient;
+        if (!$patient) {
+            return response()->json(['success' => false, 'message' => 'Profil patient non trouvé.'], 403);
+        }
+
+        $access = DoctorPatientAccess::where('doctor_id', $request->doctor_id)
+            ->where('patient_id', $patient->id)
+            ->where('access_status', 'blocked')
+            ->first();
+
+        if ($access) {
+            $access->update(['access_status' => 'granted', 'expires_at' => now()->addMonths(6)]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Médecin débloqué avec succès.',
+        ]);
+    }
+
+    /**
+     * Get list of blocked doctors
+     */
+    public function getBlockedDoctors()
+    {
+        $user    = Auth::user();
+        $patient = $user->patient;
+        if (!$patient) {
+            return response()->json(['success' => false, 'access_requests' => []], 403);
+        }
+
+        $blocked = DoctorPatientAccess::where('patient_id', $patient->id)
+            ->where('access_status', 'blocked')
+            ->with('doctor.user')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'blocked' => $blocked->map(function ($access) {
+                return [
+                    'id'          => $access->id,
+                    'doctor_id'   => $access->doctor_id,
+                    'doctor_name' => $access->doctor->user->first_name . ' ' . $access->doctor->user->last_name,
+                    'speciality'  => $access->doctor->speciality ?? '',
+                ];
+            }),
         ]);
     }
 
@@ -452,11 +583,9 @@ class PatientController extends Controller
             ->with('success', 'Laboratoire sélectionné avec succès.');
     }
 
-    public function chooseLaboratory($id)
+    public function chooseLaboratory(ExamRequest $examRequest)
     {
         $patient = auth()->user()->patient;
-
-        $examRequest = ExamRequest::with(['laboratory', 'items.exam'])->findOrFail($id);
 
         if (!$patient || $examRequest->patient_id !== $patient->id) {
             abort(403);

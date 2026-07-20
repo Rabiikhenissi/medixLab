@@ -36,7 +36,7 @@
                 </select>
             </div>
             <div class="w-full sm:w-40">
-                <label class="text-[10px] font-bold text-[#64748b] uppercase tracking-widest block mb-1.5">Prix (DZD)</label>
+                <label class="text-[10px] font-bold text-[#64748b] uppercase tracking-widest block mb-1.5">Prix (TND)</label>
                 <input type="number" name="price" step="0.01" min="0" required placeholder="0.00"
                     class="w-full px-3 py-2.5 border border-[#e2e8f0] rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/20 focus:border-[#7C3AED] bg-white text-[#1e293b]">
             </div>
@@ -83,7 +83,7 @@
                         </form>
 
                         {{-- Delete --}}
-                        <form action="{{ route('center.available-exams.destroy', $ae) }}" method="POST" onsubmit="return confirm('Retirer cet examen ?');">
+                        <form action="{{ route('center.available-exams.destroy', $ae) }}" method="POST" onsubmit="return swalConfirmSubmit(this, 'Retirer cet examen ?');">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="text-red-400 hover:text-red-600 p-1.5 rounded-lg hover:bg-red-50 transition cursor-pointer">

@@ -38,6 +38,11 @@ class DoctorPatientAccess extends Model
                      });
     }
 
+    public function scopeNotBlocked($query)
+    {
+        return $query->where('access_status', '!=', 'blocked');
+    }
+
     public function doctor()
     {
         return $this->belongsTo(Doctor::class);

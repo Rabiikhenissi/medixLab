@@ -509,7 +509,7 @@ public function examRequests(Request $request)
                 $q2->where('first_name', 'like', "%{$search}%")
                     ->orWhere('last_name', 'like', "%{$search}%");
             })
-            ->orWhere('request_number', 'like', "%{$search}%");
+            ->orWhere('exam_requests.id', 'like', "%{$search}%");
         });
     }
 

@@ -256,6 +256,12 @@
                     } else if (data.access_status === 'pending') {
                         requestAccessBtn.classList.add('hidden');
                         accessPendingMsg.classList.remove('hidden');
+                    } else if (data.access_status === 'blocked') {
+                        requestAccessBtn.classList.add('hidden');
+                        proceedToExamsBtn.classList.add('hidden');
+                        accessGrantedMsg.classList.add('hidden');
+                        accessPendingMsg.classList.add('hidden');
+                        showToast('Vous êtes bloqué par ce patient.', 'error');
                     }
 
                     patientFoundSection.classList.remove('hidden');

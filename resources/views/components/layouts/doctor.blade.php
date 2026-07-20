@@ -442,6 +442,24 @@
             document.getElementById('doctorSidebarOverlay').classList.toggle('open');
         }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function swalConfirmSubmit(form, message) {
+            Swal.fire({
+                title: 'Confirmer',
+                text: message,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#0066FF',
+                cancelButtonColor: '#94a3b8',
+                confirmButtonText: 'Confirmer',
+                cancelButtonText: 'Annuler'
+            }).then((result) => {
+                if (result.isConfirmed) form.submit();
+            });
+            return false;
+        }
+    </script>
     @yield('scripts')
     <x-loading-overlay />
 </body>

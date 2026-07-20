@@ -8,16 +8,23 @@
 
 
     <!-- Header -->
-    <div>
+    <div class="flex items-start justify-between">
+        <div>
 
-        <h1 class="text-3xl font-bold text-[#1e293b]">
-            Demandes d'analyses
-        </h1>
+            <h1 class="text-3xl font-bold text-[#1e293b]">
+                Demandes d'analyses
+            </h1>
 
-        <p class="text-sm text-[#64748b] mt-2">
-            Consultez et prenez en charge les demandes d'analyses assignées à votre laboratoire.
-        </p>
+            <p class="text-sm text-[#64748b] mt-2">
+                Consultez et prenez en charge les demandes d'analyses assignées à votre laboratoire.
+            </p>
 
+        </div>
+
+        <div id="machineStatus" class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border bg-gray-50 border-gray-200 text-gray-400">
+            <span class="w-2 h-2 rounded-full bg-gray-400 animate-pulse"></span>
+            Vérification machine...
+        </div>
     </div>
 
 
@@ -344,7 +351,6 @@
 
 
 
-
                                 <a href="{{ route('center.results.create',$item) }}"
                                 class="px-4 py-2 bg-[#7C3AED]/10 hover:bg-[#7C3AED]/20 text-[#7C3AED] rounded-xl text-xs font-bold uppercase tracking-wider transition">
 
@@ -353,6 +359,14 @@
 
 
                                 </a>
+
+                                <form method="POST" action="{{ route('center.machine.send', $item) }}" class="inline">
+                                    @csrf
+                                    <button type="submit"
+                                        class="px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 rounded-xl text-xs font-bold uppercase tracking-wider transition machine-send-btn">
+                                        Envoyer à la machine
+                                    </button>
+                                </form>
 
 
 
@@ -413,4 +427,38 @@
 </div>
 
 
+@endsection
+
+@section('scripts')
+<script>
+    function checkMachineStatus() {
+        fetch('{{ route("center.machine.status") }}')
+            .then(r => r.json())
+            .then(data => {
+                const el = document.getElementById('machineStatus');
+                if (data.online) {
+                    el.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border bg-emerald-50 border-emerald-200 text-emerald-600';
+                    el.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500"></span>' + (data.info?.machine || 'Machine connectée');
+                } else {
+                    el.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border bg-red-50 border-red-200 text-red-500';
+                    el.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-500"></span>Machine hors ligne';
+                }
+            })
+            .catch(() => {
+                const el = document.getElementById('machineStatus');
+                el.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border bg-red-50 border-red-200 text-red-500';
+                el.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-500"></span>Machine hors ligne';
+            });
+    }
+    checkMachineStatus();
+    setInterval(checkMachineStatus, 15000);
+
+    document.querySelectorAll('.machine-send-btn').forEach(btn => {
+        btn.closest('form').addEventListener('submit', function(e) {
+            btn.disabled = true;
+            btn.textContent = 'Analyse en cours...';
+            btn.classList.add('opacity-60', 'cursor-wait');
+        });
+    });
+</script>
 @endsection

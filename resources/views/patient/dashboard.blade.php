@@ -198,6 +198,36 @@
                             </div>
                         </div>
 
+                        <!-- Granted Doctors Section -->
+                        <div class="bg-[#F8FAFC]/30 border border-[#e2e8f0]/60 rounded-2xl p-6">
+                            <h3 class="text-lg font-bold text-[#1e293b] mb-4 flex items-center">
+                                <svg class="w-5 h-5 text-[#0D9488] mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                {{ __('Médecins Autorisés') }}
+                            </h3>
+                            <div id="grantedDoctorsList" class="space-y-3">
+                                <div class="p-4 text-center text-[#94a3b8]">
+                                    <p class="text-sm">{{ __('Chargement...') }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Blocked Doctors Section -->
+                        <div class="bg-[#F8FAFC]/30 border border-[#e2e8f0]/60 rounded-2xl p-6">
+                            <h3 class="text-lg font-bold text-[#1e293b] mb-4 flex items-center">
+                                <svg class="w-5 h-5 text-red-500 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                                </svg>
+                                {{ __('Médecins Bloqués') }}
+                            </h3>
+                            <div id="blockedList" class="space-y-3">
+                                <div class="p-4 text-center text-[#94a3b8]">
+                                    <p class="text-sm">{{ __('Chargement...') }}</p>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Exam Requests Section -->
                         <div class="bg-[#F8FAFC]/30 border border-[#e2e8f0]/60 rounded-2xl p-6">
                             <h3 class="text-lg font-bold text-[#1e293b] mb-4 flex items-center">
@@ -344,12 +374,13 @@
                 const response = await fetch('{{ route('patient.get-notifications') }}');
                 const data = await response.json();
 
-                if (data.success && data.notifications.length > 0) {
+                    if (data.success && data.notifications.length > 0) {
                     notificationList.innerHTML = data.notifications.map(notif => {
                         const isAccessRequest = notif.type === 'access_request';
+                        const showActions = isAccessRequest && !notif.is_read;
 
                         let actions = '';
-                        if (isAccessRequest) {
+                        if (showActions) {
                             actions = `
                                 <div class="flex gap-2 mt-3">
                                     <button class="flex-1 text-xs bg-green-500 hover:bg-green-600 text-white px-2 py-1.5 rounded font-bold notif-accept-btn" data-access-id="${notif.reference_id}" data-notif-id="${notif.id}">
@@ -892,11 +923,134 @@
         updateUnreadCount();
         loadExamRequests();
         loadAccessRequests();
+        loadGrantedDoctors();
+        loadBlockedDoctors();
 
         // Refresh notifications every 10 seconds
         setInterval(updateUnreadCount, 10000);
         // Refresh access requests every 15 seconds
         setInterval(loadAccessRequests, 15000);
+
+        // ── Block / Unblock Doctor ──
+        async function loadGrantedDoctors() {
+            const list = document.getElementById('grantedDoctorsList');
+            try {
+                const res = await fetch('{{ route("patient.get-granted-doctors") }}');
+                const data = await res.json();
+                if (data.success && data.granted.length > 0) {
+                    list.innerHTML = data.granted.map(doc => `
+                        <div class="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-xl">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-bold text-xs">
+                                    ${doc.doctor_name.split(' ').map(n => n[0]).join('').substring(0,2)}
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-[#1e293b]">Dr. ${doc.doctor_name}</p>
+                                    <p class="text-[11px] text-[#64748b]">${doc.speciality || ''}</p>
+                                    ${doc.expires_at ? `<p class="text-[10px] text-[#94a3b8]">Expire le ${doc.expires_at}</p>` : ''}
+                                </div>
+                            </div>
+                            <button onclick="blockDoctor(${doc.doctor_id})" class="text-[10px] font-bold text-red-500 hover:underline cursor-pointer uppercase">Bloquer</button>
+                        </div>
+                    `).join('');
+                } else {
+                    list.innerHTML = '<p class="text-xs text-[#94a3b8] text-center py-2">Aucun médecin autorisé</p>';
+                }
+            } catch (e) {
+                list.innerHTML = '<p class="text-xs text-[#94a3b8] text-center py-2">Erreur de chargement</p>';
+            }
+        }
+
+        async function blockDoctor(doctorId) {
+            const result = await Swal.fire({
+                title: 'Bloquer ce médecin ?',
+                text: "Il ne pourra plus voir votre profil ni accéder à votre dossier.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#94a3b8',
+                confirmButtonText: 'Oui, bloquer',
+                cancelButtonText: 'Annuler'
+            });
+            if (!result.isConfirmed) return;
+            try {
+                const res = await fetch('{{ route("patient.block-doctor") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    },
+                    body: JSON.stringify({ doctor_id: doctorId }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showMessage(data.message, 'success');
+                    loadBlockedDoctors();
+                    loadAccessRequests();
+                } else {
+                    showMessage(data.message || 'Erreur', 'error');
+                }
+            } catch (e) { showMessage('Une erreur est survenue', 'error'); }
+        }
+
+        async function unblockDoctor(doctorId) {
+            const result = await Swal.fire({
+                title: 'Débloquer ce médecin ?',
+                text: "Le médecin pourra à nouveau accéder à votre profil.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#10b981',
+                cancelButtonColor: '#94a3b8',
+                confirmButtonText: 'Oui, débloquer',
+                cancelButtonText: 'Annuler'
+            });
+            if (!result.isConfirmed) return;
+            try {
+                const res = await fetch('{{ route("patient.unblock-doctor") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    },
+                    body: JSON.stringify({ doctor_id: doctorId }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showMessage(data.message, 'success');
+                    loadBlockedDoctors();
+                } else {
+                    showMessage(data.message || 'Erreur', 'error');
+                }
+            } catch (e) { showMessage('Une erreur est survenue', 'error'); }
+        }
+
+        async function loadBlockedDoctors() {
+            const list = document.getElementById('blockedList');
+            try {
+                const res = await fetch('{{ route("patient.get-blocked-doctors") }}');
+                const data = await res.json();
+                if (data.success && data.blocked.length > 0) {
+                    list.innerHTML = data.blocked.map(doc => `
+                        <div class="flex items-center justify-between p-3 bg-red-50 border border-red-200 rounded-xl">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-full bg-red-100 flex items-center justify-center text-red-600 font-bold text-xs">
+                                    ${doc.doctor_name.split(' ').map(n => n[0]).join('').substring(0,2)}
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-[#1e293b]">Dr. ${doc.doctor_name}</p>
+                                    <p class="text-[11px] text-[#64748b]">${doc.speciality || ''}</p>
+                                </div>
+                            </div>
+                            <button onclick="unblockDoctor(${doc.doctor_id})" class="text-[10px] font-bold text-[#0D9488] hover:underline cursor-pointer uppercase">Débloquer</button>
+                        </div>
+                    `).join('');
+                } else {
+                    list.innerHTML = '<p class="text-xs text-[#94a3b8] text-center py-2">Aucun médecin bloqué</p>';
+                }
+            } catch (e) {
+                list.innerHTML = '<p class="text-xs text-[#94a3b8] text-center py-2">Erreur de chargement</p>';
+            }
+        }
     </script>
     @endsection
 </x-layouts.patient>
