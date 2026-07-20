@@ -13,6 +13,8 @@ Gérez vos informations personnelles et votre carte digitale.
 @section('content')
 
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <style>
     .profile-grid {
@@ -437,14 +439,6 @@ Gérez vos informations personnelles et votre carte digitale.
                         <label>Code médecin</label>
                         <input type="text" class="readonly" value="{{ $user->doctor->doctor_code }}" readonly>
                     </div>
-                    <div class="form-field">
-                        <label>Latitude</label>
-                        <input type="number" step="any" name="latitude" value="{{ old('latitude', $user->doctor->latitude) }}" placeholder="Ex: 36.7538">
-                    </div>
-                    <div class="form-field">
-                        <label>Longitude</label>
-                        <input type="number" step="any" name="longitude" value="{{ old('longitude', $user->doctor->longitude) }}" placeholder="Ex: 3.0588">
-                    </div>
                     @endif
 
                     @if($user->patient)
@@ -485,13 +479,16 @@ Gérez vos informations personnelles et votre carte digitale.
                         <label>Établissement</label>
                         <input type="text" class="readonly" value="{{ $user->staff->laboratory->name }}" readonly>
                     </div>
-                    <div class="form-field">
-                        <label>Latitude du labo</label>
-                        <input type="number" step="any" name="latitude" value="{{ old('latitude', $user->staff->laboratory->latitude) }}" placeholder="Ex: 36.7538">
-                    </div>
-                    <div class="form-field">
-                        <label>Longitude du labo</label>
-                        <input type="number" step="any" name="longitude" value="{{ old('longitude', $user->staff->laboratory->longitude) }}" placeholder="Ex: 3.0588">
+                    <div class="form-field full">
+                        <label>Localisation du laboratoire (cliquez sur la carte)</label>
+                        <div id="profileMapPicker" style="width:100%;height:280px;border-radius:12px;border:1px solid #e2e8f0;cursor:crosshair;"></div>
+                        <input type="hidden" id="profileLat" name="latitude" value="{{ old('latitude', $user->staff->laboratory->latitude) }}">
+                        <input type="hidden" id="profileLng" name="longitude" value="{{ old('longitude', $user->staff->laboratory->longitude) }}">
+                        <p class="text-[10px] text-[#94a3b8] mt-1.5">
+                            Position : <span id="profileCoords" class="font-bold text-[#1e293b]">
+                                {{ $user->staff->laboratory->latitude && $user->staff->laboratory->longitude ? $user->staff->laboratory->latitude . ', ' . $user->staff->laboratory->longitude : 'Non définie' }}
+                            </span>
+                        </p>
                     </div>
                     @endif
                     @endif
@@ -560,6 +557,40 @@ Gérez vos informations personnelles et votre carte digitale.
                 colorDark: "#0066ff",
                 colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+
+        // Map picker for lab location
+        var mapEl = document.getElementById('profileMapPicker');
+        if (mapEl) {
+            var latInput = document.getElementById('profileLat');
+            var lngInput = document.getElementById('profileLng');
+            var coordsSpan = document.getElementById('profileCoords');
+            var initLat = parseFloat(latInput.value) || 36.7538;
+            var initLng = parseFloat(lngInput.value) || 3.0588;
+            var hasInitial = latInput.value && lngInput.value;
+
+            var pickerMap = L.map('profileMapPicker').setView([initLat, initLng], hasInitial ? 14 : 6);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap'
+            }).addTo(pickerMap);
+
+            var marker = null;
+            if (hasInitial) {
+                marker = L.marker([initLat, initLng]).addTo(pickerMap);
+            }
+
+            pickerMap.on('click', function(e) {
+                var lat = e.latlng.lat.toFixed(6);
+                var lng = e.latlng.lng.toFixed(6);
+                latInput.value = lat;
+                lngInput.value = lng;
+                coordsSpan.textContent = lat + ', ' + lng;
+                if (marker) {
+                    marker.setLatLng(e.latlng);
+                } else {
+                    marker = L.marker(e.latlng).addTo(pickerMap);
+                }
             });
         }
     });

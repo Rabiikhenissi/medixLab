@@ -438,7 +438,7 @@ d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07"/>
 <form method="POST"
       action="{{ route('admin.exams.archive',$exam) }}"
       style="display:inline;margin:0;"
-      onsubmit="return confirm('{{ $exam->is_archive ? 'Restaurer cet examen ?' : 'Archiver cet examen ?' }}')">
+      onsubmit="return swalConfirmSubmit(this, '{{ $exam->is_archive ? 'Restaurer cet examen ?' : 'Archiver cet examen ?' }}')">
 
 
 @csrf
@@ -468,7 +468,7 @@ d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07"/>
 </form>
 @if($exam->is_archive)
     <form action="{{ route('admin.exams.force-delete', $exam) }}" method="POST" style="display:inline;margin:0;"
-          onsubmit="return confirm('Supprimer définitivement cet examen ? Cette action est irréversible.')">
+          onsubmit="return swalConfirmSubmit(this, 'Supprimer définitivement cet examen ? Cette action est irréversible.')">
         @csrf
         @method('DELETE')
         <button type="submit" class="table-action-btn delete-btn" title="Supprimer définitivement">

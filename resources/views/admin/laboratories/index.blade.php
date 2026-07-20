@@ -103,7 +103,7 @@
                                 <!-- Archive/Restore Form -->
                                 <form action="{{ route('admin.laboratories.destroy', $labo) }}" method="POST"
                                     style="display:inline;margin:0;"
-                                    onsubmit="return confirm('{{ $labo->is_archive ? 'Restaurer ce laboratoire ?' : 'Archiver ce laboratoire ?' }}')">
+                                    onsubmit="return swalConfirmSubmit(this, '{{ $labo->is_archive ? 'Restaurer ce laboratoire ?' : 'Archiver ce laboratoire ?' }}')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit"
@@ -126,7 +126,7 @@
                                 </form>
                                 @if($labo->is_archive)
                                     <form action="{{ route('admin.laboratories.force-delete', $labo) }}" method="POST" style="display:inline;margin:0;"
-                                          onsubmit="return confirm('Supprimer définitivement ce laboratoire ? Cette action est irréversible.')">
+                                          onsubmit="return swalConfirmSubmit(this, 'Supprimer définitivement ce laboratoire ? Cette action est irréversible.')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="table-action-btn delete-btn" title="Supprimer définitivement">

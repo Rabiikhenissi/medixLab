@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LaboResultController;
+use App\Http\Controllers\MachineController;
 
 /*
 |--------------------------------------------------------------------------
@@ -286,6 +287,10 @@ Route::prefix('patient')->name('patient.')->group(function () {
         Route::post('/access-request/respond', [\App\Http\Controllers\PatientController::class, 'respondToAccessRequest'])->name('respond-access');
         Route::post('/access-request/revoke', [\App\Http\Controllers\PatientController::class, 'revokeAccess'])->name('revoke-access');
         Route::get('/access-requests', [\App\Http\Controllers\PatientController::class, 'getAccessRequests'])->name('get-access-requests');
+        Route::get('/granted-doctors', [\App\Http\Controllers\PatientController::class, 'getGrantedDoctors'])->name('get-granted-doctors');
+        Route::post('/block-doctor', [\App\Http\Controllers\PatientController::class, 'blockDoctor'])->name('block-doctor');
+        Route::post('/unblock-doctor', [\App\Http\Controllers\PatientController::class, 'unblockDoctor'])->name('unblock-doctor');
+        Route::get('/blocked-doctors', [\App\Http\Controllers\PatientController::class, 'getBlockedDoctors'])->name('get-blocked-doctors');
 
         // Patient Exam Requests Routes
         Route::get('/exam-requests', [\App\Http\Controllers\PatientController::class, 'getExamRequests'])
@@ -433,6 +438,20 @@ Route::prefix('center')->name('center.')->group(function () {
             [LaboResultController::class, 'update']
         )->name('results.update');
 
+
+        // ==========================
+        // Machine Integration (HL7)
+        // ==========================
+
+        Route::post(
+            '/machine/send/{item}',
+            [MachineController::class, 'sendToMachine']
+        )->name('machine.send');
+
+        Route::get(
+            '/machine/status',
+            [MachineController::class, 'status']
+        )->name('machine.status');
 
 
 

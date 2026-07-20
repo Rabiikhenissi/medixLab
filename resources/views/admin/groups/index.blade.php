@@ -101,7 +101,7 @@
                                     @if ($group->users_count == 0)
                                         <form action="{{ route('admin.groups.destroy', $group) }}" method="POST"
                                             style="display:inline;margin:0;"
-                                            onsubmit="return confirm('{{ $group->is_archive ? 'Restaurer ce rôle ?' : 'Archiver ce rôle ?' }}')">
+                                            onsubmit="return swalConfirmSubmit(this, '{{ $group->is_archive ? 'Restaurer ce rôle ?' : 'Archiver ce rôle ?' }}')">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit"
@@ -124,7 +124,7 @@
                                         </form>
                                         @if($group->is_archive)
                                             <form action="{{ route('admin.groups.force-delete', $group) }}" method="POST" style="display:inline;margin:0;"
-                                                  onsubmit="return confirm('Supprimer définitivement ce rôle ? Cette action est irréversible.')">
+                                                  onsubmit="return swalConfirmSubmit(this, 'Supprimer définitivement ce rôle ? Cette action est irréversible.')">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="table-action-btn delete-btn" title="Supprimer définitivement">

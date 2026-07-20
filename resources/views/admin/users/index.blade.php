@@ -130,7 +130,7 @@
                                 <!-- Archive/Restore Form -->
                                 @if(auth()->id() !== $user->id)
                                     <form action="{{ route('admin.users.destroy', $user) }}" method="POST" style="display:inline;margin:0;"
-                                          onsubmit="return confirm('{{ $user->is_archive ? 'Restaurer cet utilisateur ?' : 'Archiver cet utilisateur ?' }}')">
+                                          onsubmit="return swalConfirmSubmit(this, '{{ $user->is_archive ? 'Restaurer cet utilisateur ?' : 'Archiver cet utilisateur ?' }}')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="table-action-btn {{ $user->is_archive ? 'restore-btn' : 'archive-btn' }}" title="{{ $user->is_archive ? 'Restaurer' : 'Archiver' }}">
@@ -143,7 +143,7 @@
                                     </form>
                                     @if($user->is_archive)
                                         <form action="{{ route('admin.users.force-delete', $user) }}" method="POST" style="display:inline;margin:0;"
-                                              onsubmit="return confirm('Supprimer définitivement cet utilisateur ? Cette action est irréversible.')">
+                                              onsubmit="return swalConfirmSubmit(this, 'Supprimer définitivement cet utilisateur ? Cette action est irréversible.')">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="table-action-btn delete-btn" title="Supprimer définitivement">
