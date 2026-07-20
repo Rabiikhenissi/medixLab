@@ -87,18 +87,14 @@
 
 
         <!-- Exam requests -->
-        <a href="{{ route('center.exam-requests') }}"
-           class="bg-purple-50 border border-purple-200 rounded-2xl p-5 shadow-sm hover:border-purple-400 transition">
-
+        <div class="bg-purple-50 border border-purple-200 rounded-2xl p-5 shadow-sm">
             <div class="text-3xl font-black text-[#7C3AED]">
-                →
+                {{ $workload['total'] }}
             </div>
-
             <p class="text-xs uppercase font-bold text-purple-700 mt-2">
                 Demandes d'analyses
             </p>
-
-        </a>
+        </div>
 
 
     </div>

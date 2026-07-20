@@ -265,7 +265,7 @@
         </nav>
 
         <div class="center-sidebar-bottom">
-            <a href="{{ route('profile') }}" class="center-sidebar-item" title="Mon Profil">
+            <a href="{{ route('profile.show') }}" class="center-sidebar-item" title="Mon Profil">
                 <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:20px;height:20px;">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
@@ -282,7 +282,7 @@
                 <div class="nav-user-name">{{ auth()->user()->first_name }} {{ auth()->user()->last_name }}</div>
                 <div class="nav-user-role">Établissement</div>
             </div>
-            <a href="{{ route('profile') }}" class="nav-avatar" title="Mon Profil">
+            <a href="{{ route('profile.show') }}" class="nav-avatar" title="Mon Profil">
                 {{ strtoupper(substr(auth()->user()->first_name, 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name, 0, 1)) }}
             </a>
             <form action="{{ route('center.logout') }}" method="POST" style="margin:0;padding:0;">
@@ -406,18 +406,23 @@
 
             <!-- Page Content -->
             <div class="mt-4">
-                <!-- Breadcrumbs (Task 4.7) -->
-                <div class="flex items-center space-x-2 text-[10px] uppercase tracking-wider font-extrabold text-[#64748b] bg-[#f8fafc]/40 px-4 py-2.5 rounded-xl border border-[#e2e8f0]/40 mb-6 select-none">
-                    <span class="text-[#7C3AED]">Espace Labo</span>
+                <div class="flex items-center gap-2 text-[10px] uppercase tracking-wider font-extrabold text-[#64748b] bg-[#f8fafc]/40 px-4 py-2.5 rounded-xl border border-[#e2e8f0]/40 mb-6 select-none">
+                    <a href="{{ route('center.dashboard') }}" class="hover:text-[#7C3AED] transition">Espace Labo</a>
                     <svg class="w-3 h-3 text-[#94a3b8]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
                     @if($route === 'center.dashboard')
                         <span class="text-[#1e293b]">Tableau de Bord</span>
                     @elseif($route === 'center.working-hours')
-                        <span class="text-[#1e293b]">Horaires & Exceptions</span>
+                        <a href="{{ route('center.working-hours') }}" class="hover:text-[#7C3AED] transition">Horaires</a>
+                        <svg class="w-3 h-3 text-[#94a3b8]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+                        <span class="text-[#1e293b]">Exceptions</span>
                     @elseif($route === 'center.consumables')
-                        <span class="text-[#1e293b]">Stock & Consommables</span>
+                        <a href="{{ route('center.consumables') }}" class="hover:text-[#7C3AED] transition">Stock</a>
+                        <svg class="w-3 h-3 text-[#94a3b8]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+                        <span class="text-[#1e293b]">Consommables</span>
                     @elseif($route === 'center.equipment')
-                        <span class="text-[#1e293b]">Équipements & Maintenance</span>
+                        <a href="{{ route('center.equipment') }}" class="hover:text-[#7C3AED] transition">Équipements</a>
+                        <svg class="w-3 h-3 text-[#94a3b8]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+                        <span class="text-[#1e293b]">Maintenance</span>
                     @elseif($route === 'center.exam-requests')
                         <span class="text-[#1e293b]">Demandes d'Analyses</span>
                     @elseif(str_contains($route, 'results.create'))
