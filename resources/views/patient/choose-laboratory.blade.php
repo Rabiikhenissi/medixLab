@@ -5,7 +5,7 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
     .lab-card {
-        transition: transform 0.18s ease, box-shadow 0.18s ease;
+        transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
     }
     .lab-card:hover {
         transform: translateY(-3px);
@@ -20,6 +20,35 @@
     }
     .city-bubble:hover { transform: scale(1.05); }
     .city-bubble.active { transform: scale(1.05); }
+    .badge-pulse {
+        animation: pulse-ring 2s ease-in-out infinite;
+    }
+    @keyframes pulse-ring {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
+    }
+    .sort-btn {
+        transition: all 0.15s ease;
+    }
+    .sort-btn.active {
+        background: #0D9488;
+        color: white;
+        border-color: #0D9488;
+        box-shadow: 0 2px 8px rgba(13,148,136,0.25);
+    }
+    .rec-badge {
+        animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-4px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .price-highlight {
+        background: linear-gradient(135deg, #0D9488, #14b8a6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
 </style>
 @endsection
 
@@ -40,7 +69,7 @@
         Retour au tableau de board
     </a>
 
-    {{-- Map section (outside glass-card so tiles render properly) --}}
+    {{-- Map section --}}
     @if($labsWithCoords->count() > 0)
     <div class="mb-6 rounded-2xl overflow-hidden border border-[#e2e8f0] shadow-xs" style="height: 320px;">
         <div id="labMap" style="width:100%;height:100%;"></div>
@@ -66,20 +95,29 @@
         </div>
 
         {{-- Prescription Info bar --}}
-        <div class="mt-5 mb-7 p-4 bg-[#0D9488]/5 border border-[#0D9488]/20 rounded-xl flex items-center gap-3">
-            <svg class="w-5 h-5 text-[#0D9488] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-            </svg>
-            <p class="text-sm text-[#1e293b]">
-                Prescription <span class="font-bold">#{{ $examRequest->id }}</span>
-                @if($examRequest->laboratory)
-                    · Laboratoire actuel : <strong class="text-[#0D9488]">{{ $examRequest->laboratory->name }}</strong>
-                @endif
-            </p>
+        <div class="mt-5 mb-7 p-4 bg-[#0D9488]/5 border border-[#0D9488]/20 rounded-xl flex flex-col sm:flex-row sm:items-center gap-3">
+            <div class="flex items-center gap-3 flex-1">
+                <svg class="w-5 h-5 text-[#0D9488] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <p class="text-sm text-[#1e293b]">
+                    Prescription <span class="font-bold">#{{ $examRequest->id }}</span>
+                    @if($examRequest->laboratory)
+                        · Laboratoire actuel : <strong class="text-[#0D9488]">{{ $examRequest->laboratory->name }}</strong>
+                    @endif
+                </p>
+            </div>
+            <button type="button" onclick="loadSplitSuggestions()"
+                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-bold bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 transition cursor-pointer whitespace-nowrap">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                </svg>
+                Répartir entre labos
+            </button>
         </div>
 
-        {{-- Search + Compat filter + Count --}}
-        <div class="flex flex-col sm:flex-row gap-3 mb-5">
+        {{-- Search + Sort + Compat filter + Count --}}
+        <div class="flex flex-col sm:flex-row gap-3 mb-4">
             <div class="relative flex-1">
                 <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94a3b8]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -95,13 +133,34 @@
                         <div class="w-9 h-5 bg-[#e2e8f0] rounded-full peer-checked:bg-[#0D9488] transition-colors duration-200"></div>
                         <div class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200 peer-checked:translate-x-4"></div>
                     </div>
-                    <span class="text-xs font-bold text-[#475569] whitespace-nowrap">Labs compatibles uniquement</span>
+                    <span class="text-xs font-bold text-[#475569] whitespace-nowrap">Labs compatibles</span>
                 </label>
                 @endif
                 <span id="labResultCount" class="text-sm text-[#94a3b8] font-medium whitespace-nowrap">
                     {{ count($laboratories) }} laboratoire(s)
                 </span>
             </div>
+        </div>
+
+        {{-- Sort controls --}}
+        <div class="flex items-center gap-2 mb-5 flex-wrap">
+            <span class="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider">Trier par :</span>
+            <button type="button" data-sort="recommended" class="sort-btn active inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold border border-[#e2e8f0] bg-white text-[#64748b] transition">
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                Recommandé
+            </button>
+            <button type="button" data-sort="price" class="sort-btn inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold border border-[#e2e8f0] bg-white text-[#64748b] transition">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Prix
+            </button>
+            <button type="button" data-sort="distance" class="sort-btn inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold border border-[#e2e8f0] bg-white text-[#64748b] transition">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                Distance
+            </button>
+            <button type="button" data-sort="compat" class="sort-btn inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold border border-[#e2e8f0] bg-white text-[#64748b] transition">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Compatibilité
+            </button>
         </div>
 
         {{-- City bubble filters --}}
@@ -129,20 +188,61 @@
 
         {{-- Lab grid --}}
         <div id="labGrid" class="grid md:grid-cols-2 gap-4">
-            @foreach($laboratories as $lab)
+            @foreach($rankedLabs as $entry)
             @php
-                $labAvailableExamIds = $lab->availableExams->where('is_active', true)->pluck('exam_id')->toArray();
-                $coveredCount        = count(array_intersect($requiredExamIds, $labAvailableExamIds));
-                $totalRequired       = count($requiredExamIds);
-                $isFullyCompatible   = $totalRequired === 0 || $coveredCount === $totalRequired;
-                $compatPct           = $totalRequired > 0 ? round($coveredCount / $totalRequired * 100) : 100;
+                $lab = $entry['lab'];
+                $scores = $entry['scores'];
+                $rec = $entry['recommendation'];
+                $availability = $availabilityMap[$lab->id] ?? ['status' => 'unknown', 'label' => '', 'color' => 'gray'];
+
+                $totalPrice = $scores['total_price'];
+                $isFullyCompatible = $scores['is_fully_compatible'];
+                $coveredCount = $scores['covered_count'];
+                $totalRequired = count($requiredExamIds);
+                $compatPct = $totalRequired > 0 ? round($coveredCount / $totalRequired * 100) : 100;
+
+                $sortPrice = $totalPrice > 0 ? $totalPrice : 9999;
+                $sortCompat = $compatPct;
             @endphp
             <div class="lab-card bg-white border border-[#e2e8f0] rounded-2xl p-5 flex flex-col"
                 data-name="{{ strtolower($lab->name) }}"
                 data-city="{{ strtolower($lab->city ?? '') }}"
                 data-city-exact="{{ $lab->city ?? '' }}"
                 data-compat="{{ $isFullyCompatible ? '1' : '0' }}"
-                data-lab-id="{{ $lab->id }}">
+                data-lab-id="{{ $lab->id }}"
+                data-score="{{ $entry['total_score'] }}"
+                data-price="{{ $sortPrice }}"
+                data-distance="{{ $scores['distance'] }}"
+                data-compat-pct="{{ $sortCompat }}">
+
+                {{-- Recommendation badges --}}
+                @if($rec)
+                <div class="flex flex-wrap gap-1.5 mb-3">
+                    @foreach($rec as $badge)
+                    <span class="rec-badge inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold
+                        @if($badge['color'] === 'emerald') bg-emerald-50 text-emerald-700 border border-emerald-200
+                        @elseif($badge['color'] === 'green') bg-green-50 text-green-700 border border-green-200
+                        @elseif($badge['color'] === 'blue') bg-blue-50 text-blue-700 border border-blue-200
+                        @elseif($badge['color'] === 'amber') bg-amber-50 text-amber-700 border border-amber-200
+                        @elseif($badge['color'] === 'indigo') bg-indigo-50 text-indigo-700 border border-indigo-200
+                        @else bg-slate-50 text-slate-700 border border-slate-200
+                        @endif">
+                        @if($badge['icon'] === 'star')
+                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        @elseif($badge['icon'] === 'clock')
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        @elseif($badge['icon'] === 'map')
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        @elseif($badge['icon'] === 'check')
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                        @elseif($badge['icon'] === 'price')
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/></svg>
+                        @endif
+                        {{ $badge['text'] }}
+                    </span>
+                    @endforeach
+                </div>
+                @endif
 
                 {{-- Lab Header --}}
                 <div class="flex items-start gap-3 mb-3">
@@ -150,14 +250,29 @@
                         {{ strtoupper(substr($lab->name, 0, 1)) }}
                     </div>
                     <div class="flex-1 min-w-0">
-                        <h2 class="font-bold text-[#1e293b] text-sm leading-tight">{{ $lab->name }}</h2>
-                        @if($lab->city)
-                        <span class="inline-flex items-center gap-1 mt-1 text-xs text-[#0D9488] font-medium">
-                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
-                            {{ $lab->city }}
-                        </span>
-                        @endif
-                        {{-- Exam compatibility badge (Task 3.4) --}}
+                        <div class="flex items-center gap-2">
+                            <h2 class="font-bold text-[#1e293b] text-sm leading-tight">{{ $lab->name }}</h2>
+                            {{-- Availability dot --}}
+                            <span class="badge-pulse inline-block w-2 h-2 rounded-full flex-shrink-0
+                                @if($availability['status'] === 'open') bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.5)]
+                                @elseif($availability['status'] === 'closing_soon') bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.5)]
+                                @elseif($availability['status'] === 'opens_soon') bg-amber-300
+                                @else bg-red-400
+                                @endif"
+                                title="{{ $availability['label'] }}"></span>
+                        </div>
+                        <div class="flex items-center gap-2 mt-1 flex-wrap">
+                            @if($lab->city)
+                            <span class="inline-flex items-center gap-1 text-xs text-[#0D9488] font-medium">
+                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
+                                {{ $lab->city }}
+                            </span>
+                            @endif
+                            <span class="text-[10px] font-medium {{ $availability['color'] === 'green' ? 'text-green-600' : ($availability['color'] === 'amber' ? 'text-amber-600' : 'text-red-500') }}">
+                                {{ $availability['label'] }}
+                            </span>
+                        </div>
+                        {{-- Exam compatibility bar --}}
                         @if ($totalRequired > 0)
                         <div class="mt-2 flex items-center gap-1.5">
                             <div class="flex-1 bg-slate-100 rounded-full h-1.5">
@@ -193,6 +308,16 @@
                     </div>
                     @endif
                 </div>
+
+                {{-- Total price for this prescription --}}
+                @if($totalRequired > 0 && $totalPrice > 0)
+                <div class="mb-4 p-3 bg-gradient-to-r from-[#0D9488]/5 to-teal-50 rounded-xl border border-[#0D9488]/10">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-bold text-[#64748b] uppercase tracking-wider">Total prescription</span>
+                        <span class="price-highlight text-lg font-black">{{ number_format($totalPrice, 2) }} <span class="text-xs font-bold">TND</span></span>
+                    </div>
+                </div>
+                @endif
 
                 {{-- Working Hours (collapsible) --}}
                 @if($lab->workingHours->count() > 0)
@@ -238,7 +363,7 @@
                 </details>
                 @endif
 
-                {{-- Available exams & prices (Task 3.4) --}}
+                {{-- Available exams & prices --}}
                 @php
                     $matchingExams = $lab->availableExams
                         ->where('is_active', true)
@@ -292,7 +417,7 @@
             @endforeach
         </div>
 
-        {{-- Empty state (hidden by default) --}}
+        {{-- Empty state --}}
         <div id="labEmpty" class="hidden py-16 text-center text-[#94a3b8]">
             <svg class="w-14 h-14 mx-auto mb-3 opacity-40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
@@ -316,6 +441,7 @@
     let activeCityFilter = 'all';
     let searchTerm       = '';
     let compatOnly       = false;
+    let currentSort      = 'recommended';
 
     const allCards = Array.from(document.querySelectorAll('.lab-card'));
     const labGrid  = document.getElementById('labGrid');
@@ -333,6 +459,37 @@
             labCurrentPage = 1;
             render();
         });
+    }
+
+    // Sort controls
+    document.querySelectorAll('.sort-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentSort = btn.dataset.sort;
+            labCurrentPage = 1;
+            sortCards();
+            render();
+        });
+    });
+
+    function sortCards() {
+        const sortKey = {
+            'recommended': 'score',
+            'price': 'price',
+            'distance': 'distance',
+            'compat': 'compatPct'
+        }[currentSort];
+
+        const sortAsc = currentSort === 'price';
+
+        allCards.sort((a, b) => {
+            const aVal = parseFloat(a.dataset[sortKey]) || 0;
+            const bVal = parseFloat(b.dataset[sortKey]) || 0;
+            return sortAsc ? aVal - bVal : bVal - aVal;
+        });
+
+        allCards.forEach(card => labGrid.appendChild(card));
     }
 
     function getVisible() {
@@ -353,26 +510,20 @@
         const start = (labCurrentPage - 1) * LAB_PAGE_SIZE;
         const end   = Math.min(labCurrentPage * LAB_PAGE_SIZE, total);
 
-        // Hide all
         allCards.forEach(c => c.classList.add('hidden'));
-        // Show page slice
         visible.slice(start, end).forEach(c => c.classList.remove('hidden'));
 
-        // Count
         labCount.textContent = `${total} laboratoire(s)`;
 
-        // Empty
         labEmpty.classList.toggle('hidden', total > 0);
         labGrid.classList.toggle('hidden', total === 0);
 
-        // Pagination
         if (totalPages <= 1) {
             labPag.classList.add('hidden');
         } else {
             labPag.classList.remove('hidden');
             labInfo.textContent = `${start + 1}–${end} sur ${total}`;
 
-            // Build page buttons
             const pages = [];
             for (let i = Math.max(1, labCurrentPage - 2); i <= Math.min(totalPages, labCurrentPage + 2); i++) pages.push(i);
 
@@ -433,9 +584,31 @@
         render();
     });
 
-    // Initial render
+    // Initial sort and render
+    sortCards();
     render();
 </script>
+
+{{-- Split Modal --}}
+<div id="splitModal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-[1000] flex items-center justify-center p-4">
+    <div class="bg-white rounded-[20px] w-full max-w-lg p-6 md:p-8 shadow-2xl max-h-[85vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-5 pb-4 border-b border-[#e2e8f0]">
+            <div>
+                <h3 class="text-base font-bold text-[#1e293b]">Répartition entre laboratoires</h3>
+                <p class="text-[11px] text-[#64748b] mt-0.5">Optimisation pour couvrir tous vos examens</p>
+            </div>
+            <button onclick="closeSplitModal()" class="w-8 h-8 rounded-full bg-[#f1f5f9] hover:bg-[#e2e8f0] flex items-center justify-center text-[#64748b] hover:text-[#1e293b] transition cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div id="splitContent">
+            <div class="text-center py-8">
+                <div class="animate-spin w-6 h-6 border-2 border-[#0D9488] border-t-transparent rounded-full mx-auto mb-3"></div>
+                <p class="text-xs text-[#64748b]">Analyse des laboratoires disponibles...</p>
+            </div>
+        </div>
+    </div>
+</div>
 
 @endsection
 
@@ -499,5 +672,175 @@
     })();
 </script>
 @endif
+
+<script>
+    const examRequestId = {{ $examRequest->id }};
+    const splitUrl = '{{ route("patient.split-suggestions", $examRequest) }}';
+    const applySplitUrl = '{{ route("patient.apply-split", $examRequest) }}';
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
+    const allExams = {!! json_encode($examRequest->items->map(fn($it) => ['id' => $it->exam_id, 'name' => $it->exam->name])->values()->toArray()) !!};
+
+    async function loadSplitSuggestions() {
+        const modal = document.getElementById('splitModal');
+        const content = document.getElementById('splitContent');
+        modal.classList.remove('hidden');
+        content.innerHTML = `
+            <div class="text-center py-8">
+                <div class="animate-spin w-6 h-6 border-2 border-[#0D9488] border-t-transparent rounded-full mx-auto mb-3"></div>
+                <p class="text-xs text-[#64748b]">Analyse des laboratoires disponibles...</p>
+            </div>`;
+
+        try {
+            const res = await fetch(splitUrl);
+            const data = await res.json();
+            if (!data.success || data.split.length === 0) {
+                content.innerHTML = `
+                    <div class="text-center py-8">
+                        <svg class="w-10 h-10 mx-auto mb-2 opacity-30" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                        <p class="text-sm font-semibold text-[#1e293b]">Un seul laboratoire suffit</p>
+                        <p class="text-xs text-[#94a3b8] mt-1">Tous vos examens sont couverts par au moins un labo</p>
+                    </div>`;
+                return;
+            }
+            renderSplit(data.split);
+        } catch(e) {
+            content.innerHTML = '<p class="text-xs text-red-500 text-center py-4">Erreur de chargement</p>';
+        }
+    }
+
+    let splitData = [];
+
+    function renderSplit(split) {
+        const content = document.getElementById('splitContent');
+        splitData = split;
+        const uncovered = split.filter(s => s.uncovered);
+        const covered = split.filter(s => !s.uncovered);
+
+        let html = '';
+
+        if (covered.length > 1) {
+            html += `<div class="mb-3 p-3 bg-purple-50 border border-purple-200 rounded-xl">
+                <p class="text-[11px] font-bold text-purple-700">${covered.length} laboratoire(s) nécessaires pour couvrir tous vos examens</p>
+            </div>`;
+        }
+
+        covered.forEach((group, i) => {
+            html += `
+            <label class="split-lab-card mb-3 p-4 border border-[#e2e8f0] rounded-xl cursor-pointer transition hover:border-[#0D9488]/40 hover:bg-[#f0fdfa] ${group.is_primary ? 'bg-[#0D9488]/5 border-[#0D9488]/20' : 'bg-white'}" data-index="${i}">
+                <input type="checkbox" class="split-lab-check sr-only peer" data-index="${i}" ${group.uncovered ? 'disabled' : 'checked'}>
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <div class="w-5 h-5 rounded border-2 border-[#e2e8f0] peer-checked:border-[#0D9488] peer-checked:bg-[#0D9488] flex items-center justify-center transition">
+                            <svg class="w-3 h-3 text-white hidden peer-checked:block" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                        </div>
+                        <span class="w-6 h-6 rounded-full ${group.is_primary ? 'bg-[#0D9488] text-white' : 'bg-purple-100 text-purple-700'} flex items-center justify-center text-[10px] font-black">${i + 1}</span>
+                        <span class="text-sm font-bold text-[#1e293b]">${group.lab_name}</span>
+                        ${group.is_primary ? '<span class="text-[9px] font-bold text-[#0D9488] bg-[#0D9488]/10 px-1.5 py-0.5 rounded">PRINCIPAL</span>' : ''}
+                    </div>
+                    ${group.total_price > 0 ? `<span class="text-sm font-black text-[#0D9488]">${Number(group.total_price).toFixed(2)} TND</span>` : ''}
+                </div>
+                <div class="flex items-center gap-1.5 text-[10px] text-[#64748b]">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                    ${group.exam_ids.length} examen(s) couverts
+                </div>
+                <div id="splitExamList_${i}" class="mt-2 hidden">
+                    ${renderExamTags(group)}
+                </div>
+                <button type="button" onclick="event.preventDefault(); toggleExamList(${i})" class="mt-1.5 text-[10px] font-bold text-[#0D9488] hover:text-[#0a7068] transition cursor-pointer">
+                    Voir les examens ▾
+                </button>
+            </label>`;
+        });
+
+        if (uncovered.length > 0) {
+            html += `
+            <div class="p-4 border border-dashed border-red-300 rounded-xl bg-red-50">
+                <div class="flex items-center gap-2 mb-1">
+                    <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    <span class="text-sm font-bold text-red-700">Examen(s) non couvert(s)</span>
+                </div>
+                <p class="text-[11px] text-red-600">${uncovered[0].exam_ids.length} examen(s) sans laboratoire disponible</p>
+            </div>`;
+        }
+
+        html += `<div class="flex gap-3 mt-5 pt-4 border-t border-[#e2e8f0]">
+            <button onclick="closeSplitModal()" class="flex-1 py-2.5 rounded-xl bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] font-bold text-xs uppercase tracking-wider transition cursor-pointer">Annuler</button>
+            <button onclick="applySplit()" id="applySplitBtn" class="flex-1 py-2.5 rounded-xl bg-[#0D9488] hover:bg-[#0a7068] text-white font-bold text-xs uppercase tracking-wider transition cursor-pointer">Appliquer la répartition</button>
+        </div>`;
+
+        content.innerHTML = html;
+        updateApplyBtn();
+    }
+
+    function renderExamTags(group) {
+        return `<div class="flex flex-wrap gap-1">${group.exam_ids.map(eid => {
+            const exam = allExams.find(e => e.id === eid);
+            const name = exam ? exam.name : 'Examen #' + eid;
+            return `<span class="px-2 py-0.5 bg-[#0D9488]/10 text-[#0D9488] text-[9px] font-bold rounded-full border border-[#0D9488]/15">${name}</span>`;
+        }).join('')}</div>`;
+    }
+
+    function toggleExamList(index) {
+        const el = document.getElementById('splitExamList_' + index);
+        el.classList.toggle('hidden');
+    }
+
+    function updateApplyBtn() {
+        const checked = document.querySelectorAll('.split-lab-check:checked:not(:disabled)');
+        const btn = document.getElementById('applySplitBtn');
+        if (btn) btn.disabled = checked.length === 0;
+    }
+
+    document.addEventListener('change', e => {
+        if (e.target.classList.contains('split-lab-check')) {
+            updateApplyBtn();
+        }
+    });
+
+    async function applySplit() {
+        const checked = document.querySelectorAll('.split-lab-check:checked:not(:disabled)');
+        if (checked.length === 0) return;
+
+        const selectedIndices = [...checked].map(cb => parseInt(cb.dataset.index));
+        const assignments = selectedIndices.map(idx => ({
+            labo_id: splitData[idx].labo_id,
+            exam_ids: splitData[idx].exam_ids,
+        }));
+
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = applySplitUrl;
+
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = '_token';
+        csrfInput.value = csrfToken;
+        form.appendChild(csrfInput);
+
+        assignments.forEach((a, i) => {
+            const laboInput = document.createElement('input');
+            laboInput.type = 'hidden';
+            laboInput.name = `assignments[${i}][labo_id]`;
+            laboInput.value = a.labo_id;
+            form.appendChild(laboInput);
+
+            a.exam_ids.forEach((eid) => {
+                const examInput = document.createElement('input');
+                examInput.type = 'hidden';
+                examInput.name = `assignments[${i}][exam_ids][]`;
+                examInput.value = eid;
+                form.appendChild(examInput);
+            });
+        });
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    function closeSplitModal() {
+        document.getElementById('splitModal').classList.add('hidden');
+    }
+</script>
 @endsection
+
 </x-layouts.patient>

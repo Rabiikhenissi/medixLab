@@ -169,7 +169,8 @@
                                 d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2" />
                         </svg>
                         Dernières Prescriptions d'Analyses
-                        {{-- Search & Filter Form (Task 4.2) --}}
+                    </h3>
+                    {{-- Search & Filter Form --}}
                     <form action="{{ route('doctor.dashboard') }}" method="GET" class="mb-5 flex flex-col sm:flex-row items-center gap-3">
                         <div class="relative flex-1 w-full">
                             <input type="text" name="search" value="{{ $search }}" placeholder="Rechercher par nom de patient ou code..." 
@@ -436,6 +437,11 @@
                                         <a href="{{ route('doctor.select-exams', $access->patient->id) }}"
                                             class="flex-1 bg-[#0066FF] hover:bg-[#0052CC] text-white font-bold py-2 px-3 rounded-lg text-[10px] uppercase tracking-wider text-center transition transform hover:scale-[1.02] active:scale-[0.98] shadow-xs cursor-pointer block">
                                             Prescrire des Examens
+                                        </a>
+                                        <a href="{{ route('doctor.chat', $access->patient->id) }}"
+                                            class="inline-flex items-center justify-center gap-1 bg-[#0D9488] hover:bg-[#0a7068] text-white font-bold py-2 px-3 rounded-lg text-[10px] uppercase tracking-wider transition transform hover:scale-[1.02] active:scale-[0.98] shadow-xs cursor-pointer"
+                                            title="Envoyer un message">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
                                         </a>
                                     </div>
                                 </div>

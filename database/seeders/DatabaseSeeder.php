@@ -32,9 +32,14 @@ class DatabaseSeeder extends Seeder
 
         // 2. Call seeders
         $this->call([
-            LabLocationSeeder::class,
         ]);
-        // 3. Assign all permissions to the admin group
+
+        // 3. Update database with comprehensive demo data
+        $this->call([
+            DataUpdateSeeder::class,
+        ]);
+
+        // 4. Assign all permissions to the admin group
         $adminGroup = Group::where('code', 'admin')->first();
         if ($adminGroup) {
             $allActionIds = Action::all()->pluck('id');
