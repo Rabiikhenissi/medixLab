@@ -950,7 +950,13 @@
                                     ${doc.expires_at ? `<p class="text-[10px] text-[#94a3b8]">Expire le ${doc.expires_at}</p>` : ''}
                                 </div>
                             </div>
-                            <button onclick="blockDoctor(${doc.doctor_id})" class="text-[10px] font-bold text-red-500 hover:underline cursor-pointer uppercase">Bloquer</button>
+                            <div class="flex items-center gap-2">
+                                <a href="/patient/chat/${doc.doctor_id}" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-[#0D9488] text-white hover:bg-[#0a7068] transition" title="Envoyer un message">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                                    Chat
+                                </a>
+                                <button onclick="blockDoctor(${doc.doctor_id})" class="text-[10px] font-bold text-red-500 hover:underline cursor-pointer uppercase">Bloquer</button>
+                            </div>
                         </div>
                     `).join('');
                 } else {

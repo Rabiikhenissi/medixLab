@@ -6,6 +6,7 @@ use App\Models\Patient;
 use App\Models\Notification;
 use App\Models\DoctorPatientAccess;
 use App\Models\Labo;
+use App\Services\LabRecommendationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -597,7 +598,6 @@ class PatientController extends Controller
                 ->with('error', 'Impossible de modifier le laboratoire pour cette prescription.');
         }
 
-        // IDs of exams required by this prescription
         $requiredExamIds = $examRequest->items->pluck('exam_id')->toArray();
 
         $laboratories = Labo::with(['workingHours', 'availableExams.exam'])
@@ -605,10 +605,21 @@ class PatientController extends Controller
             ->orderBy('name')
             ->get();
 
+        $recommendationService = new LabRecommendationService(
+            $patient->latitude ?? null,
+            $patient->longitude ?? null,
+            $requiredExamIds
+        );
+
+        $rankedLabs = $recommendationService->rankLabs($laboratories);
+        $availabilityMap = $recommendationService->getAvailabilityMap();
+
         return view('patient.choose-laboratory', [
             'examRequest'     => $examRequest,
             'laboratories'    => $laboratories,
             'requiredExamIds' => $requiredExamIds,
+            'rankedLabs'      => $rankedLabs,
+            'availabilityMap' => $availabilityMap,
         ]);
     }
 
@@ -682,4 +693,165 @@ class PatientController extends Controller
         return back()->with('success', 'Demande d\'examen annulée.');
     }
 
+    /**
+     * TIER 1.5 — Patient Health Trends page
+     */
+    public function healthTrends()
+    {
+        $patient = auth()->user()->patient;
+        if (!$patient) return redirect()->route('patient.dashboard');
+
+        return view('patient.health-trends', [
+            'user' => auth()->user(),
+            'patient' => $patient,
+        ]);
+    }
+
+    public function healthTrendsData()
+    {
+        $patient = auth()->user()->patient;
+        if (!$patient) return response()->json(['success' => false], 403);
+
+        $service = new \App\Services\PatientHealthTrendsService($patient);
+
+        return response()->json([
+            'success' => true,
+            'trends' => $service->getTrends(),
+            'summary' => $service->getSummary(),
+        ]);
+    }
+
+    /**
+     * TIER 2.2 — Chat with doctor
+     */
+    public function chat(\App\Models\Doctor $doctor)
+    {
+        $patient = auth()->user()->patient;
+        if (!$patient) return redirect()->route('patient.dashboard');
+
+        $access = \App\Models\DoctorPatientAccess::where('doctor_id', $doctor->id)
+            ->where('patient_id', $patient->id)
+            ->where('access_status', 'granted')
+            ->first();
+
+        if (!$access) {
+            return redirect()->route('patient.dashboard')
+                ->with('error', 'Accès non autorisé.');
+        }
+
+        $userId = auth()->id();
+        \App\Models\ChatMessage::where('sender_id', $doctor->user_id)
+            ->where('receiver_id', $userId)
+            ->where('is_read', false)
+            ->update(['is_read' => true]);
+
+        return view('patient.chat', [
+            'doctor' => $doctor,
+            'user' => auth()->user(),
+        ]);
+    }
+
+    public function chatMessages(\App\Models\Doctor $doctor)
+    {
+        $patient = auth()->user()->patient;
+        $access = \App\Models\DoctorPatientAccess::where('doctor_id', $doctor->id)
+            ->where('patient_id', $patient->id)
+            ->where('access_status', 'granted')
+            ->first();
+
+        if (!$access) return response()->json(['success' => false], 403);
+
+        $userId = auth()->id();
+        $messages = \App\Models\ChatMessage::where(function ($q) use ($userId, $doctor) {
+            $q->where('sender_id', $userId)->where('receiver_id', $doctor->user_id);
+        })->orWhere(function ($q) use ($userId, $doctor) {
+            $q->where('sender_id', $doctor->user_id)->where('receiver_id', $userId);
+        })
+        ->with('sender')
+        ->latest()
+        ->limit(100)
+        ->get()
+        ->reverse()
+        ->values();
+
+        return response()->json(['success' => true, 'messages' => $messages]);
+    }
+
+    public function chatSend(\App\Models\Doctor $doctor, Request $request)
+    {
+        $request->validate(['message' => 'required|string|max:2000']);
+
+        $patient = auth()->user()->patient;
+        $access = \App\Models\DoctorPatientAccess::where('doctor_id', $doctor->id)
+            ->where('patient_id', $patient->id)
+            ->where('access_status', 'granted')
+            ->first();
+
+        if (!$access) return response()->json(['success' => false], 403);
+
+        $msg = \App\Models\ChatMessage::create([
+            'sender_id' => auth()->id(),
+            'receiver_id' => $doctor->user_id,
+            'message' => $request->message,
+        ]);
+
+        \App\Services\NotificationService::send(
+            $doctor->user_id,
+            'Nouveau message de ' . auth()->user()->first_name . ' ' . auth()->user()->last_name,
+            $request->message,
+            'general'
+        );
+
+        return response()->json(['success' => true, 'message' => $msg]);
+    }
+
+    public function chatUnreadCount()
+    {
+        $userId = auth()->id();
+        $count = \App\Models\ChatMessage::where('receiver_id', $userId)
+            ->where('is_read', false)
+            ->count();
+
+        return response()->json(['success' => true, 'unread_count' => $count]);
+    }
+
+    /**
+     * TIER 2.4 — Multi-Lab Splitting suggestions
+     */
+    public function splitSuggestions(ExamRequest $examRequest)
+    {
+        $patient = auth()->user()->patient;
+        if (!$patient || $examRequest->patient_id !== $patient->id) abort(403);
+
+        $service = new \App\Services\MultiLabSplittingService($examRequest);
+        $suggestions = $service->getSplitSuggestions();
+
+        return response()->json([
+            'success' => true,
+            'split' => $suggestions,
+        ]);
+    }
+
+    public function applySplit(ExamRequest $examRequest, Request $request)
+    {
+        $patient = auth()->user()->patient;
+        if (!$patient || $examRequest->patient_id !== $patient->id) abort(403);
+
+        $request->validate([
+            'assignments' => 'required|array|min:1',
+            'assignments.*.labo_id' => 'required|exists:labos,id',
+            'assignments.*.exam_ids' => 'required|array|min:1',
+            'assignments.*.exam_ids.*' => 'exists:exams,id',
+        ]);
+
+        $service = new \App\Services\MultiLabSplittingService($examRequest);
+        $success = $service->assignSplit($request->assignments);
+
+        if ($success) {
+            return redirect()->route('patient.dashboard')
+                ->with('success', 'Prescription répartie entre les laboratoires avec succès.');
+        }
+
+        return back()->with('error', 'Erreur lors de la répartition.');
+    }
 }

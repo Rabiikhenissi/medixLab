@@ -56,5 +56,16 @@ class AppServiceProvider extends ServiceProvider
         \Illuminate\Support\Facades\View::composer('layouts.admin', $sidebarFeaturesComposer);
         \Illuminate\Support\Facades\View::composer('components.layouts.auth', $sidebarFeaturesComposer);
         \Illuminate\Support\Facades\View::composer('layouts.center', $sidebarFeaturesComposer);
+
+        // TIER 2.3 — Check access expiry once daily on any request
+        $todayKey = 'access_expiry_check_' . now()->format('Y-m-d');
+        if (!session()->has($todayKey)) {
+            session()->put($todayKey, true);
+            try {
+                \App\Services\ExamRequestService::checkAccessExpiry();
+            } catch (\Exception $e) {
+                \Log::error('Access expiry check failed: ' . $e->getMessage());
+            }
+        }
     }
 }
