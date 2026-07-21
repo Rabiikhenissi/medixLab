@@ -810,9 +810,31 @@ class MLLPHandler(socketserver.BaseRequestHandler):
 
             parsed = self._parse_hl7(hl7_message)
 
+            exam_code_raw = parsed.get("exam_code", "GLYC")
+            exam_code = exam_code_raw.upper().strip()
+
+            if exam_code not in EXAM_DATABASE:
+                alias_upper = {k.upper(): v for k, v in CODE_ALIASES.items()}
+                if exam_code in alias_upper:
+                    resolved = alias_upper[exam_code]
+                    if resolved in EXAM_DATABASE:
+                        exam_code = resolved
+                        print(f"  [TCP ALIAS] Mapped {exam_code_raw} -> {exam_code}")
+                else:
+                    code_map = {k.upper(): k for k in EXAM_DATABASE.keys()}
+                    if exam_code in code_map:
+                        exam_code = code_map[exam_code]
+                    else:
+                        exam_code = _resolve_fallback(exam_code_raw)
+                        print(f"  [TCP FALLBACK] {exam_code_raw} -> {exam_code}")
+
+            if exam_code not in EXAM_DATABASE:
+                print(f"  [TCP] Unknown exam code: {exam_code_raw}, defaulting to NFS")
+                exam_code = "NFS"
+
             order_data = {
                 "order_id": parsed.get("order_id", f"TCP-{uuid.uuid4().hex[:6].upper()}"),
-                "exam_code": parsed.get("exam_code", "GLYC"),
+                "exam_code": exam_code,
                 "patient": {
                     "id": parsed.get("patient_id", "0"),
                     "name": parsed.get("patient_name", "UNKNOWN^PATIENT"),
@@ -821,13 +843,13 @@ class MLLPHandler(socketserver.BaseRequestHandler):
                 },
             }
 
-            print(f"  [TCP] Generating results for exam: {order_data['exam_code']}")
+            print(f"  [TCP] Generating results for exam: {exam_code}")
             delay = random.uniform(1.5, 3.5)
             time.sleep(delay)
 
-            results = generate_results(order_data["exam_code"], order_data["patient"]["sex"])
+            results = generate_results(exam_code, order_data["patient"]["sex"])
             if results is None:
-                print(f"  [TCP] Unknown exam code: {order_data['exam_code']}")
+                print(f"  [TCP] Failed to generate results for: {exam_code}")
                 return
 
             oru_msg = generate_oru_response(order_data, results)

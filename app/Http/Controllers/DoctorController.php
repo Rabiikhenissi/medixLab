@@ -636,4 +636,154 @@ class DoctorController extends Controller
 
         return back()->with('success', 'Demande d\'examen annulée.');
     }
+
+    /**
+     * TIER 1.4 — Smart Exam Suggestions (AJAX API)
+     */
+    public function smartSuggestions(Patient $patient, Request $request)
+    {
+        $doctor = Auth::user()->doctor;
+
+        $access = DoctorPatientAccess::where('doctor_id', $doctor->id)
+            ->where('patient_id', $patient->id)
+            ->where('access_status', 'granted')
+            ->first();
+
+        if (!$access) {
+            return response()->json(['success' => false, 'message' => 'Accès non autorisé.'], 403);
+        }
+
+        $alreadySelected = $request->input('exam_ids', []);
+        if (!is_array($alreadySelected)) {
+            $alreadySelected = array_filter(explode(',', $alreadySelected));
+        }
+        $alreadySelected = array_map('intval', $alreadySelected);
+
+        $service = new \App\Services\ExamSuggestionService($patient);
+        $suggestions = $service->getSuggestions($alreadySelected);
+
+        return response()->json([
+            'success' => true,
+            'suggestions' => $suggestions,
+        ]);
+    }
+
+    /**
+     * TIER 1.4 — Patient Health Trends (doctor view, AJAX)
+     */
+    public function patientHealthTrends(Patient $patient)
+    {
+        $doctor = Auth::user()->doctor;
+
+        $access = DoctorPatientAccess::where('doctor_id', $doctor->id)
+            ->where('patient_id', $patient->id)
+            ->where('access_status', 'granted')
+            ->first();
+
+        if (!$access) {
+            return response()->json(['success' => false, 'message' => 'Accès non autorisé.'], 403);
+        }
+
+        $service = new \App\Services\PatientHealthTrendsService($patient);
+
+        return response()->json([
+            'success' => true,
+            'trends' => $service->getTrends(),
+            'summary' => $service->getSummary(),
+        ]);
+    }
+
+    /**
+     * TIER 2.2 — Chat with patient
+     */
+    public function chat(Patient $patient)
+    {
+        $doctor = Auth::user()->doctor;
+
+        $access = DoctorPatientAccess::where('doctor_id', $doctor->id)
+            ->where('patient_id', $patient->id)
+            ->where('access_status', 'granted')
+            ->first();
+
+        if (!$access) {
+            return redirect()->route('doctor.dashboard')
+                ->with('error', 'Accès non autorisé.');
+        }
+
+        $user = Auth::user();
+
+        \App\Models\ChatMessage::where('sender_id', $patient->user_id)
+            ->where('receiver_id', $user->id)
+            ->where('is_read', false)
+            ->update(['is_read' => true]);
+
+        return view('doctor.chat', [
+            'patient' => $patient,
+            'user' => $user,
+        ]);
+    }
+
+    public function chatMessages(Patient $patient)
+    {
+        $doctor = Auth::user()->doctor;
+        $access = DoctorPatientAccess::where('doctor_id', $doctor->id)
+            ->where('patient_id', $patient->id)
+            ->where('access_status', 'granted')
+            ->first();
+
+        if (!$access) return response()->json(['success' => false], 403);
+
+        $userId = Auth::id();
+        $messages = \App\Models\ChatMessage::where(function ($q) use ($userId, $patient) {
+            $q->where('sender_id', $userId)->where('receiver_id', $patient->user_id);
+        })->orWhere(function ($q) use ($userId, $patient) {
+            $q->where('sender_id', $patient->user_id)->where('receiver_id', $userId);
+        })
+        ->with('sender')
+        ->latest()
+        ->limit(100)
+        ->get()
+        ->reverse()
+        ->values();
+
+        return response()->json(['success' => true, 'messages' => $messages]);
+    }
+
+    public function chatSend(Patient $patient, Request $request)
+    {
+        $request->validate(['message' => 'required|string|max:2000']);
+
+        $doctor = Auth::user()->doctor;
+        $access = DoctorPatientAccess::where('doctor_id', $doctor->id)
+            ->where('patient_id', $patient->id)
+            ->where('access_status', 'granted')
+            ->first();
+
+        if (!$access) return response()->json(['success' => false], 403);
+
+        $msg = \App\Models\ChatMessage::create([
+            'sender_id' => Auth::id(),
+            'receiver_id' => $patient->user_id,
+            'message' => $request->message,
+        ]);
+
+        \App\Services\NotificationService::send(
+            $patient->user_id,
+            'Nouveau message du Dr. ' . Auth::user()->first_name,
+            $request->message,
+            'general'
+        );
+
+        return response()->json(['success' => true, 'message' => $msg]);
+    }
+
+    public function chatUnreadCount()
+    {
+        $userId = Auth::id();
+        $count = \App\Models\ChatMessage::where('receiver_id', $userId)
+            ->where('is_read', false)
+            ->count();
+
+        return response()->json(['success' => true, 'unread_count' => $count]);
+    }
 }

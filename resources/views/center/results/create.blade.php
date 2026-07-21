@@ -84,9 +84,11 @@
                         <div class="relative w-full md:w-44">
                             <input
                                 type="text"
-                                class="w-full pl-3 pr-3 py-2.5 border border-[#e2e8f0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/20 focus:border-[#7C3AED] transition text-[#1e293b] text-sm font-semibold bg-[#F8FAFC]/50 hover:bg-[#F8FAFC]"
+                                class="param-value-input w-full pl-3 pr-3 py-2.5 border border-[#e2e8f0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/20 focus:border-[#7C3AED] transition text-[#1e293b] text-sm font-semibold bg-[#F8FAFC]/50 hover:bg-[#F8FAFC]"
                                 placeholder="Valeur"
                                 name="parameters[{{ $index }}][value]"
+                                data-index="{{ $index }}"
+                                data-range="{{ $parameter->normal_range ?? '' }}"
                                 value="{{ old("parameters.{$index}.value") }}"
                                 required
                             >
@@ -95,13 +97,15 @@
                         <div class="relative w-full md:w-36">
                             <select
                                 name="parameters[{{ $index }}][status]"
-                                class="w-full px-3 py-2.5 border border-[#e2e8f0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/20 focus:border-[#7C3AED] transition text-[#1e293b] text-sm font-semibold bg-[#F8FAFC]/50 hover:bg-[#F8FAFC] appearance-none"
+                                data-index="{{ $index }}"
+                                class="param-status-select w-full px-3 py-2.5 border border-[#e2e8f0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/20 focus:border-[#7C3AED] transition text-[#1e293b] text-sm font-semibold bg-[#F8FAFC]/50 hover:bg-[#F8FAFC] appearance-none"
                             >
                                 <option value="normal" {{ old("parameters.{$index}.status") === 'normal' ? 'selected' : '' }}>Normal</option>
                                 <option value="high" {{ old("parameters.{$index}.status") === 'high' ? 'selected' : '' }}>Elevé</option>
                                 <option value="low" {{ old("parameters.{$index}.status") === 'low' ? 'selected' : '' }}>Bas</option>
                             </select>
                         </div>
+                        <span data-index="{{ $index }}" class="param-status-badge hidden text-[9px] font-bold px-1.5 py-0.5 rounded uppercase"></span>
                     </div>
                 </div>
             @endforeach
@@ -360,6 +364,83 @@ document.addEventListener('DOMContentLoaded', function () {
         selected = @json($preloadedConsumables);
     @endif
     render();
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    function parseRange(rangeStr) {
+        if (!rangeStr) return null;
+        // Strip suffixes like (H)/(F) and split on / to handle dual ranges
+        let cleaned = rangeStr.replace(/\(H\)/gi, '').replace(/\(F\)/gi, '').trim();
+        // Try first range (may be like "13.0 - 17.0  /  12.0 - 16.0")
+        const parts = cleaned.split('/').map(s => s.trim());
+        let min = null, max = null;
+        for (const part of parts) {
+            const m = part.match(/([\d.]+)\s*-\s*([\d.]+)/);
+            if (m) {
+                const lo = parseFloat(m[1]), hi = parseFloat(m[2]);
+                if (min === null || lo < min) min = lo;
+                if (max === null || hi > max) max = hi;
+            }
+        }
+        // Handle single value like "0.70 - 1.10"
+        if (min !== null && max !== null) return { min, max };
+        // Handle "< 5.0" or "> 3.0"
+        const lt = rangeStr.match(/<\s*([\d.]+)/);
+        if (lt) return { min: null, max: parseFloat(lt[1]) };
+        const gt = rangeStr.match(/>\s*([\d.]+)/);
+        if (gt) return { min: parseFloat(gt[1]), max: null };
+        return null;
+    }
+
+    function detectStatus(value, rangeStr) {
+        const range = parseRange(rangeStr);
+        if (!range || isNaN(value)) return null;
+        if (range.max !== null && value > range.max) return 'high';
+        if (range.min !== null && value < range.min) return 'low';
+        return 'normal';
+    }
+
+    document.querySelectorAll('.param-value-input').forEach(input => {
+        input.addEventListener('input', function () {
+            const idx = this.dataset.index;
+            const val = parseFloat(this.value);
+            const range = this.dataset.range;
+            const select = document.querySelector(`.param-status-select[data-index="${idx}"]`);
+            const badge = document.querySelector(`.param-status-badge[data-index="${idx}"]`);
+            if (!select) return;
+
+            if (isNaN(val) || !range) {
+                select.value = 'normal';
+                select.classList.remove('border-red-400','border-green-400','border-amber-400');
+                if (badge) badge.classList.add('hidden');
+                return;
+            }
+
+            const status = detectStatus(val, range);
+            if (status) {
+                select.value = status;
+                // Color the value input border + badge
+                this.classList.remove('border-red-400','border-green-400','border-amber-400');
+                if (badge) {
+                    badge.classList.remove('hidden','bg-red-100','text-red-700','border-red-300','bg-amber-100','text-amber-700','border-amber-300','bg-green-100','text-green-700','border-green-300');
+                }
+                if (status === 'high') {
+                    this.classList.add('border-red-400');
+                    if (badge) { badge.textContent = '↑ Élevé'; badge.classList.add('bg-red-100','text-red-700','border','border-red-300'); }
+                } else if (status === 'low') {
+                    this.classList.add('border-amber-400');
+                    if (badge) { badge.textContent = '↓ Bas'; badge.classList.add('bg-amber-100','text-amber-700','border','border-amber-300'); }
+                } else {
+                    this.classList.add('border-green-400');
+                    if (badge) { badge.textContent = '✓ Normal'; badge.classList.add('bg-green-100','text-green-700','border','border-green-300'); }
+                }
+            }
+        });
+        // Trigger on load for old() values
+        if (input.value) input.dispatchEvent(new Event('input'));
+    });
 });
 </script>
 @endsection
