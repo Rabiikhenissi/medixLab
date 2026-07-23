@@ -719,56 +719,80 @@
         let html = '';
 
         if (covered.length > 1) {
-            html += `<div class="mb-3 p-3 bg-purple-50 border border-purple-200 rounded-xl">
+            html += `<div class="mb-4 p-3 bg-purple-50 border border-purple-200 rounded-xl">
                 <p class="text-[11px] font-bold text-purple-700">${covered.length} laboratoire(s) nécessaires pour couvrir tous vos examens</p>
             </div>`;
         }
 
         covered.forEach((group, i) => {
+            const checkedId = 'split-check-' + i;
             html += `
-            <label class="split-lab-card mb-3 p-4 border border-[#e2e8f0] rounded-xl cursor-pointer transition hover:border-[#0D9488]/40 hover:bg-[#f0fdfa] ${group.is_primary ? 'bg-[#0D9488]/5 border-[#0D9488]/20' : 'bg-white'}" data-index="${i}">
-                <input type="checkbox" class="split-lab-check sr-only peer" data-index="${i}" ${group.uncovered ? 'disabled' : 'checked'}>
-                <div class="flex items-center justify-between mb-2">
-                    <div class="flex items-center gap-2">
-                        <div class="w-5 h-5 rounded border-2 border-[#e2e8f0] peer-checked:border-[#0D9488] peer-checked:bg-[#0D9488] flex items-center justify-center transition">
-                            <svg class="w-3 h-3 text-white hidden peer-checked:block" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            <div class="split-lab-card mb-4 p-4 border-2 rounded-xl cursor-pointer transition-all hover:border-[#0D9488]/40 ${group.is_primary ? 'bg-[#0D9488]/5 border-[#0D9488]/30' : 'bg-white border-[#e2e8f0]'}"
+                 onclick="toggleSplitCheck(${i})">
+                <input type="checkbox" id="${checkedId}" class="split-lab-check sr-only" data-index="${i}" ${group.uncovered ? 'disabled' : 'checked'}>
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2.5">
+                        <div id="split-cb-${i}" class="w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all flex-shrink-0
+                            ${!group.uncovered ? 'border-[#0D9488] bg-[#0D9488]' : 'border-[#cbd5e1] bg-white'}">
+                            <svg class="w-3 h-3 text-white ${!group.uncovered ? '' : 'hidden'}" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                         </div>
-                        <span class="w-6 h-6 rounded-full ${group.is_primary ? 'bg-[#0D9488] text-white' : 'bg-purple-100 text-purple-700'} flex items-center justify-center text-[10px] font-black">${i + 1}</span>
-                        <span class="text-sm font-bold text-[#1e293b]">${group.lab_name}</span>
-                        ${group.is_primary ? '<span class="text-[9px] font-bold text-[#0D9488] bg-[#0D9488]/10 px-1.5 py-0.5 rounded">PRINCIPAL</span>' : ''}
+                        <span class="w-7 h-7 rounded-full ${group.is_primary ? 'bg-[#0D9488] text-white' : 'bg-purple-100 text-purple-700'} flex items-center justify-center text-[11px] font-black flex-shrink-0">${i + 1}</span>
+                        <div class="min-w-0">
+                            <div class="text-sm font-bold text-[#1e293b] truncate">${group.lab_name}</div>
+                            ${group.is_primary ? '<span class="inline-block mt-0.5 text-[9px] font-bold text-[#0D9488] bg-[#0D9488]/10 px-1.5 py-0.5 rounded">PRINCIPAL</span>' : ''}
+                        </div>
                     </div>
-                    ${group.total_price > 0 ? `<span class="text-sm font-black text-[#0D9488]">${Number(group.total_price).toFixed(2)} TND</span>` : ''}
+                    ${group.total_price > 0 ? `<span class="text-sm font-black text-[#0D9488] flex-shrink-0 ml-2">${Number(group.total_price).toFixed(2)} TND</span>` : ''}
                 </div>
-                <div class="flex items-center gap-1.5 text-[10px] text-[#64748b]">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                <div class="flex items-center gap-1.5 text-[10px] text-[#64748b] mb-2">
+                    <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                     ${group.exam_ids.length} examen(s) couverts
                 </div>
-                <div id="splitExamList_${i}" class="mt-2 hidden">
+                <div id="splitExamList_${i}" class="hidden pt-2 border-t border-[#e2e8f0]/60">
                     ${renderExamTags(group)}
                 </div>
-                <button type="button" onclick="event.preventDefault(); toggleExamList(${i})" class="mt-1.5 text-[10px] font-bold text-[#0D9488] hover:text-[#0a7068] transition cursor-pointer">
+                <button type="button" onclick="event.stopPropagation(); toggleExamList(${i})" class="mt-1 text-[10px] font-bold text-[#0D9488] hover:text-[#0a7068] transition cursor-pointer">
                     Voir les examens ▾
                 </button>
-            </label>`;
+            </div>`;
         });
 
         if (uncovered.length > 0) {
             html += `
-            <div class="p-4 border border-dashed border-red-300 rounded-xl bg-red-50">
+            <div class="p-4 border-2 border-dashed border-red-300 rounded-xl bg-red-50 mb-4">
                 <div class="flex items-center gap-2 mb-1">
-                    <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    <svg class="w-4 h-4 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                     <span class="text-sm font-bold text-red-700">Examen(s) non couvert(s)</span>
                 </div>
                 <p class="text-[11px] text-red-600">${uncovered[0].exam_ids.length} examen(s) sans laboratoire disponible</p>
             </div>`;
         }
 
-        html += `<div class="flex gap-3 mt-5 pt-4 border-t border-[#e2e8f0]">
-            <button onclick="closeSplitModal()" class="flex-1 py-2.5 rounded-xl bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] font-bold text-xs uppercase tracking-wider transition cursor-pointer">Annuler</button>
-            <button onclick="applySplit()" id="applySplitBtn" class="flex-1 py-2.5 rounded-xl bg-[#0D9488] hover:bg-[#0a7068] text-white font-bold text-xs uppercase tracking-wider transition cursor-pointer">Appliquer la répartition</button>
+        html += `<div class="flex gap-3 pt-4 border-t border-[#e2e8f0]">
+            <button onclick="closeSplitModal()" class="flex-1 py-3 rounded-xl bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] font-bold text-xs uppercase tracking-wider transition cursor-pointer">Annuler</button>
+            <button onclick="applySplit()" id="applySplitBtn" class="flex-1 py-3 rounded-xl bg-[#0D9488] hover:bg-[#0a7068] text-white font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md shadow-teal-200">Appliquer la répartition</button>
         </div>`;
 
         content.innerHTML = html;
+        updateApplyBtn();
+    }
+
+    function toggleSplitCheck(index) {
+        const cb = document.getElementById('split-check-' + index);
+        if (cb.disabled) return;
+        cb.checked = !cb.checked;
+        const card = cb.closest('.split-lab-card');
+        const visual = document.getElementById('split-cb-' + index);
+        const svg = visual.querySelector('svg');
+        if (cb.checked) {
+            card.className = card.className.replace('border-[#e2e8f0] bg-white', 'border-[#0D9488]/30 bg-[#0D9488]/5');
+            visual.className = visual.className.replace('border-[#cbd5e1] bg-white', 'border-[#0D9488] bg-[#0D9488]');
+            svg.classList.remove('hidden');
+        } else {
+            card.className = card.className.replace('border-[#0D9488]/30 bg-[#0D9488]/5', 'border-[#e2e8f0] bg-white');
+            visual.className = visual.className.replace('border-[#0D9488] bg-[#0D9488]', 'border-[#cbd5e1] bg-white');
+            svg.classList.add('hidden');
+        }
         updateApplyBtn();
     }
 

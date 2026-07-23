@@ -76,6 +76,22 @@ class CenterController extends Controller
             $last7Days[$date] = $dailyVolume[$date] ?? 0;
         }
 
+        // Previous 7 days for trend comparison
+        $prevDailyVolume = $lab->examRequests()
+            ->where('created_at', '>=', Carbon::now()->subDays(13)->startOfDay())
+            ->where('created_at', '<', Carbon::now()->subDays(6)->startOfDay())
+            ->selectRaw('DATE(created_at) as day, COUNT(*) as count')
+            ->groupBy('day')
+            ->orderBy('day')
+            ->pluck('count', 'day')
+            ->toArray();
+
+        $last7PrevDays = [];
+        for ($i = 13; $i >= 7; $i--) {
+            $date = Carbon::now()->subDays($i)->toDateString();
+            $last7PrevDays[$date] = $prevDailyVolume[$date] ?? 0;
+        }
+
         // Top requested exams for this lab
         $topExams = $lab->examRequests()
             ->join('exam_request_items', 'exam_requests.id', '=', 'exam_request_items.exam_request_id')
@@ -96,7 +112,7 @@ class CenterController extends Controller
             })
             ->sum('available_exams.price');
 
-        return view('center.dashboard', compact('user', 'stats', 'workload', 'last7Days', 'topExams', 'revenue'));
+        return view('center.dashboard', compact('user', 'stats', 'workload', 'last7Days', 'last7PrevDays', 'topExams', 'revenue'));
     }
 
     /**
