@@ -95,17 +95,6 @@ class ExamRequestService
                     );
                 }
             }
-
-            NotificationService::send(
-                $examRequest->patient->user_id,
-                'Analyses terminées',
-                'Vos analyses sont prêtes. ' .
-                (!empty($abnormalItems)
-                    ? count($abnormalItems) . ' paramètre(s) nécessitent l\'attention de votre médecin.'
-                    : 'Aucune anomalie détectée. Consultez les résultats dans votre espace.'),
-                'exam_request',
-                $examRequest->id
-            );
         }
     }
 

@@ -1,4 +1,4 @@
-<x-layouts.patient>
+<x-layouts.doctor>
 <x-slot:title>Chat — Medix eSanté</x-slot:title>
 
 @section('styles')
@@ -140,4 +140,4 @@
     document.addEventListener('visibilitychange', () => { if (!document.hidden) loadMessages(); });
 </script>
 @endsection
-</x-layouts.patient>
+</x-layouts.doctor>

@@ -52,7 +52,7 @@
     </form>
 
     <!-- Table -->
-    <div class="bg-white border border-[#e2e8f0] rounded-2xl overflow-hidden shadow-sm">
+    <div class="bg-white border border-[#e2e8f0] rounded-2xl shadow-sm">
         <table class="w-full text-left border-collapse">
             <thead>
                 <tr class="bg-[#F8FAFC] border-b border-[#e2e8f0]">
@@ -96,7 +96,12 @@
 
                     <!-- Status -->
                     <td class="p-4 text-center">
-                        @if($request->status === 'assigned')
+                        @if($request->approved_by_doctor)
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/20">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            Validé
+                        </span>
+                        @elseif($request->status === 'assigned')
                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase bg-orange-50 text-orange-600 border border-orange-200">
                             <span class="w-1.5 h-1.5 rounded-full bg-orange-500"></span>Assignée
                         </span>
@@ -130,13 +135,24 @@
                                 @php
                                     $hasResult = $item->resultLabo;
                                     $dropdownId = 'item-dd-' . $item->id;
+                                    $isLocked = $request->approved_by_doctor;
                                 @endphp
                                 <div class="relative flex items-center gap-2 justify-end">
                                     <span class="text-[10px] font-semibold text-[#64748b] truncate max-w-[120px]" title="{{ $item->exam->name }}">
                                         {{ $item->exam->name }}
                                     </span>
 
-                                    @if($hasResult)
+                                    @if($isLocked)
+                                        @if($hasResult)
+                                            <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg text-[10px] font-bold uppercase tracking-wider whitespace-nowrap">
+                                                ✓ Validé
+                                            </span>
+                                        @else
+                                            <span class="px-2.5 py-1 bg-gray-50 text-gray-400 border border-gray-200 rounded-lg text-[10px] font-bold uppercase tracking-wider whitespace-nowrap">
+                                                En attente
+                                            </span>
+                                        @endif
+                                    @elseif($hasResult)
                                         <a href="{{ route('center.results.edit', $item->resultLabo) }}"
                                            class="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-[10px] font-bold uppercase tracking-wider transition whitespace-nowrap">
                                             ✓ Résultat
@@ -148,7 +164,7 @@
                                             Saisir
                                         </button>
 
-                                        <div id="{{ $dropdownId }}" class="hidden absolute right-0 top-full mt-1 w-56 bg-white border border-[#e2e8f0] rounded-xl shadow-2xl z-50 overflow-hidden">
+                                        <div id="{{ $dropdownId }}" class="hidden absolute right-0 top-full mt-1 w-56 bg-white border border-[#e2e8f0] rounded-xl shadow-2xl z-[100] overflow-visible">
                                             <a href="{{ route('center.results.create', $item) }}"
                                                class="flex items-center gap-3 px-4 py-3 text-xs font-semibold text-[#1e293b] hover:bg-[#f0fdfa] transition">
                                                 <span class="w-8 h-8 rounded-lg bg-[#7C3AED]/10 flex items-center justify-center flex-shrink-0">
@@ -162,7 +178,7 @@
                                             <div class="border-t border-[#f1f5f9]"></div>
                                             <form method="POST" action="{{ route('center.machine.send', $item) }}">
                                                 @csrf
-                                                <button type="submit" onclick="machineSendClick(this)"
+                                                <button type="submit" onclick="machineSendClick(this, event)"
                                                     class="w-full flex items-center gap-3 px-4 py-3 text-xs font-semibold text-[#1e293b] hover:bg-blue-50/50 transition machine-send-btn text-left">
                                                     <span class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
                                                         <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5"/></svg>
@@ -221,8 +237,21 @@
     function toggleItemDropdown(id) {
         const dd = document.getElementById(id);
         const isOpen = !dd.classList.contains('hidden');
-        document.querySelectorAll('[id^="item-dd-"]').forEach(el => el.classList.add('hidden'));
-        if (!isOpen) dd.classList.remove('hidden');
+        document.querySelectorAll('[id^="item-dd-"]').forEach(el => {
+            el.classList.add('hidden');
+            el.style.top = '';
+            el.style.bottom = '';
+        });
+        if (!isOpen) {
+            dd.classList.remove('hidden');
+            const rect = dd.getBoundingClientRect();
+            if (rect.bottom > window.innerHeight) {
+                dd.style.top = 'auto';
+                dd.style.bottom = '100%';
+                dd.classList.remove('mt-1');
+                dd.classList.add('mb-1');
+            }
+        }
     }
 
     document.addEventListener('click', function(e) {
@@ -231,13 +260,15 @@
         }
     });
 
-    function machineSendClick(btn) {
-        btn.disabled = true;
+    function machineSendClick(btn, e) {
+        e.preventDefault();
+        const form = btn.closest('form');
         const textEl = btn.querySelector('.machine-btn-text');
         const subEl = btn.querySelector('.machine-btn-sub');
         if (textEl) textEl.textContent = 'Analyse en cours...';
         if (subEl) subEl.textContent = 'Patientez...';
         btn.classList.add('opacity-60', 'cursor-wait');
+        form.submit();
     }
 </script>
 @endsection

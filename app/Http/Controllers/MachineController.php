@@ -30,19 +30,20 @@ class MachineController extends Controller
             return back()->with('error', 'Un résultat existe déjà pour cet examen.');
         }
 
-        $machine = new MachineService();
-
-        if (!$machine->isOnline()) {
-            return back()->with('error', 'La machine est hors ligne. Vérifiez que le simulateur est démarré (python lab_simulator\simulator.py).');
+        if ($item->examRequest->approved_by_doctor) {
+            return back()->with('error', 'Impossible d\'envoyer à la machine — le médecin a déjà validé et interprété les résultats de cette demande.');
         }
+
+        $machine = new MachineService();
 
         try {
             $response = $machine->sendOrder($item);
             $machine->processResults($item, $response, auth()->user()->staff->id);
 
             $processingTime = $response['processing_time_seconds'] ?? '?';
+            $source = $response['source'] ?? 'unknown';
 
-            return back()->with('success', "Résultats reçus de la machine en {$processingTime}s pour : {$item->exam->name}");
+            return back()->with('success', "Résultats reçus ({$source}) en {$processingTime}s pour : {$item->exam->name}");
         } catch (\Exception $e) {
             return back()->with('error', 'Erreur machine : ' . $e->getMessage());
         }

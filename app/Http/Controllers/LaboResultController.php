@@ -17,6 +17,12 @@ class LaboResultController extends Controller
 
     public function create(ExamRequestItem $item)
     {
+        if ($item->examRequest->approved_by_doctor) {
+            return redirect()
+                ->route('center.exam-requests')
+                ->with('error', 'Impossible de modifier — le médecin a déjà validé et interprété les résultats de cette demande.');
+        }
+
         $item->load([
             'exam.parameters',
             'exam.examConsumables.consumable',
@@ -61,6 +67,12 @@ class LaboResultController extends Controller
 
     public function store(\App\Http\Requests\StoreResultFormRequest $request, ExamRequestItem $item)
     {
+        if ($item->examRequest->approved_by_doctor) {
+            return redirect()
+                ->route('center.exam-requests')
+                ->with('error', 'Impossible de modifier — le médecin a déjà validé et interprété les résultats de cette demande.');
+        }
+
         $lab = auth()->user()->staff;
         $result = null;
 
@@ -149,6 +161,12 @@ class LaboResultController extends Controller
 
     public function edit(ResultLabo $result)
     {
+        if ($result->examRequestItem->examRequest->approved_by_doctor) {
+            return redirect()
+                ->route('center.exam-requests')
+                ->with('error', 'Impossible de modifier — le médecin a déjà validé et interprété les résultats de cette demande.');
+        }
+
         $result->load([
             'details',
             'consumables',
@@ -189,6 +207,11 @@ class LaboResultController extends Controller
 
     public function update(Request $request, ResultLabo $result)
     {
+        if ($result->examRequestItem->examRequest->approved_by_doctor) {
+            return redirect()
+                ->route('center.exam-requests')
+                ->with('error', 'Impossible de modifier — le médecin a déjà validé et interprété les résultats de cette demande.');
+        }
         $request->validate([
             'interpretation' => 'nullable|string',
             'parameters' => 'required|array',
