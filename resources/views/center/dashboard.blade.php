@@ -288,42 +288,67 @@
                 </div>
             </div>
 
-            <!-- 7-day sparkline -->
+            <!-- 7-day Volume Chart -->
             <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-                <h3 class="text-sm font-bold text-slate-600 uppercase tracking-wider mb-5">
-                    Volume — 7 derniers jours
-                </h3>
+                <div class="flex items-center justify-between mb-5">
+                    <h3 class="text-sm font-bold text-slate-600 uppercase tracking-wider">
+                        Volume — 7 derniers jours
+                    </h3>
+                    @php
+                        $values = array_values($last7Days);
+                        $total7 = array_sum($values);
+                        $prevValues = array_values($last7PrevDays ?? []);
+                        $prevTotal = array_sum($prevValues);
+                        $trend = $prevTotal > 0 ? round((($total7 - $prevTotal) / $prevTotal) * 100) : 0;
+                    @endphp
+                    <div class="flex items-center gap-1.5 text-xs font-bold {{ $trend >= 0 ? 'text-emerald-600' : 'text-red-500' }}">
+                        @if($trend > 0)
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"/></svg>
+                            +{{ $trend }}%
+                        @elseif($trend < 0)
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 4.5l15 15m0 0V8.25m0 11.25H8.25"/></svg>
+                            {{ $trend }}%
+                        @else
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14"/></svg>
+                            0%
+                        @endif
+                        <span class="text-[10px] text-slate-400 font-semibold">vs semaine préc.</span>
+                    </div>
+                </div>
 
                 @php
                     $days   = array_keys($last7Days);
                     $values = array_values($last7Days);
-                    $max    = max(max($values), 1);
+                    $labels = collect($days)->map(fn($d) => \Carbon\Carbon::parse($d)->format('D d'))->toArray();
+                    $maxVal = max(max($values), 1);
                 @endphp
 
-                <div class="flex items-end gap-2 h-28">
-                    @foreach ($values as $i => $val)
-                        @php
-                            $heightPct = round($val / $max * 100);
-                            $label     = \Carbon\Carbon::parse($days[$i])->format('D');
-                            $isToday   = $days[$i] === now()->toDateString();
-                        @endphp
-                        <div class="flex flex-col items-center flex-1 gap-1">
-                            <span class="text-[10px] font-bold {{ $isToday ? 'text-[#7C3AED]' : 'text-slate-400' }}">
-                                {{ $val > 0 ? $val : '' }}
-                            </span>
-                            <div class="w-full rounded-t-lg {{ $isToday ? 'bg-[#7C3AED]' : 'bg-purple-200' }} transition-all duration-500"
-                                 style="height: {{ max($heightPct, 4) }}%"
-                                 title="{{ $val }} demande(s) — {{ $days[$i] }}"></div>
-                            <span class="text-[9px] font-semibold {{ $isToday ? 'text-[#7C3AED]' : 'text-slate-400' }} uppercase">
-                                {{ $label }}
-                            </span>
-                        </div>
-                    @endforeach
+                <div class="relative" style="height: 220px;">
+                    <canvas id="volumeChart"></canvas>
                 </div>
 
-                <p class="text-[10px] text-slate-400 mt-3 text-right">
-                    Total 7j : <strong class="text-slate-600">{{ array_sum($values) }}</strong> demande(s)
-                </p>
+                <div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-100">
+                    <div class="flex items-center gap-4">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full bg-[#7C3AED]"></span>
+                            <span class="text-[10px] font-semibold text-slate-500">Demandes</span>
+                        </div>
+                        @php
+                            $avg = $total7 / 7;
+                            $peak = max($values);
+                            $peakDay = $days[array_search($peak, $values)];
+                        @endphp
+                        <div class="text-[10px] text-slate-400">
+                            Moy. <strong class="text-slate-600">{{ number_format($avg, 1) }}</strong>/jour
+                        </div>
+                    </div>
+                    <div class="text-[10px] text-slate-400">
+                        Total 7j : <strong class="text-slate-600">{{ $total7 }}</strong> demande(s)
+                        @if($peak > 0)
+                            · Pic : <strong class="text-[#7C3AED]">{{ $peak }}</strong> {{ \Carbon\Carbon::parse($peakDay)->format('D') }}
+                        @endif
+                    </div>
+                </div>
             </div>
 
         </div>
@@ -374,4 +399,99 @@
 </div>
 
 
+@endsection
+
+@section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+(function() {
+    const ctx = document.getElementById('volumeChart');
+    if (!ctx) return;
+
+    const labels = {!! json_encode($labels) !!};
+    const data   = {!! json_encode($values) !!};
+
+    const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 220);
+    gradient.addColorStop(0, 'rgba(124, 58, 237, 0.25)');
+    gradient.addColorStop(0.5, 'rgba(124, 58, 237, 0.08)');
+    gradient.addColorStop(1, 'rgba(124, 58, 237, 0.01)');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Demandes',
+                data: data,
+                borderColor: '#7C3AED',
+                backgroundColor: gradient,
+                fill: true,
+                tension: 0.4,
+                borderWidth: 2.5,
+                pointBackgroundColor: '#7C3AED',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 8,
+                pointHoverBackgroundColor: '#7C3AED',
+                pointHoverBorderColor: '#fff',
+                pointHoverBorderWidth: 3,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                intersect: false,
+                mode: 'index',
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#1e293b',
+                    titleFont: { size: 11, weight: '600', family: 'Inter, sans-serif' },
+                    bodyFont: { size: 13, weight: '800', family: 'Inter, sans-serif' },
+                    padding: { top: 10, bottom: 10, left: 14, right: 14 },
+                    cornerRadius: 10,
+                    displayColors: false,
+                    callbacks: {
+                        title: function(items) {
+                            return items[0].label;
+                        },
+                        label: function(item) {
+                            return item.formattedValue + ' demande(s)';
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    border: { display: false },
+                    ticks: {
+                        font: { size: 10, weight: '600', family: 'Inter, sans-serif' },
+                        color: '#94a3b8',
+                        padding: 6,
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    border: { display: false },
+                    grid: { color: '#f1f5f9', lineWidth: 1 },
+                    ticks: {
+                        font: { size: 10, weight: '600', family: 'Inter, sans-serif' },
+                        color: '#94a3b8',
+                        padding: 8,
+                        stepSize: 1,
+                        callback: function(value) {
+                            if (Number.isInteger(value)) return value;
+                            return '';
+                        }
+                    }
+                }
+            }
+        }
+    });
+})();
+</script>
 @endsection

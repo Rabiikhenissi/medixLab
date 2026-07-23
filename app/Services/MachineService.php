@@ -19,7 +19,7 @@ class MachineService
     public function __construct()
     {
         $this->baseUrl = config('machine.url', 'http://127.0.0.1:5000');
-        $this->timeout = config('machine.timeout', 15);
+        $this->timeout = config('machine.timeout', 5);
         $parsed = parse_url($this->baseUrl);
         $this->mllpHost = $parsed['host'] ?? '127.0.0.1';
         $this->mllpPort = config('machine.mllp_port', 5001);
@@ -140,7 +140,7 @@ class MachineService
         ];
 
         try {
-            $response = Http::timeout($this->timeout)
+            $response = Http::timeout(3)
                 ->withHeaders(['Content-Type' => 'application/json'])
                 ->post($this->baseUrl . '/api/order', $payload);
 
@@ -201,7 +201,7 @@ class MachineService
             "tcp://{$this->mllpHost}:{$this->mllpPort}",
             $errno,
             $errstr,
-            3
+            1
         );
         if ($socket) {
             fclose($socket);
