@@ -192,6 +192,16 @@ Route::prefix('doctor')->name('doctor.')->group(function () {
         Route::post('/notifications/{notification}/read', [\App\Http\Controllers\DoctorController::class, 'markAsRead'])->name('mark-as-read');
         Route::post('/notifications/read-all', [\App\Http\Controllers\DoctorController::class, 'markAllAsRead'])->name('mark-all-read');
 
+        // TIER 1.4 — Smart Exam Suggestions
+        Route::get('/api/smart-suggestions/{patient}', [\App\Http\Controllers\DoctorController::class, 'smartSuggestions'])->name('smart-suggestions');
+        Route::get('/api/patient-health-trends/{patient}', [\App\Http\Controllers\DoctorController::class, 'patientHealthTrends'])->name('patient-health-trends');
+
+        // TIER 2.2 — Doctor-Patient Chat
+        Route::get('/chat/{patient}', [\App\Http\Controllers\DoctorController::class, 'chat'])->name('chat');
+        Route::get('/chat/{patient}/messages', [\App\Http\Controllers\DoctorController::class, 'chatMessages'])->name('chat-messages');
+        Route::post('/chat/{patient}/send', [\App\Http\Controllers\DoctorController::class, 'chatSend'])->name('chat-send');
+        Route::get('/chat/unread-count', [\App\Http\Controllers\DoctorController::class, 'chatUnreadCount'])->name('chat-unread-count');
+
         Route::post('/logout', [AuthController::class, 'logout'])->defaults('role', 'doctor')->name('logout');
     });
 });
@@ -325,6 +335,20 @@ Route::prefix('patient')->name('patient.')->group(function () {
         // Cancel exam request
         Route::post('/exam-requests/{examRequest}/cancel', [\App\Http\Controllers\PatientController::class, 'cancelExamRequest'])
             ->name('cancel-exam-request');
+
+        // TIER 1.5 — Patient Health Trends
+        Route::get('/health-trends', [\App\Http\Controllers\PatientController::class, 'healthTrends'])->name('health-trends');
+        Route::get('/api/health-trends-data', [\App\Http\Controllers\PatientController::class, 'healthTrendsData'])->name('health-trends-data');
+
+        // TIER 2.2 — Patient-Doctor Chat
+        Route::get('/chat/{doctor}', [\App\Http\Controllers\PatientController::class, 'chat'])->name('chat');
+        Route::get('/chat/{doctor}/messages', [\App\Http\Controllers\PatientController::class, 'chatMessages'])->name('chat-messages');
+        Route::post('/chat/{doctor}/send', [\App\Http\Controllers\PatientController::class, 'chatSend'])->name('chat-send');
+        Route::get('/chat/unread-count', [\App\Http\Controllers\PatientController::class, 'chatUnreadCount'])->name('chat-unread-count');
+
+        // TIER 2.4 — Multi-Lab Splitting
+        Route::get('/exam-requests/{examRequest}/split-suggestions', [\App\Http\Controllers\PatientController::class, 'splitSuggestions'])->name('split-suggestions');
+        Route::post('/exam-requests/{examRequest}/apply-split', [\App\Http\Controllers\PatientController::class, 'applySplit'])->name('apply-split');
 
         Route::post('/logout', [AuthController::class, 'logout'])->defaults('role', 'patient')->name('logout');
     });

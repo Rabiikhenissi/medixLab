@@ -164,6 +164,22 @@
                         </div>
                     </div>
 
+                    <!-- TIER 1.4 — Smart Exam Suggestions -->
+                    <div id="smartSuggestionsPanel" class="bg-white border border-[#e2e8f0] rounded-2xl p-5 shadow-xs">
+                        <h3 class="text-xs font-bold text-[#64748b] uppercase tracking-widest mb-3 pb-2 border-b border-[#e2e8f0]/80 flex items-center gap-2">
+                            <svg class="w-4 h-4 text-[#0D9488]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                            </svg>
+                            Suggestions intelligentes
+                        </h3>
+                        <div id="smartSuggestionsList" class="space-y-2">
+                            <div class="text-center py-4">
+                                <div class="animate-spin w-4 h-4 border-2 border-[#0D9488] border-t-transparent rounded-full mx-auto mb-1"></div>
+                                <p class="text-[10px] text-[#94a3b8]">Analyse en cours...</p>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Notes -->
                     <div class="bg-white border border-[#e2e8f0] rounded-2xl p-5 shadow-xs">
                         <label class="text-xs font-bold text-[#64748b] uppercase tracking-widest block mb-2">
@@ -340,6 +356,50 @@
         let activeGroupName = "";
         let isSubmitting = false;
 
+        /* TIER 1.4 — Smart Suggestions */
+        async function loadSmartSuggestions() {
+            const el = document.getElementById('smartSuggestionsList');
+            try {
+                const params = new URLSearchParams();
+                selectedExamIds.forEach(id => params.append('exam_ids[]', id));
+                const res = await fetch(`/doctor/api/smart-suggestions/${patientId}?${params.toString()}`);
+                const data = await res.json();
+                if (!data.success || data.suggestions.length === 0) {
+                    el.innerHTML = '<p class="text-[10px] text-[#94a3b8] italic text-center py-2">Aucune suggestion disponible</p>';
+                    return;
+                }
+                el.innerHTML = data.suggestions.map(s => {
+                    const typeColor = s.type === 'follow_up' ? 'amber' : (s.type === 'age_based' ? 'purple' : 'teal');
+                    const typeLabel = s.type === 'follow_up' ? 'Suivi' : (s.type === 'age_based' ? 'Âge' : 'Prévention');
+                    return `
+                        <div class="p-3 bg-gradient-to-r from-[#0D9488]/5 to-transparent border border-[#0D9488]/15 rounded-xl">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-bold uppercase bg-[#0D9488]/10 text-[#0D9488]">${typeLabel}</span>
+                                <span class="text-[10px] font-bold text-[#1e293b]">${s.exam_name}</span>
+                            </div>
+                            <p class="text-[10px] text-[#64748b] leading-relaxed">${s.reason}</p>
+                            <button type="button" onclick="addSuggestedExam(${s.exam_id})"
+                                class="mt-1.5 text-[10px] font-bold text-[#0D9488] hover:text-[#0a7068] transition cursor-pointer">
+                                + Ajouter cette suggestion
+                            </button>
+                        </div>`;
+                }).join('');
+            } catch(e) {
+                el.innerHTML = '<p class="text-[10px] text-[#94a3b8] italic text-center py-2">Erreur de chargement</p>';
+            }
+        }
+
+        function addSuggestedExam(examId) {
+            const checkbox = document.querySelector(`.exam-checkbox[value="${examId}"]`);
+            if (checkbox && !checkbox.checked) {
+                checkbox.checked = true;
+                checkbox.dispatchEvent(new Event('change'));
+            }
+            loadSmartSuggestions();
+        }
+
+        loadSmartSuggestions();
+
         /* SEARCH */
         const searchInput = document.getElementById('searchExams');
         const clearBtn = document.getElementById('clearSearchBtn');
@@ -375,6 +435,8 @@
             document.getElementById('selectedCount').innerText = selectedExamIds.length;
             document.getElementById('confirmBtn').disabled = selectedExamIds.length === 0;
             document.getElementById('saveAsGroupBtn').disabled = selectedExamIds.length === 0;
+            clearTimeout(window._suggestionDebounce);
+            window._suggestionDebounce = setTimeout(loadSmartSuggestions, 500);
         }
 
         /* CONFIRM MODAL */
