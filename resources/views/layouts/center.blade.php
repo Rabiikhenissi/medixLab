@@ -301,7 +301,7 @@
 
         <nav class="center-sidebar-nav">
             @foreach ($sidebarFeatures ?? [] as $feature)
-                @if (!$feature->view_permission || auth()->user()->hasPermission($feature->view_permission))
+                @if ($feature->code !== 'profile' && (!$feature->view_permission || auth()->user()->hasPermission($feature->view_permission)))
                     @php
                         $isActive = false;
                         if ($feature->route_name && \Illuminate\Support\Facades\Route::has($feature->route_name)) {
@@ -336,13 +336,7 @@
             </a>
         </nav>
 
-        <div class="center-sidebar-bottom">
-            <a href="{{ route('profile.show') }}" class="center-sidebar-item" title="Mon Profil">
-                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:20px;height:20px;">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-            </a>
-        </div>
+
     </aside>
 
     <!-- ══ TOP NAV ══ -->
@@ -442,63 +436,7 @@
                 $route = request()->route()->getName();
             @endphp
 
-            <div class="flex flex-wrap gap-2 border-b border-[#e2e8f0]/50 pb-4 mb-6">
-
-                <!-- Dashboard -->
-                <a href="{{ route('center.dashboard') }}"
-                    class="flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition duration-200
-       {{ $route === 'center.dashboard' ? 'bg-[#7C3AED] text-white shadow-md shadow-[#7C3AED]/20' : 'text-[#64748b] hover:text-[#1e293b] hover:bg-[#F1F5F9]' }}">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75" />
-                    </svg>
-                    <span>Tableau de Bord</span>
-                </a>
-
-                <!-- Working Hours -->
-                <a href="{{ route('center.working-hours') }}"
-                    class="flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition duration-200
-       {{ str_starts_with($route, 'center.working-hours') ? 'bg-[#7C3AED] text-white shadow-md shadow-[#7C3AED]/20' : 'text-[#64748b] hover:text-[#1e293b] hover:bg-[#F1F5F9]' }}">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span>Horaires</span>
-                </a>
-
-                <!-- Consumables -->
-                <a href="{{ route('center.consumables') }}"
-                    class="flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition duration-200
-       {{ str_starts_with($route, 'center.consumables') ? 'bg-[#7C3AED] text-white shadow-md shadow-[#7C3AED]/20' : 'text-[#64748b] hover:text-[#1e293b] hover:bg-[#F1F5F9]' }}">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M9.75 3.104v13.01m0-13.01L6 6.854m3.75-3.75l3.75 3.75M3 21h18" />
-                    </svg>
-                    <span>Stock & Consommables</span>
-                </a>
-
-                <!-- Equipment -->
-                <a href="{{ route('center.equipment') }}"
-                    class="flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition duration-200
-       {{ str_starts_with($route, 'center.equipment') ? 'bg-[#7C3AED] text-white shadow-md shadow-[#7C3AED]/20' : 'text-[#64748b] hover:text-[#1e293b] hover:bg-[#F1F5F9]' }}">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877" />
-                    </svg>
-                    <span>Equipements & Maintenance</span>
-                </a>
-
-                <!-- Exam Requests -->
-                <a href="{{ route('center.exam-requests') }}"
-                    class="flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition duration-200
-       {{ str_starts_with($route, 'center.exam-requests') ? 'bg-[#7C3AED] text-white shadow-md shadow-[#7C3AED]/20' : 'text-[#64748b] hover:text-[#1e293b] hover:bg-[#F1F5F9]' }}">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 9.414V19a2 2 0 01-2 2z" />
-                    </svg>
-                    <span>Demandes d'analyses</span>
-                </a>
-            </div>
+            
 
             <!-- Page Content -->
             <div class="mt-4">

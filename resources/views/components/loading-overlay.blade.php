@@ -29,11 +29,12 @@
     (function() {
         let activeRequests = 0;
         let overlayTimeout = null;
+        let dashboardLoading = false;
         const silentUrls = [
             '/unread-count',
             '/get-notifications',
-            '/get-access-requests',
-            '/notifications'
+            '/notifications',
+            '/access-requests',
         ];
 
         function shouldBeSilent(url) {
@@ -42,7 +43,7 @@
             return silentUrls.some(silent => urlString.includes(silent));
         }
 
-        function showOverlay(message = 'Chargement en cours...') {
+        function showOverlay(message = 'Chargement en cours...', instant = false) {
             const overlay = document.getElementById('global-loading-overlay');
             const textEl = document.getElementById('loading-overlay-text');
             if (!overlay) return;
@@ -54,6 +55,8 @@
             clearTimeout(overlayTimeout);
             
             // Show after a small delay (200ms) to avoid flashing on instant actions
+            // unless instant=true (e.g. page load)
+            var delay = instant ? 0 : 200;
             overlayTimeout = setTimeout(() => {
                 overlay.classList.remove('pointer-events-none', 'opacity-0');
                 overlay.classList.add('opacity-100');
@@ -61,6 +64,7 @@
         }
 
         function hideOverlay() {
+            if (dashboardLoading) return;
             const overlay = document.getElementById('global-loading-overlay');
             if (!overlay) return;
             
@@ -93,10 +97,10 @@
             }
         });
 
-        // 2. Monitor form submissions
+        // 2. Monitor form submissions — skip if form uses swalConfirmSubmit (handled by SweetAlert)
         document.addEventListener('submit', (e) => {
             const form = e.target;
-            if (form && !form.target) {
+            if (form && !form.target && !form.getAttribute('onsubmit')) {
                 showOverlay('Traitement en cours...');
             }
         });
@@ -150,8 +154,19 @@
             return originalSend.apply(this, args);
         };
 
-        // Hide overlay on page show/load (useful when using browser back/forward cache)
-        window.addEventListener('pageshow', hideOverlay);
-        window.addEventListener('load', hideOverlay);
+        // Expose globally so other scripts can use the same loader
+        // __showLoading(message, instant) — instant=true skips the 200ms delay
+        // __hideLoading() — hides the overlay
+        // __setDashboardLoading(bool) — prevents fetch interceptor from hiding while dashboard loads
+        window.__showLoading = showOverlay;
+        window.__hideLoading = function() {
+            dashboardLoading = false;
+            hideOverlay();
+        };
+        window.__setDashboardLoading = function(val) { dashboardLoading = val; };
+
+        // Hide overlay on page show/load (useful when using browser back/forward cache and form submissions)
+        window.addEventListener('pageshow', function() { if (activeRequests <= 0) hideOverlay(); });
+        window.addEventListener('load', function() { if (activeRequests <= 0) hideOverlay(); });
     })();
 </script>
