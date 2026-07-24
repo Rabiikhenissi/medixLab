@@ -1,5 +1,6 @@
-<x-layouts.auth>
+<x-layouts.patient>
     <x-slot:title>Mes Statistiques - Medix eSanté</x-slot:title>
+    @section('content')
 
     <div class="w-full max-w-[1200px] mx-auto py-8 px-4">
 
@@ -164,4 +165,5 @@
             });
         });
     </script>
-</x-layouts.auth>
+    @endsection
+</x-layouts.patient>

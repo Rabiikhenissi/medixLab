@@ -169,7 +169,7 @@
                                     <div class="flex items-center space-x-3">
                                         <div
                                             class="w-8 h-8 rounded-lg bg-[#0D9488]/10 flex items-center justify-center text-[#0D9488] font-bold text-sm">
-                                            {{ $user->patient->doctorAccesses()->count() }}
+                                            {{ $user->patient->doctorAccesses()->where('access_status', 'granted')->count() }}
                                         </div>
                                         <span class="text-xs font-semibold text-[#64748b]">{{ __('Médecins autorisés') }}</span>
                                     </div>
@@ -918,13 +918,20 @@
             setTimeout(() => alert.remove(), 2000);
         }
 
-        // Load data on page load
-        loadNotifications();
-        updateUnreadCount();
-        loadExamRequests();
-        loadAccessRequests();
-        loadGrantedDoctors();
-        loadBlockedDoctors();
+        // Show global loader instantly, hide after all data loads
+        if (window.__setDashboardLoading) window.__setDashboardLoading(true);
+        if (window.__showLoading) window.__showLoading('Chargement...', true);
+
+        Promise.allSettled([
+            loadNotifications(),
+            updateUnreadCount(),
+            loadExamRequests(),
+            loadAccessRequests(),
+            loadGrantedDoctors(),
+            loadBlockedDoctors(),
+        ]).then(function () {
+            if (window.__hideLoading) window.__hideLoading();
+        });
 
         // Refresh notifications every 10 seconds
         setInterval(updateUnreadCount, 10000);

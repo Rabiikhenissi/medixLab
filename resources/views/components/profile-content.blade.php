@@ -1,46 +1,8 @@
-@php
-    $groupCode = auth()->user()->group->code ?? 'admin';
-    $layouts = [
-        'admin'   => 'layouts.admin',
-        'doctor'  => 'components.layouts.doctor',
-        'patient' => 'components.layouts.patient',
-        'center'  => 'layouts.center',
-    ];
-@endphp
-@php
-    $roleColors = [
-        'admin'  => ['primary' => '#1e293b', 'dark' => '#0f172a', 'light' => 'rgba(30,41,59,0.1)'],
-        'doctor' => ['primary' => '#0066ff', 'dark' => '#0044cc', 'light' => 'rgba(0,102,255,0.1)'],
-        'patient'=> ['primary' => '#0D9488', 'dark' => '#0a7a70', 'light' => 'rgba(13,148,136,0.1)'],
-        'center' => ['primary' => '#7C3AED', 'dark' => '#6d28d9', 'light' => 'rgba(124,58,237,0.1)'],
-    ];
-    $colors = $roleColors[$groupCode] ?? $roleColors['admin'];
-@endphp
-
-@extends($layouts[$groupCode] ?? 'layouts.admin')
-
-@section('title', 'Mon Profil')
-
-@section('page-title')
-Mon <span style="color:{{ $colors['primary'] }};">Profil</span>
-@endsection
-
-@section('page-subtitle')
-Gérez vos informations personnelles et votre carte digitale.
-@endsection
-
-@section('content')
-
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <style>
-    :root {
-        --role-primary: {{ $colors['primary'] }};
-        --role-dark: {{ $colors['dark'] }};
-        --role-light: {{ $colors['light'] }};
-    }
     .profile-grid {
         display: grid;
         grid-template-columns: 380px 1fr;
@@ -80,7 +42,7 @@ Gérez vos informations personnelles et votre carte digitale.
         overflow: hidden;
     }
     .flip-card-front {
-        background: linear-gradient(135deg, var(--role-primary) 0%, var(--role-dark) 100%);
+        background: linear-gradient(135deg, #0066ff 0%, #0044cc 100%);
         color: white;
         padding: 28px;
         display: flex;
@@ -216,8 +178,8 @@ Gérez vos informations personnelles et votre carte digitale.
         width: 100%;
     }
     .form-field input:focus, .form-field select:focus, .form-field textarea:focus {
-        border-color: var(--role-primary);
-        box-shadow: 0 0 0 3px var(--role-light);
+        border-color: #0066ff;
+        box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
         background: white;
     }
     .form-field textarea {
@@ -236,7 +198,7 @@ Gérez vos informations personnelles et votre carte digitale.
     }
     .btn-save {
         padding: 10px 24px;
-        background: linear-gradient(135deg, var(--role-primary), var(--role-dark));
+        background: linear-gradient(135deg, #0066ff, #0052d4);
         color: white;
         font-size: 13px;
         font-weight: 700;
@@ -245,11 +207,11 @@ Gérez vos informations personnelles et votre carte digitale.
         cursor: pointer;
         transition: all 0.2s;
         font-family: 'Inter', sans-serif;
-        box-shadow: 0 3px 10px var(--role-light);
+        box-shadow: 0 3px 10px rgba(0, 102, 255, 0.3);
     }
     .btn-save:hover {
-        background: linear-gradient(135deg, var(--role-dark), var(--role-dark));
-        box-shadow: 0 5px 16px var(--role-light);
+        background: linear-gradient(135deg, #0052d4, #0041af);
+        box-shadow: 0 5px 16px rgba(0, 102, 255, 0.4);
     }
     .btn-cancel {
         padding: 10px 20px;
@@ -391,7 +353,7 @@ Gérez vos informations personnelles et votre carte digitale.
                 </div>
                 <div style="display:flex; justify-content:space-between; font-size:13px;">
                     <span style="color:#94a3b8; font-weight:600;">Code unique</span>
-                    <span style="color:{{ $colors['primary'] }}; font-weight:700; font-family:monospace;">
+                    <span style="color:#0066ff; font-weight:700; font-family:monospace;">
                         @if($user->doctor)
                             {{ $user->doctor->doctor_code }}
                         @elseif($user->patient)
@@ -551,9 +513,6 @@ Gérez vos informations personnelles et votre carte digitale.
 
 </div>
 
-@endsection
-
-@section('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         var userCode = @json(
@@ -578,7 +537,7 @@ Gérez vos informations personnelles et votre carte digitale.
                 text: qrContent,
                 width: 140,
                 height: 140,
-                colorDark: "{{ $colors['primary'] }}",
+                colorDark: "#0066ff",
                 colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.H
             });
@@ -619,4 +578,3 @@ Gérez vos informations personnelles et votre carte digitale.
         }
     });
 </script>
-@endsection

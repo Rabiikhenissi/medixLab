@@ -284,47 +284,40 @@
 
         <nav class="patient-sidebar-nav">
             @php
-                $currentRoute = request()->route()->getName();
+                $patientSidebarFeatures = \App\Models\Feature::where('is_archive', false)
+                    ->where('is_sidebar', true)
+                    ->orderBy('order', 'asc')
+                    ->get();
             @endphp
 
-            <!-- Dashboard -->
-            <a href="{{ route('patient.dashboard') }}"
-               class="patient-sidebar-item {{ $currentRoute === 'patient.dashboard' ? 'active' : '' }}"
-               title="Tableau de bord">
-                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:20px;height:20px;">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75" />
-                </svg>
-            </a>
-
-            <!-- Medical History -->
-            <a href="{{ route('patient.medical-history') }}"
-               class="patient-sidebar-item {{ $currentRoute === 'patient.medical-history' ? 'active' : '' }}"
-               title="Historique Médical">
-                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:20px;height:20px;">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-                </svg>
-            </a>
-
-            <!-- Health Trends -->
-            <a href="{{ route('patient.health-trends') }}"
-               class="patient-sidebar-item {{ $currentRoute === 'patient.health-trends' ? 'active' : '' }}"
-               title="Évolution de ma santé">
-                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:20px;height:20px;">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-                </svg>
-            </a>
+            @foreach ($patientSidebarFeatures as $feature)
+                @if ($feature->code !=="profile" && (!$feature->view_permission || auth()->user()->hasPermission($feature->view_permission)))
+                    @php
+                        $isActive = false;
+                        if ($feature->route_name && \Illuminate\Support\Facades\Route::has($feature->route_name)) {
+                            $routePattern = str_replace('.index', '.*', $feature->route_name);
+                            $isActive = request()->routeIs($feature->route_name) || request()->routeIs($routePattern);
+                        }
+                        $href = $feature->route_name && \Illuminate\Support\Facades\Route::has($feature->route_name)
+                            ? route($feature->route_name)
+                            : '#';
+                    @endphp
+                    <a href="{{ $href }}"
+                       class="patient-sidebar-item {{ $isActive ? 'active' : '' }}"
+                       title="{{ $feature->name }}">
+                        @if ($feature->icon)
+                            <x-dynamic-component :component="'heroicon-o-' . $feature->icon" style="width:20px;height:20px;" />
+                        @else
+                            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:20px;height:20px;">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                        @endif
+                    </a>
+                @endif
+            @endforeach
         </nav>
 
-        <div class="patient-sidebar-bottom">
-            <a href="{{ route('profile.show') }}" class="patient-sidebar-item" title="Mon Profil">
-                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:20px;height:20px;">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-            </a>
-        </div>
+       
     </aside>
 
     <!-- ══ TOP NAV ══ -->
