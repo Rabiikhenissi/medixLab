@@ -29,9 +29,29 @@ return Application::configure(basePath: dirname(__DIR__))
         );
     })
     ->booted(function () {
-        // Rate-limit login endpoints: max 6 attempts per minute per IP
+        // Auth: login — 6 attempts/min
         RateLimiter::for('login', function (Request $request) {
             return Limit::perMinute(6)->by($request->ip());
+        });
+
+        // Auth: registration — 5 attempts/min
+        RateLimiter::for('register', function (Request $request) {
+            return Limit::perMinute(5)->by($request->ip());
+        });
+
+        // Auth: password reset — 3 attempts/min
+        RateLimiter::for('password-reset', function (Request $request) {
+            return Limit::perMinute(3)->by($request->ip());
+        });
+
+        // General: authenticated state-changing actions — 60/min
+        RateLimiter::for('general', function (Request $request) {
+            return Limit::perMinute(60)->by($request->ip());
+        });
+
+        // Public location endpoints — 20/min
+        RateLimiter::for('location', function (Request $request) {
+            return Limit::perMinute(20)->by($request->ip());
         });
     })
     ->create();

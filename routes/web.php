@@ -50,16 +50,19 @@ Route::prefix('doctor')->name('doctor.')->group(function () {
             ->name('register');
 
         Route::post('/register', [AuthController::class, 'register'])
+            ->middleware('throttle:register')
             ->defaults('role', 'doctor');
 
 
         // Password Reset
         Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])
             ->defaults('role', 'doctor')
+            ->middleware('throttle:password-reset')
             ->name('password.request');
 
         Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])
             ->defaults('role', 'doctor')
+            ->middleware('throttle:password-reset')
             ->name('password.email');
 
         Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])
@@ -68,10 +71,11 @@ Route::prefix('doctor')->name('doctor.')->group(function () {
 
         Route::post('/reset-password', [AuthController::class, 'resetPassword'])
             ->defaults('role', 'doctor')
+            ->middleware('throttle:password-reset')
             ->name('password.update');
     });
 
-    Route::middleware(['auth', 'doctor'])->group(function () {
+    Route::middleware(['auth', 'doctor', 'throttle:general'])->group(function () {
         Route::get('/dashboard', function () {
             $user = auth()->user();
             // Verify they are a doctor
@@ -222,16 +226,19 @@ Route::prefix('patient')->name('patient.')->group(function () {
             ->name('register');
 
         Route::post('/register', [AuthController::class, 'register'])
+            ->middleware('throttle:register')
             ->defaults('role', 'patient');
 
 
         // Password Reset
         Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])
             ->defaults('role', 'patient')
+            ->middleware('throttle:password-reset')
             ->name('password.request');
 
         Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])
             ->defaults('role', 'patient')
+            ->middleware('throttle:password-reset')
             ->name('password.email');
 
         Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])
@@ -240,11 +247,12 @@ Route::prefix('patient')->name('patient.')->group(function () {
 
         Route::post('/reset-password', [AuthController::class, 'resetPassword'])
             ->defaults('role', 'patient')
+            ->middleware('throttle:password-reset')
             ->name('password.update');
 
     });
 
-    Route::middleware(['auth', 'patient'])->group(function () {
+    Route::middleware(['auth', 'patient', 'throttle:general'])->group(function () {
         Route::get('/dashboard', function () {
             if (!auth()->user()->patient) {
                 return redirect()->route('home');
@@ -373,17 +381,20 @@ Route::prefix('center')->name('center.')->group(function () {
             ->name('register');
 
         Route::post('/register', [AuthController::class, 'register'])
+            ->middleware('throttle:register')
             ->defaults('role', 'center');
 
 
         // Password Reset
         Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])
             ->defaults('role', 'center')
+            ->middleware('throttle:password-reset')
             ->name('password.request');
 
 
         Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])
             ->defaults('role', 'center')
+            ->middleware('throttle:password-reset')
             ->name('password.email');
 
 
@@ -394,6 +405,7 @@ Route::prefix('center')->name('center.')->group(function () {
 
         Route::post('/reset-password', [AuthController::class, 'resetPassword'])
             ->defaults('role', 'center')
+            ->middleware('throttle:password-reset')
             ->name('password.update');
 
     });
@@ -403,7 +415,7 @@ Route::prefix('center')->name('center.')->group(function () {
 
 
     // Authenticated Center Routes
-    Route::middleware(['auth', 'center'])->group(function () {
+    Route::middleware(['auth', 'center', 'throttle:general'])->group(function () {
 
 
         // Dashboard
@@ -607,7 +619,7 @@ use App\Http\Controllers\Admin\AvailableExamController;
 
 // Admin Pages
 Route::prefix('admin')->name('admin.')->group(function () {
-    Route::middleware(['auth', 'admin'])->group(function () {
+    Route::middleware(['auth', 'admin', 'throttle:general'])->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
         // Exams CRUD
         Route::get('/exams', [AdminController::class, 'exams'])->name('exams.index');
@@ -676,15 +688,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
 });
 
 // Profile routes (any authenticated user)
-Route::middleware('auth')->prefix('profile')->name('profile.')->group(function () {
+Route::middleware(['auth', 'throttle:general'])->prefix('profile')->name('profile.')->group(function () {
     Route::get('/', [\App\Http\Controllers\ProfileController::class, 'show'])->name('show');
     Route::put('/', [\App\Http\Controllers\ProfileController::class, 'update'])->name('update');
     Route::put('/password', [\App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('password');
 });
 
 // Location routes (AJAX API endpoints)
-Route::get('/countries', [\App\Http\Controllers\LocationController::class, 'getCountries'])->name('countries.index');
-Route::get('/countries/{country}/states', [\App\Http\Controllers\LocationController::class, 'getStates'])->name('countries.states');
+Route::get('/countries', [\App\Http\Controllers\LocationController::class, 'getCountries'])->middleware('throttle:location')->name('countries.index');
+Route::get('/countries/{country}/states', [\App\Http\Controllers\LocationController::class, 'getStates'])->middleware('throttle:location')->name('countries.states');
 
 Route::middleware('auth')->group(function () {
     // Old profile routes removed — using ProfileController routes above
