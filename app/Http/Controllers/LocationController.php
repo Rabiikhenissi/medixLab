@@ -15,8 +15,7 @@ class LocationController extends Controller
 {
     try {
 
-        $response = Http::withoutVerifying()
-            ->timeout(20)
+        $response = Http::timeout(20)
             ->get('https://countriesnow.space/api/v0.1/countries/iso');
 
 
@@ -67,7 +66,7 @@ class LocationController extends Controller
         return response()->json([
             'success'=>false,
             'data'=>[],
-            'error'=>$e->getMessage()
+            'error'=>'Could not load country data'
         ]);
 
     }
@@ -83,8 +82,7 @@ class LocationController extends Controller
 
     try {
 
-        $response = Http::withoutVerifying()
-            ->timeout(15)
+        $response = Http::timeout(15)
             ->asJson()
             ->post(
                 'https://countriesnow.space/api/v0.1/countries/states',
@@ -131,7 +129,7 @@ class LocationController extends Controller
         return response()->json([
             'success'=>false,
             'data'=>[],
-            'error'=>$e->getMessage()
+            'error'=>'Could not load state data'
         ]);
 
     }

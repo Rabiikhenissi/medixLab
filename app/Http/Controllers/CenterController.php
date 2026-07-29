@@ -163,11 +163,31 @@ class CenterController extends Controller
         $lab = auth()->user()->staff->laboratory;
         $days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-        DB::transaction(function () use ($request, $lab, $days) {
+        $validated = $request->validate([
+            'start_Monday'   => 'nullable|date_format:H:i',
+            'end_Monday'     => 'nullable|date_format:H:i|after_or_equal:start_Monday',
+            'start_Tuesday'  => 'nullable|date_format:H:i',
+            'end_Tuesday'    => 'nullable|date_format:H:i|after_or_equal:start_Tuesday',
+            'start_Wednesday'=> 'nullable|date_format:H:i',
+            'end_Wednesday'  => 'nullable|date_format:H:i|after_or_equal:start_Wednesday',
+            'start_Thursday' => 'nullable|date_format:H:i',
+            'end_Thursday'   => 'nullable|date_format:H:i|after_or_equal:start_Thursday',
+            'start_Friday'   => 'nullable|date_format:H:i',
+            'end_Friday'     => 'nullable|date_format:H:i|after_or_equal:start_Friday',
+            'start_Saturday' => 'nullable|date_format:H:i',
+            'end_Saturday'   => 'nullable|date_format:H:i|after_or_equal:start_Saturday',
+            'start_Sunday'   => 'nullable|date_format:H:i',
+            'end_Sunday'     => 'nullable|date_format:H:i|after_or_equal:start_Sunday',
+        ], [
+            '*.date_format' => 'Le format de l\'heure doit être HH:MM.',
+            '*.after_or_equal' => 'L\'heure de fin doit être après ou égale à l\'heure de début.',
+        ]);
+
+        DB::transaction(function () use ($validated, $lab, $days) {
             foreach ($days as $day) {
                 $isClosed = $request->has("closed_{$day}");
-                $startTime = $request->input("start_{$day}");
-                $endTime = $request->input("end_{$day}");
+                $startTime = $validated["start_{$day}"] ?? null;
+                $endTime = $validated["end_{$day}"] ?? null;
 
                 WorkingHours::updateOrCreate(
                     ['labo_id' => $lab->id, 'day' => $day, 'date_close' => null],
