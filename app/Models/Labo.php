@@ -47,4 +47,9 @@ class Labo extends Model
     {
         return $this->hasMany(ExamRequest::class);
     }
+
+    public function machineConfigurations()
+    {
+        return $this->hasMany(MachineConfiguration::class);
+    }
 }

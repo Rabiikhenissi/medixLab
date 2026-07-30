@@ -218,11 +218,13 @@
             .then(data => {
                 const el = document.getElementById('machineStatus');
                 if (data.online) {
+                    const label = data.config_name || data.info?.machine || 'Machine connectée';
                     el.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border bg-emerald-50 border-emerald-200 text-emerald-600';
-                    el.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500"></span>' + (data.info?.machine || 'Machine connectée');
+                    el.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500"></span>' + label;
                 } else {
+                    const label = data.config_name ? data.config_name + ' (hors ligne)' : 'Machine hors ligne';
                     el.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border bg-red-50 border-red-200 text-red-500';
-                    el.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-500"></span>Machine hors ligne';
+                    el.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-500"></span>' + label;
                 }
             })
             .catch(() => {

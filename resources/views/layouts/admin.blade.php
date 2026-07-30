@@ -1205,6 +1205,7 @@
     </script>
     @yield('scripts')
     <x-loading-overlay />
+    @include('components.accessibility-widget')
 </body>
 
 </html>

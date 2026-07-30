@@ -136,6 +136,10 @@
                                    class="flex-1 text-center text-xs font-semibold py-2 px-3 bg-[#0066FF] text-white rounded-xl hover:bg-[#0052cc] transition">
                                     Prescrire
                                 </a>
+                                <a href="{{ route('doctor.medical-records', $patient->id) }}"
+                                   class="flex-1 text-center text-xs font-semibold py-2 px-3 bg-white text-[#0066FF] border border-[#0066FF] rounded-xl hover:bg-[#f0f6ff] transition">
+                                    Dossier
+                                </a>
                             </div>
                         </div>
                     @endforeach

@@ -572,6 +572,9 @@ Gérez vos informations personnelles et votre carte digitale.
         if (role === 'patient' && appUrl) {
             qrContent = appUrl + '/doctor/scan/' + userCode;
         }
+        if (role === 'doctor' && appUrl) {
+            qrContent = appUrl + '/patient/scan/' + userCode;
+        }
 
         if (userCode) {
             new QRCode(document.getElementById("qrcode"), {
