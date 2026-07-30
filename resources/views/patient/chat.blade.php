@@ -156,7 +156,7 @@
     });
 
     loadMessages();
-    pollInterval = setInterval(loadMessages, 5000);
+    pollInterval = setInterval(loadMessages, 10000);
 
     document.addEventListener('visibilitychange', () => {
         if (!document.hidden) loadMessages();

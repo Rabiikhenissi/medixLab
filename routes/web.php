@@ -78,7 +78,6 @@ Route::prefix('doctor')->name('doctor.')->group(function () {
     Route::middleware(['auth', 'doctor', 'throttle:general'])->group(function () {
         Route::get('/dashboard', function () {
             $user = auth()->user();
-            // Verify they are a doctor
             if (!$user->doctor) {
                 return redirect()->route('home');
             }
@@ -91,7 +90,6 @@ Route::prefix('doctor')->name('doctor.')->group(function () {
                 ->limit(20)
                 ->get();
 
-            // Search / Filter on Exam Requests (Task 4.2)
             $search = request('search');
             $status = request('status');
 
@@ -117,44 +115,42 @@ Route::prefix('doctor')->name('doctor.')->group(function () {
                 ->paginate(10)
                 ->withQueryString();
 
-            // Analytics: monthly prescriptions for last 6 months
-            $monthlyPrescriptions = \App\Models\ExamRequest::where('doctor_id', $doctor->id)
-                ->where('created_at', '>=', now()->subMonths(5)->startOfMonth())
-                ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month_key, DATE_FORMAT(created_at, '%b %Y') as label, COUNT(*) as count")
-                ->groupBy('month_key', 'label')
-                ->orderBy('month_key')
-                ->get();
+            // Cache analytics for 10 minutes
+            $cacheKey = "doctor_analytics_{$doctor->id}";
+            $analytics = cache()->remember($cacheKey, 600, function () use ($doctor) {
+                $monthlyPrescriptions = \App\Models\ExamRequest::where('doctor_id', $doctor->id)
+                    ->where('created_at', '>=', now()->subMonths(5)->startOfMonth())
+                    ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month_key, COUNT(*) as count")
+                    ->groupBy('month_key')
+                    ->orderBy('month_key')
+                    ->pluck('count', 'month_key');
 
-            $allMonths = collect();
-            for ($i = 5; $i >= 0; $i--) {
-                $d = now()->subMonths($i);
-                $allMonths->push([
-                    'key'   => $d->format('Y-m'),
-                    'label' => $d->format('M Y'),
-                    'count' => 0,
-                ]);
-            }
-            $chartData = $allMonths->map(function ($m) use ($monthlyPrescriptions) {
-                $found = $monthlyPrescriptions->firstWhere('key', $m['key']);
-                $m['count'] = $found ? $found->count : 0;
-                return $m;
-            })->values();
+                $allMonths = collect();
+                for ($i = 5; $i >= 0; $i--) {
+                    $d = now()->subMonths($i);
+                    $allMonths->push([
+                        'label' => $d->format('M Y'),
+                        'count' => $monthlyPrescriptions[$d->format('Y-m')] ?? 0,
+                    ]);
+                }
+                $chartData = $allMonths->values();
 
-            // Analytics: unique patients seen
-            $uniquePatientsCount = \App\Models\ExamRequest::where('doctor_id', $doctor->id)
-                ->distinct('patient_id')
-                ->count('patient_id');
+                $uniquePatientsCount = \App\Models\ExamRequest::where('doctor_id', $doctor->id)
+                    ->distinct('patient_id')
+                    ->count('patient_id');
 
-            // Analytics: completion rate
-            $totalRequests = \App\Models\ExamRequest::where('doctor_id', $doctor->id)->count();
-            $completedRequests = \App\Models\ExamRequest::where('doctor_id', $doctor->id)
-                ->where('status', 'completed')
-                ->count();
-            $completionRate = $totalRequests > 0 ? round(($completedRequests / $totalRequests) * 100) : 0;
+                $totalRequests = \App\Models\ExamRequest::where('doctor_id', $doctor->id)->count();
+                $completedRequests = \App\Models\ExamRequest::where('doctor_id', $doctor->id)
+                    ->where('status', 'completed')
+                    ->count();
+                $completionRate = $totalRequests > 0 ? round(($completedRequests / $totalRequests) * 100) : 0;
 
-            return view('doctor.dashboard', compact(
-                'user', 'recentPatients', 'recentExams', 'search', 'status',
-                'chartData', 'uniquePatientsCount', 'completionRate'
+                return compact('chartData', 'uniquePatientsCount', 'completionRate');
+            });
+
+            return view('doctor.dashboard', array_merge(
+                compact('user', 'recentPatients', 'recentExams', 'search', 'status'),
+                $analytics
             ));
         })->name('dashboard');
 
@@ -361,11 +357,11 @@ Route::prefix('patient')->name('patient.')->group(function () {
         Route::get('/exam-requests/{examRequest}/split-suggestions', [\App\Http\Controllers\PatientController::class, 'splitSuggestions'])->name('split-suggestions');
         Route::post('/exam-requests/{examRequest}/apply-split', [\App\Http\Controllers\PatientController::class, 'applySplit'])->name('apply-split');
 
-        // Scan doctor QR code → auto-link
-        Route::get('/scan/{code}', [\App\Http\Controllers\PatientController::class, 'scanDoctor'])->name('scan-doctor');
-
         Route::post('/logout', [AuthController::class, 'logout'])->defaults('role', 'patient')->name('logout');
     });
+
+    // Scan doctor QR code — accessible without auth (handles guest redirect internally)
+    Route::get('/scan/{code}', [\App\Http\Controllers\PatientController::class, 'scanDoctor'])->name('scan-doctor');
 });
 
 // Medical Center Authentication Pages

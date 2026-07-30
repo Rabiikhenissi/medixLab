@@ -31,7 +31,7 @@
         <div class="flex flex-col gap-1">
             <label class="text-[10px] font-bold text-[#64748b] uppercase tracking-wider">Recherche</label>
             <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Nom patient, médecin, n° demande..."
-                class="border border-[#e2e8f0] rounded-xl px-4 py-2.5 text-sm text-[#1e293b] placeholder:text-[#94a3b8] focus:border-[#0066ff] focus:ring-1 focus:ring-[#0066ff] outline-none w-64">
+                class="border border-[#e2e8f0] rounded-xl px-4 py-2.5 text-sm text-[#1e293b] placeholder:text-[#94a3b8] focus:border-[#0066ff] focus:ring-1 focus:ring-[#0066ff] outline-none w-full sm:w-64">
         </div>
         <div class="flex flex-col gap-1">
             <label class="text-[10px] font-bold text-[#64748b] uppercase tracking-wider">Statut</label>
@@ -52,8 +52,8 @@
     </form>
 
     <!-- Table -->
-    <div class="bg-white border border-[#e2e8f0] rounded-2xl shadow-sm">
-        <table class="w-full text-left border-collapse">
+    <div class="bg-white border border-[#e2e8f0] rounded-2xl shadow-sm overflow-x-auto">
+        <table class="w-full text-left border-collapse min-w-[700px]">
             <thead>
                 <tr class="bg-[#F8FAFC] border-b border-[#e2e8f0]">
                     <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider">Patient</th>
@@ -234,7 +234,7 @@
             });
     }
     checkMachineStatus();
-    setInterval(checkMachineStatus, 15000);
+    setInterval(checkMachineStatus, 30000);
 
     function toggleItemDropdown(id) {
         const dd = document.getElementById(id);

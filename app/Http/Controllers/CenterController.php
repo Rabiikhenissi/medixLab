@@ -39,80 +39,99 @@ class CenterController extends Controller
         $user = auth()->user();
         $lab = $user->staff->laboratory;
 
-        // Retrieve statistics
-        $stats = [
-            'equipment_count'          => $lab->equipment()->count(),
-            'consumables_count'        => $lab->consumables()->count(),
-            'low_stock_count'          => $lab->consumables()->whereColumn('quantity', '<=', 'min_quantity')->count(),
-            'active_maintenance_count' => EquipmentMaintenance::whereIn('equipment_id', $lab->equipment()->pluck('id'))
-                ->whereIn('status', ['pending', 'in_progress'])
-                ->count(),
-        ];
+        // Cache dashboard stats for 5 minutes
+        $cacheKey = "center_dashboard_{$lab->id}";
+        $cached = cache()->remember($cacheKey, 300, function () use ($lab) {
+            // Retrieve statistics
+            $stats = [
+                'equipment_count'          => $lab->equipment()->count(),
+                'consumables_count'        => $lab->consumables()->count(),
+                'low_stock_count'          => $lab->consumables()->whereColumn('quantity', '<=', 'min_quantity')->count(),
+                'active_maintenance_count' => EquipmentMaintenance::whereIn('equipment_id', $lab->equipment()->select('id'))
+                    ->whereIn('status', ['pending', 'in_progress'])
+                    ->count(),
+            ];
 
-        // Workload stats (Task 3.9) ─ per-status counts for this lab
-        $workload = [
-            'pending'    => $lab->examRequests()->where('status', 'pending')->count(),
-            'assigned'   => $lab->examRequests()->where('status', 'assigned')->count(),
-            'collected'  => $lab->examRequests()->where('status', 'collected')->count(),
-            'processing' => $lab->examRequests()->where('status', 'processing')->count(),
-            'completed'  => $lab->examRequests()->where('status', 'completed')->count(),
-            'cancelled'  => $lab->examRequests()->where('status', 'cancelled')->count(),
-            'total'      => $lab->examRequests()->count(),
-        ];
+            // Workload stats ─ single aggregated query
+            $statusCounts = $lab->examRequests()
+                ->selectRaw("COALESCE(SUM(status = 'pending'), 0) as pending")
+                ->selectRaw("COALESCE(SUM(status = 'assigned'), 0) as assigned")
+                ->selectRaw("COALESCE(SUM(status = 'collected'), 0) as collected")
+                ->selectRaw("COALESCE(SUM(status = 'processing'), 0) as processing")
+                ->selectRaw("COALESCE(SUM(status = 'completed'), 0) as completed")
+                ->selectRaw("COALESCE(SUM(status = 'cancelled'), 0) as cancelled")
+                ->selectRaw('COUNT(*) as total')
+                ->first();
 
-        // Daily request volume for the last 7 days
-        $dailyVolume = $lab->examRequests()
-            ->where('created_at', '>=', Carbon::now()->subDays(6)->startOfDay())
-            ->selectRaw('DATE(created_at) as day, COUNT(*) as count')
-            ->groupBy('day')
-            ->orderBy('day')
-            ->pluck('count', 'day')
-            ->toArray();
+            $workload = [
+                'pending'    => (int) $statusCounts->pending,
+                'assigned'   => (int) $statusCounts->assigned,
+                'collected'  => (int) $statusCounts->collected,
+                'processing' => (int) $statusCounts->processing,
+                'completed'  => (int) $statusCounts->completed,
+                'cancelled'  => (int) $statusCounts->cancelled,
+                'total'      => (int) $statusCounts->total,
+            ];
 
-        // Fill missing days with 0
-        $last7Days = [];
-        for ($i = 6; $i >= 0; $i--) {
-            $date = Carbon::now()->subDays($i)->toDateString();
-            $last7Days[$date] = $dailyVolume[$date] ?? 0;
-        }
+            // Daily request volume for the last 7 days
+            $dailyVolume = $lab->examRequests()
+                ->where('created_at', '>=', Carbon::now()->subDays(6)->startOfDay())
+                ->selectRaw('DATE(created_at) as day, COUNT(*) as count')
+                ->groupBy('day')
+                ->orderBy('day')
+                ->pluck('count', 'day')
+                ->toArray();
 
-        // Previous 7 days for trend comparison
-        $prevDailyVolume = $lab->examRequests()
-            ->where('created_at', '>=', Carbon::now()->subDays(13)->startOfDay())
-            ->where('created_at', '<', Carbon::now()->subDays(6)->startOfDay())
-            ->selectRaw('DATE(created_at) as day, COUNT(*) as count')
-            ->groupBy('day')
-            ->orderBy('day')
-            ->pluck('count', 'day')
-            ->toArray();
+            // Fill missing days with 0
+            $last7Days = [];
+            for ($i = 6; $i >= 0; $i--) {
+                $date = Carbon::now()->subDays($i)->toDateString();
+                $last7Days[$date] = $dailyVolume[$date] ?? 0;
+            }
 
-        $last7PrevDays = [];
-        for ($i = 13; $i >= 7; $i--) {
-            $date = Carbon::now()->subDays($i)->toDateString();
-            $last7PrevDays[$date] = $prevDailyVolume[$date] ?? 0;
-        }
+            // Previous 7 days for trend comparison
+            $prevDailyVolume = $lab->examRequests()
+                ->where('created_at', '>=', Carbon::now()->subDays(13)->startOfDay())
+                ->where('created_at', '<', Carbon::now()->subDays(6)->startOfDay())
+                ->selectRaw('DATE(created_at) as day, COUNT(*) as count')
+                ->groupBy('day')
+                ->orderBy('day')
+                ->pluck('count', 'day')
+                ->toArray();
 
-        // Top requested exams for this lab
-        $topExams = $lab->examRequests()
-            ->join('exam_request_items', 'exam_requests.id', '=', 'exam_request_items.exam_request_id')
-            ->join('exams', 'exam_request_items.exam_id', '=', 'exams.id')
-            ->select('exams.name', \DB::raw('count(*) as count'))
-            ->groupBy('exams.name')
-            ->orderByDesc('count')
-            ->limit(5)
-            ->get();
+            $last7PrevDays = [];
+            for ($i = 13; $i >= 7; $i--) {
+                $date = Carbon::now()->subDays($i)->toDateString();
+                $last7PrevDays[$date] = $prevDailyVolume[$date] ?? 0;
+            }
 
-        // Revenue estimate (completed exams only)
-        $revenue = $lab->examRequests()
-            ->where('status', 'completed')
-            ->join('exam_request_items', 'exam_requests.id', '=', 'exam_request_items.exam_request_id')
-            ->join('available_exams', function ($j) use ($lab) {
-                $j->on('exam_request_items.exam_id', '=', 'available_exams.exam_id')
-                  ->where('available_exams.labo_id', '=', $lab->id);
-            })
-            ->sum('available_exams.price');
+            // Top requested exams for this lab
+            $topExams = $lab->examRequests()
+                ->join('exam_request_items', 'exam_requests.id', '=', 'exam_request_items.exam_request_id')
+                ->join('exams', 'exam_request_items.exam_id', '=', 'exams.id')
+                ->select('exams.name', \DB::raw('count(*) as count'))
+                ->groupBy('exams.name')
+                ->orderByDesc('count')
+                ->limit(5)
+                ->get();
 
-        return view('center.dashboard', compact('user', 'stats', 'workload', 'last7Days', 'last7PrevDays', 'topExams', 'revenue'));
+            // Revenue estimate (completed exams only)
+            $revenue = $lab->examRequests()
+                ->where('status', 'completed')
+                ->join('exam_request_items', 'exam_requests.id', '=', 'exam_request_items.exam_request_id')
+                ->join('available_exams', function ($j) use ($lab) {
+                    $j->on('exam_request_items.exam_id', '=', 'available_exams.exam_id')
+                      ->where('available_exams.labo_id', '=', $lab->id);
+                })
+                ->sum('available_exams.price');
+
+            return compact('stats', 'workload', 'last7Days', 'last7PrevDays', 'topExams', 'revenue');
+        });
+
+        return view('center.dashboard', array_merge(
+            ['user' => auth()->user()],
+            $cached
+        ));
     }
 
     /**
@@ -265,7 +284,7 @@ class CenterController extends Controller
         $consumables = $query->orderBy('name', 'asc')->paginate(10, ['*'], 'consumables_page')->appends($request->query());
 
         // Get movements log for history tab
-        $movements = StockMovement::whereIn('consumable_id', $lab->consumables()->pluck('id'))
+        $movements = StockMovement::whereIn('consumable_id', $lab->consumables()->select('id'))
             ->with('consumable')
             ->latest()
             ->paginate(10, ['*'], 'movements_page')
@@ -384,7 +403,7 @@ class CenterController extends Controller
         $equipment = $query->orderBy('name', 'asc')->paginate(10, ['*'], 'equipment_page')->appends($request->query());
 
         // Get maintenance logs
-        $maintenances = EquipmentMaintenance::whereIn('equipment_id', $lab->equipment()->pluck('id'))
+        $maintenances = EquipmentMaintenance::whereIn('equipment_id', $lab->equipment()->select('id'))
             ->with(['equipment', 'staff.user'])
             ->latest()
             ->paginate(10, ['*'], 'maintenance_page')

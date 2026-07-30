@@ -25,7 +25,7 @@
                     </div>
                 </div>
 
-                <div class="flex items-center space-x-3">
+                <div class="flex items-center gap-2 flex-wrap">
                     <!-- Notification Bell -->
                     <div class="relative">
                         <button id="notificationBell" type="button"
@@ -943,7 +943,7 @@
         });
 
         // Refresh notifications every 10 seconds
-        setInterval(updateUnreadCount, 10000);
+        setInterval(updateUnreadCount, 15000);
         // Refresh access requests every 15 seconds
         setInterval(loadAccessRequests, 15000);
 
