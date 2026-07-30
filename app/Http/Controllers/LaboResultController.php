@@ -35,25 +35,24 @@ class LaboResultController extends Controller
         $consumables = $lab->consumables()->where('is_archive', false)->get();
         $equipment = $lab->equipment()->where('is_archive', false)->get();
 
-        // Prepare suggestion data for javascript (resolve by name in the current laboratory)
+        // Batch-load consumables once
+        $labConsumablesByName = $lab->consumables()
+            ->where('is_archive', false)
+            ->get()
+            ->keyBy('name');
+
         $preloadedConsumables = [];
         foreach ($item->exam->examConsumables as $ec) {
-            if ($ec->consumable) {
-                $labConsumable = $lab->consumables()
-                    ->where('name', $ec->consumable->name)
-                    ->where('is_archive', false)
-                    ->first();
-
-                if ($labConsumable) {
-                    $preloadedConsumables[] = [
-                        'id' => (string)$labConsumable->id,
-                        'name' => $labConsumable->name,
-                        'unit' => $labConsumable->unit,
-                        'stock' => $labConsumable->quantity,
-                        'quantity' => min($ec->quantity_needed, $labConsumable->quantity),
-                        'isSuggested' => true
-                    ];
-                }
+            if ($ec->consumable && isset($labConsumablesByName[$ec->consumable->name])) {
+                $lc = $labConsumablesByName[$ec->consumable->name];
+                $preloadedConsumables[] = [
+                    'id' => (string)$lc->id,
+                    'name' => $lc->name,
+                    'unit' => $lc->unit,
+                    'stock' => $lc->quantity,
+                    'quantity' => min($ec->quantity_needed, $lc->quantity),
+                    'isSuggested' => true,
+                ];
             }
         }
 
@@ -181,21 +180,24 @@ class LaboResultController extends Controller
         $consumables = $lab->consumables()->where('is_archive', false)->get();
         $equipment = $lab->equipment()->where('is_archive', false)->get();
 
-        // Prepare suggestion/preselected data for javascript (resolve suggested status by name)
+        // Batch-load suggested consumable names
+        $suggestedNames = $result->examRequestItem->exam->examConsumables()
+            ->with('consumable')
+            ->get()
+            ->pluck('consumable.name')
+            ->filter()
+            ->toArray();
+        $suggestedNames = array_flip($suggestedNames);
+
         $preloadedConsumables = [];
         foreach ($result->consumables as $c) {
-            $isSuggested = $result->examRequestItem->exam->examConsumables()
-                ->whereHas('consumable', function($query) use ($c) {
-                    $query->where('name', $c->name);
-                })->exists();
-
             $preloadedConsumables[] = [
-                'id' => (string)$c->id,
-                'name' => $c->name,
-                'unit' => $c->unit,
-                'stock' => $c->quantity + $c->pivot->quantity_used, // add back for edit limits
-                'quantity' => $c->pivot->quantity_used,
-                'isSuggested' => $isSuggested
+                'id'          => (string)$c->id,
+                'name'        => $c->name,
+                'unit'        => $c->unit,
+                'stock'       => $c->quantity + $c->pivot->quantity_used,
+                'quantity'    => $c->pivot->quantity_used,
+                'isSuggested' => isset($suggestedNames[$c->name]),
             ];
         }
 

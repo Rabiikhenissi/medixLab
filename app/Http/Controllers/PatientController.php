@@ -664,7 +664,7 @@ class PatientController extends Controller
                 'items.resultLabo.details',
             ])
             ->latest('created_at')
-            ->get();
+            ->paginate(20);
 
         return view('patient.medical-history', [
             'user'         => auth()->user(),
@@ -857,6 +857,11 @@ class PatientController extends Controller
 
     public function scanDoctor(string $code)
     {
+        if (!auth()->check()) {
+            session()->put('url.intended', request()->url());
+            return redirect()->route('patient.login');
+        }
+
         $doctor = \App\Models\Doctor::where('doctor_code', $code)->first();
         if (!$doctor) {
             return redirect()->route('patient.dashboard')

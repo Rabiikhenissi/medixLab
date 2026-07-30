@@ -22,7 +22,7 @@
                     <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7C3AED]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
-                    <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Rechercher matériel..." class="pl-9 pr-4 py-2 border border-[#e2e8f0] rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/20 focus:border-[#7C3AED] w-64 text-[#1e293b] bg-white shadow-3xs">
+                    <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Rechercher matériel..." class="pl-9 pr-4 py-2 border border-[#e2e8f0] rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/20 focus:border-[#7C3AED] w-full sm:w-64 text-[#1e293b] bg-white shadow-3xs">
                 </div>
                 <button type="submit" class="bg-[#7C3AED] hover:bg-[#5B21B6] text-white font-bold px-4 py-2 rounded-xl text-xs uppercase tracking-wider shadow-md shadow-[#7C3AED]/20 transition cursor-pointer">
                     Filtrer
@@ -36,8 +36,8 @@
             </button>
         </div>
 
-        <div class="bg-white border border-[#e2e8f0] rounded-2xl overflow-hidden shadow-xs">
-            <table class="w-full text-left border-collapse">
+        <div class="bg-white border border-[#e2e8f0] rounded-2xl overflow-x-auto shadow-xs">
+            <table class="w-full text-left border-collapse min-w-[600px]">
                 <thead>
                     <tr class="bg-[#F8FAFC]/80 border-b border-[#e2e8f0]/80">
                         <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider">Nom</th>
@@ -98,8 +98,8 @@
 
     <!-- ──────────────── TAB: MAINTENANCE HISTORY ──────────────── -->
     <div id="tab-content-maintenance" class="space-y-6 hidden">
-        <div class="bg-white border border-[#e2e8f0] rounded-2xl overflow-hidden shadow-xs">
-            <table class="w-full text-left border-collapse">
+        <div class="bg-white border border-[#e2e8f0] rounded-2xl overflow-x-auto shadow-xs">
+            <table class="w-full text-left border-collapse min-w-[600px]">
                 <thead>
                     <tr class="bg-[#F8FAFC]/80 border-b border-[#e2e8f0]/80">
                         <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider">Date Début</th>

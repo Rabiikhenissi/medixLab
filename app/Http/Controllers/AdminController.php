@@ -19,106 +19,100 @@ class AdminController extends Controller
 
     public function dashboard()
     {
-
         if (!auth()->user()->admin) {
             return redirect()->route('home');
         }
 
-
-        $stats = [
-
-            'total_exams' => Exam::where(function ($q) {
-
-                $q->where('is_archive', false)
-                    ->orWhereNull('is_archive');
-            })->count(),
-
-
-            'total_patients' => Patient::count(),
-
-
-            'total_doctors' => Doctor::count(),
-            'total_laboratories' => Labo::where('is_archive', false)->count(),
-            'total_exam_requests' => ExamRequest::count(),
-
-
-            'archived_exams' => Exam::where('is_archive', true)->count(),
-
-        ];
-
-        // 1. Status distribution
-        $statusDistribution = [
-            'pending' => ExamRequest::where('status', 'pending')->count(),
-            'assigned' => ExamRequest::where('status', 'assigned')->count(),
-            'collected' => ExamRequest::where('status', 'collected')->count(),
-            'processing' => ExamRequest::where('status', 'processing')->count(),
-            'completed' => ExamRequest::where('status', 'completed')->count(),
-            'cancelled' => ExamRequest::where('status', 'cancelled')->count(),
-        ];
-
-        // 2. Top 5 most prescribed exams
-        $topExams = ExamRequestItem::select('exam_id', \DB::raw('count(*) as count'))
-            ->groupBy('exam_id')
-            ->orderByDesc('count')
-            ->limit(5)
-            ->with('exam')
-            ->get();
-
-        // 3. Requests volume over the last 15 days (daily volume)
-        $dailyVolume = ExamRequest::where('created_at', '>=', Carbon::now()->subDays(14)->startOfDay())
-            ->selectRaw('DATE(created_at) as date, count(*) as count')
-            ->groupBy('date')
-            ->orderBy('date')
-            ->pluck('count', 'date')
-            ->toArray();
-
-        $chartData = [];
-        for ($i = 14; $i >= 0; $i--) {
-            $dateString = Carbon::now()->subDays($i)->toDateString();
-            $label = Carbon::now()->subDays($i)->format('d M');
-            $chartData[] = [
-                'label' => $label,
-                'count' => $dailyVolume[$dateString] ?? 0
+        // Cache admin dashboard for 5 minutes
+        $cacheKey = 'admin_dashboard';
+        $cached = cache()->remember($cacheKey, 300, function () {
+            $stats = [
+                'total_exams' => Exam::where(function ($q) {
+                    $q->where('is_archive', false)
+                        ->orWhereNull('is_archive');
+                })->count(),
+                'total_patients' => Patient::count(),
+                'total_doctors' => Doctor::count(),
+                'total_laboratories' => Labo::where('is_archive', false)->count(),
+                'total_exam_requests' => ExamRequest::count(),
+                'archived_exams' => Exam::where('is_archive', true)->count(),
             ];
-        }
 
+            // 1. Status distribution — single aggregated query
+            $statusCounts = ExamRequest::selectRaw("
+                    COALESCE(SUM(status = 'pending'), 0) as pending,
+                    COALESCE(SUM(status = 'assigned'), 0) as assigned,
+                    COALESCE(SUM(status = 'collected'), 0) as collected,
+                    COALESCE(SUM(status = 'processing'), 0) as processing,
+                    COALESCE(SUM(status = 'completed'), 0) as completed,
+                    COALESCE(SUM(status = 'cancelled'), 0) as cancelled
+                ")->first();
 
+            $statusDistribution = [
+                'pending'    => (int) $statusCounts->pending,
+                'assigned'   => (int) $statusCounts->assigned,
+                'collected'  => (int) $statusCounts->collected,
+                'processing' => (int) $statusCounts->processing,
+                'completed'  => (int) $statusCounts->completed,
+                'cancelled'  => (int) $statusCounts->cancelled,
+            ];
 
-        // 4. Recent prescriptions (last 5)
-        $recentPrescriptions = ExamRequest::with(['doctor.user', 'patient.user', 'laboratory'])
-            ->latest()
-            ->limit(5)
-            ->get();
+            // 2. Top 5 most prescribed exams
+            $topExams = ExamRequestItem::select('exam_id', \DB::raw('count(*) as count'))
+                ->groupBy('exam_id')
+                ->orderByDesc('count')
+                ->limit(5)
+                ->with('exam')
+                ->get();
 
-        // 5. Labs per city
-        $labsPerCity = Labo::where('is_archive', false)
-            ->selectRaw('city, count(*) as count')
-            ->groupBy('city')
-            ->orderByDesc('count')
-            ->limit(5)
-            ->pluck('count', 'city')
-            ->toArray();
+            // 3. Requests volume over the last 15 days
+            $dailyVolume = ExamRequest::where('created_at', '>=', Carbon::now()->subDays(14)->startOfDay())
+                ->selectRaw('DATE(created_at) as date, count(*) as count')
+                ->groupBy('date')
+                ->orderBy('date')
+                ->pluck('count', 'date')
+                ->toArray();
 
-        // 6. Active labs count
-        $activeLabs = Labo::where('is_archive', false)->count();
+            $chartData = [];
+            for ($i = 14; $i >= 0; $i--) {
+                $dateString = Carbon::now()->subDays($i)->toDateString();
+                $chartData[] = [
+                    'label' => Carbon::now()->subDays($i)->format('d M'),
+                    'count' => $dailyVolume[$dateString] ?? 0,
+                ];
+            }
 
-        // 7. Today's prescriptions count
-        $todayPrescriptions = ExamRequest::whereDate('created_at', Carbon::today())->count();
+            // 4. Recent prescriptions (last 5)
+            $recentPrescriptions = ExamRequest::with(['doctor.user', 'patient.user', 'laboratory'])
+                ->latest()
+                ->limit(5)
+                ->get();
 
-        return view('admin.dashboard',[
+            // 5. Labs per city
+            $labsPerCity = Labo::where('is_archive', false)
+                ->selectRaw('city, count(*) as count')
+                ->groupBy('city')
+                ->orderByDesc('count')
+                ->limit(5)
+                ->pluck('count', 'city')
+                ->toArray();
 
-            'user' => auth()->user(),
+            // 6. Active labs count
+            $activeLabs = Labo::where('is_archive', false)->count();
 
-            'stats' => $stats,
-            'statusDistribution' => $statusDistribution,
-            'topExams' => $topExams,
-            'chartData' => $chartData,
-            'recentPrescriptions' => $recentPrescriptions,
-            'labsPerCity' => $labsPerCity,
-            'activeLabs' => $activeLabs,
-            'todayPrescriptions' => $todayPrescriptions,
+            // 7. Today's prescriptions count
+            $todayPrescriptions = ExamRequest::whereDate('created_at', Carbon::today())->count();
 
-        ]);
+            return compact(
+                'stats', 'statusDistribution', 'topExams', 'chartData',
+                'recentPrescriptions', 'labsPerCity', 'activeLabs', 'todayPrescriptions'
+            );
+        });
+
+        return view('admin.dashboard', array_merge(
+            ['user' => auth()->user()],
+            $cached
+        ));
     }
 
 

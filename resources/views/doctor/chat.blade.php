@@ -136,7 +136,7 @@
     });
 
     loadMessages();
-    setInterval(loadMessages, 5000);
+    setInterval(loadMessages, 10000);
     document.addEventListener('visibilitychange', () => { if (!document.hidden) loadMessages(); });
 </script>
 @endsection
