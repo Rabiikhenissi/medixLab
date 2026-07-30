@@ -206,6 +206,9 @@ Route::prefix('doctor')->name('doctor.')->group(function () {
         Route::post('/chat/{patient}/send', [\App\Http\Controllers\DoctorController::class, 'chatSend'])->name('chat-send');
         Route::get('/chat/unread-count', [\App\Http\Controllers\DoctorController::class, 'chatUnreadCount'])->name('chat-unread-count');
 
+        // Patient Medical Records
+        Route::get('/patients/{patient}/medical-records', [\App\Http\Controllers\DoctorController::class, 'medicalRecords'])->name('medical-records');
+
         Route::post('/logout', [AuthController::class, 'logout'])->defaults('role', 'doctor')->name('logout');
     });
 });
@@ -354,9 +357,12 @@ Route::prefix('patient')->name('patient.')->group(function () {
         Route::post('/chat/{doctor}/send', [\App\Http\Controllers\PatientController::class, 'chatSend'])->name('chat-send');
         Route::get('/chat/unread-count', [\App\Http\Controllers\PatientController::class, 'chatUnreadCount'])->name('chat-unread-count');
 
-        // TIER 2.4 — Multi-Lab Splitting
+        //         TIER 2.4 — Multi-Lab Splitting
         Route::get('/exam-requests/{examRequest}/split-suggestions', [\App\Http\Controllers\PatientController::class, 'splitSuggestions'])->name('split-suggestions');
         Route::post('/exam-requests/{examRequest}/apply-split', [\App\Http\Controllers\PatientController::class, 'applySplit'])->name('apply-split');
+
+        // Scan doctor QR code → auto-link
+        Route::get('/scan/{code}', [\App\Http\Controllers\PatientController::class, 'scanDoctor'])->name('scan-doctor');
 
         Route::post('/logout', [AuthController::class, 'logout'])->defaults('role', 'patient')->name('logout');
     });
@@ -597,6 +603,15 @@ Route::prefix('center')->name('center.')->group(function () {
         Route::put('/available-exams/{availableExam}', [\App\Http\Controllers\CenterController::class, 'updateAvailableExam'])->name('available-exams.update');
         Route::post('/available-exams/{availableExam}/toggle', [\App\Http\Controllers\CenterController::class, 'toggleAvailableExam'])->name('available-exams.toggle');
         Route::delete('/available-exams/{availableExam}', [\App\Http\Controllers\CenterController::class, 'destroyAvailableExam'])->name('available-exams.destroy');
+
+        // Machine Configurations (Center-side)
+        Route::get('/machine-configurations', [\App\Http\Controllers\MachineConfigurationController::class, 'index'])->name('machine-configurations.index');
+        Route::get('/machine-configurations/create', [\App\Http\Controllers\MachineConfigurationController::class, 'create'])->name('machine-configurations.create');
+        Route::post('/machine-configurations', [\App\Http\Controllers\MachineConfigurationController::class, 'store'])->name('machine-configurations.store');
+        Route::get('/machine-configurations/{machineConfiguration}/edit', [\App\Http\Controllers\MachineConfigurationController::class, 'edit'])->name('machine-configurations.edit');
+        Route::put('/machine-configurations/{machineConfiguration}', [\App\Http\Controllers\MachineConfigurationController::class, 'update'])->name('machine-configurations.update');
+        Route::delete('/machine-configurations/{machineConfiguration}', [\App\Http\Controllers\MachineConfigurationController::class, 'destroy'])->name('machine-configurations.destroy');
+        Route::post('/machine-configurations/{machineConfiguration}/test', [\App\Http\Controllers\MachineConfigurationController::class, 'test'])->name('machine-configurations.test');
 
         // Logout
 

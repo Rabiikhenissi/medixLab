@@ -786,4 +786,29 @@ class DoctorController extends Controller
 
         return response()->json(['success' => true, 'unread_count' => $count]);
     }
+
+    public function medicalRecords(Patient $patient)
+    {
+        $doctor = Auth::user()->doctor;
+
+        $access = DoctorPatientAccess::where('doctor_id', $doctor->id)
+            ->where('patient_id', $patient->id)
+            ->where('access_status', 'granted')
+            ->first();
+
+        if (!$access) {
+            return redirect()->route('doctor.dashboard')
+                ->with('error', 'Vous n\'avez pas accès au dossier de ce patient.');
+        }
+
+        $examRequests = $patient->examRequests()
+            ->where('doctor_id', $doctor->id)
+            ->with(['items.exam', 'items.resultLabo.details', 'laboratory'])
+            ->latest()
+            ->get();
+
+        $patientUser = $patient->user;
+
+        return view('doctor.medical-records', compact('patient', 'patientUser', 'examRequests'));
+    }
 }

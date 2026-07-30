@@ -85,6 +85,15 @@
                         </svg>
                         Historique
                     </a>
+                    <button type="button" id="scanDoctorBtn"
+                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-[#0D9488] bg-[#0D9488]/10 border border-[#0D9488]/20 hover:bg-[#0D9488] hover:text-white transition uppercase tracking-wider cursor-pointer"
+                       title="Scanner le QR Code d'un médecin">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5z"/>
+                        </svg>
+                        Scanner
+                    </button>
                     <form action="{{ route('patient.logout') }}" method="POST">
                         @csrf
                         <x-button type="submit" color="slate" :fullWidth="false" class="!py-1.5 !px-4 !text-xs">
@@ -1064,6 +1073,89 @@
                 list.innerHTML = '<p class="text-xs text-[#94a3b8] text-center py-2">Erreur de chargement</p>';
             }
         }
+    </script>
+
+    {{-- QR Code Scanner Modal --}}
+    <div id="docQrScannerOverlay" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden">
+            <div class="bg-gradient-to-r from-[#0D9488] to-[#0a7068] p-4 flex justify-between items-center">
+                <div>
+                    <h3 class="text-sm font-bold text-white">Scanner QR Code Médecin</h3>
+                    <p class="text-[10px] text-white/80">Pointez la caméra vers le QR Code du médecin</p>
+                </div>
+                <button id="closeDocScannerBtn" type="button" class="text-white/70 hover:text-white transition cursor-pointer p-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="p-5">
+                <div id="docQrReaderRegion" class="rounded-xl overflow-hidden bg-black min-h-[220px]"></div>
+                <p id="docQrScannerStatus" class="text-center text-[11px] text-[#64748b] mt-3 font-semibold">En attente de la caméra...</p>
+                <button id="cancelDocScanBtn" type="button"
+                    class="w-full mt-4 py-2.5 rounded-xl text-xs font-bold text-[#64748b] bg-[#f1f5f9] hover:bg-[#e2e8f0] transition cursor-pointer uppercase">
+                    Annuler
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script>
+        (function() {
+            let docQrCodeScanner = null;
+            const scanDoctorBtn = document.getElementById('scanDoctorBtn');
+            const overlay = document.getElementById('docQrScannerOverlay');
+            const closeBtn = document.getElementById('closeDocScannerBtn');
+            const cancelBtn = document.getElementById('cancelDocScanBtn');
+            const readerRegion = document.getElementById('docQrReaderRegion');
+            const statusEl = document.getElementById('docQrScannerStatus');
+
+            function stopDocScanner() {
+                if (docQrCodeScanner) {
+                    docQrCodeScanner.stop().then(() => {
+                        docQrCodeScanner.clear();
+                        docQrCodeScanner = null;
+                    }).catch(() => { docQrCodeScanner = null; });
+                }
+                overlay.classList.add('hidden');
+            }
+
+            function startDocScanner() {
+                overlay.classList.remove('hidden');
+                statusEl.textContent = 'Pointez la caméra vers le QR Code du médecin...';
+                docQrCodeScanner = new Html5Qrcode('docQrReaderRegion');
+                docQrCodeScanner.start(
+                    { facingMode: 'environment' },
+                    { fps: 10, qrbox: { width: 220, height: 220 } },
+                    function(qrText) {
+                        stopDocScanner();
+                        var appUrl = @json(config('app.url', 'http://localhost'));
+                        var code = qrText;
+                        if (appUrl && qrText.startsWith(appUrl + '/patient/scan/')) {
+                            code = qrText.replace(appUrl + '/patient/scan/', '');
+                        }
+                        window.location.href = appUrl + '/patient/scan/' + code;
+                    },
+                    function(err) {
+                        if (err && err.includes('No MultiFormat')) return;
+                        statusEl.textContent = 'Caméra indisponible. Veuillez réessayer.';
+                    }
+                ).catch(function(e) {
+                    statusEl.textContent = 'Caméra indisponible. Vérifiez les permissions.';
+                });
+            }
+
+            if (scanDoctorBtn) scanDoctorBtn.addEventListener('click', startDocScanner);
+
+            function closeHandler(e) { stopDocScanner(); }
+            if (closeBtn) closeBtn.addEventListener('click', closeHandler);
+            if (cancelBtn) cancelBtn.addEventListener('click', closeHandler);
+
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) stopDocScanner();
+            });
+        })();
     </script>
     @endsection
 </x-layouts.patient>

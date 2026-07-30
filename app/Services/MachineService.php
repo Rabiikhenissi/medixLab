@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\ExamRequestItem;
+use App\Models\MachineConfiguration;
 use App\Models\ResultLabo;
 use App\Models\ResultLaboDetail;
 use App\Models\Staff;
@@ -15,14 +16,24 @@ class MachineService
     protected string $mllpHost;
     protected int $mllpPort;
     protected int $timeout;
+    protected ?MachineConfiguration $config;
 
-    public function __construct()
+    public function __construct(?MachineConfiguration $config = null)
     {
-        $this->baseUrl = config('machine.url', 'http://127.0.0.1:5000');
-        $this->timeout = config('machine.timeout', 5);
-        $parsed = parse_url($this->baseUrl);
-        $this->mllpHost = $parsed['host'] ?? '127.0.0.1';
-        $this->mllpPort = config('machine.mllp_port', 5001);
+        $this->config = $config;
+
+        if ($config) {
+            $this->baseUrl = $config->getBaseUrl();
+            $this->timeout = $config->timeout ?? config('machine.timeout', 5);
+            $this->mllpHost = $config->host;
+            $this->mllpPort = $config->mllp_port ?? config('machine.mllp_port', 5001);
+        } else {
+            $this->baseUrl = config('machine.url', 'http://127.0.0.1:5000');
+            $this->timeout = config('machine.timeout', 5);
+            $parsed = parse_url($this->baseUrl);
+            $this->mllpHost = $parsed['host'] ?? '127.0.0.1';
+            $this->mllpPort = config('machine.mllp_port', 5001);
+        }
     }
 
     public function isOnline(): bool
