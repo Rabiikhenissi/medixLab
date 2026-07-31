@@ -37,7 +37,7 @@ class AuthController extends Controller
 
             // Check if user is an admin
             if ($user->admin) {
-                return redirect()->intended(route('admin.dashboard'));
+                return redirect($this->safeIntended($request, 'admin.dashboard'));
             }
 
             // Validate that the user matches the role they are logging into
@@ -65,12 +65,43 @@ class AuthController extends Controller
             // Track last login time
             $user->update(['last_login_at' => now()]);
 
-            return redirect()->intended(route($role . '.dashboard'));
+            return redirect($this->safeIntended($request, $role . '.dashboard'));
         }
 
         return back()->withErrors([
             'email' => 'Les identifiants fournis ne correspondent pas à nos enregistrements.',
         ])->withInput($request->only('email', 'remember'));
+    }
+
+    /**
+     * Return the intended URL only if it is a real page of the user's role,
+     * otherwise fall back to the dashboard route. This prevents landing on
+     * JSON/AJAX endpoints (e.g. /notifications/unread-count) after login.
+     */
+    private function safeIntended(Request $request, string $fallbackRoute): string
+    {
+        $intended = $request->session()->pull('url.intended');
+
+        if (is_string($intended) && $intended !== '') {
+            try {
+                $route = app('router')->getRoutes()->match(Request::create($intended));
+                $name = $route ? $route->getName() : null;
+
+                $isAjax = str_contains((string) $name, '.api.')
+                    || str_contains((string) $name, '.get-')
+                    || preg_match('/(.*-count$|.*-requests$|mark-as-read|mark-all-read|respond-access|block-doctor|unblock-doctor|exam-details|.*-lookup$|.*-search$)/', (string) $name);
+
+                $role = explode('.', $fallbackRoute)[0];
+
+                if ($name && !$isAjax && str_starts_with($name, $role . '.')) {
+                    return $intended;
+                }
+            } catch (\Throwable $e) {
+                // fall through to dashboard
+            }
+        }
+
+        return route($fallbackRoute);
     }
 
     /**

@@ -369,7 +369,8 @@
                     const data = await response.json();
                     if (data.success) {
                         showMessage(data.message, 'success');
-                        loadNotifications();
+                        await loadNotifications();
+                        await updateUnreadCount();
                     }
                 } catch (error) {
                     console.error('Error marking all as read:', error);
@@ -410,12 +411,20 @@
                                         <p class="text-xs text-[#64748b] mt-1">${notif.message}</p>
                                         <p class="text-xs text-[#94a3b8] mt-2">${notif.created_at}</p>
                                     </div>
-                                    ${!notif.is_read ? '<div class="w-2 h-2 bg-[#0D9488] rounded-full flex-shrink-0 mt-1 ml-2"></div>' : ''}
+                                    ${!notif.is_read ? `
+                                        <div class="flex flex-col items-end gap-1 flex-shrink-0 ml-2">
+                                            <div class="w-2 h-2 bg-[#0D9488] rounded-full"></div>
+                                            <button class="text-[10px] font-bold text-[#0D9488] hover:underline cursor-pointer notif-mark-read-btn" data-notif-id="${notif.id}">Marquer lu</button>
+                                        </div>` : ''}
                                 </div>
                                 ${actions}
                             </div>
                         `;
                     }).join('');
+
+                    document.querySelectorAll('.notif-mark-read-btn').forEach(btn => {
+                        btn.addEventListener('click', () => markNotificationRead(btn.dataset.notifId));
+                    });
 
                     document.querySelectorAll('.notif-accept-btn').forEach(btn => {
                         btn.addEventListener('click', () => respondToAccess(btn.dataset.accessId, 'accept', btn.dataset.notifId));
@@ -455,6 +464,26 @@
                 }
             } catch (error) {
                 console.error('Error updating unread count:', error);
+            }
+        }
+
+        // Mark a single notification as read (updates badge live)
+        async function markNotificationRead(notificationId) {
+            try {
+                const response = await fetch('{{ route('patient.mark-as-read', '__ID__') }}'.replace('__ID__', notificationId), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    loadNotifications();
+                    updateUnreadCount();
+                }
+            } catch (error) {
+                console.error('Error marking notification as read:', error);
             }
         }
 
@@ -916,7 +945,7 @@
         function showMessage(message, type) {
             const alert = document.createElement('div');
             alert.className =
-                `fixed top-4 right-4 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white p-4 rounded-xl shadow-lg z-50 flex items-center gap-2`;
+                `fixed top-20 right-4 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white p-4 rounded-xl shadow-lg z-[100] flex items-center gap-2`;
             alert.innerHTML = `
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
@@ -1007,6 +1036,7 @@
                 const data = await res.json();
                 if (data.success) {
                     showMessage(data.message, 'success');
+                    loadGrantedDoctors();
                     loadBlockedDoctors();
                     loadAccessRequests();
                 } else {
@@ -1039,6 +1069,7 @@
                 const data = await res.json();
                 if (data.success) {
                     showMessage(data.message, 'success');
+                    loadGrantedDoctors();
                     loadBlockedDoctors();
                 } else {
                     showMessage(data.message || 'Erreur', 'error');
