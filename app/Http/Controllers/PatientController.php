@@ -5,7 +5,10 @@ use App\Models\ExamRequest;
 use App\Models\Patient;
 use App\Models\Notification;
 use App\Models\DoctorPatientAccess;
+use App\Models\Invoice;
+use App\Models\Payment;
 use App\Models\Labo;
+use Illuminate\Support\Facades\DB;
 use App\Services\LabRecommendationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -913,5 +916,85 @@ class PatientController extends Controller
 
         return redirect()->route('patient.dashboard')
             ->with('success', "Vous êtes maintenant lié(e) au Dr. {$doctorName}. Votre dossier est partagé avec lui.");
+    }
+
+    public function invoices()
+    {
+        $patient = auth()->user()->patient;
+        if (!$patient) abort(403);
+
+        $invoices = $patient->invoices()
+            ->with('labo')
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        return view('patient.invoices.index', compact('invoices'));
+    }
+
+    public function invoiceShow(Invoice $invoice)
+    {
+        $patient = auth()->user()->patient;
+        if (!$patient || $invoice->patient_id !== $patient->id) abort(403);
+
+        $invoice->load(['labo', 'items.exam', 'payments', 'examRequest.doctor.user']);
+
+        return view('patient.invoices.show', compact('invoice'));
+    }
+
+    public function printInvoice(Invoice $invoice)
+    {
+        $patient = auth()->user()->patient;
+        if (!$patient || $invoice->patient_id !== $patient->id) abort(403);
+
+        $invoice->load(['labo', 'items.exam', 'examRequest.doctor.user', 'payments']);
+
+        return view('patient.invoices.print', compact('invoice'));
+    }
+
+    public function payInvoice(Request $request, Invoice $invoice)
+    {
+        $patient = auth()->user()->patient;
+        if (!$patient || $invoice->patient_id !== $patient->id) abort(403);
+        if (in_array($invoice->status, ['paid', 'cancelled'])) {
+            return back()->with('error', 'Cette facture est déjà ' . ($invoice->status === 'paid' ? 'payée' : 'annulée') . '.');
+        }
+
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:0.001|max:' . $invoice->balance,
+            'payment_method' => 'required|in:cash,card,cheque,bank_transfer,online',
+        ]);
+
+        $user = auth()->user();
+
+        DB::transaction(function () use ($validated, $invoice, $user) {
+            $payment = Payment::create([
+                'invoice_id' => $invoice->id,
+                'amount' => $validated['amount'],
+                'payment_method' => $validated['payment_method'],
+                'status' => 'pending',
+                'payment_date' => now(),
+            ]);
+
+            // Notify lab staff
+            $labo = $invoice->labo;
+            if ($labo) {
+                $staff = $labo->staff()
+                    ->whereHas('user', fn($q) => $q->where('is_archive', false))
+                    ->with('user')
+                    ->get();
+                foreach ($staff as $s) {
+                    Notification::create([
+                        'user_id' => $s->user->id,
+                        'title' => 'Nouveau paiement en attente',
+                        'message' => $user->first_name . ' ' . $user->last_name . ' a effectué un paiement de ' . number_format($validated['amount'], 3) . ' TND par ' . $validated['payment_method'] . ' sur la facture ' . $invoice->invoice_number . '. Veuillez confirmer le paiement.',
+                        'notification_type' => 'payment',
+                        'reference_id' => $payment->id,
+                    ]);
+                }
+            }
+        });
+
+        return redirect()->route('patient.invoices.show', $invoice->id)
+            ->with('success', 'Votre paiement a été soumis et est en attente de confirmation par le laboratoire.');
     }
 }

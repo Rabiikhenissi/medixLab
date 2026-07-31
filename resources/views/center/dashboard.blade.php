@@ -96,6 +96,29 @@
             </p>
         </div>
 
+        <!-- Facturation -->
+        <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 shadow-sm">
+            <div class="text-3xl font-black text-emerald-700">
+                {{ $billingPending ?? 0 }}
+            </div>
+            <p class="text-xs uppercase font-bold text-emerald-700 mt-2">
+                Factures en attente
+            </p>
+            @if(($billingCount ?? 0) > 0)
+            <p class="text-[10px] text-emerald-600 mt-1">{{ $billingCount }} totale(s) · {{ number_format($billingRevenue ?? 0, 0) }} TND</p>
+            @endif
+        </div>
+
+        <!-- Échantillons -->
+        <div class="bg-cyan-50 border border-cyan-200 rounded-2xl p-5 shadow-sm">
+            <div class="text-3xl font-black text-cyan-700">
+                {{ $sampleActive ?? 0 }}
+            </div>
+            <p class="text-xs uppercase font-bold text-cyan-700 mt-2">
+                Échantillons actifs
+            </p>
+            <p class="text-[10px] text-cyan-600 mt-1">{{ $sampleCount ?? 0 }} totale(s)</p>
+        </div>
 
     </div>
 

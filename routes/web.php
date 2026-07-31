@@ -357,6 +357,12 @@ Route::prefix('patient')->name('patient.')->group(function () {
         Route::get('/exam-requests/{examRequest}/split-suggestions', [\App\Http\Controllers\PatientController::class, 'splitSuggestions'])->name('split-suggestions');
         Route::post('/exam-requests/{examRequest}/apply-split', [\App\Http\Controllers\PatientController::class, 'applySplit'])->name('apply-split');
 
+        // TIER 3.0 — Patient Invoices
+        Route::get('/invoices', [\App\Http\Controllers\PatientController::class, 'invoices'])->name('invoices.index');
+        Route::get('/invoices/{invoice}', [\App\Http\Controllers\PatientController::class, 'invoiceShow'])->name('invoices.show');
+        Route::get('/invoices/{invoice}/print', [\App\Http\Controllers\PatientController::class, 'printInvoice'])->name('invoices.print');
+        Route::post('/invoices/{invoice}/pay', [\App\Http\Controllers\PatientController::class, 'payInvoice'])->name('invoices.pay');
+
         Route::post('/logout', [AuthController::class, 'logout'])->defaults('role', 'patient')->name('logout');
     });
 
@@ -609,14 +615,46 @@ Route::prefix('center')->name('center.')->group(function () {
         Route::delete('/machine-configurations/{machineConfiguration}', [\App\Http\Controllers\MachineConfigurationController::class, 'destroy'])->name('machine-configurations.destroy');
         Route::post('/machine-configurations/{machineConfiguration}/test', [\App\Http\Controllers\MachineConfigurationController::class, 'test'])->name('machine-configurations.test');
 
+        // ==========================
+        // Billing & CNAM
+        // ==========================
+
+        Route::get('/billing', [\App\Http\Controllers\BillingController::class, 'index'])->name('billing.index');
+        Route::get('/billing/create', [\App\Http\Controllers\BillingController::class, 'create'])->name('billing.create');
+        Route::post('/billing', [\App\Http\Controllers\BillingController::class, 'store'])->name('billing.store');
+        Route::get('/billing/{invoice}', [\App\Http\Controllers\BillingController::class, 'show'])->name('billing.show');
+        Route::get('/billing/{invoice}/print', [\App\Http\Controllers\BillingController::class, 'print'])->name('billing.print');
+        Route::get('/billing/{invoice}/traite', [\App\Http\Controllers\BillingController::class, 'printTraite'])->name('billing.traite');
+        Route::post('/billing/{invoice}/pay', [\App\Http\Controllers\BillingController::class, 'registerPayment'])->name('billing.pay');
+        Route::post('/billing/{invoice}/cancel', [\App\Http\Controllers\BillingController::class, 'cancel'])->name('billing.cancel');
+        Route::post('/payments/{payment}/confirm', [\App\Http\Controllers\BillingController::class, 'confirmPayment'])->name('payments.confirm');
+        Route::get('/billing/{invoice}/elfatoora', [\App\Http\Controllers\BillingController::class, 'elFatooraExport'])->name('billing.elfatoora');
+
+        // CNAM Nomenclature Management
+        Route::get('/cnam', [\App\Http\Controllers\BillingController::class, 'cnamIndex'])->name('cnam.index');
+        Route::post('/cnam', [\App\Http\Controllers\BillingController::class, 'cnamStore'])->name('cnam.store');
+
+        // ==========================
+        // Sample Tracking
+        // ==========================
+
+        Route::get('/samples', [\App\Http\Controllers\SampleController::class, 'index'])->name('samples.index');
+        Route::get('/samples/create', [\App\Http\Controllers\SampleController::class, 'create'])->name('samples.create');
+        Route::post('/samples', [\App\Http\Controllers\SampleController::class, 'store'])->name('samples.store');
+        Route::get('/samples/{sample}', [\App\Http\Controllers\SampleController::class, 'show'])->name('samples.show');
+        Route::post('/samples/{sample}/status', [\App\Http\Controllers\SampleController::class, 'updateStatus'])->name('samples.status');
+        Route::get('/samples/{sample}/barcode', [\App\Http\Controllers\SampleController::class, 'printBarcode'])->name('samples.barcode');
+        Route::get('/samples/scan', [\App\Http\Controllers\SampleController::class, 'scan'])->name('samples.scan');
+        Route::post('/samples/lookup', [\App\Http\Controllers\SampleController::class, 'lookupByBarcode'])->name('samples.lookup');
+
         // Logout
 
-        Route::post(
-            '/logout',
-            [AuthController::class, 'logout']
-        )
-            ->defaults('role', 'center')
-            ->name('logout');
+            Route::post(
+                '/logout',
+                [AuthController::class, 'logout']
+            )
+                ->defaults('role', 'center')
+                ->name('logout');
 
     });
 

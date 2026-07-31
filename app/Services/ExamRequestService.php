@@ -7,6 +7,12 @@ use App\Models\ExamRequestItem;
 use App\Models\DoctorPatientAccess;
 use App\Models\Doctor;
 use App\Models\Patient;
+use App\Models\Invoice;
+use App\Models\InvoiceItem;
+use App\Models\AvailableExam;
+use App\Models\CnamAffiliation;
+use App\Models\CnamNomenclature;
+use App\Models\CnamRate;
 use Illuminate\Support\Facades\DB;
 
 class ExamRequestService
@@ -54,6 +60,12 @@ class ExamRequestService
         if ($allDone && $examRequest->status !== 'completed') {
             $examRequest->update(['status' => 'completed']);
 
+            // Auto-create invoice if exam request has a labo and no invoice exists
+            $laboId = $examRequest->labo_id;
+            if ($laboId && !Invoice::where('exam_request_id', $examRequest->id)->exists()) {
+                self::autoCreateInvoice($examRequest, $laboId);
+            }
+
             $abnormalItems = [];
             foreach ($examRequest->items as $item) {
                 if (!$item->resultLabo) continue;
@@ -96,6 +108,83 @@ class ExamRequestService
                 }
             }
         }
+    }
+
+    /**
+     * Auto-create an invoice when exam results are completed.
+     */
+    protected static function autoCreateInvoice(ExamRequest $examRequest, int $laboId): void
+    {
+        $examRequest->load('items.exam', 'patient.cnamAffiliation.rate');
+
+        $examCnamMap = [
+            1 => '1001', 2 => '1002', 3 => '1003', 4 => '1004', 5 => '1005',
+            6 => '1006', 7 => '1007', 8 => '1008', 9 => '1009', 10 => '1010',
+        ];
+        $cnamNomenclatures = CnamNomenclature::all()->keyBy('code_cnam');
+
+        $cnamTaux = 0;
+        $cnamAffiliation = $examRequest->patient->cnamAffiliation ?? null;
+        if ($cnamAffiliation && $cnamAffiliation->is_active && $cnamAffiliation->rate) {
+            $cnamTaux = $cnamAffiliation->rate->taux;
+        }
+
+        $totalAmount = 0;
+        $cnamAmount = 0;
+        $invoiceItems = [];
+
+        foreach ($examRequest->items as $item) {
+            $available = AvailableExam::where('labo_id', $laboId)
+                ->where('exam_id', $item->exam_id)
+                ->first();
+            $price = $available ? $available->price : 0;
+            $totalAmount += $price;
+
+            $cnamCode = $examCnamMap[$item->exam_id] ?? null;
+            $itemCnamCoverage = 0;
+            $valeurB = null;
+            if ($cnamCode && $cnamTaux > 0 && isset($cnamNomenclatures[$cnamCode])) {
+                $nomen = $cnamNomenclatures[$cnamCode];
+                $valeurB = $nomen->valeur_b;
+                $itemCnamCoverage = $valeurB * 1 * ($cnamTaux / 100);
+                $cnamAmount += $itemCnamCoverage;
+            }
+
+            $invoiceItems[] = [
+                'exam_id' => $item->exam_id,
+                'exam_request_item_id' => $item->id,
+                'description' => $item->exam->name,
+                'quantity' => 1,
+                'unit_price' => $price,
+                'total' => $price,
+                'cnam_code' => $cnamCode,
+                'valeur_b' => $valeurB,
+                'cnam_coverage' => $itemCnamCoverage,
+            ];
+        }
+
+        $patientAmount = max(0, $totalAmount - $cnamAmount);
+        $lastInvoice = Invoice::where('labo_id', $laboId)->orderBy('id', 'desc')->first();
+        $seq = $lastInvoice ? ((int) substr($lastInvoice->invoice_number, -4)) + 1 : 1;
+
+        DB::transaction(function () use ($examRequest, $laboId, $totalAmount, $cnamAmount, $patientAmount, $invoiceItems, $seq) {
+            $invoice = Invoice::create([
+                'invoice_number' => 'FAC-' . $laboId . '-' . str_pad($seq, 4, '0', STR_PAD_LEFT),
+                'patient_id' => $examRequest->patient_id,
+                'labo_id' => $laboId,
+                'exam_request_id' => $examRequest->id,
+                'status' => 'pending',
+                'total_amount' => $totalAmount,
+                'cnam_amount' => $cnamAmount,
+                'patient_amount' => $patientAmount,
+                'paid_amount' => 0,
+                'notes' => 'Facture générée automatiquement à la complétion des résultats.',
+            ]);
+
+            foreach ($invoiceItems as $iid) {
+                $invoice->items()->create($iid);
+            }
+        });
     }
 
     /**

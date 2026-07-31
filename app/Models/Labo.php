@@ -52,4 +52,14 @@ class Labo extends Model
     {
         return $this->hasMany(MachineConfiguration::class);
     }
+
+    public function invoices()
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
+    public function samples()
+    {
+        return $this->hasMany(Sample::class);
+    }
 }
