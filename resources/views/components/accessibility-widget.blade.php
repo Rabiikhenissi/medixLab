@@ -191,16 +191,22 @@ html.a11y-focus *:focus-visible {
 
 <button id="a11y-toggle" aria-label="Accessibilité" title="Accessibilité">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"/>
-        <path d="M12 8v8M8 12h8"/>
+        <circle cx="16" cy="4" r="1"/>
+        <path d="m18 19 1-7-6 1"/>
+        <path d="m5 8 3-3 5.5 3-2.36 3.5"/>
+        <path d="M4.24 14.5a5 5 0 0 0 6.88 6"/>
+        <path d="M13.76 17.5a5 5 0 0 0-6.88-6"/>
     </svg>
 </button>
 
 <div id="a11y-panel" role="dialog" aria-label="Paramètres d'accessibilité">
     <h3>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M12 8v8M8 12h8"/>
+            <circle cx="16" cy="4" r="1"/>
+            <path d="m18 19 1-7-6 1"/>
+            <path d="m5 8 3-3 5.5 3-2.36 3.5"/>
+            <path d="M4.24 14.5a5 5 0 0 0 6.88 6"/>
+            <path d="M13.76 17.5a5 5 0 0 0-6.88-6"/>
         </svg>
         Accessibilité
         <small>paramètres</small>
