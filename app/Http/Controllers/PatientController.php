@@ -860,9 +860,42 @@ class PatientController extends Controller
 
     public function scanDoctor(string $code)
     {
+        if (str_contains($code, '/')) {
+            $code = basename(parse_url($code, PHP_URL_PATH) ?? $code);
+        }
+
         if (!auth()->check()) {
             session()->put('url.intended', request()->url());
             return redirect()->route('patient.login');
+        }
+
+        $doctor = \App\Models\Doctor::where('doctor_code', $code)->first();
+        if (!$doctor) {
+            return redirect()->route('patient.dashboard')
+                ->with('error', 'Code médecin invalide. Veuillez vérifier le QR code scanné.');
+        }
+
+        $patient = auth()->user()->patient;
+        if (!$patient) {
+            return redirect()->route('patient.dashboard')
+                ->with('error', 'Impossible de vous identifier en tant que patient.');
+        }
+
+        $existing = DoctorPatientAccess::where('doctor_id', $doctor->id)
+            ->where('patient_id', $patient->id)
+            ->first();
+
+        return view('patient.doctor-scan-result', [
+            'user'    => auth()->user(),
+            'doctor'  => $doctor,
+            'existing'=> $existing,
+        ]);
+    }
+
+    public function linkDoctor(string $code)
+    {
+        if (str_contains($code, '/')) {
+            $code = basename(parse_url($code, PHP_URL_PATH) ?? $code);
         }
 
         $doctor = \App\Models\Doctor::where('doctor_code', $code)->first();
@@ -895,7 +928,7 @@ class PatientController extends Controller
                 'expires_at' => now()->addMonths(6),
             ]);
         } else {
-            DoctorPatientAccess::create([
+            $existing = DoctorPatientAccess::create([
                 'doctor_id' => $doctor->id,
                 'patient_id' => $patient->id,
                 'access_status' => 'granted',
@@ -909,9 +942,9 @@ class PatientController extends Controller
         \App\Models\Notification::create([
             'user_id' => $doctor->user_id,
             'title' => 'Nouveau patient lié',
-            'message' => "{$patientName} a scanné votre QR code et vous est désormais lié(e) en tant que patient. Vous avez accès à son dossier médical.",
+            'message' => "{$patientName} s'est lié(e) à vous et est désormais votre patient. Vous avez accès à son dossier médical.",
             'notification_type' => 'access_request',
-            'reference_id' => $existing?->id ?? DoctorPatientAccess::latest()->first()->id,
+            'reference_id' => $existing->id,
         ]);
 
         return redirect()->route('patient.dashboard')

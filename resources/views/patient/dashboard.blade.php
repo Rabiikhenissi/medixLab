@@ -41,7 +41,7 @@
 
                         <!-- Notification Dropdown -->
                         <div id="notificationPanel"
-                            class="hidden absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-[#e2e8f0] z-50 overflow-hidden">
+                            class="hidden fixed top-20 right-4 w-80 max-w-[calc(100vw-2rem)] bg-white rounded-xl shadow-lg border border-[#e2e8f0] z-50 overflow-hidden md:absolute md:top-auto md:right-0 md:mt-2">
                             <div class="bg-gradient-to-r from-[#0D9488] to-[#0a7068] p-4 text-white flex justify-between items-center">
                                 <div>
                                     <h3 class="font-bold text-sm">{{ __('Notifications') }}</h3>
@@ -1131,11 +1131,12 @@
                     function(qrText) {
                         stopDocScanner();
                         var appUrl = @json(config('app.url', 'http://localhost'));
-                        var code = qrText;
-                        if (appUrl && qrText.startsWith(appUrl + '/patient/scan/')) {
-                            code = qrText.replace(appUrl + '/patient/scan/', '');
+                        var code = qrText.trim();
+                        if (code.includes('/')) {
+                            var parts = code.split('/');
+                            code = parts[parts.length - 1];
                         }
-                        window.location.href = appUrl + '/patient/scan/' + code;
+                        window.location.href = appUrl + '/patient/scan/' + encodeURIComponent(code);
                     },
                     function(err) {
                         if (err && err.includes('No MultiFormat')) return;

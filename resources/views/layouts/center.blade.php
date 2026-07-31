@@ -350,7 +350,7 @@
                     </svg>
                     <span id="centerNotifBadge" class="hidden absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">0</span>
                 </button>
-                <div id="centerNotifPanel" class="hidden absolute right-0 top-12 w-80 bg-white border border-[#e2e8f0] rounded-2xl shadow-2xl z-50 overflow-hidden">
+                <div id="centerNotifPanel" class="hidden fixed top-20 right-4 md:absolute md:top-12 md:right-0 w-80 max-w-[calc(100vw-2rem)] bg-white border border-[#e2e8f0] rounded-2xl shadow-2xl z-50 overflow-hidden">
                     <div class="flex items-center justify-between px-4 py-3 border-b border-[#f1f5f9]">
                         <span class="text-xs font-bold text-[#1e293b] uppercase tracking-wider">Notifications</span>
                         <button onclick="centerMarkAllRead()" class="text-[10px] font-bold text-[#7C3AED] hover:underline cursor-pointer">Tout marquer lu</button>

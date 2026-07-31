@@ -37,6 +37,18 @@ Route::get('/home', function () {
 // Doctor Authentication Pages
 Route::prefix('doctor')->name('doctor.')->group(function () {
 
+    // QR Code scan - role-aware (public, so old/wrong QRs never strand users)
+    Route::get('/scan/{code}', function ($code) {
+        $user = auth()->user();
+        if ($user && $user->doctor) {
+            return redirect()->route('doctor.dashboard', ['scan' => $code]);
+        }
+        if ($user && $user->patient) {
+            return redirect()->route('patient.scan-doctor', ['code' => $code]);
+        }
+        return redirect()->route('home');
+    })->name('scan-patient');
+
     Route::middleware('guest')->group(function () {
 
         Route::get('/login', fn() => view('doctor.login'))
@@ -153,11 +165,6 @@ Route::prefix('doctor')->name('doctor.')->group(function () {
                 $analytics
             ));
         })->name('dashboard');
-
-        // QR Code scan → auto-search patient
-        Route::get('/scan/{code}', function ($code) {
-            return redirect()->route('doctor.dashboard', ['scan' => $code]);
-        })->name('scan-patient');
 
         // Doctor Interface Routes
         Route::get('/patient-search', [\App\Http\Controllers\DoctorController::class, 'patientSearch'])->name('patient-search');
@@ -368,6 +375,7 @@ Route::prefix('patient')->name('patient.')->group(function () {
 
     // Scan doctor QR code — accessible without auth (handles guest redirect internally)
     Route::get('/scan/{code}', [\App\Http\Controllers\PatientController::class, 'scanDoctor'])->name('scan-doctor');
+    Route::post('/scan/{code}/link', [\App\Http\Controllers\PatientController::class, 'linkDoctor'])->name('scan-doctor-link');
 });
 
 // Medical Center Authentication Pages
