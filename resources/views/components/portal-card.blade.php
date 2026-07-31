@@ -6,7 +6,7 @@
     'loginUrl',
     'registerUrl',
     'loginText',
-    'registerText' => "Create an account"
+    'registerText' => "Créer un compte"
 ])
 
 <div class="glass-card rounded-[24px] p-8 flex flex-col justify-between items-center text-center h-full max-w-[340px] w-full transition-all duration-300">

@@ -30,5 +30,15 @@ class ExamRequestItem extends Model
 {
     return $this->hasOne(ResultLabo::class);
 }
+
+    public function sample()
+    {
+        return $this->hasOne(Sample::class);
+    }
+
+    public function invoiceItems()
+    {
+        return $this->hasMany(InvoiceItem::class);
+    }
     
 }

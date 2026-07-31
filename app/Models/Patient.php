@@ -38,4 +38,19 @@ class Patient extends Model
     {
         return $this->hasMany(ExamRequest::class);
     }
+
+    public function cnamAffiliation()
+    {
+        return $this->hasOne(CnamAffiliation::class)->where('is_active', true);
+    }
+
+    public function invoices()
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
+    public function samples()
+    {
+        return $this->hasMany(Sample::class);
+    }
 }

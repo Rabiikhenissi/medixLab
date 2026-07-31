@@ -239,9 +239,10 @@
                 @if (!$feature->view_permission || auth()->user()->hasPermission($feature->view_permission))
                     @php
                         $isActive = false;
-                        if ($feature->route_name && \Illuminate\Support\Facades\Route::has($feature->route_name)) {
-                            $routePattern = str_replace('.index', '.*', $feature->route_name);
-                            $isActive = request()->routeIs($feature->route_name) || request()->routeIs($routePattern);
+                        if ($feature->route_name && \Illuminate\Support\Facades\Route::has($feature->route_name) && $route = request()->route()) {
+                            $current = $route->getName();
+                            $prefix = preg_replace('/\.index$/', '', $feature->route_name);
+                            $isActive = $current === $feature->route_name || str_starts_with($current, $prefix . '.');
                         }
                         $href = $feature->route_name && \Illuminate\Support\Facades\Route::has($feature->route_name)
                             ? route($feature->route_name)

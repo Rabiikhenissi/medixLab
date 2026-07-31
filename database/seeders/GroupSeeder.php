@@ -143,6 +143,12 @@ class GroupSeeder extends Seeder
                 'actions' => [['code' => 'view-patient-dashboard', 'name' => 'View patient dashboard']],
             ],
             [
+                'name' => 'Mes Factures', 'code' => 'patient-invoices',
+                'route_name' => 'patient.invoices.index', 'icon' => 'currency-dollar', 'is_sidebar' => true, 'order' => 206,
+                'view_permission' => 'view-patient-invoices',
+                'actions' => [['code' => 'view-patient-invoices', 'name' => 'View patient invoices']],
+            ],
+            [
                 'name' => 'Mes Analyses', 'code' => 'patient-exam-requests',
                 'route_name' => 'patient.get-exam-requests', 'icon' => 'document-text', 'is_sidebar' => true, 'order' => 202,
                 'view_permission' => 'view-patient-exam-requests',
@@ -177,6 +183,37 @@ class GroupSeeder extends Seeder
                 'route_name' => 'center.equipment', 'icon' => 'wrench', 'is_sidebar' => true, 'order' => 305,
                 'view_permission' => 'view-center-equipment',
                 'actions' => [['code' => 'view-center-equipment', 'name' => 'View center equipment']],
+            ],
+            // LIS Features
+            [
+                'name' => 'Examens Disponibles', 'code' => 'center-available-exams',
+                'route_name' => 'center.available-exams', 'icon' => 'clipboard-document-list', 'is_sidebar' => true, 'order' => 306,
+                'view_permission' => 'view-center-available-exams',
+                'actions' => [['code' => 'view-center-available-exams', 'name' => 'View available exams']],
+            ],
+            [
+                'name' => 'Configuration Machine', 'code' => 'center-machine-configurations',
+                'route_name' => 'center.machine-configurations.index', 'icon' => 'cog-6-tooth', 'is_sidebar' => true, 'order' => 307,
+                'view_permission' => 'view-center-machine-configurations',
+                'actions' => [['code' => 'view-center-machine-configurations', 'name' => 'View machine configurations']],
+            ],
+            [
+                'name' => 'Facturation', 'code' => 'center-billing',
+                'route_name' => 'center.billing.index', 'icon' => 'currency-dollar', 'is_sidebar' => true, 'order' => 401,
+                'view_permission' => 'view-center-billing',
+                'actions' => [['code' => 'view-center-billing', 'name' => 'View billing']],
+            ],
+            [
+                'name' => 'Nomenclature CNAM', 'code' => 'center-cnam',
+                'route_name' => 'center.cnam.index', 'icon' => 'clipboard-document-check', 'is_sidebar' => true, 'order' => 402,
+                'view_permission' => 'view-center-cnam',
+                'actions' => [['code' => 'view-center-cnam', 'name' => 'View CNAM']],
+            ],
+            [
+                'name' => 'Suivi des Échantillons', 'code' => 'center-samples',
+                'route_name' => 'center.samples.index', 'icon' => 'rectangle-stack', 'is_sidebar' => true, 'order' => 403,
+                'view_permission' => 'view-center-samples',
+                'actions' => [['code' => 'view-center-samples', 'name' => 'View samples']],
             ],
         ];
 

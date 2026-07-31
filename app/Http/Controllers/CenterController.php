@@ -125,7 +125,16 @@ class CenterController extends Controller
                 })
                 ->sum('available_exams.price');
 
-            return compact('stats', 'workload', 'last7Days', 'last7PrevDays', 'topExams', 'revenue');
+            // Billing stats
+            $billingCount = \App\Models\Invoice::where('labo_id', $lab->id)->count();
+            $billingPending = \App\Models\Invoice::where('labo_id', $lab->id)->whereIn('status', ['pending', 'partially_paid'])->count();
+            $billingRevenue = \App\Models\Invoice::where('labo_id', $lab->id)->where('status', 'paid')->sum('total_amount');
+
+            // Sample stats
+            $sampleCount = \App\Models\Sample::where('labo_id', $lab->id)->count();
+            $sampleActive = \App\Models\Sample::where('labo_id', $lab->id)->whereNotIn('status', ['completed', 'rejected'])->count();
+
+            return compact('stats', 'workload', 'last7Days', 'last7PrevDays', 'topExams', 'revenue', 'billingCount', 'billingPending', 'billingRevenue', 'sampleCount', 'sampleActive');
         });
 
         return view('center.dashboard', array_merge(

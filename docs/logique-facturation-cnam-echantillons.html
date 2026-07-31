@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>MedixLab — Facturation, CNAM &amp; Échantillons</title>
+<style>
+    @page { margin: 2cm; }
+    * { box-sizing: border-box; }
+    body { font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; color: #1e293b; line-height: 1.6; max-width: 1000px; margin: 0 auto; padding: 2rem; }
+    h1 { font-size: 28px; color: #7C3AED; border-bottom: 3px solid #7C3AED; padding-bottom: 10px; margin-top: 0; }
+    h2 { font-size: 20px; color: #5B21B6; margin-top: 40px; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; }
+    h3 { font-size: 16px; color: #1e293b; margin-top: 28px; }
+    h4 { font-size: 14px; color: #475569; margin-top: 20px; }
+    p, li { font-size: 13px; }
+    code { background: #f1f5f9; padding: 1px 5px; border-radius: 4px; font-size: 12px; font-family: 'Cascadia Code', 'Fira Code', monospace; }
+    pre { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; overflow-x: auto; font-size: 12px; line-height: 1.5; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+    th, td { border: 1px solid #e2e8f0; padding: 8px 12px; text-align: left; }
+    th { background: #f8fafc; font-weight: 700; font-size: 11px; text-transform: uppercase; color: #64748b; }
+    tr:nth-child(even) { background: #fafbfc; }
+    .box { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 16px; margin: 16px 0; }
+    .box-purple { background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 8px; padding: 16px; margin: 16px 0; }
+    .box-amber { background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 16px; margin: 16px 0; }
+    .tag { display: inline-block; background: #e2e8f0; color: #475569; border-radius: 999px; padding: 1px 10px; font-size: 11px; font-weight: 700; }
+    .tag-green { background: #dcfce7; color: #166534; }
+    .tag-purple { background: #f3e8ff; color: #6b21a8; }
+    .tag-amber { background: #fef3c7; color: #92400e; }
+    .flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+    .flow-step { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 14px; font-size: 12px; font-weight: 600; }
+    .flow-arrow { color: #94a3b8; font-size: 18px; }
+    .footer { margin-top: 60px; padding-top: 20px; border-top: 1px solid #e2e8f0; font-size: 11px; color: #94a3b8; text-align: center; }
+    @media print { body { padding: 0; } }
+</style>
+</head>
+<body>
+
+<h1>MedixLab — Logique Métier</h1>
+<p style="font-size:14px;color:#64748b;">Facturation &bull; Nomenclature CNAM &bull; Suivi des Échantillons</p>
+
+<!-- ============================================================ -->
+<h2>1. Facturation (Billing)</h2>
+
+<h3>1.1 Modèle de données</h3>
+
+<h4>Table <code>invoices</code></h4>
+<table>
+<tr><th>Colonne</th><th>Type</th><th>Description</th></tr>
+<tr><td><code>id</code></td><td>PK</td><td>Identifiant unique</td></tr>
+<tr><td><code>invoice_number</code></td><td>string</td><td>Format <code>FAC-{laboId}-{seq}</code> ex: <code>FAC-21-0011</code></td></tr>
+<tr><td><code>patient_id</code></td><td>FK</td><td>→ <code>patients.id</code></td></tr>
+<tr><td><code>labo_id</code></td><td>FK</td><td>→ <code>labos.id</code></td></tr>
+<tr><td><code>exam_request_id</code></td><td>FK</td><td>→ <code>exam_requests.id</code></td></tr>
+<tr><td><code>status</code></td><td>enum</td><td><code>pending</code> | <code>partially_paid</code> | <code>paid</code> | <code>cancelled</code></td></tr>
+<tr><td><code>total_amount</code></td><td>decimal</td><td>Somme des prix des examens (sans CNAM)</td></tr>
+<tr><td><code>cnam_amount</code></td><td>decimal</td><td>Total pris en charge par la CNAM</td></tr>
+<tr><td><code>patient_amount</code></td><td>decimal</td><td><code>total_amount − cnam_amount</code> (ce que le patient doit)</td></tr>
+<tr><td><code>paid_amount</code></td><td>decimal</td><td>Total des paiements <strong>confirmés</strong></td></tr>
+<tr><td><code>payment_method</code></td><td>string</td><td>Dernière méthode utilisée</td></tr>
+<tr><td><code>paid_at</code></td><td>timestamp</td><td>Confirmé quand <code>paid_amount ≥ patient_amount</code></td></tr>
+</table>
+
+<h4>Table <code>invoice_items</code></h4>
+<table>
+<tr><th>Colonne</th><th>Description</th></tr>
+<tr><td><code>id</code></td><td>PK</td></tr>
+<tr><td><code>invoice_id</code></td><td>FK → <code>invoices.id</code></td></tr>
+<tr><td><code>exam_id</code></td><td>FK → <code>exams.id</code></td></tr>
+<tr><td><code>exam_request_item_id</code></td><td>FK → <code>exam_request_items.id</code></td></tr>
+<tr><td><code>description</code></td><td>Nom de l'examen</td></tr>
+<tr><td><code>quantity</code></td><td>Quantité</td></tr>
+<tr><td><code>unit_price</code></td><td>Prix unitaire</td></tr>
+<tr><td><code>total</code></td><td><code>quantity × unit_price</code></td></tr>
+<tr><td><code>cnam_code</code></td><td>Code CNAM appliqué (nullable)</td></tr>
+<tr><td><code>valeur_b</code></td><td>Valeur B CNAM (nullable)</td></tr>
+<tr><td><code>cnam_coverage</code></td><td>Montant couvert par CNAM pour cette ligne</td></tr>
+</table>
+
+<h4>Table <code>payments</code></h4>
+<table>
+<tr><th>Colonne</th><th>Description</th></tr>
+<tr><td><code>id</code></td><td>PK</td></tr>
+<tr><td><code>invoice_id</code></td><td>FK → <code>invoices.id</code></td></tr>
+<tr><td><code>amount</code></td><td>Montant payé</td></tr>
+<tr><td><code>payment_method</code></td><td><code>cash</code> | <code>card</code> | <code>cheque</code> | <code>bank_transfer</code> | <code>online</code></td></tr>
+<tr><td><code>status</code></td><td><code>pending</code> → <code>confirmed</code> (via laboratoire)</td></tr>
+<tr><td><code>transaction_id</code></td><td>N° chèque / réf. virement</td></tr>
+<tr><td><code>payment_date</code></td><td>Date de soumission</td></tr>
+<tr><td><code>confirmed_at</code></td><td>Date de confirmation par le labo</td></tr>
+</table>
+
+<!-- 1.2 -->
+<h3>1.2 Création d'une facture</h3>
+
+<h4>Depuis le centre (manuelle)</h4>
+<ul>
+<li><strong>Route :</strong> <code>POST /center/billing</code> → <code>BillingController@store</code></li>
+<li>L'utilisateur sélectionne une demande d'examen et saisit les articles avec leurs prix</li>
+<li>Pour chaque article avec <code>cnam_code</code> :</li>
+</ul>
+<pre>1. Récupérer CnamNomenclature via code_cnam
+2. valeur_b = celle saisie OU celle de la nomenclature
+3. taux = cnam_affiliation.rate.taux (catégorie du patient)
+4. cnam_coverage = valeur_b × quantity × (taux / 100)
+5. cnam_amount = somme(cnam_coverage)
+6. patient_amount = max(0, total_amount - cnam_amount)</pre>
+
+<h4>Automatique (à la complétion des résultats)</h4>
+<ul>
+<li>Déclenché dans <code>ExamRequestService::checkCompletion()</code> quand tous les résultats sont saisis</li>
+<li>Vérifie qu'aucune facture n'existe déjà pour cette <code>exam_request_id</code></li>
+<li>Utilise les prix de <code>AvailableExam</code> pour le laboratoire concerné</li>
+<li>Applique le même calcul CNAM</li>
+<li>Statut initial : <code>pending</code></li>
+</ul>
+
+<!-- 1.3 -->
+<h3>1.3 Paiements — Workflow complet</h3>
+
+<div class="box-purple">
+<div class="flow">
+    <span class="flow-step">Patient soumet</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step tag-amber" style="font-weight:700;">Pending</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step">Labo confirme</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step tag-green" style="font-weight:700;">Confirmed</span>
+</div>
+
+<ol>
+<li><strong>Patient soumet</strong> → <code>Payment.status = 'pending'</code>, la facture <strong>n'est pas modifiée</strong></li>
+<li><strong>Notification</strong> envoyée à tout le staff du laboratoire : "Nouveau paiement en attente"</li>
+<li><strong>Staff du labo</strong> voit le paiement "En attente" sur la page de la facture + bouton "Confirmer le paiement"</li>
+<li><strong>Confirmation</strong> → <code>Payment.status = 'confirmed'</code>, <code>confirmed_at = now()</code></li>
+<li><strong>Mise à jour facture</strong> : <code>paid_amount</code> recalculé, <code>status</code> mis à jour (<code>paid</code> / <code>partially_paid</code>)</li>
+<li><strong>Notification patient</strong> : "Votre paiement a été confirmé par le laboratoire"</li>
+</ol>
+</div>
+
+<h4>Méthodes de paiement</h4>
+<table>
+<tr><th>Code</th><th>Libellé</th><th>Icône</th></tr>
+<tr><td><code>cash</code></td><td>Espèces</td><td>💵</td></tr>
+<tr><td><code>card</code></td><td>Carte bancaire</td><td>💳</td></tr>
+<tr><td><code>cheque</code></td><td>Chèque</td><td>📝</td></tr>
+<tr><td><code>bank_transfer</code></td><td>Virement bancaire</td><td>🏦</td></tr>
+<tr><td><code>online</code></td><td>Paiement en ligne</td><td>🌐 (pas de passerelle réelle — confirmation manuelle par le labo)</td></tr>
+</table>
+
+<h4>Montant à payer</h4>
+<ul>
+<li>Côté patient : champ <strong>lecture seule</strong> — le patient paie toujours le solde complet</li>
+<li>Côté centre : champ modifiable pour permettre des paiements partiels</li>
+</ul>
+
+<h4>Statuts de facture</h4>
+<table>
+<tr><th>Status</th><th>Condition</th></tr>
+<tr><td><code>pending</code></td><td><code>paid_amount = 0</code></td></tr>
+<tr><td><code>partially_paid</code></td><td><code>0 &lt; paid_amount &lt; patient_amount</code></td></tr>
+<tr><td><code>paid</code></td><td><code>paid_amount ≥ patient_amount</code></td></tr>
+<tr><td><code>cancelled</code></td><td>Annulation manuelle par le labo</td></tr>
+</table>
+
+<!-- 1.4 -->
+<h3>1.4 Balance (solde restant)</h3>
+<pre>// Invoice.php — Attention : utilise patient_amount, PAS total_amount !
+public function getBalanceAttribute()
+{
+    return $this->patient_amount - $this->paid_amount;
+}</pre>
+<p>La balance ne tient pas compte de <code>cnam_amount</code> car la part CNAM n'est pas due par le patient.</p>
+
+<!-- 1.5 -->
+<h3>1.5 Exemple chiffré complet</h3>
+
+<div class="box">
+<p><strong>Facture FAC-21-0014</strong> — Patient Rabii Khenissi (Assuré social, taux 100%)</p>
+<table>
+<tr><th>Examen</th><th>Prix labo</th><th>Code CNAM</th><th>Valeur B</th><th>Couverture CNAM</th></tr>
+<tr><td>Glycémie à jeun</td><td>5.000</td><td>1002</td><td>5.000</td><td>5.000</td></tr>
+<tr><td>HbA1c</td><td>18.000</td><td>1003</td><td>12.000</td><td>12.000</td></tr>
+<tr><td>Urée sanguine</td><td>6.000</td><td>1004</td><td>4.000</td><td>4.000</td></tr>
+<tr style="font-weight:700;"><td colspan="2"><strong>Totaux</strong></td><td></td><td></td><td></td></tr>
+<tr><td colspan="2"><code>total_amount</code></td><td></td><td></td><td><strong>29.000 TND</strong></td></tr>
+<tr><td colspan="2"><code>cnam_amount</code></td><td></td><td></td><td><strong>21.000 TND</strong></td></tr>
+<tr><td colspan="2"><code>patient_amount</code></td><td></td><td></td><td><strong>8.000 TND</strong></td></tr>
+</table>
+<p><strong>Le patient paie 8 TND</strong> (et non 29 TND) grâce à la prise en charge CNAM de 21 TND.</p>
+</div>
+
+<!-- 1.6 -->
+<h3>1.6 Portail patient "Mes Factures"</h3>
+<ul>
+<li>Routes : <code>patient.invoices.*</code></li>
+<li>Liste paginée avec numéro, laboratoire, montant, statut</li>
+<li>Détail : articles, tableau CNAM, prescripteur, paiements, formulaire de paiement</li>
+<li>Impression via <code>window.print()</code></li>
+<li>Lien vers le compte-rendu d'examens (si complété + approuvé)</li>
+</ul>
+
+<h3>1.7 Documents exportables</h3>
+<table>
+<tr><th>Document</th><th>Route</th><th>Description</th></tr>
+<tr><td>Facture PDF</td><td><code>center.billing.print</code></td><td>Vue dédiée avec <code>@media print</code></td></tr>
+<tr><td>Traite CNAM</td><td><code>center.billing.traite</code></td><td>Avec infos d'affiliation + signature</td></tr>
+<tr><td>XML ELFATOORA</td><td><code>center.billing.elfatoora</code></td><td>UBL 2.1 (e-invoicing tunisienne)</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<h2>2. Nomenclature CNAM</h2>
+
+<h3>2.1 Modèle de données</h3>
+
+<h4>Table <code>cnam_nomenclatures</code></h4>
+<table>
+<tr><th>Colonne</th><th>Description</th></tr>
+<tr><td><code>code_cnam</code></td><td>Code de l'acte (ex: <code>1001</code> pour NFS)</td></tr>
+<tr><td><code>exam_name</code></td><td>Nom de l'examen</td></tr>
+<tr><td><code>valeur_b</code></td><td>Valeur B — base de remboursement fixée par la CNAM</td></tr>
+<tr><td><code>taux</code></td><td>Taux de l'acte (pourcentage, ex: 75%)</td></tr>
+<tr><td><code>is_active</code></td><td>Booléen</td></tr>
+</table>
+
+<h4>Table <code>cnam_rates</code> — Catégories de patients</h4>
+<table>
+<tr><th>Code</th><th>Label</th><th>Taux</th></tr>
+<tr><td><code>assure_social</code></td><td>Assuré social</td><td><strong>100%</strong></td></tr>
+<tr><td><code>conjoint</code></td><td>Conjoint</td><td><strong>50%</strong></td></tr>
+<tr><td><code>enfant</code></td><td>Enfant</td><td><strong>25%</strong></td></tr>
+</table>
+
+<h4>Table <code>cnam_affiliations</code></h4>
+<table>
+<tr><th>Colonne</th><th>Description</th></tr>
+<tr><td><code>patient_id</code></td><td>FK → <code>patients.id</code></td></tr>
+<tr><td><code>cnam_number</code></td><td>N° CNAM du patient</td></tr>
+<tr><td><code>affiliation_number</code></td><td>N° d'affiliation</td></tr>
+<tr><td><code>cnam_rate_id</code></td><td>FK → <code>cnam_rates.id</code></td></tr>
+<tr><td><code>valid_until</code></td><td>Date de validité</td></tr>
+<tr><td><code>is_active</code></td><td>Booléen</td></tr>
+</table>
+
+<h3>2.2 Mapping Exam → Code CNAM</h3>
+<pre>$examCnamMap = [
+    1  => '1001',   // NFS           → Hémogramme (NFS)
+    2  => '1002',   // Glycémie      → Glycémie à jeun
+    3  => '1003',   // HbA1c         → HbA1c
+    4  => '1004',   // Urée          → Urée sanguine
+    5  => '1005',   // Créatinine    → Créatinine sanguine
+    6  => '1006',   // CRP           → CRP
+    7  => '1007',   // VS            → VS
+    8  => '1008',   // Ionogramme    → Ionogramme sanguin
+    9  => '1009',   // TSH           → TSH
+    10 => '1010',   // ECBU          → ECBU
+];</pre>
+
+<h3>2.3 Calcul détaillé</h3>
+
+<div class="box-purple">
+<h4>Pour chaque item avec un code CNAM :</h4>
+<pre>1. Récupérer la nomenclature CNAM via code_cnam
+2. Déterminer valeur_b :
+   - Priorité : valeur_b saisie manuellement > valeur_b de la nomenclature
+3. Récupérer le taux patient :
+   - Via cnam_affiliation.rate.taux (100% pour Assuré social)
+4. Calculer la couverture CNAM :
+   cnam_coverage = valeur_b × quantity × (taux_patient / 100)
+
+5. cnam_amount = somme de tous les cnam_coverage
+6. patient_amount = max(0, total_amount - cnam_amount)</pre>
+</div>
+
+<h3>2.4 Affichage côté patient</h3>
+<p>Sur la page détail de la facture, un tableau <strong>"Prise en charge CNAM"</strong> montre pour chaque item :</p>
+<ul>
+<li>Code CNAM</li>
+<li>Valeur B</li>
+<li>Taux (catégorie du patient)</li>
+<li>Couverture CNAM</li>
+</ul>
+<p>Le résumé affiche : <strong>Total → Part CNAM → Net à payer</strong></p>
+
+<!-- ============================================================ -->
+<h2>3. Suivi des Échantillons (Samples)</h2>
+
+<h3>3.1 Modèle de données</h3>
+
+<h4>Table <code>samples</code></h4>
+<table>
+<tr><th>Colonne</th><th>Description</th></tr>
+<tr><td><code>id</code></td><td>PK</td></tr>
+<tr><td><code>exam_request_item_id</code></td><td>FK → <code>exam_request_items.id</code></td></tr>
+<tr><td><code>labo_id</code></td><td>FK → <code>labos.id</code></td></tr>
+<tr><td><code>barcode</code></td><td>Code-barres unique</td></tr>
+<tr><td><code>sample_type</code></td><td><code>blood</code> | <code>urine</code> | <code>serum</code> | <code>plasma</code> | ...</td></tr>
+<tr><td><code>status</code></td><td><code>collected</code> → <code>processing</code> → <code>completed</code> | <code>rejected</code></td></tr>
+<tr><td><code>collected_at</code></td><td>Date/heure de prélèvement</td></tr>
+<tr><td><code>collected_by</code></td><td>Qui a prélevé</td></tr>
+<tr><td><code>rejected_reason</code></td><td>Motif si rejeté</td></tr>
+<tr><td><code>storage_location</code></td><td>Emplacement de stockage</td></tr>
+<tr><td><code>container_type</code></td><td>Tube | Pot | ...</td></tr>
+</table>
+
+<h4>Table <code>sample_barcode_logs</code> — Traçabilité</h4>
+<table>
+<tr><th>Colonne</th><th>Description</th></tr>
+<tr><td><code>sample_id</code></td><td>FK → <code>samples.id</code></td></tr>
+<tr><td><code>action</code></td><td><code>created</code> | <code>scanned</code> | <code>status_changed</code> | ...</td></tr>
+<tr><td><code>barcode</code></td><td>Code-barres au moment de l'action</td></tr>
+<tr><td><code>staff_id</code></td><td>FK → <code>staff.id</code></td></tr>
+<tr><td><code>metadata</code></td><td>JSON pour infos supplémentaires</td></tr>
+</table>
+
+<h3>3.2 Génération des codes-barres</h3>
+<pre>Format : SAMP-{laboId}-{6 chiffres séquentiels}
+Exemple : SAMP-21-000001</pre>
+<ul>
+<li>Généré automatiquement à la création de l'échantillon</li>
+<li>Basé sur le dernier ID pour ce laboratoire</li>
+<li>Affiché avec <strong>JsBarcode</strong> (code128) sur les pages d'impression</li>
+<li>Bibliothèque chargée depuis CDN : <code>https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6</code></li>
+</ul>
+
+<h3>3.3 Workflow de statut</h3>
+<div class="flow">
+    <span class="flow-step tag-amber">collected</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step tag-purple">processing</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step tag-green">completed</span>
+    <span class="flow-arrow">│</span>
+    <span class="flow-step" style="background:#fef2f2;border-color:#fecaca;color:#dc2626;">rejected</span>
+</div>
+
+<h3>3.4 Création d'un échantillon</h3>
+<ul>
+<li><strong>Automatique</strong> : quand le laboratoire réclame (<code>claim</code>) une demande d'examen, des échantillons sont créés pour chaque <code>exam_request_item</code></li>
+<li><strong>Manuelle</strong> : depuis l'interface de suivi des échantillons</li>
+<li>Statut initial : <code>collected</code></li>
+</ul>
+
+<h3>3.5 Scan par code-barres</h3>
+<ul>
+<li>Champ de saisie pour taper/scanner le code-barres (côté laboratoire)</li>
+<li>Requête AJAX : <code>GET /center/samples/lookup?barcode={code}</code></li>
+<li>Retourne les infos de l'échantillon en JSON</li>
+<li>Permet de changer rapidement le statut</li>
+</ul>
+
+<h3>3.6 Logs de traçabilité</h3>
+<p>Chaque action est enregistrée dans <code>sample_barcode_logs</code> :</p>
+<table>
+<tr><th>Action</th><th>Déclencheur</th></tr>
+<tr><td><code>created</code></td><td>Création de l'échantillon</td></tr>
+<tr><td><code>scanned</code></td><td>Scan du code-barres</td></tr>
+<tr><td><code>status_changed</code></td><td>Changement de statut</td></tr>
+</table>
+
+<h3>3.7 Interface utilisateur</h3>
+<table>
+<tr><th>Page</th><th>Route</th><th>Contenu</th></tr>
+<tr><td>Liste</td><td><code>center.samples.index</code></td><td>Tableau paginé, statuts colorés, filtres, recherche par code-barres</td></tr>
+<tr><td>Fiche</td><td><code>center.samples.show</code></td><td>Code-barres (JsBarcode), infos détaillées, historique des logs, changement de statut</td></tr>
+<tr><td>Impression</td><td><code>center.samples.print</code></td><td>Étiquettes en grand format, plusieurs par page, optimisé pour impression thermique</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<h2>4. Intégration entre les modules</h2>
+
+<pre style="font-size:13px;line-height:1.8;">
+Demande d'examens (prescription du docteur)
+        │
+        ▼
+Attribution au laboratoire (claim)
+        │
+        ├──▶ Création des échantillons (sample tracking)
+        │       │
+        │       ▼
+        │    Saisie des résultats par le laboratoire
+        │       │
+        │       ▼
+        │    ExamRequest.status = 'completed' (automatique si tous les résultats sont saisis)
+        │       │
+        │       ├──▶ Notification au docteur (anomalies ou "tout est normal")
+        │       │
+        │       ▼
+        │    CRÉATION AUTOMATIQUE DE LA FACTURE
+        │       │
+        │       ├──▶ Calcul CNAM (Valeur B × Taux patient)
+        │       │
+        │       ▼
+        │    Patient voit "Mes Factures"
+        │       │
+        │       ▼
+        │    Patient soumet un paiement
+        │       │
+        │       ├──▶ Status = "En attente"
+        │       ├──▶ Notification au laboratoire
+        │       │
+        │       ▼
+        │    Laboratoire confirme le paiement
+        │       │
+        │       ├──▶ Paiement → "Confirmé"
+        │       ├──▶ Facture mise à jour (paid_amount, status, paid_at)
+        │       ├──▶ Notification au patient
+        │       │
+        │       ▼
+        │    Docteur approuve et interprète les résultats
+        │       │
+        │       ▼
+        │    Patient peut télécharger le compte-rendu
+        │
+        └──▶ Tout au long du processus : notifications en temps réel
+</pre>
+
+<!-- ============================================================ -->
+<h2>5. Points clés à retenir</h2>
+
+<div class="box">
+<ol>
+<li><strong>La Valeur B</strong> est le montant de base fixé par la CNAM pour chaque acte — <strong>pas</strong> le prix du laboratoire</li>
+<li><strong>Le taux patient</strong> dépend de sa catégorie (Assuré social = 100%, Conjoint = 50%, Enfant = 25%)</li>
+<li><strong>La couverture CNAM</strong> = Valeur B × Quantité × (Taux patient / 100)</li>
+<li><strong>Le patient ne paie que</strong> <code>total_amount − cnam_amount</code>, jamais plus</li>
+<li><strong>Les paiements</strong> passent par un workflow <code>pending → confirmed</code> : le patient soumet, le labo confirme</li>
+<li><strong>Les codes-barres</strong> utilisent le format <code>SAMP-{laboId}-{seq}</code> avec JsBarcode (code128)</li>
+<li><strong>La facture est créée automatiquement</strong> quand tous les résultats d'une demande sont saisis</li>
+<li><strong>La balance</strong> utilise <code>patient_amount − paid_amount</code> (pas <code>total_amount</code>)</li>
+<li><strong>Pas de passerelle de paiement réelle</strong> : le "Paiement en ligne" est confirmé manuellement par le labo</li>
+<li><strong>Toute action importante génère une notification</strong> (patient, docteur, staff du labo)</li>
+</ol>
+</div>
+
+<div class="footer">
+<p>MedixLab — Document généré le 31/07/2026</p>
+<p>Pour imprimer en PDF : Ctrl+P (ou Cmd+P) → Enregistrer au format PDF</p>
+</div>
+
+</body>
+</html>
