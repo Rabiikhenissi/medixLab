@@ -8,6 +8,7 @@ use App\Models\Exam;
 use App\Models\ExamGroup;
 use App\Models\ExamGroupItem;
 use App\Models\ExamRequest;
+use App\Models\ExamRequestItem;
 use App\Models\DoctorPatientAccess;
 use App\Models\Notification;
 use Illuminate\Http\Request;
@@ -459,7 +460,7 @@ class DoctorController extends Controller
 
         $examCount = $examGroup->exams->count();
 
-        $examRequest = \Illuminate\Support\Facades\DB::transaction(function () use ($doctor, $patient, $examGroup, $request) {
+        $examRequest = \Illuminate\Support\Facades\DB::transaction(function () use ($doctor, $patient, $examGroup, $request, $examCount) {
             $examRequest = ExamRequest::create([
                 'doctor_id'      => $doctor->id,
                 'patient_id'     => $patient->id,

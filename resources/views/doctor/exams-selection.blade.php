@@ -628,17 +628,8 @@
                 const data = await response.json();
                 if (data.success) {
                     Swal.fire({ icon: 'success', title: 'Succès', text: data.message, confirmButtonColor: '#0066FF' }).then(() => {
-                        const previouslySelected = [...selectedExamIds];
+                        try { sessionStorage.setItem('pendingExamSelection', JSON.stringify(selectedExamIds)); } catch (e) {}
                         window.location.reload();
-                        window.addEventListener('load', () => {
-                            previouslySelected.forEach(id => {
-                                const cb = document.querySelector(`.exam-checkbox[value="${id}"]`);
-                                if (cb) {
-                                    cb.checked = true;
-                                    cb.dispatchEvent(new Event('change'));
-                                }
-                            });
-                        });
                     });
                 } else {
                     Swal.fire({ icon: 'error', title: 'Erreur', text: data.message || 'Une erreur est survenue.', confirmButtonColor: '#0066FF' });
@@ -653,6 +644,21 @@
         document.getElementById('cancelBtn').onclick = () => {
             window.location.href = '{{ route('doctor.dashboard') }}';
         };
+
+        // Restore exam selection after saving a group (page reload)
+        try {
+            const pending = sessionStorage.getItem('pendingExamSelection');
+            if (pending) {
+                sessionStorage.removeItem('pendingExamSelection');
+                JSON.parse(pending).forEach(id => {
+                    const cb = document.querySelector(`.exam-checkbox[value="${id}"]`);
+                    if (cb) {
+                        cb.checked = true;
+                        cb.dispatchEvent(new Event('change'));
+                    }
+                });
+            }
+        } catch (e) {}
 
         updateCount();
     </script>

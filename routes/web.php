@@ -266,6 +266,9 @@ Route::prefix('patient')->name('patient.')->group(function () {
             return view('patient.dashboard', ['user' => auth()->user()]);
         })->name('dashboard');
 
+        Route::post('/save-location', [\App\Http\Controllers\PatientController::class, 'saveLocation'])
+            ->name('save-location');
+
         Route::get('/analytics', function () {
             if (!auth()->user()->patient) {
                 return redirect()->route('home');
