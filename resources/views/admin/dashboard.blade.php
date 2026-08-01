@@ -362,15 +362,15 @@ Gérez la plateforme et supervisez les activités de Medix eSanté.
     <!-- Top Prescribed Exams -->
     <div class="chart-container">
         <h3>Top 5 des examens les plus prescrits</h3>
-        @if($topExams->count() > 0)
+        @if(count($topExams) > 0)
             <div class="top-exams-list">
                 @foreach($topExams as $index => $item)
                     <div class="top-exam-item">
                         <div style="display:flex; align-items:center; gap:10px;">
                             <span style="font-weight:900; color:#64748b; font-size:14px;">#{{ $index + 1 }}</span>
-                            <span class="top-exam-name">{{ $item->exam->name }}</span>
+                            <span class="top-exam-name">{{ $item['name'] }}</span>
                         </div>
-                        <span class="top-exam-count">{{ $item->count }} prescription(s)</span>
+                        <span class="top-exam-count">{{ $item['count'] }} prescription(s)</span>
                     </div>
                 @endforeach
             </div>
@@ -406,20 +406,16 @@ Gérez la plateforme et supervisez les activités de Medix eSanté.
     <!-- Recent Prescriptions -->
     <div class="chart-container">
         <h3>Prescriptions récentes</h3>
-        @if($recentPrescriptions->count() > 0)
+        @if(count($recentPrescriptions) > 0)
             <div class="recent-list">
                 @php
                     $avatarColors = ['#0066ff','#16a34a','#9333ea','#ea580c','#0891b2'];
                 @endphp
                 @foreach($recentPrescriptions as $i => $rx)
                     @php
-                        $doctorName = $rx->doctor && $rx->doctor->user
-                            ? $rx->doctor->user->first_name . ' ' . $rx->doctor->user->last_name
-                            : '—';
-                        $patientName = $rx->patient && $rx->patient->user
-                            ? $rx->patient->user->first_name . ' ' . $rx->patient->user->last_name
-                            : '—';
-                        $labName = $rx->laboratory ? $rx->laboratory->name : 'Non assigné';
+                        $doctorName = $rx['doctor_name'];
+                        $patientName = $rx['patient_name'];
+                        $labName = $rx['lab_name'];
                         $initials = strtoupper(substr($doctorName, 0, 1));
                         $color = $avatarColors[$i % count($avatarColors)];
                         $statusMap = [
@@ -430,13 +426,13 @@ Gérez la plateforme et supervisez les activités de Medix eSanté.
                             'completed' => ['Complété', 'pill-completed'],
                             'cancelled' => ['Annulé', 'pill-cancelled'],
                         ];
-                        $statusInfo = $statusMap[$rx->status] ?? ['Inconnu', 'pill-pending'];
+                        $statusInfo = $statusMap[$rx['status']] ?? ['Inconnu', 'pill-pending'];
                     @endphp
                     <div class="recent-item">
                         <div class="recent-item-avatar" style="background:{{ $color }};">{{ $initials }}</div>
                         <div class="recent-item-info">
                             <div class="recent-item-title">{{ $doctorName }} → {{ $patientName }}</div>
-                            <div class="recent-item-sub">{{ $labName }} · {{ $rx->created_at->diffForHumans() }}</div>
+                            <div class="recent-item-sub">{{ $labName }} · {{ $rx['created_at'] }}</div>
                         </div>
                         <span class="status-pill {{ $statusInfo[1] }}">
                             <span class="dot"></span>

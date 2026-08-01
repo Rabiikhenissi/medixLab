@@ -49,6 +49,31 @@
         -webkit-text-fill-color: transparent;
         background-clip: text;
     }
+    .patient-marker {
+        background: transparent;
+        border: none;
+    }
+    .patient-pin {
+        position: relative;
+        width: 16px;
+        height: 16px;
+        background: #0D9488;
+        border: 3px solid #ffffff;
+        border-radius: 50%;
+        box-shadow: 0 0 0 3px rgba(13,148,136,0.35), 0 2px 6px rgba(0,0,0,0.3);
+    }
+    .patient-pin::after {
+        content: '';
+        position: absolute;
+        inset: -9px;
+        border-radius: 50%;
+        border: 2px solid rgba(13,148,136,0.55);
+        animation: patient-pulse 1.8s ease-out infinite;
+    }
+    @keyframes patient-pulse {
+        0% { transform: scale(0.5); opacity: 1; }
+        100% { transform: scale(1.5); opacity: 0; }
+    }
 </style>
 @endsection
 
@@ -56,6 +81,9 @@
 
 @php
     $labsWithCoords = $laboratories->filter(fn($lab) => $lab->latitude && $lab->longitude);
+    $patientLoc = auth()->user()->patient;
+    $patientLat = $patientLoc ? ($patientLoc->latitude ?? null) : null;
+    $patientLng = $patientLoc ? ($patientLoc->longitude ?? null) : null;
 @endphp
 
 <div class="w-full max-w-[900px] mx-auto py-8 px-4">
@@ -145,6 +173,10 @@
         {{-- Sort controls --}}
         <div class="flex items-center gap-2 mb-5 flex-wrap">
             <span class="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider">Trier par :</span>
+            <span id="locStatus" class="hidden inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-[#94a3b8] bg-slate-100 border border-[#e2e8f0]">
+                <svg class="w-3 h-3 animate-spin" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span id="locStatusText">Localisation...</span>
+            </span>
             <button type="button" data-sort="recommended" class="sort-btn active inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold border border-[#e2e8f0] bg-white text-[#64748b] transition">
                 <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
                 Recommandé
@@ -451,6 +483,88 @@
     const labBtns  = document.getElementById('labPageButtons');
     const labCount = document.getElementById('labResultCount');
 
+    // --- Distance sort: geolocation + haversine ---
+    const savedPatLat  = {{ $patientLat ?? 'null' }};
+    const savedPatLng  = {{ $patientLng ?? 'null' }};
+    const labCoords    = {!! json_encode($labsWithCoords->mapWithKeys(fn($l) => [$l->id => [(float)$l->latitude, (float)$l->longitude]])->toArray()) !!};
+    const saveLocUrl   = '{{ route('patient.save-location') }}';
+    const locCsrfToken = document.querySelector('meta[name="csrf-token"]');
+
+    const locStatus = document.getElementById('locStatus');
+    const locStatusText = document.getElementById('locStatusText');
+
+    function setLocStatus(text, done) {
+        locStatus.classList.remove('hidden');
+        locStatusText.textContent = text;
+        if (done) {
+            locStatus.querySelector('svg').classList.add('hidden');
+            locStatus.classList.remove('text-[#94a3b8]', 'bg-slate-100', 'border-[#e2e8f0]');
+            locStatus.classList.add('text-[#0D9488]', 'bg-[#0D9488]/10', 'border-[#0D9488]/30');
+        } else {
+            locStatus.querySelector('svg').classList.remove('hidden');
+            locStatus.classList.add('text-[#94a3b8]', 'bg-slate-100', 'border-[#e2e8f0]');
+        }
+    }
+
+    function haversineKm(lat1, lng1, lat2, lng2) {
+        const R = 6371;
+        const toRad = x => x * Math.PI / 180;
+        const dLat = toRad(lat2 - lat1);
+        const dLng = toRad(lng2 - lng1);
+        const a = Math.sin(dLat / 2) ** 2 +
+                  Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+        return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    function applyDistances(patLat, patLng) {
+        allCards.forEach(card => {
+            const c = labCoords[card.dataset.labId];
+            card.dataset.distance = c ? haversineKm(patLat, patLng, c[0], c[1]).toFixed(2) : '9999';
+        });
+        if (currentSort === 'distance') { sortCards(); render(); }
+    }
+
+    function enableDistanceSort() {
+        if (savedPatLat !== null && savedPatLng !== null) {
+            applyDistances(savedPatLat, savedPatLng);
+            return;
+        }
+        if (!('geolocation' in navigator)) {
+            setLocStatus('Localisation indisponible', true);
+            return;
+        }
+        setLocStatus('Localisation en cours...', false);
+        navigator.geolocation.getCurrentPosition(
+            function (pos) {
+                setLocStatus('Localisation activée', true);
+                applyDistances(pos.coords.latitude, pos.coords.longitude);
+                window.dispatchEvent(new CustomEvent('patient-location', {
+                    detail: { lat: pos.coords.latitude, lng: pos.coords.longitude }
+                }));
+                if (locCsrfToken) {
+                    fetch(saveLocUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': locCsrfToken.content
+                        },
+                        body: JSON.stringify({
+                            latitude: pos.coords.latitude,
+                            longitude: pos.coords.longitude
+                        })
+                    }).catch(function () {});
+                }
+            },
+            function () {
+                setLocStatus('Localisation refusée', true);
+            },
+            { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 }
+        );
+    }
+
+    enableDistanceSort();
+
     // Compatibility toggle
     const compatToggle = document.getElementById('compatFilter');
     if (compatToggle) {
@@ -481,7 +595,7 @@
             'compat': 'compatPct'
         }[currentSort];
 
-        const sortAsc = currentSort === 'price';
+        const sortAsc = currentSort === 'price' || currentSort === 'distance';
 
         allCards.sort((a, b) => {
             const aVal = parseFloat(a.dataset[sortKey]) || 0;
@@ -650,10 +764,46 @@
             allMarkers.push(marker);
         });
 
-        if (labs.length > 1) {
-            var group = L.featureGroup(allMarkers);
-            map.fitBounds(group.getBounds().pad(0.1));
+        var patientMarker = null;
+        var patientIcon = L.divIcon({
+            className: 'patient-marker',
+            html: '<div class="patient-pin"></div>',
+            iconSize: [22, 22],
+            iconAnchor: [11, 11],
+            popupAnchor: [0, -14]
+        });
+
+        function placePatientMarker(lat, lng) {
+            if (patientMarker) {
+                patientMarker.setLatLng([lat, lng]);
+                return;
+            }
+            patientMarker = L.marker([lat, lng], { icon: patientIcon }).addTo(map);
+            patientMarker.bindPopup('<div style="font-family:Inter,sans-serif"><b>Ma position</b></div>');
+            allMarkers.push(patientMarker);
+            fitMap();
         }
+
+        function fitMap() {
+            if (allMarkers.length > 1) {
+                var group = L.featureGroup(allMarkers);
+                map.fitBounds(group.getBounds().pad(0.15));
+            } else if (patientMarker) {
+                map.setView(patientMarker.getLatLng(), 12);
+            }
+        }
+
+        if (labs.length <= 1) {
+            fitMap();
+        }
+
+        if (typeof savedPatLat !== 'undefined' && savedPatLat !== null && savedPatLng !== null) {
+            placePatientMarker(savedPatLat, savedPatLng);
+        }
+
+        window.addEventListener('patient-location', function(e) {
+            placePatientMarker(e.detail.lat, e.detail.lng);
+        });
 
         setTimeout(function() { map.invalidateSize(); }, 200);
 

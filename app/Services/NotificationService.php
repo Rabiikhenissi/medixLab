@@ -21,7 +21,7 @@ class NotificationService
 
         if (in_array($type, ['access_request', 'exam_request', 'stock_alert'])) {
             try {
-                $user = User::select('id', 'email', 'doctor_id', 'staff_id', 'patient_id')->find($userId);
+                $user = User::select('id', 'email')->find($userId);
                 if ($user && $user->email) {
                     $role = 'patient';
                     if ($user->doctor) {

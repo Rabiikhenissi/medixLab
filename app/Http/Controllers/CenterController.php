@@ -40,7 +40,7 @@ class CenterController extends Controller
         $lab = $user->staff->laboratory;
 
         // Cache dashboard stats for 5 minutes
-        $cacheKey = "center_dashboard_{$lab->id}";
+        $cacheKey = "center_dashboard_{$lab->id}_v2";
         $cached = cache()->remember($cacheKey, 300, function () use ($lab) {
             // Retrieve statistics
             $stats = [
@@ -113,7 +113,10 @@ class CenterController extends Controller
                 ->groupBy('exams.name')
                 ->orderByDesc('count')
                 ->limit(5)
-                ->get();
+                ->get()
+                ->map(fn($row) => ['name' => $row->name, 'count' => (int) $row->count])
+                ->values()
+                ->all();
 
             // Revenue estimate (completed exams only)
             $revenue = $lab->examRequests()
