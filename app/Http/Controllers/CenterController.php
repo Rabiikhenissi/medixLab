@@ -2,19 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AvailableExam;
 use App\Models\Consumable;
 use App\Models\Equipment;
 use App\Models\EquipmentMaintenance;
-use App\Models\WorkingHours;
-use App\Models\ExamRequest;
-use App\Models\StockMovement;
-use App\Models\Notification;
-use App\Models\AvailableExam;
 use App\Models\Exam;
+use App\Models\ExamRequest;
+use App\Models\Invoice;
+use App\Models\Notification;
+use App\Models\Sample;
+use App\Models\StockMovement;
+use App\Models\WorkingHours;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class CenterController extends Controller
 {
@@ -24,9 +26,10 @@ class CenterController extends Controller
     public function __construct()
     {
         $this->middleware(function ($request, $next) {
-            if (!auth()->check() || !auth()->user()->staff) {
+            if (! auth()->check() || ! auth()->user()->staff) {
                 return redirect()->route('home');
             }
+
             return $next($request);
         });
     }
@@ -44,9 +47,9 @@ class CenterController extends Controller
         $cached = cache()->remember($cacheKey, 300, function () use ($lab) {
             // Retrieve statistics
             $stats = [
-                'equipment_count'          => $lab->equipment()->count(),
-                'consumables_count'        => $lab->consumables()->count(),
-                'low_stock_count'          => $lab->consumables()->whereColumn('quantity', '<=', 'min_quantity')->count(),
+                'equipment_count' => $lab->equipment()->count(),
+                'consumables_count' => $lab->consumables()->count(),
+                'low_stock_count' => $lab->consumables()->whereColumn('quantity', '<=', 'min_quantity')->count(),
                 'active_maintenance_count' => EquipmentMaintenance::whereIn('equipment_id', $lab->equipment()->select('id'))
                     ->whereIn('status', ['pending', 'in_progress'])
                     ->count(),
@@ -64,13 +67,13 @@ class CenterController extends Controller
                 ->first();
 
             $workload = [
-                'pending'    => (int) $statusCounts->pending,
-                'assigned'   => (int) $statusCounts->assigned,
-                'collected'  => (int) $statusCounts->collected,
+                'pending' => (int) $statusCounts->pending,
+                'assigned' => (int) $statusCounts->assigned,
+                'collected' => (int) $statusCounts->collected,
                 'processing' => (int) $statusCounts->processing,
-                'completed'  => (int) $statusCounts->completed,
-                'cancelled'  => (int) $statusCounts->cancelled,
-                'total'      => (int) $statusCounts->total,
+                'completed' => (int) $statusCounts->completed,
+                'cancelled' => (int) $statusCounts->cancelled,
+                'total' => (int) $statusCounts->total,
             ];
 
             // Daily request volume for the last 7 days
@@ -124,18 +127,18 @@ class CenterController extends Controller
                 ->join('exam_request_items', 'exam_requests.id', '=', 'exam_request_items.exam_request_id')
                 ->join('available_exams', function ($j) use ($lab) {
                     $j->on('exam_request_items.exam_id', '=', 'available_exams.exam_id')
-                      ->where('available_exams.labo_id', '=', $lab->id);
+                        ->where('available_exams.labo_id', '=', $lab->id);
                 })
                 ->sum('available_exams.price');
 
             // Billing stats
-            $billingCount = \App\Models\Invoice::where('labo_id', $lab->id)->count();
-            $billingPending = \App\Models\Invoice::where('labo_id', $lab->id)->whereIn('status', ['pending', 'partially_paid'])->count();
-            $billingRevenue = \App\Models\Invoice::where('labo_id', $lab->id)->where('status', 'paid')->sum('total_amount');
+            $billingCount = Invoice::where('labo_id', $lab->id)->count();
+            $billingPending = Invoice::where('labo_id', $lab->id)->whereIn('status', ['pending', 'partially_paid'])->count();
+            $billingRevenue = Invoice::where('labo_id', $lab->id)->where('status', 'paid')->sum('total_amount');
 
             // Sample stats
-            $sampleCount = \App\Models\Sample::where('labo_id', $lab->id)->count();
-            $sampleActive = \App\Models\Sample::where('labo_id', $lab->id)->whereNotIn('status', ['completed', 'rejected'])->count();
+            $sampleCount = Sample::where('labo_id', $lab->id)->count();
+            $sampleActive = Sample::where('labo_id', $lab->id)->whereNotIn('status', ['completed', 'rejected'])->count();
 
             return compact('stats', 'workload', 'last7Days', 'last7PrevDays', 'topExams', 'revenue', 'billingCount', 'billingPending', 'billingRevenue', 'sampleCount', 'sampleActive');
         });
@@ -195,25 +198,26 @@ class CenterController extends Controller
         $days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
         $validated = $request->validate([
-            'start_Monday'   => 'nullable|date_format:H:i',
-            'end_Monday'     => 'nullable|date_format:H:i|after_or_equal:start_Monday',
-            'start_Tuesday'  => 'nullable|date_format:H:i',
-            'end_Tuesday'    => 'nullable|date_format:H:i|after_or_equal:start_Tuesday',
-            'start_Wednesday'=> 'nullable|date_format:H:i',
-            'end_Wednesday'  => 'nullable|date_format:H:i|after_or_equal:start_Wednesday',
+            'start_Monday' => 'nullable|date_format:H:i',
+            'end_Monday' => 'nullable|date_format:H:i|after_or_equal:start_Monday',
+            'start_Tuesday' => 'nullable|date_format:H:i',
+            'end_Tuesday' => 'nullable|date_format:H:i|after_or_equal:start_Tuesday',
+            'start_Wednesday' => 'nullable|date_format:H:i',
+            'end_Wednesday' => 'nullable|date_format:H:i|after_or_equal:start_Wednesday',
             'start_Thursday' => 'nullable|date_format:H:i',
-            'end_Thursday'   => 'nullable|date_format:H:i|after_or_equal:start_Thursday',
-            'start_Friday'   => 'nullable|date_format:H:i',
-            'end_Friday'     => 'nullable|date_format:H:i|after_or_equal:start_Friday',
+            'end_Thursday' => 'nullable|date_format:H:i|after_or_equal:start_Thursday',
+            'start_Friday' => 'nullable|date_format:H:i',
+            'end_Friday' => 'nullable|date_format:H:i|after_or_equal:start_Friday',
             'start_Saturday' => 'nullable|date_format:H:i',
-            'end_Saturday'   => 'nullable|date_format:H:i|after_or_equal:start_Saturday',
-            'start_Sunday'   => 'nullable|date_format:H:i',
-            'end_Sunday'     => 'nullable|date_format:H:i|after_or_equal:start_Sunday',
+            'end_Saturday' => 'nullable|date_format:H:i|after_or_equal:start_Saturday',
+            'start_Sunday' => 'nullable|date_format:H:i',
+            'end_Sunday' => 'nullable|date_format:H:i|after_or_equal:start_Sunday',
         ], [
             '*.date_format' => 'Le format de l\'heure doit être HH:MM.',
             '*.after_or_equal' => 'L\'heure de fin doit être après ou égale à l\'heure de début.',
         ]);
 
+        // Upsert each day's schedule within a transaction
         DB::transaction(function () use ($validated, $lab, $days) {
             foreach ($days as $day) {
                 $isClosed = $request->has("closed_{$day}");
@@ -270,7 +274,7 @@ class CenterController extends Controller
      */
     public function deleteException(WorkingHours $workingHour)
     {
-        if ($workingHour->labo_id !== auth()->user()->staff->labo_id) {
+        if ($workingHour->labo_id !== auth()->user()->staff->laboratory_id) {
             abort(403);
         }
 
@@ -336,7 +340,7 @@ class CenterController extends Controller
      */
     public function updateConsumable(Request $request, Consumable $consumable)
     {
-        if ($consumable->labo_id !== auth()->user()->staff->labo_id) {
+        if ($consumable->labo_id !== auth()->user()->staff->laboratory_id) {
             abort(403);
         }
 
@@ -360,7 +364,7 @@ class CenterController extends Controller
      */
     public function addStockMovement(Request $request, Consumable $consumable)
     {
-        if ($consumable->labo_id !== auth()->user()->staff->labo_id) {
+        if ($consumable->labo_id !== auth()->user()->staff->laboratory_id) {
             abort(403);
         }
 
@@ -371,7 +375,7 @@ class CenterController extends Controller
         ]);
 
         $type = $request->input('type');
-        $qtyChange = (int)$request->input('quantity_change');
+        $qtyChange = (int) $request->input('quantity_change');
 
         DB::transaction(function () use ($consumable, $type, $qtyChange, $request) {
             // Create stock movement
@@ -407,8 +411,8 @@ class CenterController extends Controller
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('serial_number', 'like', "%{$search}%")
-                  ->orWhere('type', 'like', "%{$search}%");
+                    ->orWhere('serial_number', 'like', "%{$search}%")
+                    ->orWhere('type', 'like', "%{$search}%");
             });
         }
 
@@ -455,7 +459,7 @@ class CenterController extends Controller
      */
     public function updateEquipment(Request $request, Equipment $equipment)
     {
-        if ($equipment->labo_id !== auth()->user()->staff->labo_id) {
+        if ($equipment->labo_id !== auth()->user()->staff->laboratory_id) {
             abort(403);
         }
 
@@ -481,7 +485,7 @@ class CenterController extends Controller
      */
     public function storeMaintenance(Request $request, Equipment $equipment)
     {
-        if ($equipment->labo_id !== auth()->user()->staff->labo_id) {
+        if ($equipment->labo_id !== auth()->user()->staff->laboratory_id) {
             abort(403);
         }
 
@@ -522,13 +526,13 @@ class CenterController extends Controller
      */
     public function updateMaintenance(Request $request, EquipmentMaintenance $maintenance)
     {
-        if ($maintenance->equipment->labo_id !== auth()->user()->staff->labo_id) {
+        if ($maintenance->equipment->labo_id !== auth()->user()->staff->laboratory_id) {
             abort(403);
         }
 
         $request->validate([
             'status' => 'required|in:pending,in_progress,completed,cancelled',
-            'end_date' => 'nullable|date|after_or_equal:' . $maintenance->start_date->format('Y-m-d H:i:s'),
+            'end_date' => 'nullable|date|after_or_equal:'.$maintenance->start_date->format('Y-m-d H:i:s'),
         ]);
 
         $status = $request->input('status');
@@ -552,241 +556,265 @@ class CenterController extends Controller
         return back()->with('success', 'État de maintenance mis à jour avec succès.');
     }
 
-public function examRequests(Request $request)
-{
-    $lab = auth()->user()->staff->laboratory;
+    /**
+     * List exam requests for the laboratory
+     */
+    public function examRequests(Request $request)
+    {
+        $lab = auth()->user()->staff->laboratory;
 
-    $search = $request->input('search', '');
-    $status = $request->input('status', '');
+        $search = $request->input('search', '');
+        $status = $request->input('status', '');
 
-    $query = \App\Models\ExamRequest::where('labo_id', $lab->id)
-        ->with([
-            'patient.user',
-            'doctor.user',
-            'items.exam',
+        // Build the base query for the lab's requests
+        $query = ExamRequest::where('labo_id', $lab->id)
+            ->with([
+                'patient.user',
+                'doctor.user',
+                'items.exam',
+            ]);
+
+        // Filter by patient, doctor, or request id
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('patient.user', function ($q2) use ($search) {
+                    $q2->where('first_name', 'like', "%{$search}%")
+                        ->orWhere('last_name', 'like', "%{$search}%");
+                })
+                    ->orWhereHas('doctor.user', function ($q2) use ($search) {
+                        $q2->where('first_name', 'like', "%{$search}%")
+                            ->orWhere('last_name', 'like', "%{$search}%");
+                    })
+                    ->orWhere('exam_requests.id', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter by status
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        $requests = $query->latest()->paginate(15)->appends($request->query());
+
+        return view('center.exam-requests', compact('requests', 'search', 'status'));
+    }
+
+    /**
+     * Mark an assigned exam request as in progress
+     */
+    public function claimExamRequest(ExamRequest $examRequest)
+    {
+        $lab = auth()->user()->staff->laboratory;
+
+        if ($examRequest->labo_id !== $lab->id) {
+            abort(403);
+        }
+
+        if ($examRequest->status !== 'assigned') {
+            return back()->with('error', 'Cette demande ne peut plus être prise en charge.');
+        }
+
+        $examRequest->update([
+            'status' => 'processing',
         ]);
 
-    if ($search) {
-        $query->where(function ($q) use ($search) {
-            $q->whereHas('patient.user', function ($q2) use ($search) {
-                $q2->where('first_name', 'like', "%{$search}%")
-                    ->orWhere('last_name', 'like', "%{$search}%");
-            })
-            ->orWhereHas('doctor.user', function ($q2) use ($search) {
-                $q2->where('first_name', 'like', "%{$search}%")
-                    ->orWhere('last_name', 'like', "%{$search}%");
-            })
-            ->orWhere('exam_requests.id', 'like', "%{$search}%");
-        });
+        return back()->with('success', 'La demande est maintenant en traitement.');
     }
 
-    if ($status) {
-        $query->where('status', $status);
+    /**
+     * Mark an exam request as collected (sample collected from patient)
+     */
+    public function collectExamRequest(ExamRequest $examRequest)
+    {
+        $lab = auth()->user()->staff->laboratory;
+
+        if ($examRequest->labo_id !== $lab->id) {
+            abort(403);
+        }
+
+        if ($examRequest->status !== 'assigned') {
+            return back()->with('error', 'Cette demande ne peut plus être marquée comme collectée.');
+        }
+
+        $examRequest->update(['status' => 'collected']);
+
+        return back()->with('success', 'Échantillon collecté. Vous pouvez commencer le traitement.');
     }
 
-    $requests = $query->latest()->paginate(15)->appends($request->query());
+    /**
+     * Get all notifications for center staff
+     */
+    public function getNotifications()
+    {
+        $user = Auth::user();
+        $notifications = Notification::forUser($user->id)
+            ->latest('created_at')
+            ->limit(50)
+            ->get();
 
-    return view('center.exam-requests', compact('requests', 'search', 'status'));
-}
-
-
-public function claimExamRequest(ExamRequest $examRequest)
-{
-    $lab = auth()->user()->staff->laboratory;
-
-    if ($examRequest->labo_id !== $lab->id) {
-        abort(403);
+        return response()->json([
+            'success' => true,
+            'notifications' => $notifications->map(function ($notification) {
+                return [
+                    'id' => $notification->id,
+                    'title' => $notification->title,
+                    'message' => $notification->message,
+                    'is_read' => $notification->is_read,
+                    'type' => $notification->notification_type ?? 'general',
+                    'reference_id' => $notification->reference_id,
+                    'created_at' => $notification->created_at->diffForHumans(),
+                ];
+            }),
+        ]);
     }
 
-    if ($examRequest->status !== 'assigned') {
-        return back()->with('error', 'Cette demande ne peut plus être prise en charge.');
+    /**
+     * Get unread notification count
+     */
+    public function getUnreadCount()
+    {
+        $user = Auth::user();
+        $count = Notification::forUser($user->id)->unread()->count();
+
+        return response()->json([
+            'success' => true,
+            'unread_count' => $count,
+        ]);
     }
 
-    $examRequest->update([
-        'status' => 'processing',
-    ]);
+    /**
+     * Mark notification as read
+     */
+    public function markAsRead(Notification $notification)
+    {
+        if ($notification->user_id !== Auth::id()) {
+            abort(403);
+        }
 
-    return back()->with('success', 'La demande est maintenant en traitement.');
-}
+        $notification->update(['is_read' => true]);
 
-/**
- * Mark an exam request as collected (sample collected from patient)
- */
-public function collectExamRequest(ExamRequest $examRequest)
-{
-    $lab = auth()->user()->staff->laboratory;
-
-    if ($examRequest->labo_id !== $lab->id) {
-        abort(403);
+        return response()->json(['success' => true]);
     }
 
-    if ($examRequest->status !== 'assigned') {
-        return back()->with('error', 'Cette demande ne peut plus être marquée comme collectée.');
+    /**
+     * Mark all notifications as read
+     */
+    public function markAllAsRead()
+    {
+        Notification::where('user_id', Auth::id())
+            ->where('is_read', false)
+            ->where('is_archive', false)
+            ->update(['is_read' => true]);
+
+        return response()->json(['success' => true]);
     }
 
-    $examRequest->update(['status' => 'collected']);
+    // ==========================
+    // AVAILABLE EXAMS (Center-side)
+    // ==========================
 
-    return back()->with('success', 'Échantillon collecté. Vous pouvez commencer le traitement.');
-}
+    /**
+     * Show the lab's available exams
+     */
+    public function availableExams()
+    {
+        $lab = auth()->user()->staff->laboratory;
+        $availableExams = AvailableExam::where('labo_id', $lab->id)
+            ->where('is_archive', false)
+            ->with('exam')
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-/**
- * Get all notifications for center staff
- */
-public function getNotifications()
-{
-    $user = Auth::user();
-    $notifications = Notification::forUser($user->id)
-        ->latest('created_at')
-        ->limit(50)
-        ->get();
+        $allExams = Exam::where('is_archive', false)
+            ->orWhereNull('is_archive')
+            ->orderBy('name')
+            ->get();
 
-    return response()->json([
-        'success' => true,
-        'notifications' => $notifications->map(function ($notification) {
-            return [
-                'id' => $notification->id,
-                'title' => $notification->title,
-                'message' => $notification->message,
-                'is_read' => $notification->is_read,
-                'type' => $notification->notification_type ?? 'general',
-                'reference_id' => $notification->reference_id,
-                'created_at' => $notification->created_at->diffForHumans(),
-            ];
-        }),
-    ]);
-}
-
-/**
- * Get unread notification count
- */
-public function getUnreadCount()
-{
-    $user = Auth::user();
-    $count = Notification::forUser($user->id)->unread()->count();
-
-    return response()->json([
-        'success' => true,
-        'unread_count' => $count,
-    ]);
-}
-
-/**
- * Mark notification as read
- */
-public function markAsRead(Notification $notification)
-{
-    if ($notification->user_id !== Auth::id()) {
-        abort(403);
+        return view('center.available-exams', compact('availableExams', 'allExams', 'lab'));
     }
 
-    $notification->update(['is_read' => true]);
+    /**
+     * Add an exam to the lab's available list
+     */
+    public function storeAvailableExam(Request $request)
+    {
+        $lab = auth()->user()->staff->laboratory;
 
-    return response()->json(['success' => true]);
-}
+        $data = $request->validate([
+            'exam_id' => 'required|exists:exams,id',
+            'price' => 'required|numeric|min:0',
+        ]);
 
-/**
- * Mark all notifications as read
- */
-public function markAllAsRead()
-{
-    Notification::where('user_id', Auth::id())
-        ->where('is_read', false)
-        ->where('is_archive', false)
-        ->update(['is_read' => true]);
+        // Reject exams already configured for this lab
+        $exists = AvailableExam::where('labo_id', $lab->id)
+            ->where('exam_id', $data['exam_id'])
+            ->where('is_archive', false)
+            ->exists();
 
-    return response()->json(['success' => true]);
-}
+        if ($exists) {
+            return back()->with('error', 'Cet examen est déjà configuré pour votre laboratoire.');
+        }
 
-// ==========================
-// AVAILABLE EXAMS (Center-side)
-// ==========================
+        AvailableExam::create([
+            'labo_id' => $lab->id,
+            'exam_id' => $data['exam_id'],
+            'price' => $data['price'],
+            'is_active' => true,
+        ]);
 
-public function availableExams()
-{
-    $lab = auth()->user()->staff->laboratory;
-    $availableExams = AvailableExam::where('labo_id', $lab->id)
-        ->where('is_archive', false)
-        ->with('exam')
-        ->orderBy('created_at', 'desc')
-        ->get();
-
-    $allExams = Exam::where('is_archive', false)
-        ->orWhereNull('is_archive')
-        ->orderBy('name')
-        ->get();
-
-    return view('center.available-exams', compact('availableExams', 'allExams', 'lab'));
-}
-
-public function storeAvailableExam(Request $request)
-{
-    $lab = auth()->user()->staff->laboratory;
-
-    $data = $request->validate([
-        'exam_id' => 'required|exists:exams,id',
-        'price' => 'required|numeric|min:0',
-    ]);
-
-    $exists = AvailableExam::where('labo_id', $lab->id)
-        ->where('exam_id', $data['exam_id'])
-        ->where('is_archive', false)
-        ->exists();
-
-    if ($exists) {
-        return back()->with('error', 'Cet examen est déjà configuré pour votre laboratoire.');
+        return back()->with('success', 'Examen disponible ajouté avec succès.');
     }
 
-    AvailableExam::create([
-        'labo_id' => $lab->id,
-        'exam_id' => $data['exam_id'],
-        'price' => $data['price'],
-        'is_active' => true,
-    ]);
+    /**
+     * Update an available exam's price and status
+     */
+    public function updateAvailableExam(Request $request, AvailableExam $availableExam)
+    {
+        $lab = auth()->user()->staff->laboratory;
 
-    return back()->with('success', 'Examen disponible ajouté avec succès.');
-}
+        if ($availableExam->labo_id !== $lab->id) {
+            abort(403);
+        }
 
-public function updateAvailableExam(Request $request, AvailableExam $availableExam)
-{
-    $lab = auth()->user()->staff->laboratory;
+        $data = $request->validate([
+            'price' => 'required|numeric|min:0',
+            'is_active' => 'boolean',
+        ]);
 
-    if ($availableExam->labo_id !== $lab->id) {
-        abort(403);
+        $availableExam->update($data);
+
+        return back()->with('success', 'Examen disponible mis à jour.');
     }
 
-    $data = $request->validate([
-        'price' => 'required|numeric|min:0',
-        'is_active' => 'boolean',
-    ]);
+    /**
+     * Toggle an available exam's active status
+     */
+    public function toggleAvailableExam(AvailableExam $availableExam)
+    {
+        $lab = auth()->user()->staff->laboratory;
 
-    $availableExam->update($data);
+        if ($availableExam->labo_id !== $lab->id) {
+            abort(403);
+        }
 
-    return back()->with('success', 'Examen disponible mis à jour.');
-}
+        $availableExam->update(['is_active' => ! $availableExam->is_active]);
 
-public function toggleAvailableExam(AvailableExam $availableExam)
-{
-    $lab = auth()->user()->staff->laboratory;
-
-    if ($availableExam->labo_id !== $lab->id) {
-        abort(403);
+        return back()->with('success', 'Statut modifié.');
     }
 
-    $availableExam->update(['is_active' => !$availableExam->is_active]);
+    /**
+     * Archive an available exam
+     */
+    public function destroyAvailableExam(AvailableExam $availableExam)
+    {
+        $lab = auth()->user()->staff->laboratory;
 
-    return back()->with('success', 'Statut modifié.');
-}
+        if ($availableExam->labo_id !== $lab->id) {
+            abort(403);
+        }
 
-public function destroyAvailableExam(AvailableExam $availableExam)
-{
-    $lab = auth()->user()->staff->laboratory;
+        $availableExam->update(['is_archive' => true]);
 
-    if ($availableExam->labo_id !== $lab->id) {
-        abort(403);
+        return back()->with('success', 'Examen retiré de la liste.');
     }
-
-    $availableExam->update(['is_archive' => true]);
-
-    return back()->with('success', 'Examen retiré de la liste.');
-}
 }

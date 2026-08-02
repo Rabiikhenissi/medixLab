@@ -2,48 +2,55 @@
 
 namespace App\Services;
 
+use App\Models\AvailableExam;
+use App\Models\CnamNomenclature;
+use App\Models\Doctor;
+use App\Models\DoctorPatientAccess;
 use App\Models\ExamRequest;
 use App\Models\ExamRequestItem;
-use App\Models\DoctorPatientAccess;
-use App\Models\Doctor;
-use App\Models\Patient;
 use App\Models\Invoice;
-use App\Models\InvoiceItem;
-use App\Models\AvailableExam;
-use App\Models\CnamAffiliation;
-use App\Models\CnamNomenclature;
-use App\Models\CnamRate;
+use App\Models\Patient;
 use Illuminate\Support\Facades\DB;
 
 class ExamRequestService
 {
     /**
      * Create an exam request with items and notify the patient.
+     *
+     * @param  Doctor  $doctor  the prescribing doctor
+     * @param  Patient  $patient  the patient receiving the exam request
+     * @param  array  $examIds  ids of the exams to include
+     * @param  string|null  $clinicalNotes  optional clinical notes from the doctor
+     * @return ExamRequest the created exam request
      */
     public static function create(Doctor $doctor, Patient $patient, array $examIds, ?string $clinicalNotes): ExamRequest
     {
         return DB::transaction(function () use ($doctor, $patient, $examIds, $clinicalNotes) {
+            // Create the exam request as pending
             $examRequest = ExamRequest::create([
-                'doctor_id'     => $doctor->id,
-                'patient_id'    => $patient->id,
-                'status'        => 'pending',
-                'clinical_notes'=> $clinicalNotes,
+                'doctor_id' => $doctor->id,
+                'patient_id' => $patient->id,
+                'status' => 'pending',
+                'clinical_notes' => $clinicalNotes,
             ]);
 
+            // Attach each requested exam as a request item
             foreach ($examIds as $examId) {
                 ExamRequestItem::create([
                     'exam_request_id' => $examRequest->id,
-                    'exam_id'         => $examId,
+                    'exam_id' => $examId,
                 ]);
             }
 
+            // Notify the patient about the new exam request
             NotificationService::examRequest(
                 $patient->user_id,
-                'Dr. ' . $doctor->user->first_name . ' ' . $doctor->user->last_name .
-                    ' vous a prescrit ' . count($examIds) . ' examen(s). Consultez les détails dans vos demandes.',
+                'Dr. '.$doctor->user->first_name.' '.$doctor->user->last_name.
+                    ' vous a prescrit '.count($examIds).' examen(s). Consultez les détails dans vos demandes.',
                 $examRequest->id
             );
 
+            // Return the created exam request
             return $examRequest;
         });
     }
@@ -51,24 +58,34 @@ class ExamRequestService
     /**
      * Check if all items on a request are completed and update status accordingly.
      * TIER 2.3 — Smart Notifications: detects abnormal results, notifies doctor + patient.
+     *
+     * @param  ExamRequest  $examRequest  the exam request to check
      */
     public static function checkCompletion(ExamRequest $examRequest): void
     {
+        // Load each item with its lab result and result details
         $examRequest->load('items.resultLabo.details');
-        $allDone = $examRequest->items->every(fn($item) => $item->resultLabo !== null);
 
+        // Determine whether every item has a lab result yet
+        $allDone = $examRequest->items->every(fn ($item) => $item->resultLabo !== null);
+
+        // Mark the request as completed once all results are in
         if ($allDone && $examRequest->status !== 'completed') {
             $examRequest->update(['status' => 'completed']);
 
             // Auto-create invoice if exam request has a labo and no invoice exists
             $laboId = $examRequest->labo_id;
-            if ($laboId && !Invoice::where('exam_request_id', $examRequest->id)->exists()) {
+            if ($laboId && ! Invoice::where('exam_request_id', $examRequest->id)->exists()) {
                 self::autoCreateInvoice($examRequest, $laboId);
             }
 
+            // Collect abnormal result details for the doctor notification
             $abnormalItems = [];
+            // Inspect every result detail and flag abnormal values
             foreach ($examRequest->items as $item) {
-                if (!$item->resultLabo) continue;
+                if (! $item->resultLabo) {
+                    continue;
+                }
                 foreach ($item->resultLabo->details as $detail) {
                     if (in_array($detail->status, ['high', 'low', 'abnormal'])) {
                         $abnormalItems[] = [
@@ -82,27 +99,29 @@ class ExamRequestService
                 }
             }
 
+            // Notify the doctor about the completed results
             if ($examRequest->doctor && $examRequest->doctor->user) {
                 $patientUser = $examRequest->patient->user;
-                $patientName = $patientUser->first_name . ' ' . $patientUser->last_name;
+                $patientName = $patientUser->first_name.' '.$patientUser->last_name;
 
-                if (!empty($abnormalItems)) {
+                // Notify the doctor about the abnormal parameters
+                if (! empty($abnormalItems)) {
                     $abnormalSummary = collect($abnormalItems)->take(3)->map(
-                        fn($a) => $a['parameter'] . ': ' . $a['value'] . ' ' . $a['unit'] . ' (' . $a['status'] . ')'
+                        fn ($a) => $a['parameter'].': '.$a['value'].' '.$a['unit'].' ('.$a['status'].')'
                     )->implode(', ');
 
                     NotificationService::send(
                         $examRequest->doctor->user->id,
-                        '⚠ Anomalies détectées — ' . $patientName,
-                        count($abnormalItems) . ' paramètre(s) anormal(s) détecté(s) pour ' . $patientName . '. ' .
-                        $abnormalSummary . '. Veuillez rédiger votre interprétation.',
+                        '⚠ Anomalies détectées — '.$patientName,
+                        count($abnormalItems).' paramètre(s) anormal(s) détecté(s) pour '.$patientName.'. '.
+                        $abnormalSummary.'. Veuillez rédiger votre interprétation.',
                         'exam_request',
                         $examRequest->id
                     );
                 } else {
                     NotificationService::resultsReady(
                         $examRequest->doctor->user->id,
-                        'Toutes les analyses pour ' . $patientName . ' sont terminées. Aucune anomalie détectée. Vous pouvez rédiger votre interprétation.',
+                        'Toutes les analyses pour '.$patientName.' sont terminées. Aucune anomalie détectée. Vous pouvez rédiger votre interprétation.',
                         $examRequest->id
                     );
                 }
@@ -112,6 +131,9 @@ class ExamRequestService
 
     /**
      * Auto-create an invoice when exam results are completed.
+     *
+     * @param  ExamRequest  $examRequest  the completed exam request to bill
+     * @param  int  $laboId  the laboratory that will issue the invoice
      */
     protected static function autoCreateInvoice(ExamRequest $examRequest, int $laboId): void
     {
@@ -169,7 +191,7 @@ class ExamRequestService
 
         DB::transaction(function () use ($examRequest, $laboId, $totalAmount, $cnamAmount, $patientAmount, $invoiceItems, $seq) {
             $invoice = Invoice::create([
-                'invoice_number' => 'FAC-' . $laboId . '-' . str_pad($seq, 4, '0', STR_PAD_LEFT),
+                'invoice_number' => 'FAC-'.$laboId.'-'.str_pad($seq, 4, '0', STR_PAD_LEFT),
                 'patient_id' => $examRequest->patient_id,
                 'labo_id' => $laboId,
                 'exam_request_id' => $examRequest->id,
@@ -193,6 +215,7 @@ class ExamRequestService
      */
     public static function checkAccessExpiry(): void
     {
+        // Find granted accesses that expire within the next 7 days
         $expiringSoon = DoctorPatientAccess::where('access_status', 'granted')
             ->whereNotNull('expires_at')
             ->where('expires_at', '<=', now()->addDays(7))
@@ -200,25 +223,28 @@ class ExamRequestService
             ->with(['doctor.user', 'patient.user'])
             ->get();
 
+        // Remind both the patient and the doctor before access expires
         foreach ($expiringSoon as $access) {
             $daysLeft = (int) $access->expires_at->diffInDays(now());
-            $patientName = $access->patient->user->first_name . ' ' . $access->patient->user->last_name;
-            $doctorName = 'Dr. ' . $access->doctor->user->first_name . ' ' . $access->doctor->user->last_name;
+            $patientName = $access->patient->user->first_name.' '.$access->patient->user->last_name;
+            $doctorName = 'Dr. '.$access->doctor->user->first_name.' '.$access->doctor->user->last_name;
 
+            // Notify the patient that the doctor's access is about to expire
             NotificationService::send(
                 $access->patient->user_id,
-                'Accès expire dans ' . $daysLeft . ' jour(s)',
-                $doctorName . ' a accès à votre dossier médical. Cet accès expire le ' .
-                $access->expires_at->format('d/m/Y') . '. Souhaitez-vous le renouveler ?',
+                'Accès expire dans '.$daysLeft.' jour(s)',
+                $doctorName.' a accès à votre dossier médical. Cet accès expire le '.
+                $access->expires_at->format('d/m/Y').'. Souhaitez-vous le renouveler ?',
                 'access_request',
                 $access->id
             );
 
+            // Notify the doctor that their patient access is about to expire
             NotificationService::send(
                 $access->doctor->user->id,
                 'Accès patient expire bientôt',
-                'Votre accès au dossier de ' . $patientName . ' expire le ' .
-                $access->expires_at->format('d/m/Y') . '. Le patient devra confirmer le renouvellement.',
+                'Votre accès au dossier de '.$patientName.' expire le '.
+                $access->expires_at->format('d/m/Y').'. Le patient devra confirmer le renouvellement.',
                 'general',
                 $access->id
             );

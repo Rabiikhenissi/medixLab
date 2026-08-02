@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Official CNAM nomenclature entry mapping an exam to its base value and rate.
+ */
 class CnamNomenclature extends Model
 {
     protected $fillable = ['code_cnam', 'exam_name', 'valeur_b', 'taux', 'description', 'is_active'];

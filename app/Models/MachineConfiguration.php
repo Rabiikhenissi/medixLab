@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use App\Models\Traits\ActiveScoped;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Model;
 
 #[Fillable(['labo_id', 'name', 'host', 'port', 'protocol', 'mllp_port', 'api_key', 'timeout', 'enabled', 'is_archive'])]
+/**
+ * Connection settings for an external laboratory machine integrated via HL7.
+ */
 class MachineConfiguration extends Model
 {
     use ActiveScoped;
@@ -24,13 +27,15 @@ class MachineConfiguration extends Model
         ];
     }
 
+    /** The laboratory owning this machine configuration. */
     public function laboratory()
     {
         return $this->belongsTo(Labo::class, 'labo_id');
     }
 
+    /** Base http url built from the configured host and port. */
     public function getBaseUrl(): string
     {
-        return 'http://' . $this->host . ':' . $this->port;
+        return 'http://'.$this->host.':'.$this->port;
     }
 }

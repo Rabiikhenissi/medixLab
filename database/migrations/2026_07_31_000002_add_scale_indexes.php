@@ -23,16 +23,20 @@ return new class extends Migration
         Schema::table('exams', function (Blueprint $table) {
             $table->index('code');
             $table->index('category');
-            $table->fullText('name', 'exams_name_fulltext');
-            $table->fullText('description', 'exams_description_fulltext');
+            if (Schema::getConnection()->getDriverName() === 'mysql') {
+                $table->fullText('name', 'exams_name_fulltext');
+                $table->fullText('description', 'exams_description_fulltext');
+            }
         });
 
         Schema::table('users', function (Blueprint $table) {
             $table->index('first_name');
             $table->index('last_name');
             $table->index('email');
-            $table->fullText('first_name', 'users_first_name_fulltext');
-            $table->fullText('last_name', 'users_last_name_fulltext');
+            if (Schema::getConnection()->getDriverName() === 'mysql') {
+                $table->fullText('first_name', 'users_first_name_fulltext');
+                $table->fullText('last_name', 'users_last_name_fulltext');
+            }
         });
 
         Schema::table('labos', function (Blueprint $table) {
@@ -80,15 +84,19 @@ return new class extends Migration
         Schema::table('exams', function (Blueprint $table) {
             $table->dropIndex(['code']);
             $table->dropIndex(['category']);
-            $table->dropIndex('exams_name_fulltext');
-            $table->dropIndex('exams_description_fulltext');
+            if (Schema::getConnection()->getDriverName() === 'mysql') {
+                $table->dropIndex('exams_name_fulltext');
+                $table->dropIndex('exams_description_fulltext');
+            }
         });
         Schema::table('users', function (Blueprint $table) {
             $table->dropIndex(['first_name']);
             $table->dropIndex(['last_name']);
             $table->dropIndex(['email']);
-            $table->dropIndex('users_first_name_fulltext');
-            $table->dropIndex('users_last_name_fulltext');
+            if (Schema::getConnection()->getDriverName() === 'mysql') {
+                $table->dropIndex('users_first_name_fulltext');
+                $table->dropIndex('users_last_name_fulltext');
+            }
         });
         Schema::table('labos', function (Blueprint $table) {
             $table->dropIndex(['city']);

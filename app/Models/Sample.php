@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Biological sample collected for a lab result, tracked by barcode through its lifecycle.
+ */
 class Sample extends Model
 {
     protected $fillable = [
@@ -22,26 +25,31 @@ class Sample extends Model
         ];
     }
 
+    /** The exam request item this sample was collected for. */
     public function examRequestItem()
     {
         return $this->belongsTo(ExamRequestItem::class);
     }
 
+    /** The patient the sample belongs to. */
     public function patient()
     {
         return $this->belongsTo(Patient::class);
     }
 
+    /** The laboratory handling the sample. */
     public function labo()
     {
         return $this->belongsTo(Labo::class);
     }
 
+    /** The staff member who collected the sample. */
     public function collector()
     {
         return $this->belongsTo(Staff::class, 'collected_by');
     }
 
+    /** Scan history for the sample barcode. */
     public function barcodeLogs()
     {
         return $this->hasMany(SampleBarcodeLog::class);

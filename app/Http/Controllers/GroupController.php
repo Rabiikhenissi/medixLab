@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Group;
 use App\Models\Feature;
+use App\Models\Group;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
 
 class GroupController extends Controller
 {
@@ -13,6 +15,8 @@ class GroupController extends Controller
 
     /**
      * Display a listing of groups.
+     *
+     * @return View
      */
     public function index(Request $request)
     {
@@ -21,15 +25,17 @@ class GroupController extends Controller
 
         $query = Group::withCount('users');
 
-        if (!$showArchived) {
+        // hide archived groups unless explicitly requested
+        if (! $showArchived) {
             $query->where(function ($q) {
                 $q->where('is_archive', false)->orWhereNull('is_archive');
             });
         }
 
+        // narrow results by search keyword
         if ($search) {
             $query->where('name', 'like', "%{$search}%")
-                  ->orWhere('code', 'like', "%{$search}%");
+                ->orWhere('code', 'like', "%{$search}%");
         }
 
         $groups = $query->orderBy('name', 'asc')->paginate(10)->appends($request->query());
@@ -43,9 +49,12 @@ class GroupController extends Controller
 
     /**
      * Show the form for creating a new group.
+     *
+     * @return View
      */
     public function create()
     {
+        // load all non-archived features with their actions for the form
         $features = Feature::with(['actions' => function ($q) {
             $q->where('is_archive', false)->orWhereNull('is_archive');
         }])->where('is_archive', false)->orWhereNull('is_archive')->get();
@@ -57,9 +66,12 @@ class GroupController extends Controller
 
     /**
      * Store a newly created group in storage.
+     *
+     * @return RedirectResponse
      */
     public function store(Request $request)
     {
+        // validate the group fields and its actions
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:255|unique:groups,code',
@@ -80,20 +92,24 @@ class GroupController extends Controller
             'is_archive' => false,
         ]);
 
-        if (!empty($data['actions'])) {
+        // attach the granted actions to the group
+        if (! empty($data['actions'])) {
             $group->actions()->sync($data['actions']);
         }
 
+        // redirect back to the groups list
         return redirect()->route('admin.groups.index')->with('success', 'Rôle créé avec succès.');
     }
 
     /**
      * Show the form for editing the specified group.
+     *
+     * @return View
      */
     public function edit(Group $group)
     {
 
-
+        // load all non-archived features with their actions for the form
         $features = Feature::with(['actions' => function ($q) {
             $q->where('is_archive', false)->orWhereNull('is_archive');
         }])->where('is_archive', false)->orWhereNull('is_archive')->get();
@@ -109,20 +125,23 @@ class GroupController extends Controller
 
     /**
      * Update the specified group in storage.
+     *
+     * @return RedirectResponse
      */
     public function update(Request $request, Group $group)
     {
 
-
+        // validate the group fields and its actions
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'code' => 'required|string|max:255|unique:groups,code,' . $group->id,
+            'code' => 'required|string|max:255|unique:groups,code,'.$group->id,
             'actions' => 'nullable|array',
             'actions.*' => 'exists:actions,id',
         ]);
 
         $code = Str::slug($data['code']);
 
+        // reject duplicated slugified codes on other groups
         if (Group::where('code', $code)->where('id', '!=', $group->id)->exists()) {
             return back()->withErrors(['code' => 'Ce code de groupe est déjà utilisé.'])->withInput();
         }
@@ -140,10 +159,11 @@ class GroupController extends Controller
 
     /**
      * Remove the specified group from storage.
+     *
+     * @return RedirectResponse
      */
     public function destroy(Group $group)
     {
-
 
         // Check if group is assigned to active users
         if ($group->users()->exists()) {
@@ -151,7 +171,7 @@ class GroupController extends Controller
         }
 
         // Toggle archive status
-        $group->update(['is_archive' => !$group->is_archive]);
+        $group->update(['is_archive' => ! $group->is_archive]);
 
         $message = $group->is_archive
             ? 'Rôle archivé avec succès.'
@@ -162,6 +182,8 @@ class GroupController extends Controller
 
     /**
      * Permanently remove the specified group from storage.
+     *
+     * @return RedirectResponse
      */
     public function forceDelete(Group $group)
     {

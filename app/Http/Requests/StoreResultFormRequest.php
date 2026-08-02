@@ -4,8 +4,12 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Validation for storing a lab result with parameters, consumables and equipment.
+ */
 class StoreResultFormRequest extends FormRequest
 {
+    /** Only authenticated center staff may store lab results. */
     public function authorize(): bool
     {
         return auth()->check() && auth()->user()->staff !== null;
@@ -14,17 +18,17 @@ class StoreResultFormRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'interpretation'         => 'nullable|string',
-            'parameters'             => 'required|array|min:1',
-            'parameters.*.name'      => 'required|string',
-            'parameters.*.value'     => 'required|string',
-            'parameters.*.status'    => 'required|in:normal,high,low',
-            'parameters.*.range'     => 'nullable|string',
-            'consumables'            => 'nullable|array',
-            'consumables.*.id'       => 'required|exists:consumables,id',
+            'interpretation' => 'nullable|string',
+            'parameters' => 'required|array|min:1',
+            'parameters.*.name' => 'required|string',
+            'parameters.*.value' => 'required|string',
+            'parameters.*.status' => 'required|in:normal,high,low',
+            'parameters.*.range' => 'nullable|string',
+            'consumables' => 'nullable|array',
+            'consumables.*.id' => 'required|exists:consumables,id',
             'consumables.*.quantity' => 'required|integer|min:1',
-            'equipment'              => 'nullable|array',
-            'equipment.*'            => 'required|exists:equipment,id',
+            'equipment' => 'nullable|array',
+            'equipment.*' => 'required|exists:equipment,id',
         ];
     }
 }

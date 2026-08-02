@@ -2,22 +2,22 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
+use App\Models\ChatMessage;
 use App\Models\Doctor;
-use App\Models\Patient;
-use App\Models\Staff;
-use App\Models\Labo;
+use App\Models\DoctorPatientAccess;
 use App\Models\Exam;
 use App\Models\ExamParameter;
 use App\Models\ExamRequest;
 use App\Models\ExamRequestItem;
+use App\Models\Labo;
+use App\Models\Notification;
+use App\Models\Patient;
 use App\Models\ResultLabo;
 use App\Models\ResultLaboDetail;
-use App\Models\DoctorPatientAccess;
-use App\Models\Notification;
-use App\Models\ChatMessage;
-use Illuminate\Database\Seeder;
+use App\Models\Staff;
+use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
 
 class DemoDataSeeder extends Seeder
 {
@@ -34,7 +34,9 @@ class DemoDataSeeder extends Seeder
         $doctors = Doctor::pluck('id')->toArray();
         $patients = Patient::pluck('id')->toArray();
 
-        if (empty($doctors) || empty($patients)) return;
+        if (empty($doctors) || empty($patients)) {
+            return;
+        }
 
         $statuses = ['granted', 'granted', 'granted', 'pending', 'revoked'];
 
@@ -60,7 +62,9 @@ class DemoDataSeeder extends Seeder
         $staffUsers = Staff::pluck('id')->toArray();
         $allExamIds = Exam::pluck('id')->toArray();
 
-        if (empty($doctors) || empty($patients) || empty($allExamIds)) return;
+        if (empty($doctors) || empty($patients) || empty($allExamIds)) {
+            return;
+        }
 
         $statuses = ['pending', 'assigned', 'collected', 'processing', 'completed'];
 
@@ -80,7 +84,9 @@ class DemoDataSeeder extends Seeder
 
             $numExams = rand(1, 4);
             $chosen = array_rand(array_flip($allExamIds), min($numExams, count($allExamIds)));
-            if (!is_array($chosen)) $chosen = [$chosen];
+            if (! is_array($chosen)) {
+                $chosen = [$chosen];
+            }
 
             foreach ($chosen as $examId) {
                 $item = ExamRequestItem::create([
@@ -92,7 +98,7 @@ class DemoDataSeeder extends Seeder
                 if (in_array($status, ['processing', 'completed'])) {
                     $result = ResultLabo::create([
                         'exam_request_item_id' => $item->id,
-                        'staff_id' => !empty($staffUsers) ? $staffUsers[array_rand($staffUsers)] : null,
+                        'staff_id' => ! empty($staffUsers) ? $staffUsers[array_rand($staffUsers)] : null,
                         'interpretation' => $this->getRandomInterpretation(),
                         'is_archive' => false,
                         'created_at' => $request->created_at->addHours(rand(1, 48)),
@@ -138,7 +144,9 @@ class DemoDataSeeder extends Seeder
     private function seedNotifications(): void
     {
         $users = User::where('is_archive', false)->where('group_id', '!=', null)->get();
-        if ($users->isEmpty()) return;
+        if ($users->isEmpty()) {
+            return;
+        }
 
         $notifications = [
             ['title' => 'Nouvelle demande d\'acces', 'message' => 'Un medecin a demande l\'acces a votre dossier medical.', 'notification_type' => 'access_request'],
@@ -167,7 +175,9 @@ class DemoDataSeeder extends Seeder
         $doctors = Doctor::with('user')->get();
         $patients = Patient::with('user')->get();
 
-        if ($doctors->isEmpty() || $patients->isEmpty()) return;
+        if ($doctors->isEmpty() || $patients->isEmpty()) {
+            return;
+        }
 
         $messages = [
             'Bonjour, avez-vous recu mes resultats ?',
@@ -186,7 +196,9 @@ class DemoDataSeeder extends Seeder
         for ($i = 0; $i < 10; $i++) {
             $doc = $doctors->random();
             $pat = $patients->random();
-            if (!$doc->user || !$pat->user) continue;
+            if (! $doc->user || ! $pat->user) {
+                continue;
+            }
 
             $sender = rand(0, 1) ? $doc->user : $pat->user;
             $receiver = $sender->id === $doc->user->id ? $pat->user : $doc->user;
@@ -200,22 +212,27 @@ class DemoDataSeeder extends Seeder
             $count++;
         }
 
-        $this->command->info($count . ' chat messages seeded.');
+        $this->command->info($count.' chat messages seeded.');
     }
 
     private function parseNormalRange(string $range): array
     {
-        $min = 0; $max = 100; $mid = 50;
+        $min = 0;
+        $max = 100;
+        $mid = 50;
         $clean = preg_replace('/\s*\(.*?\)/', '', $range);
         $clean = trim(explode('/', $clean)[0]);
 
         if (preg_match('/([\d.]+)\s*-\s*([\d.]+)/', $clean, $m)) {
-            $min = (float) $m[1]; $max = (float) $m[2];
+            $min = (float) $m[1];
+            $max = (float) $m[2];
             $mid = round(($min + $max) / 2, 2);
         } elseif (preg_match('/<\s*([\d.]+)/', $clean, $m)) {
-            $max = (float) $m[1]; $mid = round($max * 0.6, 2);
+            $max = (float) $m[1];
+            $mid = round($max * 0.6, 2);
         } elseif (preg_match('/>\s*([\d.]+)/', $clean, $m)) {
-            $min = (float) $m[1]; $mid = round($min * 1.3, 2);
+            $min = (float) $m[1];
+            $mid = round($min * 1.3, 2);
         }
 
         return ['min' => $min, 'max' => $max, 'mid' => $mid];
@@ -233,6 +250,7 @@ class DemoDataSeeder extends Seeder
             'Recherche de maladie auto-immune', 'Suivi d\'une grossesse',
             'Controle post-hospitalisation',
         ];
+
         return $notes[array_rand($notes)];
     }
 
@@ -255,6 +273,7 @@ class DemoDataSeeder extends Seeder
             'Fonction renale normale, DFG > 90 mL/min',
             'RAS, tous les parametres dans les normes',
         ];
+
         return $interpretations[array_rand($interpretations)];
     }
 }
