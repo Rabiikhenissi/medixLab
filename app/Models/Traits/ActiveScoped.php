@@ -4,6 +4,9 @@ namespace App\Models\Traits;
 
 use Illuminate\Database\Eloquent\Builder;
 
+/**
+ * Shared query scope exposing only non-archived records.
+ */
 trait ActiveScoped
 {
     /**
@@ -11,6 +14,6 @@ trait ActiveScoped
      */
     public function scopeActive(Builder $query): Builder
     {
-        return $query->where($this->getTable() . '.is_archive', false);
+        return $query->where($this->getTable().'.is_archive', false);
     }
 }

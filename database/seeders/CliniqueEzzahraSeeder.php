@@ -2,17 +2,17 @@
 
 namespace Database\Seeders;
 
+use App\Models\AvailableExam;
+use App\Models\CnamAffiliation;
 use App\Models\CnamNomenclature;
 use App\Models\CnamRate;
-use App\Models\CnamAffiliation;
-use App\Models\AvailableExam;
-use App\Models\Invoice;
-use App\Models\InvoiceItem;
-use App\Models\Sample;
-use App\Models\SampleBarcodeLog;
+use App\Models\Exam;
 use App\Models\ExamRequest;
 use App\Models\ExamRequestItem;
-use App\Models\Exam;
+use App\Models\Invoice;
+use App\Models\MachineConfiguration;
+use App\Models\Sample;
+use App\Models\SampleBarcodeLog;
 use Illuminate\Database\Seeder;
 
 class CliniqueEzzahraSeeder extends Seeder
@@ -56,7 +56,7 @@ class CliniqueEzzahraSeeder extends Seeder
                 ]
             );
         }
-        $this->command->info('Created ' . count($cnamData) . ' CNAM nomenclatures');
+        $this->command->info('Created '.count($cnamData).' CNAM nomenclatures');
 
         // ============================================================
         // 2. CNAM RATES
@@ -72,7 +72,7 @@ class CliniqueEzzahraSeeder extends Seeder
                 ['label' => $r['label'], 'taux' => $r['taux'], 'is_active' => true]
             );
         }
-        $this->command->info('Created ' . count($rates) . ' CNAM rates');
+        $this->command->info('Created '.count($rates).' CNAM rates');
 
         // ============================================================
         // 3. CNAM AFFILIATION for patient 11
@@ -81,14 +81,14 @@ class CliniqueEzzahraSeeder extends Seeder
         CnamAffiliation::updateOrCreate(
             ['patient_id' => $patientId],
             [
-                'cnam_number' => 'CNAM-' . str_pad($patientId, 8, '0', STR_PAD_LEFT),
-                'affiliation_number' => 'AFF-' . str_pad($patientId, 8, '0', STR_PAD_LEFT),
+                'cnam_number' => 'CNAM-'.str_pad($patientId, 8, '0', STR_PAD_LEFT),
+                'affiliation_number' => 'AFF-'.str_pad($patientId, 8, '0', STR_PAD_LEFT),
                 'cnam_rate_id' => $rateId,
                 'valid_until' => now()->addYear(),
                 'is_active' => true,
             ]
         );
-        $this->command->info('Created CNAM affiliation for patient ' . $patientId);
+        $this->command->info('Created CNAM affiliation for patient '.$patientId);
 
         // ============================================================
         // 4. AVAILABLE EXAMS for Clinique Ezzahra
@@ -108,7 +108,7 @@ class CliniqueEzzahraSeeder extends Seeder
                 ['price' => $price, 'is_active' => true, 'is_archive' => false]
             );
         }
-        $this->command->info('Created ' . count($examPrices) . ' available exams');
+        $this->command->info('Created '.count($examPrices).' available exams');
 
         // ============================================================
         // 5. INVOICES from completed exam requests (with CNAM)
@@ -129,10 +129,14 @@ class CliniqueEzzahraSeeder extends Seeder
 
         foreach ($completedIds as $erId) {
             $er = ExamRequest::find($erId);
-            if (!$er) continue;
+            if (! $er) {
+                continue;
+            }
 
             $items = $itemsGrouped->get($erId, collect());
-            if ($items->isEmpty()) continue;
+            if ($items->isEmpty()) {
+                continue;
+            }
 
             $totalAmount = 0;
             $cnamAmount = 0;
@@ -170,7 +174,7 @@ class CliniqueEzzahraSeeder extends Seeder
             $patientAmount = max(0, $totalAmount - $cnamAmount);
 
             $invoice = Invoice::create([
-                'invoice_number' => 'FAC-' . $laboId . '-' . str_pad($erId, 4, '0', STR_PAD_LEFT),
+                'invoice_number' => 'FAC-'.$laboId.'-'.str_pad($erId, 4, '0', STR_PAD_LEFT),
                 'patient_id' => $patientId,
                 'labo_id' => $laboId,
                 'exam_request_id' => $erId,
@@ -179,7 +183,7 @@ class CliniqueEzzahraSeeder extends Seeder
                 'cnam_amount' => $cnamAmount,
                 'patient_amount' => $patientAmount,
                 'paid_amount' => 0,
-                'notes' => 'Facture générée depuis la demande #' . $erId,
+                'notes' => 'Facture générée depuis la demande #'.$erId,
             ]);
 
             foreach ($invoiceItems as $iid) {
@@ -196,10 +200,12 @@ class CliniqueEzzahraSeeder extends Seeder
         $created = 0;
         foreach ($itemsGrouped as $erId => $items) {
             foreach ($items as $item) {
-                if ($created >= 6) break 2;
+                if ($created >= 6) {
+                    break 2;
+                }
 
                 $material = $materialTypes[array_rand($materialTypes)];
-                $sampleCode = 'SMP-' . $laboId . '-' . str_pad($item->id, 5, '0', STR_PAD_LEFT);
+                $sampleCode = 'SMP-'.$laboId.'-'.str_pad($item->id, 5, '0', STR_PAD_LEFT);
 
                 $sample = Sample::create([
                     'sample_code' => $sampleCode,
@@ -218,13 +224,83 @@ class CliniqueEzzahraSeeder extends Seeder
                     'sample_id' => $sample->id,
                     'action' => 'created',
                     'staff_id' => $staffId,
-                    'notes' => 'Échantillon créé avec code ' . $sampleCode,
+                    'notes' => 'Échantillon créé avec code '.$sampleCode,
                 ]);
 
                 $this->command->info("Created sample [{$sample->id}] {$sampleCode} ({$material})");
                 $created++;
             }
         }
+
+        // ============================================================
+        // 5. LAB MACHINE CONFIGURATIONS (LIS connections)
+        // ============================================================
+        $machines = [
+            [
+                'name' => 'Finecare FIA Meter Plus (Wondfo)',
+                'host' => '127.0.0.1',
+                'port' => 5011,
+                'mllp_port' => 5011,
+                'timeout' => 15,
+                'enabled' => false,
+            ],
+            [
+                'name' => 'Wondfo Finecare Mini',
+                'host' => '127.0.0.1',
+                'port' => 5012,
+                'mllp_port' => 5012,
+                'timeout' => 15,
+                'enabled' => false,
+            ],
+            [
+                'name' => 'Zybio Z3 (Hématologie 3 part.)',
+                'host' => '127.0.0.1',
+                'port' => 5013,
+                'mllp_port' => 5013,
+                'timeout' => 15,
+                'enabled' => false,
+            ],
+            [
+                'name' => 'ELITechGroup Selectra ProS (Biochimie)',
+                'host' => '127.0.0.1',
+                'port' => 5014,
+                'mllp_port' => 5014,
+                'timeout' => 15,
+                'enabled' => false,
+            ],
+            [
+                'name' => 'Mindray BA-88A (Biochimie semi-auto)',
+                'host' => '127.0.0.1',
+                'port' => 5015,
+                'mllp_port' => 5015,
+                'timeout' => 15,
+                'enabled' => false,
+            ],
+            [
+                'name' => 'Boditech iCHROMA II (FIA)',
+                'host' => '127.0.0.1',
+                'port' => 5016,
+                'mllp_port' => 5016,
+                'timeout' => 15,
+                'enabled' => false,
+            ],
+        ];
+
+        $machineCount = 0;
+        foreach ($machines as $machine) {
+            MachineConfiguration::updateOrCreate(
+                ['labo_id' => $laboId, 'name' => $machine['name']],
+                array_merge([
+                    'protocol' => 'hl7_mllp',
+                    'api_key' => null,
+                    'enabled' => false,
+                    'is_archive' => false,
+                ], $machine)
+            );
+            $machineCount++;
+        }
+
+        $this->command->info("Created {$machineCount} machine configurations (all disabled until connected)");
 
         $this->command->info('Seeding complete!');
     }

@@ -2,13 +2,13 @@
 
 namespace Database\Seeders;
 
-use App\Models\Labo;
-use App\Models\Exam;
 use App\Models\AvailableExam;
-use App\Models\ExamConsumable;
-use App\Models\ExamEquipment;
 use App\Models\Consumable;
 use App\Models\Equipment;
+use App\Models\Exam;
+use App\Models\ExamConsumable;
+use App\Models\ExamEquipment;
+use App\Models\Labo;
 use Illuminate\Database\Seeder;
 
 class ExamResourceSeeder extends Seeder
@@ -20,6 +20,7 @@ class ExamResourceSeeder extends Seeder
 
         if ($labs->isEmpty() || $exams->isEmpty()) {
             $this->command->info('No labs or exams found, skipping available exams.');
+
             return;
         }
 
@@ -45,7 +46,7 @@ class ExamResourceSeeder extends Seeder
             }
         }
 
-        $this->command->info($labs->count() . ' labs x ' . $exams->count() . ' exams = available exams seeded.');
+        $this->command->info($labs->count().' labs x '.$exams->count().' exams = available exams seeded.');
 
         $examEquipmentMap = [
             'NFS' => 'Analyseur d\'Hematologie Laser 5 Populations',

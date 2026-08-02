@@ -2,16 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Feature;
 use App\Models\Action;
+use App\Models\Feature;
+use App\Support\Heroicons;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use App\Support\Heroicons;
+use Illuminate\View\View;
 
 class FeatureController extends Controller
 {
     /**
      * Display a listing of features.
+     *
+     * @return View
      */
     public function index(Request $request)
     {
@@ -22,12 +26,14 @@ class FeatureController extends Controller
             $q->where('is_archive', false)->orWhereNull('is_archive');
         }]);
 
-        if (!$showArchived) {
+        // hide archived features unless explicitly requested
+        if (! $showArchived) {
             $query->where(function ($q) {
                 $q->where('is_archive', false)->orWhereNull('is_archive');
             });
         }
 
+        // narrow results by search keyword
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
@@ -54,15 +60,18 @@ class FeatureController extends Controller
     public function create()
     {
         return view('admin.features.create', [
-            'icons' => Heroicons::all()
+            'icons' => Heroicons::all(),
         ]);
     }
 
     /**
      * Store a newly created feature in storage.
+     *
+     * @return RedirectResponse
      */
     public function store(Request $request)
     {
+        // validate the feature and its optional actions
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:255|unique:features,code',
@@ -78,12 +87,14 @@ class FeatureController extends Controller
 
         $code = Str::slug($data['code']);
 
+        // reject duplicated slugified codes
         if (Feature::where('code', $code)->exists()) {
             return back()->withErrors(['code' => 'Ce code de module est déjà utilisé.'])->withInput();
         }
 
+        // collect and validate the submitted actions
         $actionsData = [];
-        if (!empty($request->input('actions'))) {
+        if (! empty($request->input('actions'))) {
             $actionCodes = [];
             foreach ($request->input('actions') as $actionInput) {
                 if (empty($actionInput['name']) || empty($actionInput['code'])) {
@@ -105,13 +116,14 @@ class FeatureController extends Controller
             }
         }
 
+        // create the feature and attach its actions
         $feature = Feature::create([
             'name' => $data['name'],
             'code' => $code,
             'route_name' => $data['route_name'] ?: null,
             'icon' => $data['icon'] ?: null,
-            'is_sidebar' => (bool)$data['is_sidebar'],
-            'order' => (int)$data['order'],
+            'is_sidebar' => (bool) $data['is_sidebar'],
+            'order' => (int) $data['order'],
             'view_permission' => $data['view_permission'] ?: null,
             'is_archive' => false,
         ]);
@@ -120,11 +132,14 @@ class FeatureController extends Controller
             $feature->actions()->create($act);
         }
 
+        // redirect back to the features list
         return redirect()->route('admin.features.index')->with('success', 'Module créé avec succès.');
     }
 
     /**
      * Show the form for editing the specified feature.
+     *
+     * @return View
      */
     public function edit(Feature $feature)
     {
@@ -136,18 +151,21 @@ class FeatureController extends Controller
         return view('admin.features.edit', [
             'feature' => $feature,
             'actions' => $actions,
-            'icons' => Heroicons::all()
+            'icons' => Heroicons::all(),
         ]);
     }
 
     /**
      * Update the specified feature in storage.
+     *
+     * @return RedirectResponse
      */
     public function update(Request $request, Feature $feature)
     {
+        // validate the feature fields
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'code' => 'required|string|max:255|unique:features,code,' . $feature->id,
+            'code' => 'required|string|max:255|unique:features,code,'.$feature->id,
             'route_name' => 'nullable|string|max:255',
             'icon' => 'nullable|string',
             'is_sidebar' => 'required|boolean',
@@ -157,6 +175,7 @@ class FeatureController extends Controller
 
         $code = Str::slug($data['code']);
 
+        // reject duplicated slugified codes on other features
         if (Feature::where('code', $code)->where('id', '!=', $feature->id)->exists()) {
             return back()->withErrors(['code' => 'Ce code de module est déjà utilisé.'])->withInput();
         }
@@ -166,8 +185,8 @@ class FeatureController extends Controller
             'code' => $code,
             'route_name' => $data['route_name'] ?: null,
             'icon' => $data['icon'] ?: null,
-            'is_sidebar' => (bool)$data['is_sidebar'],
-            'order' => (int)$data['order'],
+            'is_sidebar' => (bool) $data['is_sidebar'],
+            'order' => (int) $data['order'],
             'view_permission' => $data['view_permission'] ?: null,
         ]);
 
@@ -176,11 +195,13 @@ class FeatureController extends Controller
 
     /**
      * Remove the specified feature from storage.
+     *
+     * @return RedirectResponse
      */
     public function destroy(Feature $feature)
     {
         // Toggle archive status
-        $feature->update(['is_archive' => !$feature->is_archive]);
+        $feature->update(['is_archive' => ! $feature->is_archive]);
 
         $message = $feature->is_archive
             ? 'Module archivé avec succès.'
@@ -191,6 +212,8 @@ class FeatureController extends Controller
 
     /**
      * Permanently remove the specified feature from storage.
+     *
+     * @return RedirectResponse
      */
     public function forceDelete(Feature $feature)
     {
@@ -201,9 +224,12 @@ class FeatureController extends Controller
 
     /**
      * Store a newly created action under this feature.
+     *
+     * @return RedirectResponse
      */
     public function storeAction(Request $request, Feature $feature)
     {
+        // validate the action fields
         $data = $request->validate([
             'action_name' => 'required|string|max:255',
             'action_code' => 'required|string|max:255|unique:actions,code',
@@ -211,6 +237,7 @@ class FeatureController extends Controller
 
         $actionCode = Str::slug($data['action_code']);
 
+        // reject duplicated slugified action codes
         if (Action::where('code', $actionCode)->exists()) {
             return back()->withErrors(['action_code' => 'Ce code d\'action est déjà utilisé.'])->withInput();
         }
@@ -222,14 +249,18 @@ class FeatureController extends Controller
             'is_archive' => false,
         ]);
 
+        // redirect back to the edit page
         return back()->with('success', 'Action ajoutée avec succès.');
     }
 
     /**
      * Update the specified action.
+     *
+     * @return RedirectResponse
      */
     public function updateAction(Request $request, Action $action)
     {
+        // validate the action fields
         $data = $request->validate([
             'action_name' => 'required|string|max:255',
             'action_code' => 'required|string|max:255',
@@ -237,6 +268,7 @@ class FeatureController extends Controller
 
         $actionCode = Str::slug($data['action_code']);
 
+        // reject duplicated slugified action codes on other actions
         if (Action::where('code', $actionCode)->where('id', '!=', $action->id)->exists()) {
             return back()->withErrors(['action_code' => 'Ce code d\'action est déjà utilisé.'])->withInput();
         }
@@ -246,11 +278,14 @@ class FeatureController extends Controller
             'code' => $actionCode,
         ]);
 
+        // redirect back to the edit page
         return back()->with('success', 'Action mise à jour avec succès.');
     }
 
     /**
      * Remove the specified action from storage.
+     *
+     * @return RedirectResponse
      */
     public function destroyAction(Action $action)
     {

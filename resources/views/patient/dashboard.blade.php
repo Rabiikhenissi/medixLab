@@ -167,7 +167,7 @@
                                     <div class="flex items-center space-x-3">
                                         <div
                                             class="w-8 h-8 rounded-lg bg-[#0D9488]/10 flex items-center justify-center text-[#0D9488] font-bold text-sm">
-                                            {{ $user->patient->examRequests()->count() }}
+                                            {{ $patientStats['examRequestsCount'] }}
                                         </div>
                                         <span class="text-xs font-semibold text-[#64748b]">{{ __("Demandes d'analyses") }}</span>
                                     </div>
@@ -178,7 +178,7 @@
                                     <div class="flex items-center space-x-3">
                                         <div
                                             class="w-8 h-8 rounded-lg bg-[#0D9488]/10 flex items-center justify-center text-[#0D9488] font-bold text-sm">
-                                            {{ $user->patient->doctorAccesses()->where('access_status', 'granted')->count() }}
+                                            {{ $patientStats['grantedDoctorsCount'] }}
                                         </div>
                                         <span class="text-xs font-semibold text-[#64748b]">{{ __('Médecins autorisés') }}</span>
                                     </div>

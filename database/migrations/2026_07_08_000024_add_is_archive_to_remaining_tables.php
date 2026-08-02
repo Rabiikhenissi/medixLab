@@ -39,7 +39,7 @@ return new class extends Migration
         ];
 
         foreach ($tables as $table) {
-            if (Schema::hasTable($table) && !Schema::hasColumn($table, 'is_archive')) {
+            if (Schema::hasTable($table) && ! Schema::hasColumn($table, 'is_archive')) {
                 Schema::table($table, function (Blueprint $tableGroup) {
                     $tableGroup->boolean('is_archive')->default(false);
                 });

@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CreateExamRequestFormRequest;
+use App\Models\ChatMessage;
 use App\Models\Doctor;
-use App\Models\Patient;
+use App\Models\DoctorPatientAccess;
 use App\Models\Exam;
 use App\Models\ExamGroup;
 use App\Models\ExamGroupItem;
@@ -11,8 +13,14 @@ use App\Models\ExamRequest;
 use App\Models\ExamRequestItem;
 use App\Models\DoctorPatientAccess;
 use App\Models\Notification;
+use App\Models\Patient;
+use App\Services\ExamRequestService;
+use App\Services\ExamSuggestionService;
+use App\Services\NotificationService;
+use App\Services\PatientHealthTrendsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class DoctorController extends Controller
 {
@@ -83,6 +91,7 @@ class DoctorController extends Controller
 
         return response()->json(['success' => true]);
     }
+
     /**
      * Show patient search page
      */
@@ -100,11 +109,12 @@ class DoctorController extends Controller
             'patient_code' => 'required|string',
         ]);
 
+        // Find the patient by their unique code
         $patient = Patient::where('patient_code', $request->patient_code)
             ->with('user')
             ->first();
 
-        if (!$patient) {
+        if (! $patient) {
             return response()->json([
                 'success' => false,
                 'message' => 'Patient non trouvé.',
@@ -112,6 +122,7 @@ class DoctorController extends Controller
         }
 
         $doctor = Auth::user()->doctor;
+        // Check the doctor's access record for this patient
         $access = DoctorPatientAccess::where('doctor_id', $doctor->id)
             ->where('patient_id', $patient->id)
             ->first();
@@ -123,19 +134,28 @@ class DoctorController extends Controller
             ], 403);
         }
 
+        $hasGrantedAccess = $access && $access->access_status === 'granted' && ! $access->isExpired();
+
+        // Build the safe patient payload
+        $patientData = [
+            'id' => $patient->id,
+            'patient_code' => $patient->patient_code,
+            'user' => [
+                'first_name' => $patient->user->first_name,
+                'last_name' => $patient->user->last_name,
+            ],
+        ];
+
+        // Full PII (DOB, email, phone) only revealed once access is granted
+        if ($hasGrantedAccess) {
+            $patientData['date_of_birth'] = $patient->date_of_birth;
+            $patientData['user']['email'] = $patient->user->email;
+            $patientData['user']['phone'] = $patient->user->phone;
+        }
+
         return response()->json([
             'success' => true,
-            'patient' => [
-                'id' => $patient->id,
-                'patient_code' => $patient->patient_code,
-                'date_of_birth' => $patient->date_of_birth,
-                'user' => [
-                    'first_name' => $patient->user->first_name,
-                    'last_name' => $patient->user->last_name,
-                    'email' => $patient->user->email,
-                    'phone' => $patient->user->phone,
-                ]
-            ],
+            'patient' => $patientData,
             'access_status' => $access ? $access->access_status : 'none',
         ]);
     }
@@ -193,7 +213,7 @@ class DoctorController extends Controller
         Notification::create([
             'user_id' => $patient->user_id,
             'title' => 'Demande d\'accès médicale',
-            'message' => 'Dr. ' . $doctor->user->first_name . ' ' . $doctor->user->last_name . ' (' . $doctor->speciality . ') demande l\'accès à votre dossier médical.',
+            'message' => 'Dr. '.$doctor->user->first_name.' '.$doctor->user->last_name.' ('.$doctor->speciality.') demande l\'accès à votre dossier médical.',
             'notification_type' => 'access_request',
             'reference_id' => $access->id,
         ]);
@@ -215,18 +235,22 @@ class DoctorController extends Controller
         // Check if doctor has access to this patient
         $access = DoctorPatientAccess::where('doctor_id', $doctor->id)
             ->where('patient_id', $patient->id)
-            ->where('access_status', 'granted')
+            ->active()
             ->first();
 
-        if (!$access) {
+        if (! $access) {
             return redirect()->route('doctor.patient-search')
                 ->with('error', 'Vous n\'avez pas accès à ce patient.');
         }
 
+        $patient->load('user');
+
+        // Load all active exams to choose from
         $exams = Exam::where('is_archive', false)
             ->select('id', 'name', 'code', 'category', 'description', 'preparation_instructions')
             ->get();
-        
+
+        // Load the doctor's saved exam groups
         $examGroups = $doctor->examGroups()
             ->where('is_archive', false)
             ->with('items.exam')
@@ -239,7 +263,7 @@ class DoctorController extends Controller
     /**
      * Create exam request with selected exams
      */
-    public function createExamRequest(\App\Http\Requests\CreateExamRequestFormRequest $request)
+    public function createExamRequest(CreateExamRequestFormRequest $request)
     {
         $doctor = Auth::user()->doctor;
         $patient = Patient::findOrFail($request->patient_id);
@@ -247,17 +271,18 @@ class DoctorController extends Controller
         // Verify access
         $access = DoctorPatientAccess::where('doctor_id', $doctor->id)
             ->where('patient_id', $patient->id)
-            ->where('access_status', 'granted')
+            ->active()
             ->first();
 
-        if (!$access) {
+        if (! $access) {
             return response()->json([
                 'success' => false,
                 'message' => 'Vous n\'avez pas accès à ce patient.',
             ], 403);
         }
 
-        $examRequest = \App\Services\ExamRequestService::create(
+        // Create the exam request via the service
+        $examRequest = ExamRequestService::create(
             $doctor,
             $patient,
             $request->exam_ids,
@@ -277,12 +302,14 @@ class DoctorController extends Controller
     public function examGroupsIndex()
     {
         $doctor = Auth::user()->doctor;
+        // Fetch the doctor's active exam groups
         $examGroups = $doctor->examGroups()
             ->where('is_archive', false)
             ->with('items.exam')
             ->latest()
             ->get();
 
+        // Fetch the exams catalog for the picker
         $exams = Exam::where('is_archive', false)
             ->select('id', 'name', 'category')
             ->orderBy('name')
@@ -290,8 +317,8 @@ class DoctorController extends Controller
 
         return view('doctor.exam-groups', [
             'examGroups' => $examGroups,
-            'exams'      => $exams,
-            'editGroup'  => null,
+            'exams' => $exams,
+            'editGroup' => null,
         ]);
     }
 
@@ -301,29 +328,31 @@ class DoctorController extends Controller
     public function examGroupsStore(Request $request)
     {
         $request->validate([
-            'name'       => 'required|string|max:255',
-            'description'=> 'nullable|string|max:500',
-            'exam_ids'   => 'required|array|min:1',
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string|max:500',
+            'exam_ids' => 'required|array|min:1',
             'exam_ids.*' => 'exists:exams,id',
         ]);
 
         $doctor = Auth::user()->doctor;
 
+        // Create the new exam group
         $examGroup = ExamGroup::create([
-            'doctor_id'   => $doctor->id,
-            'name'        => $request->name,
+            'doctor_id' => $doctor->id,
+            'name' => $request->name,
             'description' => $request->description,
         ]);
 
+        // Attach the selected exams to the group
         foreach ($request->exam_ids as $examId) {
             ExamGroupItem::create([
                 'exam_group_id' => $examGroup->id,
-                'exam_id'       => $examId,
+                'exam_id' => $examId,
             ]);
         }
 
         return redirect()->route('doctor.exam-groups.index')
-            ->with('success', 'Groupe « ' . $examGroup->name . ' » créé avec succès.');
+            ->with('success', 'Groupe « '.$examGroup->name.' » créé avec succès.');
     }
 
     /**
@@ -337,12 +366,14 @@ class DoctorController extends Controller
             abort(403);
         }
 
+        // Load the exam groups list for the page
         $examGroups = $doctor->examGroups()
             ->where('is_archive', false)
             ->with('items.exam')
             ->latest()
             ->get();
 
+        // Load the exams catalog for the picker
         $exams = Exam::where('is_archive', false)
             ->select('id', 'name', 'category')
             ->orderBy('name')
@@ -352,8 +383,8 @@ class DoctorController extends Controller
 
         return view('doctor.exam-groups', [
             'examGroups' => $examGroups,
-            'exams'      => $exams,
-            'editGroup'  => $examGroup,
+            'exams' => $exams,
+            'editGroup' => $examGroup,
         ]);
     }
 
@@ -369,14 +400,15 @@ class DoctorController extends Controller
         }
 
         $request->validate([
-            'name'       => 'required|string|max:255',
-            'description'=> 'nullable|string|max:500',
-            'exam_ids'   => 'required|array|min:1',
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string|max:500',
+            'exam_ids' => 'required|array|min:1',
             'exam_ids.*' => 'exists:exams,id',
         ]);
 
+        // Update the group's basic details
         $examGroup->update([
-            'name'        => $request->name,
+            'name' => $request->name,
             'description' => $request->description,
         ]);
 
@@ -385,12 +417,12 @@ class DoctorController extends Controller
         foreach ($request->exam_ids as $examId) {
             ExamGroupItem::create([
                 'exam_group_id' => $examGroup->id,
-                'exam_id'       => $examId,
+                'exam_id' => $examId,
             ]);
         }
 
         return redirect()->route('doctor.exam-groups.index')
-            ->with('success', 'Groupe « ' . $examGroup->name . ' » mis à jour avec succès.');
+            ->with('success', 'Groupe « '.$examGroup->name.' » mis à jour avec succès.');
     }
 
     /**
@@ -411,7 +443,7 @@ class DoctorController extends Controller
         $examGroup->delete();
 
         return redirect()->route('doctor.exam-groups.index')
-            ->with('success', 'Groupe « ' . $name . ' » supprimé définitivement.');
+            ->with('success', 'Groupe « '.$name.' » supprimé définitivement.');
     }
 
     /**
@@ -420,15 +452,17 @@ class DoctorController extends Controller
     public function applyExamGroup(Request $request)
     {
         $request->validate([
-            'patient_id'    => 'required|exists:patients,id',
+            'patient_id' => 'required|exists:patients,id',
             'exam_group_id' => 'required|exists:exam_groups,id',
-            'clinical_notes'=> 'nullable|string|max:500',
+            'clinical_notes' => 'nullable|string|max:500',
         ]);
 
-        $doctor  = Auth::user()->doctor;
+        $doctor = Auth::user()->doctor;
+        // Load the patient and the exam group
         $patient = Patient::findOrFail($request->patient_id);
         $examGroup = ExamGroup::with('exams')->findOrFail($request->exam_group_id);
 
+        // Reject groups that do not belong to the doctor
         if ($examGroup->doctor_id !== $doctor->id) {
             return response()->json([
                 'success' => false,
@@ -436,6 +470,7 @@ class DoctorController extends Controller
             ], 403);
         }
 
+        // Reject groups with no exams
         if ($examGroup->exams->isEmpty()) {
             return response()->json([
                 'success' => false,
@@ -443,6 +478,7 @@ class DoctorController extends Controller
             ], 422);
         }
 
+        // Verify the doctor has active access to the patient
         $access = DoctorPatientAccess::where('doctor_id', $doctor->id)
             ->where('patient_id', $patient->id)
             ->where('access_status', 'granted')
@@ -451,7 +487,7 @@ class DoctorController extends Controller
             })
             ->first();
 
-        if (!$access) {
+        if (! $access) {
             return response()->json([
                 'success' => false,
                 'message' => 'Vous n\'avez pas accès à ce patient.',
@@ -460,35 +496,39 @@ class DoctorController extends Controller
 
         $examCount = $examGroup->exams->count();
 
-        $examRequest = \Illuminate\Support\Facades\DB::transaction(function () use ($doctor, $patient, $examGroup, $request, $examCount) {
+        // Create the exam request in a single transaction
+        $examRequest = DB::transaction(function () use ($doctor, $patient, $examGroup, $request) {
+            // Create the exam request record
             $examRequest = ExamRequest::create([
-                'doctor_id'      => $doctor->id,
-                'patient_id'     => $patient->id,
-                'status'         => 'pending',
+                'doctor_id' => $doctor->id,
+                'patient_id' => $patient->id,
+                'status' => 'pending',
                 'clinical_notes' => $request->clinical_notes,
             ]);
 
+            // Attach each exam from the group
             foreach ($examGroup->exams as $exam) {
                 ExamRequestItem::create([
                     'exam_request_id' => $examRequest->id,
-                    'exam_id'         => $exam->id,
+                    'exam_id' => $exam->id,
                 ]);
             }
 
+            // Notify the patient of the new prescription
             Notification::create([
-                'user_id'           => $patient->user_id,
-                'title'             => 'Nouvelle demande d\'analyses',
-                'message'           => 'Dr. ' . $doctor->user->first_name . ' ' . $doctor->user->last_name . ' vous a prescrit le groupe « ' . $examGroup->name . ' » (' . $examCount . ' examen(s)).',
+                'user_id' => $patient->user_id,
+                'title' => 'Nouvelle demande d\'analyses',
+                'message' => 'Dr. '.$doctor->user->first_name.' '.$doctor->user->last_name.' vous a prescrit le groupe « '.$examGroup->name.' » ('.$examCount.' examen(s)).',
                 'notification_type' => 'exam_request',
-                'reference_id'      => $examRequest->id,
+                'reference_id' => $examRequest->id,
             ]);
 
             return $examRequest;
         });
 
         return response()->json([
-            'success'         => true,
-            'message'         => 'Groupe d\'examens appliqué avec succès.',
+            'success' => true,
+            'message' => 'Groupe d\'examens appliqué avec succès.',
             'exam_request_id' => $examRequest->id,
         ]);
     }
@@ -512,35 +552,37 @@ class DoctorController extends Controller
     public function storeExamGroupApi(Request $request)
     {
         $request->validate([
-            'name'        => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:500',
-            'exam_ids'    => 'required|array|min:1',
-            'exam_ids.*'  => 'exists:exams,id',
+            'exam_ids' => 'required|array|min:1',
+            'exam_ids.*' => 'exists:exams,id',
         ]);
 
         $doctor = Auth::user()->doctor;
 
+        // Create the new exam group
         $examGroup = ExamGroup::create([
-            'doctor_id'   => $doctor->id,
-            'name'        => $request->name,
+            'doctor_id' => $doctor->id,
+            'name' => $request->name,
             'description' => $request->description,
         ]);
 
+        // Attach the selected exams to the group
         foreach ($request->exam_ids as $examId) {
             ExamGroupItem::create([
                 'exam_group_id' => $examGroup->id,
-                'exam_id'       => $examId,
+                'exam_id' => $examId,
             ]);
         }
 
         return response()->json([
-            'success'   => true,
-            'message'   => 'Groupe « ' . $examGroup->name . ' » créé avec succès.',
-            'group'     => [
-                'id'          => $examGroup->id,
-                'name'        => $examGroup->name,
+            'success' => true,
+            'message' => 'Groupe « '.$examGroup->name.' » créé avec succès.',
+            'group' => [
+                'id' => $examGroup->id,
+                'name' => $examGroup->name,
                 'description' => $examGroup->description,
-                'exam_count'  => count($request->exam_ids),
+                'exam_count' => count($request->exam_ids),
             ],
         ]);
     }
@@ -551,7 +593,7 @@ class DoctorController extends Controller
     public function submitInterpretation(Request $request, ExamRequest $examRequest)
     {
         $doctor = auth()->user()->doctor;
-        if (!$doctor || $examRequest->doctor_id !== $doctor->id) {
+        if (! $doctor || $examRequest->doctor_id !== $doctor->id) {
             abort(403, 'Action non autorisée.');
         }
 
@@ -565,18 +607,19 @@ class DoctorController extends Controller
             'doctor_interpretation' => 'required|string',
         ]);
 
+        // Store the interpretation and mark the results as approved
         $examRequest->update([
             'doctor_interpretation' => $request->doctor_interpretation,
             'approved_by_doctor' => true,
         ]);
 
         // Create notification for patient
-        \App\Models\Notification::create([
-            'user_id'           => $examRequest->patient->user_id,
-            'title'             => 'Résultats d\'examens disponibles',
-            'message'           => 'Dr. ' . $doctor->user->first_name . ' ' . $doctor->user->last_name . ' a validé et interprété vos résultats d\'analyses.',
+        Notification::create([
+            'user_id' => $examRequest->patient->user_id,
+            'title' => 'Résultats d\'examens disponibles',
+            'message' => 'Dr. '.$doctor->user->first_name.' '.$doctor->user->last_name.' a validé et interprété vos résultats d\'analyses.',
             'notification_type' => 'exam_request',
-            'reference_id'      => $examRequest->id,
+            'reference_id' => $examRequest->id,
         ]);
 
         return redirect()
@@ -591,8 +634,9 @@ class DoctorController extends Controller
     {
         $doctor = auth()->user()->doctor;
 
+        // Fetch active accesses with patient data and recent requests
         $accesses = DoctorPatientAccess::where('doctor_id', $doctor->id)
-            ->where('access_status', 'granted')
+            ->active()
             ->with(['patient.user', 'patient.examRequests' => function ($q) use ($doctor) {
                 $q->where('doctor_id', $doctor->id)->latest()->limit(5);
             }])
@@ -609,7 +653,7 @@ class DoctorController extends Controller
     {
         $doctor = auth()->user()->doctor;
 
-        if (!$doctor || $examRequest->doctor_id !== $doctor->id) {
+        if (! $doctor || $examRequest->doctor_id !== $doctor->id) {
             abort(403);
         }
 
@@ -647,20 +691,22 @@ class DoctorController extends Controller
 
         $access = DoctorPatientAccess::where('doctor_id', $doctor->id)
             ->where('patient_id', $patient->id)
-            ->where('access_status', 'granted')
+            ->active()
             ->first();
 
-        if (!$access) {
+        if (! $access) {
             return response()->json(['success' => false, 'message' => 'Accès non autorisé.'], 403);
         }
 
+        // Normalize the already selected exam ids
         $alreadySelected = $request->input('exam_ids', []);
-        if (!is_array($alreadySelected)) {
+        if (! is_array($alreadySelected)) {
             $alreadySelected = array_filter(explode(',', $alreadySelected));
         }
         $alreadySelected = array_map('intval', $alreadySelected);
 
-        $service = new \App\Services\ExamSuggestionService($patient);
+        // Compute suggestions via the service
+        $service = new ExamSuggestionService($patient);
         $suggestions = $service->getSuggestions($alreadySelected);
 
         return response()->json([
@@ -678,14 +724,15 @@ class DoctorController extends Controller
 
         $access = DoctorPatientAccess::where('doctor_id', $doctor->id)
             ->where('patient_id', $patient->id)
-            ->where('access_status', 'granted')
+            ->active()
             ->first();
 
-        if (!$access) {
+        if (! $access) {
             return response()->json(['success' => false, 'message' => 'Accès non autorisé.'], 403);
         }
 
-        $service = new \App\Services\PatientHealthTrendsService($patient);
+        // Build the trends via the service
+        $service = new PatientHealthTrendsService($patient);
 
         return response()->json([
             'success' => true,
@@ -703,20 +750,23 @@ class DoctorController extends Controller
 
         $access = DoctorPatientAccess::where('doctor_id', $doctor->id)
             ->where('patient_id', $patient->id)
-            ->where('access_status', 'granted')
+            ->active()
             ->first();
 
-        if (!$access) {
+        if (! $access) {
             return redirect()->route('doctor.dashboard')
                 ->with('error', 'Accès non autorisé.');
         }
 
         $user = Auth::user();
 
-        \App\Models\ChatMessage::where('sender_id', $patient->user_id)
+        // Mark incoming messages from the patient as read
+        ChatMessage::where('sender_id', $patient->user_id)
             ->where('receiver_id', $user->id)
             ->where('is_read', false)
             ->update(['is_read' => true]);
+
+        $patient->load('user');
 
         return view('doctor.chat', [
             'patient' => $patient,
@@ -724,53 +774,67 @@ class DoctorController extends Controller
         ]);
     }
 
+    /**
+     * Return the chat history with a patient as JSON
+     */
     public function chatMessages(Patient $patient)
     {
         $doctor = Auth::user()->doctor;
         $access = DoctorPatientAccess::where('doctor_id', $doctor->id)
             ->where('patient_id', $patient->id)
-            ->where('access_status', 'granted')
+            ->active()
             ->first();
 
-        if (!$access) return response()->json(['success' => false], 403);
+        if (! $access) {
+            return response()->json(['success' => false], 403);
+        }
 
         $userId = Auth::id();
-        $messages = \App\Models\ChatMessage::where(function ($q) use ($userId, $patient) {
+        // Fetch messages exchanged in both directions with the patient
+        $messages = ChatMessage::where(function ($q) use ($userId, $patient) {
             $q->where('sender_id', $userId)->where('receiver_id', $patient->user_id);
         })->orWhere(function ($q) use ($userId, $patient) {
             $q->where('sender_id', $patient->user_id)->where('receiver_id', $userId);
         })
-        ->with('sender')
-        ->latest()
-        ->limit(100)
-        ->get()
-        ->reverse()
-        ->values();
+            ->with('sender')
+            ->latest()
+            ->limit(100)
+            ->get()
+            ->reverse()
+            ->values();
 
         return response()->json(['success' => true, 'messages' => $messages]);
     }
 
+    /**
+     * Send a chat message to a patient
+     */
     public function chatSend(Patient $patient, Request $request)
     {
         $request->validate(['message' => 'required|string|max:2000']);
 
         $doctor = Auth::user()->doctor;
+        // Verify the doctor has active access to the patient
         $access = DoctorPatientAccess::where('doctor_id', $doctor->id)
             ->where('patient_id', $patient->id)
-            ->where('access_status', 'granted')
+            ->active()
             ->first();
 
-        if (!$access) return response()->json(['success' => false], 403);
+        if (! $access) {
+            return response()->json(['success' => false], 403);
+        }
 
-        $msg = \App\Models\ChatMessage::create([
+        // Store the message
+        $msg = ChatMessage::create([
             'sender_id' => Auth::id(),
             'receiver_id' => $patient->user_id,
             'message' => $request->message,
         ]);
 
-        \App\Services\NotificationService::send(
+        // Notify the patient of the new message
+        NotificationService::send(
             $patient->user_id,
-            'Nouveau message du Dr. ' . Auth::user()->first_name,
+            'Nouveau message du Dr. '.Auth::user()->first_name,
             $request->message,
             'general'
         );
@@ -778,30 +842,37 @@ class DoctorController extends Controller
         return response()->json(['success' => true, 'message' => $msg]);
     }
 
+    /**
+     * Return the count of unread chat messages for the doctor
+     */
     public function chatUnreadCount()
     {
         $userId = Auth::id();
-        $count = \App\Models\ChatMessage::where('receiver_id', $userId)
+        $count = ChatMessage::where('receiver_id', $userId)
             ->where('is_read', false)
             ->count();
 
         return response()->json(['success' => true, 'unread_count' => $count]);
     }
 
+    /**
+     * Display the patient's medical records for the doctor
+     */
     public function medicalRecords(Patient $patient)
     {
         $doctor = Auth::user()->doctor;
 
         $access = DoctorPatientAccess::where('doctor_id', $doctor->id)
             ->where('patient_id', $patient->id)
-            ->where('access_status', 'granted')
+            ->active()
             ->first();
 
-        if (!$access) {
+        if (! $access) {
             return redirect()->route('doctor.dashboard')
                 ->with('error', 'Vous n\'avez pas accès au dossier de ce patient.');
         }
 
+        // Fetch the patient's exam requests with results
         $examRequests = $patient->examRequests()
             ->where('doctor_id', $doctor->id)
             ->with(['items.exam', 'items.resultLabo.details', 'laboratory'])

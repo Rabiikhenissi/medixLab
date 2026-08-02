@@ -2,16 +2,15 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use App\Models\Group;
 use App\Models\Admin;
 use App\Models\Doctor;
+use App\Models\Group;
+use App\Models\Labo;
 use App\Models\Patient;
 use App\Models\Staff;
-use App\Models\Labo;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use Carbon\Carbon;
 
 class UserSeeder extends Seeder
 {
@@ -53,7 +52,7 @@ class UserSeeder extends Seeder
                 ['user_id' => $user->id],
                 [
                     'speciality' => $d['speciality'],
-                    'doctor_code' => 'DOC-' . str_pad($user->id, 4, '0', STR_PAD_LEFT),
+                    'doctor_code' => 'DOC-'.str_pad($user->id, 4, '0', STR_PAD_LEFT),
                     'latitude' => $d['lat'], 'longitude' => $d['lng'],
                     'is_archive' => false,
                 ]
@@ -85,7 +84,7 @@ class UserSeeder extends Seeder
             Patient::updateOrCreate(
                 ['user_id' => $user->id],
                 [
-                    'patient_code' => 'PAT-' . str_pad($user->id, 4, '0', STR_PAD_LEFT),
+                    'patient_code' => 'PAT-'.str_pad($user->id, 4, '0', STR_PAD_LEFT),
                     'date_of_birth' => $p['dob'], 'gender' => $p['gender'],
                     'country' => $p['country'], 'state_code' => $p['state'],
                     'blood_group' => $p['blood'], 'is_archive' => false,
@@ -102,7 +101,9 @@ class UserSeeder extends Seeder
 
         foreach ($staffNames as $idx => $s) {
             $lab = $labs[$idx] ?? $labs->first();
-            if (!$lab) continue;
+            if (! $lab) {
+                continue;
+            }
 
             $user = User::updateOrCreate(
                 ['email' => $s['email']],
@@ -116,7 +117,7 @@ class UserSeeder extends Seeder
                 ['user_id' => $user->id],
                 [
                     'laboratory_id' => $lab->id,
-                    'staff_code' => 'STF-' . str_pad($user->id, 4, '0', STR_PAD_LEFT),
+                    'staff_code' => 'STF-'.str_pad($user->id, 4, '0', STR_PAD_LEFT),
                     'is_archive' => false,
                 ]
             );
@@ -129,7 +130,9 @@ class UserSeeder extends Seeder
 
         foreach ($centerUsers as $cu) {
             $lab = $labs[$cu['lab_idx']] ?? $labs->first();
-            if (!$lab) continue;
+            if (! $lab) {
+                continue;
+            }
 
             $user = User::updateOrCreate(
                 ['email' => $cu['email']],
@@ -143,7 +146,7 @@ class UserSeeder extends Seeder
                 ['user_id' => $user->id],
                 [
                     'laboratory_id' => $lab->id,
-                    'staff_code' => 'STF-' . str_pad($user->id, 4, '0', STR_PAD_LEFT),
+                    'staff_code' => 'STF-'.str_pad($user->id, 4, '0', STR_PAD_LEFT),
                     'is_archive' => false,
                 ]
             );

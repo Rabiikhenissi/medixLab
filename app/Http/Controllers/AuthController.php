@@ -2,36 +2,44 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
-use App\Models\Group;
 use App\Models\Doctor;
+use App\Models\Group;
+use App\Models\Labo;
 use App\Models\Patient;
 use App\Models\Staff;
-use App\Models\Labo;
+use App\Models\User;
 use App\Services\CodeGeneratorService;
+use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\View\View;
 
 class AuthController extends Controller
 {
     /**
-     * Handle login requests.
+     * Handle login requests for a given role.
+     *
+     * @return RedirectResponse
      */
     public function login(Request $request, string $role)
     {
+        // validate login credentials
         $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required|string',
         ]);
 
+        // remember the session if requested
         $remember = $request->filled('remember');
 
+        // attempt authentication
         if (Auth::attempt($credentials, $remember)) {
+            // protect against session fixation
             $request->session()->regenerate();
             $user = Auth::user();
 
@@ -41,22 +49,25 @@ class AuthController extends Controller
             }
 
             // Validate that the user matches the role they are logging into
-            if ($role === 'doctor' && !$user->doctor) {
+            if ($role === 'doctor' && ! $user->doctor) {
                 Auth::logout();
+
                 return back()->withErrors([
                     'email' => 'Cet email n\'est pas enregistré en tant que médecin.',
                 ])->withInput($request->only('email', 'remember'));
             }
 
-            if ($role === 'patient' && !$user->patient) {
+            if ($role === 'patient' && ! $user->patient) {
                 Auth::logout();
+
                 return back()->withErrors([
                     'email' => 'Cet email n\'est pas enregistré en tant que patient.',
                 ])->withInput($request->only('email', 'remember'));
             }
 
-            if ($role === 'center' && !$user->staff) {
+            if ($role === 'center' && ! $user->staff) {
                 Auth::logout();
+
                 return back()->withErrors([
                     'email' => 'Cet email n\'est pas enregistré en tant que centre médical.',
                 ])->withInput($request->only('email', 'remember'));
@@ -65,7 +76,8 @@ class AuthController extends Controller
             // Track last login time
             $user->update(['last_login_at' => now()]);
 
-            return redirect($this->safeIntended($request, $role . '.dashboard'));
+            // redirect to the dashboard of the user's role
+            return redirect($this->safeIntended($request, $role.'.dashboard'));
         }
 
         return back()->withErrors([
@@ -93,7 +105,7 @@ class AuthController extends Controller
 
                 $role = explode('.', $fallbackRoute)[0];
 
-                if ($name && !$isAjax && str_starts_with($name, $role . '.')) {
+                if ($name && ! $isAjax && str_starts_with($name, $role.'.')) {
                     return $intended;
                 }
             } catch (\Throwable $e) {
@@ -105,10 +117,13 @@ class AuthController extends Controller
     }
 
     /**
-     * Handle registration requests.
+     * Handle registration requests for a given role.
+     *
+     * @return RedirectResponse
      */
     public function register(Request $request, string $role)
     {
+        // register a doctor account
         if ($role === 'doctor') {
             $data = $request->validate([
                 'first_name' => 'required|string|max:255',
@@ -120,6 +135,7 @@ class AuthController extends Controller
                 'password' => 'required|string|min:8|confirmed',
             ]);
 
+            // run doctor creation in a database transaction
             $user = DB::transaction(function () use ($data) {
                 $group = Group::firstOrCreate(['code' => 'doctor'], ['name' => 'Doctor']);
 
@@ -137,7 +153,7 @@ class AuthController extends Controller
                 $doctor = Doctor::create([
                     'user_id' => $user->id,
                     'speciality' => $data['specialty'],
-                    'doctor_code' => 'TEMP-' . Str::random(10),
+                    'doctor_code' => 'TEMP-'.Str::random(10),
                 ]);
 
                 // Generate real unique code using database ID and update
@@ -148,9 +164,11 @@ class AuthController extends Controller
             });
 
             Auth::login($user);
+
             return redirect()->route('doctor.dashboard');
         }
 
+        // register a patient account
         if ($role === 'patient') {
             $data = $request->validate([
                 'first_name' => 'required|string|max:255',
@@ -166,6 +184,7 @@ class AuthController extends Controller
                 'password' => 'required|string|min:8|confirmed',
             ]);
 
+            // run patient creation in a database transaction
             $user = DB::transaction(function () use ($data) {
                 $group = Group::firstOrCreate(['code' => 'patient'], ['name' => 'Patient']);
 
@@ -182,7 +201,7 @@ class AuthController extends Controller
                 // Create patient with temporary unique code
                 $patient = Patient::create([
                     'user_id' => $user->id,
-                    'patient_code' => 'TEMP-' . Str::random(10),
+                    'patient_code' => 'TEMP-'.Str::random(10),
                     'blood_group' => $data['blood_group'] ?? null,
                     'date_of_birth' => $data['birth_date'] ?? null,
                     'gender' => $data['gender'] ?? null,
@@ -198,9 +217,11 @@ class AuthController extends Controller
             });
 
             Auth::login($user);
+
             return redirect()->route('patient.dashboard');
         }
 
+        // register a medical center account
         if ($role === 'center') {
             $data = $request->validate([
                 'center_name' => 'required|string|max:255',
@@ -212,7 +233,9 @@ class AuthController extends Controller
                 'password' => 'required|string|min:8|confirmed',
             ]);
 
+            // run center creation in a database transaction
             $user = DB::transaction(function () use ($data) {
+                // create the laboratory for the center
                 $labo = Labo::create([
                     'name' => $data['center_name'],
                     'email' => $data['email'],
@@ -221,6 +244,7 @@ class AuthController extends Controller
                     'address' => $data['address'] ?? null,
                 ]);
 
+                // split the responsible name into first and last name
                 $names = explode(' ', trim($data['responsible']), 2);
                 $firstName = $names[0];
                 $lastName = $names[1] ?? 'Responsable';
@@ -241,7 +265,7 @@ class AuthController extends Controller
                 $staff = Staff::create([
                     'user_id' => $user->id,
                     'laboratory_id' => $labo->id,
-                    'staff_code' => 'TEMP-' . Str::random(10),
+                    'staff_code' => 'TEMP-'.Str::random(10),
                 ]);
 
                 // Generate real unique code using staff ID and lab name
@@ -252,6 +276,7 @@ class AuthController extends Controller
             });
 
             Auth::login($user);
+
             return redirect()->route('center.dashboard');
         }
 
@@ -259,20 +284,24 @@ class AuthController extends Controller
     }
 
     /**
-     * Handle logout requests.
+     * Handle logout requests: sign out, invalidate the session and redirect.
+     *
+     * @return RedirectResponse
      */
     public function logout(Request $request, string $role)
     {
         Auth::logout();
 
+        // clear the session and regenerate the CSRF token
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
+        // admins go back to the home page, others to their login page
         if ($role === 'admin') {
             return redirect()->route('home');
         }
 
-        return redirect()->route($role . '.login');
+        return redirect()->route($role.'.login');
     }
 
     /**
@@ -280,16 +309,19 @@ class AuthController extends Controller
      */
     public function showForgotPassword(string $role)
     {
-    return view('auth.forgot-password', compact('role'));
+        return view('auth.forgot-password', compact('role'));
     }
 
     /**
      * Send the password reset link email.
+     *
+     * @return RedirectResponse
      */
     public function sendResetLink(Request $request, string $role)
     {
         $request->validate(['email' => 'required|email']);
 
+        // dispatch the reset link and report the broker status
         $status = Password::sendResetLink($request->only('email'));
 
         if ($status === Password::RESET_LINK_SENT) {
@@ -301,31 +333,37 @@ class AuthController extends Controller
 
     /**
      * Show the password reset form (with token from email link).
+     *
+     * @return View
      */
- public function showResetPassword(Request $request, string $token, string $role)
-{
-    return view('auth.reset-password', [
-        'token' => $token,
-        'email' => $request->email,
-        'role' => $role,
-    ]);
-}
+    public function showResetPassword(Request $request, string $token, string $role)
+    {
+        return view('auth.reset-password', [
+            'token' => $token,
+            'email' => $request->email,
+            'role' => $role,
+        ]);
+    }
+
     /**
      * Handle the new password submission.
+     *
+     * @return RedirectResponse
      */
     public function resetPassword(Request $request, string $role)
     {
         $request->validate([
-            'token'                 => 'required',
-            'email'                 => 'required|email',
-            'password'              => 'required|string|min:8|confirmed',
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|string|min:8|confirmed',
         ]);
 
+        // reset the password through the broker
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function (User $user, string $password) {
                 $user->forceFill(['password' => Hash::make($password)])
-                     ->setRememberToken(Str::random(60));
+                    ->setRememberToken(Str::random(60));
                 $user->save();
                 event(new PasswordReset($user));
             }
@@ -338,5 +376,4 @@ class AuthController extends Controller
 
         return back()->withErrors(['email' => __($status)])->withInput();
     }
-
 }

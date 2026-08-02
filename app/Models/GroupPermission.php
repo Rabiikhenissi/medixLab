@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Model;
 
 #[Fillable(['group_id', 'action_id', 'is_archive'])]
 class GroupPermission extends Model
@@ -14,6 +14,7 @@ class GroupPermission extends Model
             'is_archive' => 'boolean',
         ];
     }
+
     protected $table = 'group_permissions';
 
     public function group()

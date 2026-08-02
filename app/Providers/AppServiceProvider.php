@@ -2,8 +2,13 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
+use App\Models\Feature;
+use App\Services\ExamRequestService;
 use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -20,7 +25,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        \Illuminate\Support\Facades\Gate::before(function ($user, $ability) {
+        Gate::before(function ($user, $ability) {
             if (method_exists($user, 'hasPermission') && $user->hasPermission($ability)) {
                 return true;
             }
@@ -38,33 +43,33 @@ class AppServiceProvider extends ServiceProvider
                 $role = 'patient';
             }
 
-            $url = url("/{$role}/reset-password/" . $token . '?email=' . urlencode($notifiable->email));
+            $url = url("/{$role}/reset-password/".$token.'?email='.urlencode($notifiable->email));
 
-            return (new \Illuminate\Notifications\Messages\MailMessage)
+            return (new MailMessage)
                 ->subject('Réinitialisation de votre mot de passe — Medix eSanté')
                 ->view('emails.reset-password', ['url' => $url]);
         });
-        
+
         $sidebarFeaturesComposer = function ($view) {
-            $sidebarFeatures = \App\Models\Feature::where('is_archive', false)
+            $sidebarFeatures = Feature::where('is_archive', false)
                 ->where('is_sidebar', true)
                 ->orderBy('order', 'asc')
                 ->get();
             $view->with('sidebarFeatures', $sidebarFeatures);
         };
 
-        \Illuminate\Support\Facades\View::composer('layouts.admin', $sidebarFeaturesComposer);
-        \Illuminate\Support\Facades\View::composer('components.layouts.auth', $sidebarFeaturesComposer);
-        \Illuminate\Support\Facades\View::composer('layouts.center', $sidebarFeaturesComposer);
+        View::composer('layouts.admin', $sidebarFeaturesComposer);
+        View::composer('components.layouts.auth', $sidebarFeaturesComposer);
+        View::composer('layouts.center', $sidebarFeaturesComposer);
 
         // TIER 2.3 — Check access expiry once daily on any request
-        $todayKey = 'access_expiry_check_' . now()->format('Y-m-d');
-        if (!session()->has($todayKey)) {
+        $todayKey = 'access_expiry_check_'.now()->format('Y-m-d');
+        if (! session()->has($todayKey)) {
             session()->put($todayKey, true);
             try {
-                \App\Services\ExamRequestService::checkAccessExpiry();
+                ExamRequestService::checkAccessExpiry();
             } catch (\Exception $e) {
-                \Log::error('Access expiry check failed: ' . $e->getMessage());
+                \Log::error('Access expiry check failed: '.$e->getMessage());
             }
         }
     }

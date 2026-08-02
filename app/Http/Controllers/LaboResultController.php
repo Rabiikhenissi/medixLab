@@ -2,36 +2,53 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreResultFormRequest;
+use App\Models\Consumable;
+use App\Models\Equipment;
 use App\Models\ExamRequestItem;
 use App\Models\ResultLabo;
 use App\Models\ResultLaboDetail;
-use App\Models\Consumable;
 use App\Models\StockMovement;
 use App\Services\ExamRequestService;
 use App\Services\StockService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 
 class LaboResultController extends Controller
 {
-
+    /**
+     * Show the result entry form for a given exam request item.
+     *
+     * @return View|RedirectResponse
+     */
     public function create(ExamRequestItem $item)
     {
+        // only the owning laboratory may enter results
+        $lab = auth()->user()->staff->laboratory;
+        if ($item->examRequest->labo_id !== $lab->id) {
+            abort(403);
+        }
+
+        // block editing once the doctor has validated the results
         if ($item->examRequest->approved_by_doctor) {
             return redirect()
                 ->route('center.exam-requests')
                 ->with('error', 'Impossible de modifier — le médecin a déjà validé et interprété les résultats de cette demande.');
         }
 
+        // eager load the exam, request and existing result relations
         $item->load([
             'exam.parameters',
             'exam.examConsumables.consumable',
             'exam.examEquipment.equipment',
             'examRequest.patient.user',
-            'resultLabo.details'
+            'examRequest.doctor.user',
+            'resultLabo.details',
         ]);
 
-        $lab = auth()->user()->staff->laboratory;
+        // available lab consumables and equipment for the form
         $consumables = $lab->consumables()->where('is_archive', false)->get();
         $equipment = $lab->equipment()->where('is_archive', false)->get();
 
@@ -41,12 +58,13 @@ class LaboResultController extends Controller
             ->get()
             ->keyBy('name');
 
+        // prefill consumables suggested by the exam definition
         $preloadedConsumables = [];
         foreach ($item->exam->examConsumables as $ec) {
             if ($ec->consumable && isset($labConsumablesByName[$ec->consumable->name])) {
                 $lc = $labConsumablesByName[$ec->consumable->name];
                 $preloadedConsumables[] = [
-                    'id' => (string)$lc->id,
+                    'id' => (string) $lc->id,
                     'name' => $lc->name,
                     'unit' => $lc->unit,
                     'stock' => $lc->quantity,
@@ -62,17 +80,30 @@ class LaboResultController extends Controller
         );
     }
 
-
-
-    public function store(\App\Http\Requests\StoreResultFormRequest $request, ExamRequestItem $item)
+    /**
+     * Save or update the result for an exam request item.
+     *
+     * @return RedirectResponse
+     */
+    public function store(StoreResultFormRequest $request, ExamRequestItem $item)
     {
+        // only the owning laboratory may save results
+        $lab = auth()->user()->staff;
+        if ($item->examRequest->labo_id !== $lab->laboratory_id) {
+            abort(403);
+        }
+
+        $lab = auth()->user()->staff;
+        if ($item->examRequest->labo_id !== $lab->laboratory_id) {
+            abort(403);
+        }
+
         if ($item->examRequest->approved_by_doctor) {
             return redirect()
                 ->route('center.exam-requests')
                 ->with('error', 'Impossible de modifier — le médecin a déjà validé et interprété les résultats de cette demande.');
         }
 
-        $lab = auth()->user()->staff;
         $result = null;
 
         DB::transaction(function () use ($request, $item, $lab, &$result) {
@@ -83,43 +114,41 @@ class LaboResultController extends Controller
             )->first();
 
             // If exists => update
-            if($result){
+            if ($result) {
                 $result->update([
-                    'interpretation'=>$request->interpretation,
+                    'interpretation' => $request->interpretation,
                 ]);
 
                 // 1. Revert previous stock movements & quantities
                 foreach ($result->consumables as $oldConsumable) {
                     $qtyUsed = $oldConsumable->pivot->quantity_used;
-                    StockService::add($oldConsumable, $qtyUsed, "Annulation / Mise à jour du résultat d'examen #" . $result->id);
+                    StockService::add($oldConsumable, $qtyUsed, "Annulation / Mise à jour du résultat d'examen #".$result->id);
                 }
 
                 // Remove old details, consumables and equipment
                 $result->details()->delete();
                 $result->consumables()->detach();
                 $result->equipment()->detach();
-            }
-            else {
+            } else {
                 // Create new result
                 $result = ResultLabo::create([
-                    'exam_request_item_id'=>$item->id,
-                    'staff_id'=>$lab->id,
-                    'interpretation'=>$request->interpretation,
-                    'is_archive'=>false
+                    'exam_request_item_id' => $item->id,
+                    'staff_id' => $lab->id,
+                    'interpretation' => $request->interpretation,
+                    'is_archive' => false,
                 ]);
             }
 
             // Save parameters
-            foreach($request->parameters as $parameter)
-            {
+            foreach ($request->parameters as $parameter) {
                 ResultLaboDetail::create([
-                    'result_labo_id'=>$result->id,
-                    'parameter'=>$parameter['name'],
-                    'value'=>$parameter['value'],
-                    'status'=>$parameter['status'],
-                    'reference_range'=>$parameter['range'],
-                    'unit'=>$parameter['unit'] ?? null,
-                    'is_archive'=>false
+                    'result_labo_id' => $result->id,
+                    'parameter' => $parameter['name'],
+                    'value' => $parameter['value'],
+                    'status' => $parameter['status'],
+                    'reference_range' => $parameter['range'],
+                    'unit' => $parameter['unit'] ?? null,
+                    'is_archive' => false,
                 ]);
             }
 
@@ -127,15 +156,18 @@ class LaboResultController extends Controller
             if ($request->has('consumables')) {
                 foreach ($request->consumables as $cData) {
                     $consumableId = $cData['id'];
-                    $quantityUsed = (int)$cData['quantity'];
+                    $quantityUsed = (int) $cData['quantity'];
 
                     $consumable = Consumable::findOrFail($consumableId);
-                    StockService::deduct($consumable, $quantityUsed, "Utilisé pour le résultat d'examen #" . $result->id);
+                    if ($consumable->labo_id !== $lab->laboratory_id) {
+                        abort(403);
+                    }
+                    StockService::deduct($consumable, $quantityUsed, "Utilisé pour le résultat d'examen #".$result->id);
 
                     // Attach to result
                     $result->consumables()->attach($consumableId, [
                         'quantity_used' => $quantityUsed,
-                        'is_archive' => false
+                        'is_archive' => false,
                     ]);
                 }
             }
@@ -143,8 +175,12 @@ class LaboResultController extends Controller
             // Save equipment used
             if ($request->has('equipment')) {
                 foreach ($request->equipment as $equipId) {
+                    $equipment = Equipment::findOrFail($equipId);
+                    if ($equipment->labo_id !== $lab->laboratory_id) {
+                        abort(403);
+                    }
                     $result->equipment()->attach($equipId, [
-                        'is_archive' => false
+                        'is_archive' => false,
                     ]);
                 }
             }
@@ -153,19 +189,32 @@ class LaboResultController extends Controller
         // Check if all items in this request have results using ExamRequestService
         ExamRequestService::checkCompletion($item->examRequest);
 
+        // redirect back to the exam requests list
         return redirect()
             ->route('center.exam-requests')
-            ->with('success','Résultat enregistré avec succès.');
+            ->with('success', 'Résultat enregistré avec succès.');
     }
 
+    /**
+     * Show the form to edit an existing result.
+     *
+     * @return View|RedirectResponse
+     */
     public function edit(ResultLabo $result)
     {
+        // only the owning laboratory may edit the result
+        $lab = auth()->user()->staff->laboratory;
+        if ($result->examRequestItem->examRequest->labo_id !== $lab->id) {
+            abort(403);
+        }
+
         if ($result->examRequestItem->examRequest->approved_by_doctor) {
             return redirect()
                 ->route('center.exam-requests')
                 ->with('error', 'Impossible de modifier — le médecin a déjà validé et interprété les résultats de cette demande.');
         }
 
+        // eager load result details, consumables, equipment and request context
         $result->load([
             'details',
             'consumables',
@@ -173,10 +222,11 @@ class LaboResultController extends Controller
             'examRequestItem.exam.parameters',
             'examRequestItem.exam.examConsumables.consumable',
             'examRequestItem.exam.examEquipment.equipment',
-            'examRequestItem.examRequest.patient.user'
+            'examRequestItem.examRequest.patient.user',
+            'examRequestItem.examRequest.doctor.user',
         ]);
 
-        $lab = auth()->user()->staff->laboratory;
+        // consumables and equipment available in the laboratory
         $consumables = $lab->consumables()->where('is_archive', false)->get();
         $equipment = $lab->equipment()->where('is_archive', false)->get();
 
@@ -192,11 +242,11 @@ class LaboResultController extends Controller
         $preloadedConsumables = [];
         foreach ($result->consumables as $c) {
             $preloadedConsumables[] = [
-                'id'          => (string)$c->id,
-                'name'        => $c->name,
-                'unit'        => $c->unit,
-                'stock'       => $c->quantity + $c->pivot->quantity_used,
-                'quantity'    => $c->pivot->quantity_used,
+                'id' => (string) $c->id,
+                'name' => $c->name,
+                'unit' => $c->unit,
+                'stock' => $c->quantity + $c->pivot->quantity_used,
+                'quantity' => $c->pivot->quantity_used,
                 'isSuggested' => isset($suggestedNames[$c->name]),
             ];
         }
@@ -207,13 +257,26 @@ class LaboResultController extends Controller
         );
     }
 
+    /**
+     * Update an existing result with new parameters, consumables and equipment.
+     *
+     * @return RedirectResponse
+     */
     public function update(Request $request, ResultLabo $result)
     {
+        // only the owning laboratory may update the result
+        $lab = auth()->user()->staff->laboratory;
+        if ($result->examRequestItem->examRequest->labo_id !== $lab->id) {
+            abort(403);
+        }
+
+        // block editing once the doctor has validated the results
         if ($result->examRequestItem->examRequest->approved_by_doctor) {
             return redirect()
                 ->route('center.exam-requests')
                 ->with('error', 'Impossible de modifier — le médecin a déjà validé et interprété les résultats de cette demande.');
         }
+        // validate the submitted parameters, consumables and equipment
         $request->validate([
             'interpretation' => 'nullable|string',
             'parameters' => 'required|array',
@@ -228,9 +291,9 @@ class LaboResultController extends Controller
             'equipment.*' => 'required|exists:equipment,id',
         ]);
 
-        DB::transaction(function () use ($request, $result) {
+        DB::transaction(function () use ($request, $result, $lab) {
             $result->update([
-                'interpretation'=>$request->interpretation
+                'interpretation' => $request->interpretation,
             ]);
 
             // 1. Revert previous stock movements & quantities for this result
@@ -243,7 +306,7 @@ class LaboResultController extends Controller
                     'consumable_id' => $oldConsumable->id,
                     'quantity_change' => $qtyUsed,
                     'type' => 'in',
-                    'reason' => "Mise à jour du résultat d'examen #" . $result->id . " (Restitution)",
+                    'reason' => "Mise à jour du résultat d'examen #".$result->id.' (Restitution)',
                 ]);
             }
 
@@ -253,16 +316,15 @@ class LaboResultController extends Controller
             $result->equipment()->detach();
 
             // 3. Re-save parameters
-            foreach($request->parameters as $parameter)
-            {
+            foreach ($request->parameters as $parameter) {
                 ResultLaboDetail::create([
-                    'result_labo_id'=>$result->id,
-                    'parameter'=>$parameter['name'],
-                    'value'=>$parameter['value'],
-                    'status'=>$parameter['status'],
-                    'reference_range'=>$parameter['range'],
-                    'unit'=>$parameter['unit'] ?? null,
-                    'is_archive'=>false
+                    'result_labo_id' => $result->id,
+                    'parameter' => $parameter['name'],
+                    'value' => $parameter['value'],
+                    'status' => $parameter['status'],
+                    'reference_range' => $parameter['range'],
+                    'unit' => $parameter['unit'] ?? null,
+                    'is_archive' => false,
                 ]);
             }
 
@@ -270,9 +332,12 @@ class LaboResultController extends Controller
             if ($request->has('consumables')) {
                 foreach ($request->consumables as $cData) {
                     $consumableId = $cData['id'];
-                    $quantityUsed = (int)$cData['quantity'];
+                    $quantityUsed = (int) $cData['quantity'];
 
                     $consumable = Consumable::findOrFail($consumableId);
+                    if ($consumable->labo_id !== $lab->id) {
+                        abort(403);
+                    }
                     // Deduct stock
                     $consumable->quantity = max(0, $consumable->quantity - $quantityUsed);
                     $consumable->save();
@@ -282,13 +347,13 @@ class LaboResultController extends Controller
                         'consumable_id' => $consumable->id,
                         'quantity_change' => $quantityUsed,
                         'type' => 'out',
-                        'reason' => "Utilisé pour le résultat d'examen #" . $result->id,
+                        'reason' => "Utilisé pour le résultat d'examen #".$result->id,
                     ]);
 
                     // Attach to result
                     $result->consumables()->attach($consumableId, [
                         'quantity_used' => $quantityUsed,
-                        'is_archive' => false
+                        'is_archive' => false,
                     ]);
                 }
             }
@@ -296,8 +361,12 @@ class LaboResultController extends Controller
             // 5. Save new equipment
             if ($request->has('equipment')) {
                 foreach ($request->equipment as $equipId) {
+                    $equipment = Equipment::findOrFail($equipId);
+                    if ($equipment->labo_id !== $lab->id) {
+                        abort(403);
+                    }
                     $result->equipment()->attach($equipId, [
-                        'is_archive' => false
+                        'is_archive' => false,
                     ]);
                 }
             }
@@ -305,9 +374,9 @@ class LaboResultController extends Controller
 
         ExamRequestService::checkCompletion($result->examRequestItem->examRequest);
 
+        // redirect back to the exam requests list
         return redirect()
             ->route('center.exam-requests')
-            ->with('success','Résultat modifié avec succès.');
+            ->with('success', 'Résultat modifié avec succès.');
     }
-
 }
