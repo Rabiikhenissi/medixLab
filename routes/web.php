@@ -659,11 +659,11 @@ Route::prefix('center')->name('center.')->group(function () {
         Route::get('/samples', [SampleController::class, 'index'])->name('samples.index');
         Route::get('/samples/create', [SampleController::class, 'create'])->name('samples.create');
         Route::post('/samples', [SampleController::class, 'store'])->name('samples.store');
+        Route::get('/samples/scan', [SampleController::class, 'scan'])->name('samples.scan');
+        Route::post('/samples/lookup', [SampleController::class, 'lookupByBarcode'])->name('samples.lookup');
         Route::get('/samples/{sample}', [SampleController::class, 'show'])->name('samples.show');
         Route::post('/samples/{sample}/status', [SampleController::class, 'updateStatus'])->name('samples.status');
         Route::get('/samples/{sample}/barcode', [SampleController::class, 'printBarcode'])->name('samples.barcode');
-        Route::get('/samples/scan', [SampleController::class, 'scan'])->name('samples.scan');
-        Route::post('/samples/lookup', [SampleController::class, 'lookupByBarcode'])->name('samples.lookup');
 
         // Logout
 

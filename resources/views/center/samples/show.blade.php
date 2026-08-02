@@ -33,7 +33,7 @@
                     <div><span class="text-[#64748b]">Expire le:</span><br><span class="font-bold {{ $sample->expiry_date && $sample->expiry_date->isPast() ? 'text-red-600' : '' }}">{{ $sample->expiry_date ? $sample->expiry_date->format('d/m/Y') : '-' }}</span></div>
                     <div><span class="text-[#64748b]">Statut:</span><br>
                         @php $statusClasses = ['pending'=>'bg-slate-100 text-slate-700','collected'=>'bg-blue-100 text-blue-700','in_transit'=>'bg-amber-100 text-amber-700','received'=>'bg-purple-100 text-purple-700','processing'=>'bg-cyan-100 text-cyan-700','completed'=>'bg-emerald-100 text-emerald-700','rejected'=>'bg-red-100 text-red-700']; @endphp
-                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold {{ $statusClasses[$sample->status] ?? 'bg-slate-100' }}">{{ $sample->status }}</span>
+                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold {{ $statusClasses[$sample->status] ?? 'bg-slate-100' }}">{{ __('samples.status.'.$sample->status) }}</span>
                     </div>
                 </div>
                 @if($sample->rejection_reason)
