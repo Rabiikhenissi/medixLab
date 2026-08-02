@@ -37,7 +37,7 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
         <div>
             <h1 class="text-xl font-bold text-[#1e293b]">Configuration Machine</h1>
-            <p class="text-xs text-[#64748b] mt-1">Connectez votre laboratoire à un analyseur HL7 ou HTTP</p>
+            <p class="text-xs text-[#64748b] mt-1">Connectez votre laboratoire à un analyseur HL7 (TCP ou Série), RS-232/USB ou HTTP</p>
         </div>
         <a href="{{ route('center.machine-configurations.create') }}"
            class="mt-3 sm:mt-0 inline-flex items-center gap-2 px-4 py-2 bg-[#7C3AED] text-white rounded-xl text-xs font-bold hover:bg-[#6D28D9] transition whitespace-nowrap">
@@ -88,14 +88,29 @@
 
                     {{-- Connection details --}}
                     <div class="space-y-1.5 text-xs text-[#64748b] mb-5">
-                        <div class="flex justify-between">
-                            <span>Hôte</span>
-                            <strong class="text-[#1e293b] font-mono">{{ $config->host }}</strong>
-                        </div>
-                        <div class="flex justify-between">
-                            <span>Port</span>
-                            <strong class="text-[#1e293b] font-mono">{{ $config->protocol === 'hl7_mllp' && $config->mllp_port ? $config->mllp_port : $config->port }}</strong>
-                        </div>
+                        @if($config->protocol === 'serial_hl7')
+                            <div class="flex justify-between">
+                                <span>Port série</span>
+                                <strong class="text-[#1e293b] font-mono">{{ $config->serial_port ?? '—' }}</strong>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Débit</span>
+                                <strong class="text-[#1e293b] font-mono">{{ $config->baud_rate }} baud</strong>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Format</span>
+                                <strong class="text-[#1e293b] font-mono">{{ $config->data_bits }}{{ $config->parity }}{{ $config->stop_bits }}</strong>
+                            </div>
+                        @else
+                            <div class="flex justify-between">
+                                <span>Hôte</span>
+                                <strong class="text-[#1e293b] font-mono">{{ $config->host }}</strong>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Port</span>
+                                <strong class="text-[#1e293b] font-mono">{{ $config->protocol === 'hl7_mllp' && $config->mllp_port ? $config->mllp_port : $config->port }}</strong>
+                            </div>
+                        @endif
                         <div class="flex justify-between">
                             <span>Timeout</span>
                             <strong class="text-[#1e293b]">{{ $config->timeout }}s</strong>

@@ -20,6 +20,18 @@ class MachineService
 
     protected int $timeout;
 
+    protected string $protocol;
+
+    protected string $serialPort;
+
+    protected int $serialBaudRate;
+
+    protected int $serialDataBits;
+
+    protected int $serialStopBits;
+
+    protected string $serialParity;
+
     protected ?MachineConfiguration $config;
 
     /**
@@ -37,6 +49,12 @@ class MachineService
             $this->timeout = $config->timeout ?? config('machine.timeout', 5);
             $this->mllpHost = $config->host;
             $this->mllpPort = $config->mllp_port ?? config('machine.mllp_port', 5001);
+            $this->protocol = $config->protocol ?? 'hl7_mllp';
+            $this->serialPort = $config->serial_port ?? config('machine.serial.port');
+            $this->serialBaudRate = $config->baud_rate ?? config('machine.serial.baud_rate', 9600);
+            $this->serialDataBits = $config->data_bits ?? config('machine.serial.data_bits', 8);
+            $this->serialStopBits = $config->stop_bits ?? config('machine.serial.stop_bits', 1);
+            $this->serialParity = $config->parity ?? config('machine.serial.parity', 'N');
         } else {
             // Fall back to the global machine config
             $this->baseUrl = config('machine.url', 'http://127.0.0.1:5000');
@@ -44,16 +62,27 @@ class MachineService
             $parsed = parse_url($this->baseUrl);
             $this->mllpHost = $parsed['host'] ?? '127.0.0.1';
             $this->mllpPort = config('machine.mllp_port', 5001);
+            $this->protocol = config('machine.protocol', 'hl7_mllp');
+            $this->serialPort = config('machine.serial.port', PHP_OS_FAMILY === 'Windows' ? 'COM3' : '/dev/ttyUSB0');
+            $this->serialBaudRate = config('machine.serial.baud_rate', 9600);
+            $this->serialDataBits = config('machine.serial.data_bits', 8);
+            $this->serialStopBits = config('machine.serial.stop_bits', 1);
+            $this->serialParity = config('machine.serial.parity', 'N');
         }
     }
 
     /**
      * Check whether the machine is currently reachable.
      *
-     * @return bool true when the MLLP port or status endpoint responds
+     * @return bool true when the serial port, MLLP port, or status endpoint responds
      */
     public function isOnline(): bool
     {
+        // serial machines are reachable when the COM/tty device can be opened
+        if ($this->protocol === 'serial_hl7' && $this->isSerialAvailable()) {
+            return true;
+        }
+
         // A reachable TCP port is enough to consider the machine online
         if ($this->isTcpReachable()) {
             return true;
@@ -85,25 +114,112 @@ class MachineService
     }
 
     /**
-     * Send an exam order to the machine, preferring HL7/MLLP.
+     * Send an exam order to the machine using the configured protocol.
      *
      * @param  ExamRequestItem  $item  the exam item to order
      * @return array machine response with results
      */
     public function sendOrder(ExamRequestItem $item): array
     {
-        // Prefer HL7 over MLLP when the machine is reachable
-        $result = $this->sendViaHl7($item);
+        // route the order over the transport matching the saved protocol
+        $result = match ($this->protocol) {
+            // HL7 over a serial line (RS-232 / USB virtual COM port)
+            'serial_hl7' => $this->sendViaSerialHl7($item),
+            // Plain HTTP / JSON simulator
+            'http_json' => $this->sendViaHttp($item),
+            // Default: HL7 over MLLP (TCP)
+            default => $this->sendViaHl7($item),
+        };
+
         if ($result !== null) {
             return $result;
         }
 
-        Log::info('HL7 TCP unavailable, falling back to HTTP', [
+        Log::info('Preferred transport unavailable, falling back to HTTP', [
             'item_id' => $item->id,
+            'protocol' => $this->protocol,
         ]);
 
-        // Fall back to the HTTP simulator when HL7 is unavailable
+        // Fall back to the HTTP simulator when the chosen transport is unavailable
         return $this->sendViaHttp($item);
+    }
+
+    /**
+     * Send the order via HL7 ORM^O01 over the serial line and parse the ORU response.
+     *
+     * @param  ExamRequestItem  $item  the exam item to order
+     * @return array|null parsed results, or null when the serial line cannot be used
+     */
+    private function sendViaSerialHl7(ExamRequestItem $item): ?array
+    {
+        // Only attempt serial HL7 when the device can be opened
+        if (! $this->isSerialAvailable()) {
+            Log::warning('Serial port unavailable', ['port' => $this->serialPort]);
+
+            return null;
+        }
+
+        try {
+            // Build the ORM order and send it over the serial line
+            $builder = new Hl7MessageBuilder;
+            $ormMessage = $builder->buildOrmOrder($item);
+
+            Log::info('Sending HL7 ORM^O01 over serial', [
+                'item_id' => $item->id,
+                'exam_code' => $item->exam->code,
+                'port' => $this->serialPort,
+                'baud' => $this->serialBaudRate,
+                'message_length' => strlen($ormMessage),
+            ]);
+
+            $client = new SerialClient(
+                $this->serialPort,
+                $this->serialBaudRate,
+                $this->serialDataBits,
+                $this->serialStopBits,
+                $this->serialParity,
+                $this->timeout
+            );
+            $response = $client->send($ormMessage);
+
+            if ($response === null) {
+                Log::warning('Serial no response', ['item_id' => $item->id]);
+
+                return null;
+            }
+
+            // Parse the ORU response into results
+            $parser = new Hl7ResponseParser;
+            $parsed = $parser->parseOru($response);
+
+            $results = $parsed['results'];
+            if (empty($results)) {
+                Log::warning('HL7 ORU contained no results', ['item_id' => $item->id]);
+
+                return null;
+            }
+
+            // Count abnormal results and build the response payload
+            $abnormalCount = count(array_filter($results, fn ($r) => $r['status'] !== 'normal'));
+
+            return [
+                'status' => 'completed',
+                'order_id' => $parsed['order_id'] ?: $item->id,
+                'exam_code' => $parsed['exam_code'] ?: $item->exam->code,
+                'exam_name' => $parsed['exam_name'] ?: $item->exam->name,
+                'results' => $results,
+                'processing_time_seconds' => 0,
+                'abnormal_count' => $abnormalCount,
+                'source' => 'hl7_serial',
+            ];
+        } catch (\Exception $e) {
+            Log::error('Serial HL7 send failed', [
+                'item_id' => $item->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
     }
 
     /**
@@ -295,6 +411,25 @@ class MachineService
         }
 
         return false;
+    }
+
+    /**
+     * Probe whether the configured serial device can be opened.
+     *
+     * @return bool true when the serial port is available
+     */
+    private function isSerialAvailable(): bool
+    {
+        $client = new SerialClient(
+            $this->serialPort,
+            $this->serialBaudRate,
+            $this->serialDataBits,
+            $this->serialStopBits,
+            $this->serialParity,
+            $this->timeout
+        );
+
+        return $client->isAvailable();
     }
 
     /**
