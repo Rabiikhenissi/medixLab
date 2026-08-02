@@ -47,4 +47,9 @@ class ExamRequest extends Model
     {
         return $this->hasMany(ExamRequestItem::class);
     }
+
+    public function invoices()
+    {
+        return $this->hasMany(Invoice::class);
+    }
 }
