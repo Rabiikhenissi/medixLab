@@ -402,13 +402,13 @@
                 </svg>
                 Top 5 Examens Demandés
             </h3>
-            @if($topExams->count() > 0)
+            @if(count($topExams) > 0)
                 <div class="space-y-3">
                     @foreach($topExams as $i => $exam)
                         <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
                             <span class="w-7 h-7 rounded-lg bg-[#7C3AED]/10 flex items-center justify-center text-[#7C3AED] font-bold text-xs">{{ $i + 1 }}</span>
-                            <span class="flex-1 text-sm font-semibold text-slate-700">{{ $exam->name }}</span>
-                            <span class="text-xs font-bold text-[#7C3AED] bg-[#7C3AED]/10 px-2 py-1 rounded">{{ $exam->count }}</span>
+                            <span class="flex-1 text-sm font-semibold text-slate-700">{{ $exam['name'] }}</span>
+                            <span class="text-xs font-bold text-[#7C3AED] bg-[#7C3AED]/10 px-2 py-1 rounded">{{ $exam['count'] }}</span>
                         </div>
                     @endforeach
                 </div>

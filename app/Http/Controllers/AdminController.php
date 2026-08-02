@@ -29,7 +29,7 @@ class AdminController extends Controller
         }
 
         // Cache admin dashboard for 5 minutes
-        $cacheKey = 'admin_dashboard';
+        $cacheKey = 'admin_dashboard_v2';
         $cached = cache()->remember($cacheKey, 300, function () {
             $stats = [
                 'total_exams' => Exam::where(function ($q) {
@@ -68,7 +68,10 @@ class AdminController extends Controller
                 ->orderByDesc('count')
                 ->limit(5)
                 ->with('exam')
-                ->get();
+                ->get()
+                ->map(fn($item) => ['name' => $item->exam?->name ?? 'Inconnu', 'count' => (int) $item->count])
+                ->values()
+                ->all();
 
             // 3. Requests volume over the last 15 days
             $dailyVolume = ExamRequest::where('created_at', '>=', Carbon::now()->subDays(14)->startOfDay())
@@ -91,7 +94,17 @@ class AdminController extends Controller
             $recentPrescriptions = ExamRequest::with(['doctor.user', 'patient.user', 'laboratory'])
                 ->latest()
                 ->limit(5)
-                ->get();
+                ->get()
+                ->map(fn($rx) => [
+                    'id'           => $rx->id,
+                    'status'       => $rx->status,
+                    'created_at'   => $rx->created_at->diffForHumans(),
+                    'doctor_name'  => $rx->doctor?->user ? trim($rx->doctor->user->first_name . ' ' . $rx->doctor->user->last_name) : '—',
+                    'patient_name' => $rx->patient?->user ? trim($rx->patient->user->first_name . ' ' . $rx->patient->user->last_name) : '—',
+                    'lab_name'     => $rx->laboratory?->name ?? 'Non assigné',
+                ])
+                ->values()
+                ->all();
 
             // 5. Labs per city
             $labsPerCity = Labo::where('is_archive', false)

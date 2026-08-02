@@ -574,8 +574,29 @@ class PatientController extends Controller
     }
 
     /**
-     * Show the laboratory selection page for an exam request
+     * Persist the patient's current location so distance scores can be computed.
      */
+    public function saveLocation(Request $request)
+    {
+        $validated = $request->validate([
+            'latitude'  => ['required', 'numeric', 'between:-90,90'],
+            'longitude' => ['required', 'numeric', 'between:-180,180'],
+        ]);
+
+        $patient = auth()->user()->patient;
+
+        if (!$patient) {
+            return response()->json(['success' => false, 'message' => 'Profil patient introuvable.'], 404);
+        }
+
+        $patient->update([
+            'latitude'  => $validated['latitude'],
+            'longitude' => $validated['longitude'],
+        ]);
+
+        return response()->json(['success' => true]);
+    }
+
     public function chooseLaboratory(ExamRequest $examRequest)
     {
         $patient = auth()->user()->patient;
