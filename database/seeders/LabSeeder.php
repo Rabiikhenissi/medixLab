@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\Labo;
-use App\Models\WorkingHours;
 use App\Models\Consumable;
 use App\Models\Equipment;
+use App\Models\Labo;
+use App\Models\WorkingHours;
 use Illuminate\Database\Seeder;
 
 class LabSeeder extends Seeder
@@ -144,13 +144,13 @@ class LabSeeder extends Seeder
                     ['labo_id' => $lab->id, 'name' => $e['name']],
                     [
                         'type' => $e['type'],
-                        'serial_number' => 'SN-EQ-' . str_pad($lab->id, 2, '0', STR_PAD_LEFT) . '-' . str_pad($idx + 1, 3, '0', STR_PAD_LEFT),
+                        'serial_number' => 'SN-EQ-'.str_pad($lab->id, 2, '0', STR_PAD_LEFT).'-'.str_pad($idx + 1, 3, '0', STR_PAD_LEFT),
                         'status' => 'active', 'is_archive' => false,
                     ]
                 );
             }
         }
 
-        $this->command->info($labs->count() . ' labs with working hours, consumables, equipment seeded.');
+        $this->command->info($labs->count().' labs with working hours, consumables, equipment seeded.');
     }
 }

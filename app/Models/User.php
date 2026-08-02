@@ -9,10 +9,12 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Notifications\Messages\MailMessage;
 
 #[Fillable(['first_name', 'last_name', 'email', 'password', 'phone', 'group_id', 'address', 'is_archive', 'last_login_at'])]
 #[Hidden(['password', 'remember_token'])]
+/**
+ * Authenticatable user account shared by every role (admin, doctor, patient, center staff).
+ */
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
@@ -32,39 +34,46 @@ class User extends Authenticatable
         ];
     }
 
+    /** The permission group this user belongs to. */
     public function group()
     {
         return $this->belongsTo(Group::class);
     }
 
+    /** In-app notifications sent to this user. */
     public function notifications()
     {
         return $this->hasMany(Notification::class);
     }
 
+    /** The admin profile attached to this account, if any. */
     public function admin()
     {
         return $this->hasOne(Admin::class);
     }
 
+    /** The doctor profile attached to this account, if any. */
     public function doctor()
     {
         return $this->hasOne(Doctor::class);
     }
 
+    /** The patient profile attached to this account, if any. */
     public function patient()
     {
         return $this->hasOne(Patient::class);
     }
 
+    /** The center staff profile attached to this account, if any. */
     public function staff()
     {
         return $this->hasOne(Staff::class);
     }
 
+    /** Whether the user's group is granted the given action code (cached per group). */
     public function hasPermission(string $actionCode): bool
     {
-        if (!$this->group) {
+        if (! $this->group) {
             return false;
         }
 

@@ -6,6 +6,17 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
+/**
+ * Seed bulk demo/stress data (patient, doctor and staff users, exams, labs and
+ * available-exam links) for load testing. Each inserted batch of rows is tracked
+ * in storage/app/bulk_seed_tracker.json so it can be fully removed afterwards.
+ *
+ * Usage:
+ *   php artisan stress:seed --patients=500 --doctors=300 --staff=200
+ *                           --exams=1000 --labs=1000 --links-per-exam=10
+ *
+ * Revert everything with: php artisan stress:undo
+ */
 class SeedStressData extends Command
 {
     protected $signature = 'stress:seed
@@ -18,27 +29,34 @@ class SeedStressData extends Command
 
     protected $description = 'Seed bulk stress data (users, exams, labs) and track it for easy undo via stress:undo';
 
+    /**
+     * Run the stress seed command.
+     *
+     * @return int command exit status (SUCCESS on completion)
+     */
     public function handle(): int
     {
         $patientCount = (int) $this->option('patients');
-        $doctorCount  = (int) $this->option('doctors');
-        $staffCount   = (int) $this->option('staff');
-        $examCount    = (int) $this->option('exams');
-        $labCount     = (int) $this->option('labs');
+        $doctorCount = (int) $this->option('doctors');
+        $staffCount = (int) $this->option('staff');
+        $examCount = (int) $this->option('exams');
+        $labCount = (int) $this->option('labs');
         $linksPerExam = (int) $this->option('links-per-exam');
 
         $this->warn("Seeding {$patientCount} patients, {$doctorCount} doctors, {$staffCount} staff, {$examCount} exams, {$labCount} labs...");
 
+        // Track the id range inserted per table so stress:undo can delete them
         $ranges = [
-            'labos'          => [],
-            'exams'          => [],
-            'users'          => [],
-            'patients'       => [],
-            'doctors'        => [],
-            'staff'          => [],
-            'available_exams'=> [],
+            'labos' => [],
+            'exams' => [],
+            'users' => [],
+            'patients' => [],
+            'doctors' => [],
+            'staff' => [],
+            'available_exams' => [],
         ];
 
+        // Insert everything inside a single transaction
         DB::transaction(function () use (
             $patientCount, $doctorCount, $staffCount, $examCount, $labCount, $linksPerExam, &$ranges
         ) {
@@ -56,7 +74,7 @@ class SeedStressData extends Command
                     'name' => "Labo Stress {$i}",
                     'address' => "Adresse Stress {$i}",
                     'city' => "Ville {$i}",
-                    'phone' => '+216' . str_pad((string) (20000000 + $i), 8, '0', STR_PAD_LEFT),
+                    'phone' => '+216'.str_pad((string) (20000000 + $i), 8, '0', STR_PAD_LEFT),
                     'email' => "stress.lab.{$i}@test.local",
                     'created_at' => $now,
                     'updated_at' => $now,
@@ -70,7 +88,7 @@ class SeedStressData extends Command
             $examRows = [];
             for ($i = 1; $i <= $examCount; $i++) {
                 $examRows[] = [
-                    'code' => 'STR-' . str_pad((string) $i, 5, '0', STR_PAD_LEFT),
+                    'code' => 'STR-'.str_pad((string) $i, 5, '0', STR_PAD_LEFT),
                     'name' => "Examen Stress {$i}",
                     'category' => $categories[($i - 1) % count($categories)],
                     'description' => "Examen de test stress {$i}",
@@ -98,14 +116,14 @@ class SeedStressData extends Command
             }
             $this->insertChunked('users', $userRows, 200, $ranges['users']);
             $userIds = $this->chunkIds($ranges['users']);
-            $this->line('  users: ' . count($userRows));
+            $this->line('  users: '.count($userRows));
 
             // Patients
             $patientRows = [];
             for ($k = 0; $k < $patientCount; $k++) {
                 $patientRows[] = [
                     'user_id' => $userIds[$k],
-                    'patient_code' => 'PT-STR-' . str_pad((string) ($k + 1), 5, '0', STR_PAD_LEFT),
+                    'patient_code' => 'PT-STR-'.str_pad((string) ($k + 1), 5, '0', STR_PAD_LEFT),
                     'gender' => $genders[$k % 2],
                     'date_of_birth' => now()->subYears(20 + ($k % 60))->format('Y-m-d'),
                     'country' => 'TN',
@@ -123,7 +141,7 @@ class SeedStressData extends Command
                 $doctorRows[] = [
                     'user_id' => $userIds[$patientCount + $k],
                     'speciality' => $specialities[$k % 5],
-                    'doctor_code' => 'DR-STR-' . str_pad((string) ($k + 1), 5, '0', STR_PAD_LEFT),
+                    'doctor_code' => 'DR-STR-'.str_pad((string) ($k + 1), 5, '0', STR_PAD_LEFT),
                     'created_at' => $now,
                     'updated_at' => $now,
                 ];
@@ -136,7 +154,7 @@ class SeedStressData extends Command
                 $staffRows[] = [
                     'user_id' => $userIds[$patientCount + $doctorCount + $k],
                     'laboratory_id' => $labIds[$k],
-                    'staff_code' => 'ST-STR-' . str_pad((string) ($k + 1), 5, '0', STR_PAD_LEFT),
+                    'staff_code' => 'ST-STR-'.str_pad((string) ($k + 1), 5, '0', STR_PAD_LEFT),
                     'created_at' => $now,
                     'updated_at' => $now,
                 ];
@@ -159,15 +177,27 @@ class SeedStressData extends Command
                 }
             }
             $this->insertChunked('available_exams', $availableRows, 300, $ranges['available_exams']);
-            $this->line('  available_exams: ' . count($availableRows));
+            $this->line('  available_exams: '.count($availableRows));
         });
 
+        // Save the id ranges for the undo command
         $this->storeTracker($ranges);
         $this->info('Stress data seeded. Run `php artisan stress:undo` to revert.');
 
         return self::SUCCESS;
     }
 
+    /**
+     * Build a user row for the bulk insert.
+     *
+     * @param  string  $name  user display name
+     * @param  string  $email  user email
+     * @param  int  $phoneSeed  seed used to build a unique phone number
+     * @param  int  $groupId  user group id
+     * @param  string  $now  shared created/updated timestamp
+     * @param  string  $passwordHash  pre-computed password hash
+     * @return array user row ready for insertion
+     */
     private function userRow(string $name, string $email, int $phoneSeed, int $groupId, string $now, string $passwordHash): array
     {
         return [
@@ -175,7 +205,7 @@ class SeedStressData extends Command
             'last_name' => 'Stress',
             'email' => $email,
             'password' => $passwordHash,
-            'phone' => '+216' . str_pad((string) $phoneSeed, 8, '0', STR_PAD_LEFT),
+            'phone' => '+216'.str_pad((string) $phoneSeed, 8, '0', STR_PAD_LEFT),
             'group_id' => $groupId,
             'address' => "Adresse {$name}",
             'email_verified_at' => $now,
@@ -184,6 +214,14 @@ class SeedStressData extends Command
         ];
     }
 
+    /**
+     * Insert rows in chunks and record the id range of each chunk.
+     *
+     * @param  string  $table  table to insert into
+     * @param  array  $rows  rows to insert
+     * @param  int  $chunkSize  max rows per insert
+     * @param  array  $ranges  tracker array receiving the id ranges
+     */
     private function insertChunked(string $table, array $rows, int $chunkSize, array &$ranges): void
     {
         $total = count($rows);
@@ -196,6 +234,12 @@ class SeedStressData extends Command
         }
     }
 
+    /**
+     * Expand id ranges into a flat list of ids.
+     *
+     * @param  array  $ranges  list of [first, last] id ranges
+     * @return array flat list of ids
+     */
     private function chunkIds(array $ranges): array
     {
         $ids = [];
@@ -204,9 +248,15 @@ class SeedStressData extends Command
                 $ids[] = $id;
             }
         }
+
         return $ids;
     }
 
+    /**
+     * Append this seed run's id ranges to the bulk seed tracker file.
+     *
+     * @param  array  $ranges  id ranges per table
+     */
     private function storeTracker(array $ranges): void
     {
         $trackerPath = storage_path('app/bulk_seed_tracker.json');

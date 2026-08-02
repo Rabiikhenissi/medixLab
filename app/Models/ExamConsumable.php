@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Model;
 
 #[Fillable(['exam_id', 'consumable_id', 'quantity_needed', 'is_archive'])]
 class ExamConsumable extends Model
@@ -14,6 +14,7 @@ class ExamConsumable extends Model
             'is_archive' => 'boolean',
         ];
     }
+
     protected $table = 'exam_consumables';
 
     public function exam()

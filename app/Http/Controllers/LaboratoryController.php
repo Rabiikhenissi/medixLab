@@ -3,12 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\Labo;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class LaboratoryController extends Controller
 {
     /**
      * Display a listing of laboratories.
+     *
+     * @return View
      */
     public function index(Request $request)
     {
@@ -17,18 +21,20 @@ class LaboratoryController extends Controller
 
         $query = Labo::query();
 
-        if (!$showArchived) {
+        // hide archived laboratories unless explicitly requested
+        if (! $showArchived) {
             $query->where(function ($q) {
                 $q->where('is_archive', false)->orWhereNull('is_archive');
             });
         }
 
+        // narrow results by search keyword
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('city', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%");
+                    ->orWhere('city', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%");
             });
         }
 
@@ -51,9 +57,12 @@ class LaboratoryController extends Controller
 
     /**
      * Store a newly created laboratory in storage.
+     *
+     * @return RedirectResponse
      */
     public function store(Request $request)
     {
+        // validate the laboratory fields
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|max:255',
@@ -70,6 +79,8 @@ class LaboratoryController extends Controller
 
     /**
      * Show the form for editing the specified laboratory.
+     *
+     * @return View
      */
     public function edit(Labo $laboratory)
     {
@@ -80,9 +91,12 @@ class LaboratoryController extends Controller
 
     /**
      * Update the specified laboratory in storage.
+     *
+     * @return RedirectResponse
      */
     public function update(Request $request, Labo $laboratory)
     {
+        // validate the laboratory fields
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|max:255',
@@ -98,10 +112,12 @@ class LaboratoryController extends Controller
 
     /**
      * Remove the specified laboratory from storage (toggle archive).
+     *
+     * @return RedirectResponse
      */
     public function destroy(Labo $laboratory)
     {
-        $laboratory->update(['is_archive' => !$laboratory->is_archive]);
+        $laboratory->update(['is_archive' => ! $laboratory->is_archive]);
 
         $message = $laboratory->is_archive
             ? 'Laboratoire archivé avec succès.'
@@ -112,6 +128,8 @@ class LaboratoryController extends Controller
 
     /**
      * Permanently remove the specified laboratory from storage.
+     *
+     * @return RedirectResponse
      */
     public function forceDelete(Labo $laboratory)
     {

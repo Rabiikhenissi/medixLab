@@ -13,21 +13,32 @@ use Illuminate\Support\Facades\Log;
 class MachineService
 {
     protected string $baseUrl;
+
     protected string $mllpHost;
+
     protected int $mllpPort;
+
     protected int $timeout;
+
     protected ?MachineConfiguration $config;
 
+    /**
+     * Create the machine service, using a saved configuration or app defaults.
+     *
+     * @param  MachineConfiguration|null  $config  optional saved machine configuration
+     */
     public function __construct(?MachineConfiguration $config = null)
     {
         $this->config = $config;
 
         if ($config) {
+            // Read connection settings from the stored configuration
             $this->baseUrl = $config->getBaseUrl();
             $this->timeout = $config->timeout ?? config('machine.timeout', 5);
             $this->mllpHost = $config->host;
             $this->mllpPort = $config->mllp_port ?? config('machine.mllp_port', 5001);
         } else {
+            // Fall back to the global machine config
             $this->baseUrl = config('machine.url', 'http://127.0.0.1:5000');
             $this->timeout = config('machine.timeout', 5);
             $parsed = parse_url($this->baseUrl);
@@ -36,31 +47,52 @@ class MachineService
         }
     }
 
+    /**
+     * Check whether the machine is currently reachable.
+     *
+     * @return bool true when the MLLP port or status endpoint responds
+     */
     public function isOnline(): bool
     {
+        // A reachable TCP port is enough to consider the machine online
         if ($this->isTcpReachable()) {
             return true;
         }
         try {
-            $response = Http::timeout($this->timeout)->get($this->baseUrl . '/api/status');
+            // Otherwise probe the HTTP status endpoint
+            $response = Http::timeout($this->timeout)->get($this->baseUrl.'/api/status');
+
             return $response->successful();
         } catch (\Exception $e) {
             return false;
         }
     }
 
+    /**
+     * Fetch the machine's status payload from the HTTP endpoint.
+     *
+     * @return array|null decoded status JSON, or null on failure
+     */
     public function getStatus(): ?array
     {
         try {
-            $response = Http::timeout($this->timeout)->get($this->baseUrl . '/api/status');
+            $response = Http::timeout($this->timeout)->get($this->baseUrl.'/api/status');
+
             return $response->json();
         } catch (\Exception $e) {
             return null;
         }
     }
 
+    /**
+     * Send an exam order to the machine, preferring HL7/MLLP.
+     *
+     * @param  ExamRequestItem  $item  the exam item to order
+     * @return array machine response with results
+     */
     public function sendOrder(ExamRequestItem $item): array
     {
+        // Prefer HL7 over MLLP when the machine is reachable
         $result = $this->sendViaHl7($item);
         if ($result !== null) {
             return $result;
@@ -70,17 +102,26 @@ class MachineService
             'item_id' => $item->id,
         ]);
 
+        // Fall back to the HTTP simulator when HL7 is unavailable
         return $this->sendViaHttp($item);
     }
 
+    /**
+     * Send the order via HL7 ORM^O01 over MLLP and parse the ORU response.
+     *
+     * @param  ExamRequestItem  $item  the exam item to order
+     * @return array|null parsed results, or null when HL7 cannot be used
+     */
     private function sendViaHl7(ExamRequestItem $item): ?array
     {
-        if (!$this->isTcpReachable()) {
+        // Only attempt HL7 if the MLLP port is open
+        if (! $this->isTcpReachable()) {
             return null;
         }
 
         try {
-            $builder = new Hl7MessageBuilder();
+            // Build and send the ORM order over MLLP
+            $builder = new Hl7MessageBuilder;
             $ormMessage = $builder->buildOrmOrder($item);
 
             Log::info('Sending HL7 ORM^O01 via MLLP', [
@@ -96,19 +137,23 @@ class MachineService
 
             if ($response === null) {
                 Log::warning('MLLP no response', ['item_id' => $item->id]);
+
                 return null;
             }
 
-            $parser = new Hl7ResponseParser();
+            // Parse the ORU response into results
+            $parser = new Hl7ResponseParser;
             $parsed = $parser->parseOru($response);
 
             $results = $parsed['results'];
             if (empty($results)) {
                 Log::warning('HL7 ORU contained no results', ['item_id' => $item->id]);
+
                 return null;
             }
 
-            $abnormalCount = count(array_filter($results, fn($r) => $r['status'] !== 'normal'));
+            // Count abnormal results and build the response payload
+            $abnormalCount = count(array_filter($results, fn ($r) => $r['status'] !== 'normal'));
 
             return [
                 'status' => 'completed',
@@ -125,39 +170,49 @@ class MachineService
                 'item_id' => $item->id,
                 'error' => $e->getMessage(),
             ]);
+
             return null;
         }
     }
 
+    /**
+     * Send the order to the HTTP simulator and return its response.
+     *
+     * @param  ExamRequestItem  $item  the exam item to order
+     * @return array simulator response, or built-in generated results on failure
+     */
     private function sendViaHttp(ExamRequestItem $item): array
     {
         $patient = $item->examRequest->patient;
         $doctor = $item->examRequest->doctor;
 
+        // Build the JSON order payload for the HTTP simulator
         $payload = [
-            'order_id' => 'ORD-' . $item->examRequest->id . '-' . $item->id,
+            'order_id' => 'ORD-'.$item->examRequest->id.'-'.$item->id,
             'exam_request_item_id' => $item->id,
             'exam_code' => $item->exam->code,
             'patient' => [
                 'id' => $patient->id,
-                'name' => $patient->user->first_name . ' ' . $patient->user->last_name,
+                'name' => $patient->user->first_name.' '.$patient->user->last_name,
                 'birth_date' => $patient->date_of_birth?->format('Y-m-d') ?? '1990-01-01',
                 'sex' => $patient->gender ?? 'M',
             ],
             'doctor' => $doctor ? [
                 'id' => $doctor->id,
-                'name' => 'Dr. ' . $doctor->user->first_name . ' ' . $doctor->user->last_name,
+                'name' => 'Dr. '.$doctor->user->first_name.' '.$doctor->user->last_name,
             ] : null,
         ];
 
         try {
+            // Post the order to the simulator
             $response = Http::timeout(3)
                 ->withHeaders(['Content-Type' => 'application/json'])
-                ->post($this->baseUrl . '/api/order', $payload);
+                ->post($this->baseUrl.'/api/order', $payload);
 
             if ($response->successful()) {
                 $data = $response->json();
                 $data['source'] = 'http_json';
+
                 return $data;
             }
         } catch (\Exception $e) {
@@ -167,14 +222,25 @@ class MachineService
             ]);
         }
 
+        // Simulator unreachable: generate deterministic results locally
         return $this->generateBuiltInResults($item);
     }
 
+    /**
+     * Store machine results for an exam item and trigger completion checks.
+     *
+     * @param  ExamRequestItem  $item  the exam item the results belong to
+     * @param  array  $machineResponse  machine response containing the results
+     * @param  int  $staffId  staff user that validated the results
+     * @return ResultLabo the created or updated lab result
+     */
     public function processResults(ExamRequestItem $item, array $machineResponse, int $staffId): ResultLabo
     {
+        // Extract the parameter results from the machine response
         $results = $machineResponse['results'] ?? [];
         $staff = Staff::find($staffId);
 
+        // Create or update the lab result container for this item
         $result = ResultLabo::updateOrCreate(
             ['exam_request_item_id' => $item->id],
             [
@@ -184,8 +250,10 @@ class MachineService
             ]
         );
 
+        // Reset old details before storing fresh results
         $result->details()->delete();
 
+        // Store each parameter as a result detail
         foreach ($results as $r) {
             $statusMap = ['normal' => 'normal', 'high' => 'high', 'low' => 'low', 'abnormal' => 'abnormal'];
             $detailStatus = $statusMap[$r['status']] ?? 'normal';
@@ -201,11 +269,17 @@ class MachineService
             ]);
         }
 
+        // Trigger exam completion checks and notifications
         ExamRequestService::checkCompletion($item->examRequest);
 
         return $result;
     }
 
+    /**
+     * Probe whether the MLLP TCP port accepts connections.
+     *
+     * @return bool true when a socket connection can be opened
+     */
     private function isTcpReachable(): bool
     {
         $socket = @stream_socket_client(
@@ -216,21 +290,31 @@ class MachineService
         );
         if ($socket) {
             fclose($socket);
+
             return true;
         }
+
         return false;
     }
 
+    /**
+     * Generate plausible results locally when no machine is reachable.
+     *
+     * @param  ExamRequestItem  $item  the exam item to generate results for
+     * @return array generated result payload
+     */
     private function generateBuiltInResults(ExamRequestItem $item): array
     {
         $examCode = strtoupper($item->exam->code);
         $sex = $item->examRequest->patient->gender ?? 'M';
-        $orderId = 'ORD-' . $item->examRequest->id . '-' . $item->id;
+        $orderId = 'ORD-'.$item->examRequest->id.'-'.$item->id;
 
+        // Pick the parameter definitions for the exam code
         $params = self::getExamParameters($examCode);
         $results = [];
 
-        $abnormalCount = random_int(0, max(1, (int)(count($params) * 0.15)));
+        // Decide how many parameters will be abnormal
+        $abnormalCount = random_int(0, max(1, (int) (count($params) * 0.15)));
         $abnormalIndices = [];
         if ($abnormalCount > 0) {
             $indices = range(0, count($params) - 1);
@@ -238,18 +322,22 @@ class MachineService
             $abnormalIndices = array_slice($indices, 0, $abnormalCount);
         }
 
+        // Generate a value for each parameter
         foreach ($params as $i => $param) {
             $isAbnormal = in_array($i, $abnormalIndices);
 
-            if (!empty($param['qualitative'])) {
+            // Qualitative tests only have positive/negative results
+            if (! empty($param['qualitative'])) {
                 $val = $isAbnormal ? 'Positif' : 'Négatif';
                 $results[] = [
                     'parameter' => $param['name'], 'value' => $val, 'unit' => $param['unit'],
                     'reference_range' => 'Négatif', 'status' => $isAbnormal ? 'high' : 'normal',
                 ];
+
                 continue;
             }
 
+            // Use gender-specific ranges when the patient is female
             $low = $param['range'][0] ?? $param['range_m'][0];
             $high = $param['range'][1] ?? $param['range_m'][1];
             if ($sex === 'F' && isset($param['range_f'])) {
@@ -257,6 +345,7 @@ class MachineService
                 $high = $param['range_f'][1];
             }
 
+            // Abnormal values are pushed just outside the reference range
             if ($isAbnormal) {
                 $direction = random_int(0, 1) ? 'high' : 'low';
                 $value = $direction === 'high'
@@ -264,11 +353,13 @@ class MachineService
                     : $low - ($param['std'] * mt_rand(10, 25) / 10);
                 $status = $direction;
             } else {
+                // Normal values stay within the reference range
                 $value = $param['mean'] + ($param['std'] * (mt_rand(-100, 100) / 100));
                 $value = max($low, min($high, $value));
                 $status = 'normal';
             }
 
+            // Round the value according to the parameter's precision
             $std = $param['std'];
             $value = $std < 0.01 ? round($value, 3) : ($std < 1.0 ? round($value, 2) : ($std < 10.0 ? round($value, 1) : round($value, 0)));
 
@@ -278,17 +369,25 @@ class MachineService
             ];
         }
 
+        // Assemble the generated result payload
         return [
             'status' => 'completed', 'order_id' => $orderId, 'exam_code' => $examCode,
             'exam_name' => $item->exam->name, 'results' => $results,
             'processing_time_seconds' => round(mt_rand(150, 400) / 100, 2),
-            'abnormal_count' => count(array_filter($results, fn($r) => $r['status'] !== 'normal')),
+            'abnormal_count' => count(array_filter($results, fn ($r) => $r['status'] !== 'normal')),
             'source' => 'builtin',
         ];
     }
 
+    /**
+     * Resolve the parameter definitions for an exam code.
+     *
+     * @param  string  $code  exam code, possibly an alias
+     * @return array list of parameter definition arrays
+     */
     private static function getExamParameters(string $code): array
     {
+        // Normalize aliases to the canonical exam code
         $aliasMap = [
             'CBC' => 'NFS', 'BLOOD' => 'NFS', 'HEMO' => 'NFS',
             'GLYCEMIE' => 'GLYC', 'GLYCO' => 'GLYC', 'LIPID' => 'GLYC',

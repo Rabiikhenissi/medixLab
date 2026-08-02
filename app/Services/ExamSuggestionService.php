@@ -3,83 +3,141 @@
 namespace App\Services;
 
 use App\Models\Exam;
-use App\Models\Patient;
-use App\Models\ExamRequest;
-use App\Models\ResultLaboDetail;
-use App\Models\ResultLabo;
 use App\Models\ExamRequestItem;
+use App\Models\Patient;
 
 class ExamSuggestionService
 {
     private Patient $patient;
 
     private static $AGE_GROUP_MAP = [
-        'child'    => ['min' => 0, 'max' => 17],
-        'adult'    => ['min' => 18, 'max' => 39],
-        'middle'   => ['min' => 40, 'max' => 59],
-        'senior'   => ['min' => 60, 'max' => 120],
+        'child' => ['min' => 0, 'max' => 17],
+        'adult' => ['min' => 18, 'max' => 39],
+        'middle' => ['min' => 40, 'max' => 59],
+        'senior' => ['min' => 60, 'max' => 120],
     ];
 
     private static $GENDER_AGNOSTIC = ['NFS', 'BIOCH', 'HEME'];
 
+    /**
+     * Create the suggestion service for a given patient.
+     *
+     * @param  Patient  $patient  the patient to generate suggestions for
+     */
     public function __construct(Patient $patient)
     {
         $this->patient = $patient;
     }
 
+    /**
+     * Build exam suggestions for the patient (preventive, follow-up, age-based).
+     *
+     * @param  array|null  $alreadySelectedExamIds  exam ids already picked by the doctor
+     * @return array sorted list of suggestion arrays (max 10)
+     */
     public function getSuggestions(?array $alreadySelectedExamIds = []): array
     {
+        // Normalize the list of exams the doctor already selected
         $alreadySelectedExamIds = $alreadySelectedExamIds ?? [];
         $suggestions = [];
         $age = $this->getAgeGroup();
         $gender = $this->patient->gender;
 
+        // Load patient history to detect abnormalities and recent exams
         $pastResults = $this->getPatientResultHistory();
         $abnormalParams = $this->getAbnormalParameters($pastResults);
         $recentExams = $this->getRecentExamCodes();
 
+        // Merge preventive, follow-up and age-based suggestions
         $preventive = $this->getPreventiveSuggestions($age, $gender, $recentExams);
         $followUp = $this->getFollowUpSuggestions($abnormalParams);
         $ageBased = $this->getAgeBasedSuggestions($age);
 
         $allSuggestions = array_merge($preventive, $followUp, $ageBased);
 
+        // Drop exams already selected by the doctor or already suggested
         $seen = [];
         foreach ($allSuggestions as $s) {
-            if (in_array($s['exam_id'], $alreadySelectedExamIds)) continue;
-            if (in_array($s['exam_id'], $seen)) continue;
+            if (in_array($s['exam_id'], $alreadySelectedExamIds)) {
+                continue;
+            }
+            if (in_array($s['exam_id'], $seen)) {
+                continue;
+            }
             $seen[] = $s['exam_id'];
             $suggestions[] = $s;
         }
 
-        usort($suggestions, fn($a, $b) => $b['priority'] <=> $a['priority']);
+        // Sort by priority, highest first
+        usort($suggestions, fn ($a, $b) => $b['priority'] <=> $a['priority']);
 
+        // Keep only the top 10 suggestions
         return array_slice($suggestions, 0, 10);
     }
 
+    /**
+     * Assign human-readable category tags to an exam based on its code and name.
+     *
+     * @param  Exam  $exam  the exam to tag
+     * @return array list of unique category tags
+     */
     public static function getExamCategoryTags(Exam $exam): array
     {
         $tags = [];
         $code = strtoupper($exam->code);
         $name = strtolower($exam->name);
 
-        if (in_array($code, ['NFS', 'VS', 'HEME', 'COAG'])) $tags[] = 'hematologie';
-        if (in_array($code, ['BIOCH', 'GLUC', 'CHOL', 'TRIG', 'UREA', 'CREAT', 'ALAT', 'ASAT', 'BILI'])) $tags[] = 'biochimie';
-        if (in_array($code, ['URIN', 'ECBU'])) $tags[] = 'urin分析';
-        if (in_array($code, ['TSH', 'FT4', 'FT3', 'INS', 'CORT'])) $tags[] = 'endocrinologie';
-        if (in_array($code, ['HB1AC', 'FRUC'])) $tags[] = 'diabète';
-        if (in_array($code, ['IRON', 'FERR', 'VITB12', 'FOL'])) $tags[] = 'carence';
-        if (in_array($code, ['PSA'])) $tags[] = 'prostate';
-        if (in_array($code, ['LIPID'])) $tags[] = 'cardiovasculaire';
-        if (in_array($code, ['CALCI', 'PHOSP', 'MAGN'])) $tags[] = 'électrolytes';
-        if (in_array($code, ['AMY', 'LIPAS'])) $tags[] = 'pancréas';
+        // Derive tags from the exam code
+        if (in_array($code, ['NFS', 'VS', 'HEME', 'COAG'])) {
+            $tags[] = 'hematologie';
+        }
+        if (in_array($code, ['BIOCH', 'GLUC', 'CHOL', 'TRIG', 'UREA', 'CREAT', 'ALAT', 'ASAT', 'BILI'])) {
+            $tags[] = 'biochimie';
+        }
+        if (in_array($code, ['URIN', 'ECBU'])) {
+            $tags[] = 'urin分析';
+        }
+        if (in_array($code, ['TSH', 'FT4', 'FT3', 'INS', 'CORT'])) {
+            $tags[] = 'endocrinologie';
+        }
+        if (in_array($code, ['HB1AC', 'FRUC'])) {
+            $tags[] = 'diabète';
+        }
+        if (in_array($code, ['IRON', 'FERR', 'VITB12', 'FOL'])) {
+            $tags[] = 'carence';
+        }
+        if (in_array($code, ['PSA'])) {
+            $tags[] = 'prostate';
+        }
+        if (in_array($code, ['LIPID'])) {
+            $tags[] = 'cardiovasculaire';
+        }
+        if (in_array($code, ['CALCI', 'PHOSP', 'MAGN'])) {
+            $tags[] = 'électrolytes';
+        }
+        if (in_array($code, ['AMY', 'LIPAS'])) {
+            $tags[] = 'pancréas';
+        }
 
-        if (str_contains($name, 'foie') || str_contains($name, 'hépat')) $tags[] = 'foie';
-        if (str_contains($name, 'rein') || str_contains($name, 'rénal')) $tags[] = 'rein';
-        if (str_contains($name, 'thyroid') || str_contains($name, 'thyro')) $tags[] = 'thyroïde';
-        if (str_contains($name, 'glyc') || str_contains($name, 'sang')) $tags[] = 'diabète';
-        if (str_contains($name, 'cholest') || str_contains($name, 'lipid')) $tags[] = 'cardiovasculaire';
-        if (str_contains($name, 'vitamin') || str_contains($name, 'fer')) $tags[] = 'carence';
+        // Derive extra tags from the exam name
+        if (str_contains($name, 'foie') || str_contains($name, 'hépat')) {
+            $tags[] = 'foie';
+        }
+        if (str_contains($name, 'rein') || str_contains($name, 'rénal')) {
+            $tags[] = 'rein';
+        }
+        if (str_contains($name, 'thyroid') || str_contains($name, 'thyro')) {
+            $tags[] = 'thyroïde';
+        }
+        if (str_contains($name, 'glyc') || str_contains($name, 'sang')) {
+            $tags[] = 'diabète';
+        }
+        if (str_contains($name, 'cholest') || str_contains($name, 'lipid')) {
+            $tags[] = 'cardiovasculaire';
+        }
+        if (str_contains($name, 'vitamin') || str_contains($name, 'fer')) {
+            $tags[] = 'carence';
+        }
 
         return array_unique($tags);
     }
@@ -95,6 +153,7 @@ class ExamSuggestionService
                 return $group;
             }
         }
+
         return 'adult';
     }
 
@@ -147,9 +206,13 @@ class ExamSuggestionService
         $map = $preventiveMap[$ageGroup] ?? $preventiveMap['adult'];
 
         foreach ($map as $item) {
-            if (in_array(strtoupper($item['code']), $recentExams)) continue;
+            if (in_array(strtoupper($item['code']), $recentExams)) {
+                continue;
+            }
             $exam = Exam::where('code', $item['code'])->where('is_archive', false)->first();
-            if (!$exam) continue;
+            if (! $exam) {
+                continue;
+            }
             $suggestions[] = [
                 'exam_id' => $exam->id,
                 'exam_name' => $exam->name,
@@ -183,17 +246,21 @@ class ExamSuggestionService
 
         foreach ($abnormalParams as $param => $details) {
             $mapping = $followUpMap[$param] ?? null;
-            if (!$mapping) continue;
+            if (! $mapping) {
+                continue;
+            }
 
             foreach ($mapping as $item) {
                 $exam = Exam::where('code', $item['code'])->where('is_archive', false)->first();
-                if (!$exam) continue;
+                if (! $exam) {
+                    continue;
+                }
                 $suggestions[] = [
                     'exam_id' => $exam->id,
                     'exam_name' => $exam->name,
                     'exam_code' => $exam->code,
                     'category' => $exam->category,
-                    'reason' => $item['reason'] . ' (valeur: ' . $details['value'] . ' ' . ($details['unit'] ?? '') . ')',
+                    'reason' => $item['reason'].' (valeur: '.$details['value'].' '.($details['unit'] ?? '').')',
                     'type' => 'follow_up',
                     'priority' => $item['priority'],
                 ];
@@ -215,7 +282,9 @@ class ExamSuggestionService
         $items = $map[$ageGroup] ?? [];
         foreach ($items as $item) {
             $exam = Exam::where('code', $item['code'])->where('is_archive', false)->first();
-            if (!$exam) continue;
+            if (! $exam) {
+                continue;
+            }
             $suggestions[] = [
                 'exam_id' => $exam->id,
                 'exam_name' => $exam->name,
@@ -232,13 +301,13 @@ class ExamSuggestionService
 
     private function getPatientResultHistory(): array
     {
-        $items = ExamRequestItem::whereHas('examRequest', fn($q) => $q
+        $items = ExamRequestItem::whereHas('examRequest', fn ($q) => $q
             ->where('patient_id', $this->patient->id)
             ->where('status', 'completed')
         )
-        ->whereHas('resultLabo')
-        ->with('resultLabo.details')
-        ->get();
+            ->whereHas('resultLabo')
+            ->with('resultLabo.details')
+            ->get();
 
         $history = [];
         foreach ($items as $item) {
@@ -264,10 +333,12 @@ class ExamSuggestionService
         $recentThreshold = now()->subMonths(6);
 
         foreach ($history as $entry) {
-            if ($entry['created_at'] < $recentThreshold) continue;
+            if ($entry['created_at'] < $recentThreshold) {
+                continue;
+            }
             if (in_array($entry['status'], ['high', 'low', 'abnormal'])) {
                 $param = $entry['parameter'];
-                if (!isset($abnormal[$param]) || $entry['created_at'] > $abnormal[$param]['created_at']) {
+                if (! isset($abnormal[$param]) || $entry['created_at'] > $abnormal[$param]['created_at']) {
                     $abnormal[$param] = $entry;
                 }
             }
@@ -279,17 +350,18 @@ class ExamSuggestionService
     private function getRecentExamCodes(): array
     {
         $cutoff = now()->subMonths(3);
-        return ExamRequestItem::whereHas('examRequest', fn($q) => $q
+
+        return ExamRequestItem::whereHas('examRequest', fn ($q) => $q
             ->where('patient_id', $this->patient->id)
             ->where('created_at', '>=', $cutoff)
         )
-        ->with('exam')
-        ->get()
-        ->pluck('exam.code')
-        ->filter()
-        ->map(fn($c) => strtoupper($c))
-        ->unique()
-        ->values()
-        ->toArray();
+            ->with('exam')
+            ->get()
+            ->pluck('exam.code')
+            ->filter()
+            ->map(fn ($c) => strtoupper($c))
+            ->unique()
+            ->values()
+            ->toArray();
     }
 }

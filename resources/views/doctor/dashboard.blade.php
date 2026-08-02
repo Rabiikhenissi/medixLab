@@ -102,7 +102,7 @@
                 <div class="grid grid-cols-2 gap-4">
                     <a href="{{ route('doctor.exam-groups.index') }}"
                         class="relative overflow-hidden p-6 bg-gradient-to-br from-[#0066FF]/5 to-[#0066FF]/10 border border-[#0066FF]/20 rounded-2xl shadow-xs block hover:border-[#0066FF]/40 transition">
-                        <div class="text-3xl font-black text-[#0066FF] mb-1">{{ $user->doctor->examGroups()->count() }}
+                        <div class="text-3xl font-black text-[#0066FF] mb-1">{{ $doctorStats['examGroupsCount'] }}
                         </div>
                         <p class="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Groupes d'Examens</p>
                         <svg class="absolute -right-3 -bottom-3 w-14 h-14 text-[#0066FF]/10" fill="currentColor"
@@ -113,7 +113,7 @@
                     <div
                         class="relative overflow-hidden p-6 bg-gradient-to-br from-emerald-500/5 to-emerald-500/10 border border-emerald-500/20 rounded-2xl shadow-xs">
                         <div class="text-3xl font-black text-emerald-600 mb-1">
-                            {{ $user->doctor->examRequests()->count() }}</div>
+                            {{ $doctorStats['examRequestsCount'] }}</div>
                         <p class="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Prescriptions Envoyées
                         </p>
                         <svg class="absolute -right-3 -bottom-3 w-14 h-14 text-emerald-500/10" fill="currentColor"
@@ -305,10 +305,6 @@
                             </a>
                         </div>
                     </div>
-
-                    @php
-                        $doctorGroups = $user->doctor->examGroups()->where('is_archive', false)->with('items.exam')->get();
-                    @endphp
 
                     @if($doctorGroups->count() > 0)
                         <div class="space-y-3 max-h-[460px] overflow-y-auto pr-1">

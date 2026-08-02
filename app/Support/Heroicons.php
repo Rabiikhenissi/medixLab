@@ -4,15 +4,19 @@ namespace App\Support;
 
 use Illuminate\Support\Facades\File;
 
+/**
+ * Lists available heroicon names for icon pickers in the admin UI.
+ */
 class Heroicons
 {
+    /** Return the names of all outline heroicons shipped by the package. */
     public static function all()
     {
         $path = base_path(
             'vendor/blade-ui-kit/blade-heroicons/resources/svg'
         );
 
-        if (!File::exists($path)) {
+        if (! File::exists($path)) {
             return [];
         }
 
@@ -22,7 +26,7 @@ class Heroicons
                 $name = $file->getFilenameWithoutExtension();
 
                 // Keep only outline icons
-                if (!str_starts_with($name, 'o-')) {
+                if (! str_starts_with($name, 'o-')) {
                     return null;
                 }
 

@@ -8,29 +8,42 @@ class Hl7MessageBuilder
 {
     private string $timestamp;
 
+    /**
+     * Create a builder that stamps every message with the current timestamp.
+     */
     public function __construct()
     {
         $this->timestamp = date('YmdHis');
     }
 
+    /**
+     * Build an HL7 ORM^O01 order message for an exam item.
+     *
+     * @param  ExamRequestItem  $item  the exam item to order
+     * @return string the complete HL7 message
+     */
     public function buildOrmOrder(ExamRequestItem $item): string
     {
+        // Gather patient demographics for the PID segment
         $patient = $item->examRequest->patient;
         $doctor = $item->examRequest->doctor;
-        $orderId = 'ORD-' . $item->examRequest->id . '-' . $item->id;
+        $orderId = 'ORD-'.$item->examRequest->id.'-'.$item->id;
         $patientCode = $patient->patient_code ?? $patient->id;
-        $patientName = strtoupper($patient->user->last_name) . '^' . strtoupper($patient->user->first_name);
+        $patientName = strtoupper($patient->user->last_name).'^'.strtoupper($patient->user->first_name);
         $birthDate = $patient->date_of_birth?->format('Ymd') ?? '19900101';
         $sex = $patient->gender ?? 'M';
         $sex = strtoupper($sex) === 'F' ? 'F' : 'M';
 
+        // Gather the ordering doctor's name
         $doctorName = $doctor
-            ? strtoupper($doctor->user->last_name) . '^' . strtoupper($doctor->user->first_name)
+            ? strtoupper($doctor->user->last_name).'^'.strtoupper($doctor->user->first_name)
             : 'UNKNOWN^DOCTOR';
 
-        $msgId = 'MSG' . strtoupper(bin2hex(random_bytes(4)));
+        // Generate a unique message id for this order
+        $msgId = 'MSG'.strtoupper(bin2hex(random_bytes(4)));
         $now = $this->timestamp;
 
+        // Assemble the ORM message segments
         $segments = [
             $this->buildMsh($msgId, $now),
             $this->buildPid($patientCode, $patientName, $birthDate, $sex),
@@ -40,9 +53,17 @@ class Hl7MessageBuilder
             $this->buildZds($item),
         ];
 
-        return implode("\r", $segments) . "\r";
+        // Join segments with the HL7 segment terminator
+        return implode("\r", $segments)."\r";
     }
 
+    /**
+     * Build the MSH (message header) segment.
+     *
+     * @param  string  $msgId  message control id
+     * @param  string  $timestamp  message creation time
+     * @return string the MSH segment
+     */
     private function buildMsh(string $msgId, string $timestamp): string
     {
         return implode('|', [
@@ -69,12 +90,21 @@ class Hl7MessageBuilder
         ]);
     }
 
+    /**
+     * Build the PID (patient identification) segment.
+     *
+     * @param  string  $id  patient identifier
+     * @param  string  $name  patient name in HL7 name format
+     * @param  string  $birthDate  patient birth date
+     * @param  string  $sex  patient sex
+     * @return string the PID segment
+     */
     private function buildPid(string $id, string $name, string $birthDate, string $sex): string
     {
         return implode('|', [
             'PID',
             '1',
-            $id . '^MRN^MEDIX',
+            $id.'^MRN^MEDIX',
             $id,
             $name,
             '',
@@ -94,6 +124,12 @@ class Hl7MessageBuilder
         ]);
     }
 
+    /**
+     * Build the NK1 (next of kin) segment with patient contact details.
+     *
+     * @param  mixed  $patient  the patient model
+     * @return string the NK1 segment
+     */
     private function buildNk1($patient): string
     {
         $address = $patient->user->address ?? '';
@@ -114,6 +150,12 @@ class Hl7MessageBuilder
         ]);
     }
 
+    /**
+     * Build the ORC (common order) segment for a new order.
+     *
+     * @param  string  $orderId  order identifier
+     * @return string the ORC segment
+     */
     private function buildOrc(string $orderId): string
     {
         return implode('|', [
@@ -139,6 +181,13 @@ class Hl7MessageBuilder
         ]);
     }
 
+    /**
+     * Build the OBR (observation request) segment for the ordered exam.
+     *
+     * @param  string  $orderId  order identifier
+     * @param  ExamRequestItem  $item  the exam item being ordered
+     * @return string the OBR segment
+     */
     private function buildObr(string $orderId, ExamRequestItem $item): string
     {
         $now = $this->timestamp;
@@ -148,7 +197,7 @@ class Hl7MessageBuilder
             'OBR',
             '1',
             $orderId,
-            $item->exam->code . '^' . $item->exam->name,
+            $item->exam->code.'^'.$item->exam->name,
             '',
             '',
             $now,
@@ -173,6 +222,12 @@ class Hl7MessageBuilder
         ]);
     }
 
+    /**
+     * Build the ZDS (custom Medix) segment with exam metadata.
+     *
+     * @param  ExamRequestItem  $item  the exam item being ordered
+     * @return string the ZDS segment
+     */
     private function buildZds(ExamRequestItem $item): string
     {
         return implode('|', [

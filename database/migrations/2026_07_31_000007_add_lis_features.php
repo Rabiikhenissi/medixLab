@@ -1,11 +1,9 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-use App\Models\Feature;
 use App\Models\Action;
+use App\Models\Feature;
 use App\Models\Group;
+use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
 {
@@ -79,7 +77,7 @@ return new class extends Migration
                 ['code' => $f['view_permission']],
                 [
                     'feature_id' => $feature->id,
-                    'name' => 'View ' . $f['code'],
+                    'name' => 'View '.$f['code'],
                     'is_archive' => false,
                 ]
             );

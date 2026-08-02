@@ -2,24 +2,29 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Exam;
-use App\Models\Patient;
 use App\Models\Doctor;
+use App\Models\Exam;
 use App\Models\ExamParameter;
-use Illuminate\Http\Request;
-
-use App\Models\Labo;
 use App\Models\ExamRequest;
 use App\Models\ExamRequestItem;
+use App\Models\Labo;
+use App\Models\Patient;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\View\View;
 
 class AdminController extends Controller
 {
-
-
+    /**
+     * Render the admin dashboard with cached statistics, charts and recent activity.
+     *
+     * @return View|RedirectResponse
+     */
     public function dashboard()
     {
-        if (!auth()->user()->admin) {
+        // only admins can access the dashboard
+        if (! auth()->user()->admin) {
             return redirect()->route('home');
         }
 
@@ -49,12 +54,12 @@ class AdminController extends Controller
                 ")->first();
 
             $statusDistribution = [
-                'pending'    => (int) $statusCounts->pending,
-                'assigned'   => (int) $statusCounts->assigned,
-                'collected'  => (int) $statusCounts->collected,
+                'pending' => (int) $statusCounts->pending,
+                'assigned' => (int) $statusCounts->assigned,
+                'collected' => (int) $statusCounts->collected,
                 'processing' => (int) $statusCounts->processing,
-                'completed'  => (int) $statusCounts->completed,
-                'cancelled'  => (int) $statusCounts->cancelled,
+                'completed' => (int) $statusCounts->completed,
+                'cancelled' => (int) $statusCounts->cancelled,
             ];
 
             // 2. Top 5 most prescribed exams
@@ -115,29 +120,24 @@ class AdminController extends Controller
         ));
     }
 
-
-
-
-
-
-
     /*
     |--------------------------------------------------------------------------
     | Exams Pages
     |--------------------------------------------------------------------------
     */
 
-
-
+    /**
+     * List exams, optionally filtered by search keyword, category and archive status.
+     *
+     * @return View
+     */
     public function exams(Request $request)
     {
 
-
-        if (!auth()->user()->admin) {
+        // only admins can access
+        if (! auth()->user()->admin) {
             abort(403);
         }
-
-
 
         $showArchived = $request->boolean('show_archived');
 
@@ -145,16 +145,10 @@ class AdminController extends Controller
 
         $category = $request->input('category', '');
 
-
-
-
         $query = Exam::query();
 
-
-
-
-
-        if (!$showArchived) {
+        // hide archived exams unless explicitly requested
+        if (! $showArchived) {
 
             $query->where(function ($q) {
 
@@ -163,10 +157,7 @@ class AdminController extends Controller
             });
         }
 
-
-
-
-
+        // narrow results by search keyword
         if ($search) {
 
             $query->where(function ($q) use ($search) {
@@ -177,10 +168,7 @@ class AdminController extends Controller
             });
         }
 
-
-
-
-
+        // narrow results by selected category
         if ($category) {
 
             $query->where(
@@ -189,18 +177,10 @@ class AdminController extends Controller
             );
         }
 
-
-
-
-
         $exams = $query
             ->orderBy('created_at', 'desc')
             ->paginate(10)
             ->appends($request->query());
-
-
-
-
 
         return view('admin.exams.index', [
 
@@ -215,43 +195,24 @@ class AdminController extends Controller
         ]);
     }
 
-
-
-
-
-
-
-
-
     public function createExam()
     {
 
-        if (!auth()->user()->admin) {
+        if (! auth()->user()->admin) {
             abort(403);
         }
-
 
         return view('admin.exams.create');
     }
 
-
-
-
-
-
-
-
-
     public function editExam(Exam $exam)
     {
 
-        if (!auth()->user()->admin) {
+        if (! auth()->user()->admin) {
             abort(403);
         }
 
-
         $exam->load('parameters');
-
 
         return view(
             'admin.exams.edit',
@@ -259,36 +220,27 @@ class AdminController extends Controller
         );
     }
 
-
-
-
-
-
-
-
-
     /*
     |--------------------------------------------------------------------------
     | Exams Actions
     |--------------------------------------------------------------------------
     */
 
-
-
-
-
+    /**
+     * Validate and persist a new exam together with its optional parameters.
+     *
+     * @return RedirectResponse
+     */
     public function storeExam(Request $request)
     {
 
-
-        if (!auth()->user()->admin) {
+        // only admins can access
+        if (! auth()->user()->admin) {
             abort(403);
         }
 
-
-
+        // validate exam fields
         $data = $request->validate([
-
 
             'code' => 'required|string|max:255|unique:exams',
 
@@ -302,8 +254,6 @@ class AdminController extends Controller
 
             'preparation_instructions' => 'nullable|string',
 
-
-
             'parameters' => 'nullable|array',
 
             'parameters.*.name' => 'required|string|max:255',
@@ -314,25 +264,15 @@ class AdminController extends Controller
 
         ]);
 
-
-
-
-
+        // create the exam as not archived
         $data['is_archive'] = false;
-
-
 
         $exam = Exam::create($data);
 
-
-
-
-
+        // persist any submitted exam parameters
         if ($request->has('parameters')) {
 
-
             foreach ($request->parameters as $parameter) {
-
 
                 ExamParameter::create([
 
@@ -350,11 +290,7 @@ class AdminController extends Controller
             }
         }
 
-
-
-
-
-
+        // redirect back to the exam list
         return redirect()
 
             ->route('admin.exams.index')
@@ -365,30 +301,23 @@ class AdminController extends Controller
             );
     }
 
-
-
-
-
-
-
-
-
+    /**
+     * Validate and update the given exam.
+     *
+     * @return RedirectResponse
+     */
     public function updateExam(Request $request, Exam $exam)
     {
 
-
-        if (!auth()->user()->admin) {
+        // only admins can access
+        if (! auth()->user()->admin) {
             abort(403);
         }
 
-
-
-
-
+        // validate exam fields
         $data = $request->validate([
 
-
-            'code' => 'required|string|max:255|unique:exams,code,' . $exam->id,
+            'code' => 'required|string|max:255|unique:exams,code,'.$exam->id,
 
             'name' => 'required|string|max:255',
 
@@ -400,20 +329,12 @@ class AdminController extends Controller
 
             'preparation_instructions' => 'nullable|string',
 
-
         ]);
 
-
-
-
-
-
+        // apply the changes to the exam
         $exam->update($data);
 
-
-
-
-
+        // redirect back to the exam list
         return redirect()
 
             ->route('admin.exams.index')
@@ -424,50 +345,33 @@ class AdminController extends Controller
             );
     }
 
-
-
-
-
-
-
-
     public function showExam(Exam $exam)
     {
-        if (!auth()->user()->admin) {
+        if (! auth()->user()->admin) {
             abort(403);
         }
-
 
         $exam->load('parameters');
 
-
         return view('admin.exams.show', [
 
-            'exam' => $exam
+            'exam' => $exam,
 
         ]);
     }
+
     public function archiveExam(Exam $exam)
     {
 
-
-        if (!auth()->user()->admin) {
+        if (! auth()->user()->admin) {
             abort(403);
         }
 
-
-
-
-
         $exam->update([
 
-            'is_archive' => !$exam->is_archive
+            'is_archive' => ! $exam->is_archive,
 
         ]);
-
-
-
-
 
         return redirect()
 
@@ -481,7 +385,7 @@ class AdminController extends Controller
 
     public function forceDeleteExam(Exam $exam)
     {
-        if (!auth()->user()->admin) {
+        if (! auth()->user()->admin) {
             abort(403);
         }
 

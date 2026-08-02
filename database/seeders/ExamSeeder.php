@@ -206,7 +206,9 @@ class ExamSeeder extends Seeder
 
         foreach ($params as $code => $examParams) {
             $exam = Exam::where('code', $code)->first();
-            if (!$exam) continue;
+            if (! $exam) {
+                continue;
+            }
             foreach ($examParams as $p) {
                 ExamParameter::updateOrCreate(
                     ['exam_id' => $exam->id, 'name' => $p['name']],
