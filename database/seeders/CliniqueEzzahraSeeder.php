@@ -13,6 +13,7 @@ use App\Models\SampleBarcodeLog;
 use App\Models\ExamRequest;
 use App\Models\ExamRequestItem;
 use App\Models\Exam;
+use App\Models\MachineConfiguration;
 use Illuminate\Database\Seeder;
 
 class CliniqueEzzahraSeeder extends Seeder
@@ -221,6 +222,76 @@ class CliniqueEzzahraSeeder extends Seeder
                 $created++;
             }
         }
+
+        // ============================================================
+        // 5. LAB MACHINE CONFIGURATIONS (LIS connections)
+        // ============================================================
+        $machines = [
+            [
+                'name' => 'Finecare FIA Meter Plus (Wondfo)',
+                'host' => '127.0.0.1',
+                'port' => 5011,
+                'mllp_port' => 5011,
+                'timeout' => 15,
+                'enabled' => false,
+            ],
+            [
+                'name' => 'Wondfo Finecare Mini',
+                'host' => '127.0.0.1',
+                'port' => 5012,
+                'mllp_port' => 5012,
+                'timeout' => 15,
+                'enabled' => false,
+            ],
+            [
+                'name' => 'Zybio Z3 (Hématologie 3 part.)',
+                'host' => '127.0.0.1',
+                'port' => 5013,
+                'mllp_port' => 5013,
+                'timeout' => 15,
+                'enabled' => false,
+            ],
+            [
+                'name' => 'ELITechGroup Selectra ProS (Biochimie)',
+                'host' => '127.0.0.1',
+                'port' => 5014,
+                'mllp_port' => 5014,
+                'timeout' => 15,
+                'enabled' => false,
+            ],
+            [
+                'name' => 'Mindray BA-88A (Biochimie semi-auto)',
+                'host' => '127.0.0.1',
+                'port' => 5015,
+                'mllp_port' => 5015,
+                'timeout' => 15,
+                'enabled' => false,
+            ],
+            [
+                'name' => 'Boditech iCHROMA II (FIA)',
+                'host' => '127.0.0.1',
+                'port' => 5016,
+                'mllp_port' => 5016,
+                'timeout' => 15,
+                'enabled' => false,
+            ],
+        ];
+
+        $machineCount = 0;
+        foreach ($machines as $machine) {
+            MachineConfiguration::updateOrCreate(
+                ['labo_id' => $laboId, 'name' => $machine['name']],
+                array_merge([
+                    'protocol' => 'hl7_mllp',
+                    'api_key' => null,
+                    'enabled' => false,
+                    'is_archive' => false,
+                ], $machine)
+            );
+            $machineCount++;
+        }
+
+        $this->command->info("Created {$machineCount} machine configurations (all disabled until connected)");
 
         $this->command->info('Seeding complete!');
     }
