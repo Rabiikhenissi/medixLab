@@ -6,10 +6,7 @@ use App\Models\Traits\ActiveScoped;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['user_id', 'patient_code', 'blood_group', 'date_of_birth', 'gender', 'country', 'state_code', 'is_archive'])]
-/**
- * Patient profile linked to a user account, the subject of exam requests.
- */
+#[Fillable(['user_id', 'patient_code', 'blood_group', 'date_of_birth', 'gender', 'country', 'state_code', 'latitude', 'longitude', 'is_archive'])]
 class Patient extends Model
 {
     use ActiveScoped;

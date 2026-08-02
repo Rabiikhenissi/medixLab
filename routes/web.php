@@ -315,7 +315,9 @@ Route::prefix('patient')->name('patient.')->group(function () {
             return view('patient.dashboard', ['user' => $user, 'patientStats' => $patientStats]);
         })->name('dashboard');
 
-        // Patient analytics: requests grouped by status and by month for the chart
+        Route::post('/save-location', [\App\Http\Controllers\PatientController::class, 'saveLocation'])
+            ->name('save-location');
+
         Route::get('/analytics', function () {
             if (! auth()->user()->patient) {
                 return redirect()->route('home');

@@ -10,6 +10,8 @@ use App\Models\Exam;
 use App\Models\ExamGroup;
 use App\Models\ExamGroupItem;
 use App\Models\ExamRequest;
+use App\Models\ExamRequestItem;
+use App\Models\DoctorPatientAccess;
 use App\Models\Notification;
 use App\Models\Patient;
 use App\Services\ExamRequestService;

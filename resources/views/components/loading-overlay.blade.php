@@ -35,6 +35,7 @@
             '/get-notifications',
             '/notifications',
             '/access-requests',
+            '/save-location',
         ];
 
         function shouldBeSilent(url) {
