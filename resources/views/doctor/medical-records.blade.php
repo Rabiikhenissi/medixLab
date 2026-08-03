@@ -75,7 +75,7 @@
                             @if($item->resultLabo && $item->resultLabo->details->count() > 0)
                                 <div class="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-1.5">
                                     @foreach($item->resultLabo->details as $detail)
-                                        <div class="p-1.5 bg-white rounded-lg border border-[#e2e8f0] {{ in_array($detail->status, ['high', 'low', 'abnormal']) ? 'border-l-2 border-l-red-400' : '' }}">
+                                        <div class="p-1.5 bg-white rounded-lg border border-[#e2e8f0] {{ in_array($detail->status, ['high', 'low', 'abnormal', 'critical']) ? ($detail->status === 'critical' ? 'border-l-2 border-l-purple-500' : 'border-l-2 border-l-red-400') : '' }}">
                                             <span class="text-[9px] text-[#94a3b8] block">{{ $detail->parameter }}</span>
                                             <span class="text-xs font-bold text-[#1e293b]">{{ $detail->value }}
                                                 @if($detail->unit)<span class="text-[9px] text-[#94a3b8] font-normal"> {{ $detail->unit }}</span>@endif

@@ -102,9 +102,18 @@ class GroupSeeder extends Seeder
             ],
             [
                 'name' => 'Activite', 'code' => 'activity-logs',
-                'route_name' => '#', 'icon' => 'chart-bar', 'is_sidebar' => true, 'order' => 7,
+                'route_name' => 'admin.activity', 'icon' => 'chart-bar', 'is_sidebar' => true, 'order' => 7,
                 'view_permission' => 'view-activity',
                 'actions' => [['code' => 'view-activity', 'name' => 'View activity logs']],
+            ],
+            [
+                'name' => 'RGPD / Données', 'code' => 'gdpr-management',
+                'route_name' => 'admin.gdpr', 'icon' => 'shield-check', 'is_sidebar' => true, 'order' => 9,
+                'view_permission' => 'view-gdpr',
+                'actions' => [
+                    ['code' => 'view-gdpr', 'name' => 'View GDPR requests'],
+                    ['code' => 'manage-gdpr', 'name' => 'Export & erase user data'],
+                ],
             ],
             [
                 'name' => 'Historique', 'code' => 'history',

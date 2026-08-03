@@ -187,7 +187,7 @@
         const labels = trend.data_points.map(d => d.date);
         const values = trend.data_points.map(d => d.value);
         const colors = trend.data_points.map(d =>
-            d.status === 'high' || d.status === 'low' || d.status === 'abnormal'
+            d.status === 'high' || d.status === 'low' || d.status === 'abnormal' || d.status === 'critical'
                 ? '#ef4444' : '#0D9488'
         );
 

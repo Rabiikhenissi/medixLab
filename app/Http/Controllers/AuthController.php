@@ -43,6 +43,23 @@ class AuthController extends Controller
             $request->session()->regenerate();
             $user = Auth::user();
 
+            // Two-factor challenge: do not authenticate yet, stash the pending
+            // login in the session and ask for the TOTP code.
+            if ($user->twoFactorEnabled()) {
+                $intended = $user->admin
+                    ? $this->safeIntended($request, 'admin.dashboard')
+                    : $this->safeIntended($request, $role.'.dashboard');
+
+                $request->session()->put('two_factor', [
+                    'user_id' => $user->id,
+                    'remember' => $remember,
+                    'intended' => $intended,
+                ]);
+                Auth::logout();
+
+                return redirect()->route('two-factor.login');
+            }
+
             // Check if user is an admin
             if ($user->admin) {
                 return redirect($this->safeIntended($request, 'admin.dashboard'));

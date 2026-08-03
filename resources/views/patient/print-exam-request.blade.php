@@ -101,6 +101,7 @@
         .results-table tr:hover td { background: #fafafa; }
         .status-normal { color: #16a34a; font-weight: 700; }
         .status-high   { color: #dc2626; font-weight: 700; }
+        .status-critical { color: #7C3AED; font-weight: 700; }
         .status-low    { color: #d97706; font-weight: 700; }
 
         .interp {
@@ -160,8 +161,9 @@
 <div class="print-bar">
     <p>📋 Rapport d'Analyses — Medix eSanté</p>
     <div style="display:flex;gap:8px">
+        <a class="close-btn" style="text-decoration:none; display:inline-flex; align-items:center; gap-x:6px;" href="{{ url()->current() }}?pdf=1">⬇ Télécharger PDF</a>
         <button class="close-btn" onclick="history.back()">← Retour</button>
-        <button class="print-btn" onclick="window.print()">🖨 Imprimer / PDF</button>
+        <button class="print-btn" onclick="window.print()">🖨 Imprimer</button>
     </div>
 </div>
 
@@ -254,11 +256,12 @@
                     <td style="font-weight:700">{{ $detail->value }}</td>
                     <td style="color:#94a3b8">{{ $detail->reference_range ?? '—' }}</td>
                     <td>
-                        @php $smap = ['normal'=>'status-normal','high'=>'status-high','low'=>'status-low']; @endphp
+                        @php $smap = ['normal'=>'status-normal','high'=>'status-high','low'=>'status-low','critical'=>'status-critical']; @endphp
                         <span class="{{ $smap[$detail->status] ?? '' }}">
                             @if($detail->status === 'normal') ✓ Normal
                             @elseif($detail->status === 'high') ↑ Élevé
                             @elseif($detail->status === 'low')  ↓ Bas
+                            @elseif($detail->status === 'critical') ⚠ Critique
                             @else {{ $detail->status }}
                             @endif
                         </span>

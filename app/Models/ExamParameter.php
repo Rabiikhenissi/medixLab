@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Model;
     'name',
     'unit',
     'normal_range',
+    'critical_low',
+    'critical_high',
     'is_archive',
 ])]
 /**
@@ -21,6 +23,8 @@ class ExamParameter extends Model
     {
         return [
             'is_archive' => 'boolean',
+            'critical_low' => 'decimal:3',
+            'critical_high' => 'decimal:3',
         ];
     }
 
@@ -28,5 +32,21 @@ class ExamParameter extends Model
     public function exam()
     {
         return $this->belongsTo(Exam::class);
+    }
+
+    /** True when both critical thresholds are defined. */
+    public function hasCriticalThresholds(): bool
+    {
+        return $this->critical_low !== null && $this->critical_high !== null;
+    }
+
+    /** True when the given numeric value falls outside the critical thresholds. */
+    public function isCriticalValue(float $value): bool
+    {
+        if (! $this->hasCriticalThresholds()) {
+            return false;
+        }
+
+        return $value < (float) $this->critical_low || $value > (float) $this->critical_high;
     }
 }

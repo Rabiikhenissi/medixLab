@@ -22,7 +22,7 @@ class StoreResultFormRequest extends FormRequest
             'parameters' => 'required|array|min:1',
             'parameters.*.name' => 'required|string',
             'parameters.*.value' => 'required|string',
-            'parameters.*.status' => 'required|in:normal,high,low',
+            'parameters.*.status' => 'required|in:normal,high,low,critical',
             'parameters.*.range' => 'nullable|string',
             'consumables' => 'nullable|array',
             'consumables.*.id' => 'required|exists:consumables,id',

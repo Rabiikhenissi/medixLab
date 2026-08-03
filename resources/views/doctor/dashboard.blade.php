@@ -740,6 +740,7 @@
                             let badgeClass = 'bg-emerald-50 text-emerald-700 border-emerald-200';
                             if (detail.status === 'high') badgeClass = 'bg-red-50 text-red-700 border-red-200';
                             if (detail.status === 'low') badgeClass = 'bg-amber-50 text-amber-700 border-amber-200';
+                            if (detail.status === 'critical') badgeClass = 'bg-purple-50 text-purple-700 border-purple-200';
 
                             return `
                                 <tr class="border-b border-[#e2e8f0]/40">

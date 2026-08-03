@@ -2,7 +2,17 @@
 
 namespace App\Providers;
 
+use App\Models\DoctorPatientAccess;
+use App\Models\ExamParameter;
+use App\Models\ExamRequest;
+use App\Models\ExamRequestItem;
 use App\Models\Feature;
+use App\Models\MachineConfiguration;
+use App\Models\ResultLabo;
+use App\Models\ResultLaboDetail;
+use App\Models\Sample;
+use App\Models\User;
+use App\Observers\AuditableObserver;
 use App\Services\ExamRequestService;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -25,6 +35,18 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Medico-legal audit trail for sensitive models
+        $observer = AuditableObserver::class;
+        User::observe($observer);
+        ExamRequest::observe($observer);
+        ExamRequestItem::observe($observer);
+        Sample::observe($observer);
+        ResultLabo::observe($observer);
+        ResultLaboDetail::observe($observer);
+        MachineConfiguration::observe($observer);
+        ExamParameter::observe($observer);
+        DoctorPatientAccess::observe($observer);
+
         Gate::before(function ($user, $ability) {
             if (method_exists($user, 'hasPermission') && $user->hasPermission($ability)) {
                 return true;

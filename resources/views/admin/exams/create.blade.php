@@ -421,6 +421,26 @@ Valeur normale
        class="form-control"
        placeholder="13 - 17">
 
+<label class="form-label" style="margin-top:15px;">
+Valeur critique basse
+</label>
+
+<input type="number"
+       step="any"
+       name="parameters[0][critical_low]"
+       class="form-control"
+       placeholder="7.0">
+
+<label class="form-label" style="margin-top:15px;">
+Valeur critique haute
+</label>
+
+<input type="number"
+       step="any"
+       name="parameters[0][critical_high]"
+       class="form-control"
+       placeholder="23.0">
+
 
 </div>
 
@@ -546,6 +566,32 @@ placeholder="Unité">
 name="parameters[${parameterIndex}][normal_range]"
 class="form-control"
 placeholder="Valeur normale">
+
+</div>
+
+
+
+<div class="form-group">
+
+<input type="number"
+step="any"
+name="parameters[${parameterIndex}][critical_low]"
+class="form-control"
+placeholder="Valeur critique basse">
+
+</div>
+
+
+
+<div class="form-group">
+
+<input type="number"
+step="any"
+name="parameters[${parameterIndex}][critical_high]"
+class="form-control"
+placeholder="Valeur critique haute">
+
+</div>
 
 </div>
 

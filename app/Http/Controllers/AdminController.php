@@ -69,7 +69,7 @@ class AdminController extends Controller
                 ->limit(5)
                 ->with('exam')
                 ->get()
-                ->map(fn($item) => ['name' => $item->exam?->name ?? 'Inconnu', 'count' => (int) $item->count])
+                ->map(fn ($item) => ['name' => $item->exam?->name ?? 'Inconnu', 'count' => (int) $item->count])
                 ->values()
                 ->all();
 
@@ -95,13 +95,13 @@ class AdminController extends Controller
                 ->latest()
                 ->limit(5)
                 ->get()
-                ->map(fn($rx) => [
-                    'id'           => $rx->id,
-                    'status'       => $rx->status,
-                    'created_at'   => $rx->created_at->diffForHumans(),
-                    'doctor_name'  => $rx->doctor?->user ? trim($rx->doctor->user->first_name . ' ' . $rx->doctor->user->last_name) : '—',
-                    'patient_name' => $rx->patient?->user ? trim($rx->patient->user->first_name . ' ' . $rx->patient->user->last_name) : '—',
-                    'lab_name'     => $rx->laboratory?->name ?? 'Non assigné',
+                ->map(fn ($rx) => [
+                    'id' => $rx->id,
+                    'status' => $rx->status,
+                    'created_at' => $rx->created_at->diffForHumans(),
+                    'doctor_name' => $rx->doctor?->user ? trim($rx->doctor->user->first_name.' '.$rx->doctor->user->last_name) : '—',
+                    'patient_name' => $rx->patient?->user ? trim($rx->patient->user->first_name.' '.$rx->patient->user->last_name) : '—',
+                    'lab_name' => $rx->laboratory?->name ?? 'Non assigné',
                 ])
                 ->values()
                 ->all();
@@ -275,6 +275,10 @@ class AdminController extends Controller
 
             'parameters.*.normal_range' => 'nullable|string|max:255',
 
+            'parameters.*.critical_low' => 'nullable|numeric',
+
+            'parameters.*.critical_high' => 'nullable|numeric',
+
         ]);
 
         // create the exam as not archived
@@ -296,6 +300,10 @@ class AdminController extends Controller
                     'unit' => $parameter['unit'] ?? null,
 
                     'normal_range' => $parameter['normal_range'] ?? null,
+
+                    'critical_low' => $parameter['critical_low'] ?? null,
+
+                    'critical_high' => $parameter['critical_high'] ?? null,
 
                     'is_archive' => false,
 

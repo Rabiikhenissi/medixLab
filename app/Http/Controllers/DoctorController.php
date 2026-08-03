@@ -13,6 +13,7 @@ use App\Models\ExamRequest;
 use App\Models\ExamRequestItem;
 use App\Models\Notification;
 use App\Models\Patient;
+use App\Services\ExamReportPdf;
 use App\Services\ExamRequestService;
 use App\Services\ExamSuggestionService;
 use App\Services\NotificationService;
@@ -654,6 +655,10 @@ class DoctorController extends Controller
 
         if (! $doctor || $examRequest->doctor_id !== $doctor->id) {
             abort(403);
+        }
+
+        if (request()->query('pdf')) {
+            return ExamReportPdf::download($examRequest);
         }
 
         $examRequest->load(['doctor.user', 'patient.user', 'laboratory', 'items.exam', 'items.resultLabo.details']);

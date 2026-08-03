@@ -25,4 +25,16 @@ class ResultLaboDetail extends Model
     {
         return $this->belongsTo(ResultLabo::class);
     }
+
+    /** True when this value is flagged as a critical value. */
+    public function isCritical(): bool
+    {
+        return $this->status === 'critical';
+    }
+
+    /** True when the value is not within its normal range. */
+    public function isAbnormal(): bool
+    {
+        return in_array($this->status, ['high', 'low', 'critical'], true);
+    }
 }

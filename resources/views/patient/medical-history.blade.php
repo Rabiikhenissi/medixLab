@@ -141,7 +141,7 @@
                                                 </span>
                                             @endif
                                             @if ($req->status === 'completed' && $req->approved_by_doctor)
-                                                <a href="{{ route('patient.print-exam-request', $req->id) }}"
+                                                <a href="{{ route('patient.print-exam-request', $req->id) }}?pdf=1"
                                                    target="_blank"
                                                    class="flex items-center gap-1 px-3 py-1 text-[10px] font-bold text-[#7C3AED] bg-[#7C3AED]/10 border border-[#7C3AED]/20 rounded-full hover:bg-[#7C3AED]/20 transition">
                                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
@@ -183,14 +183,14 @@
                                                                 <div class="flex items-center justify-between text-xs">
                                                                     <span class="text-[#475569] font-medium">{{ $detail->parameter }}@if($detail->unit) <span class="text-[9px] font-semibold text-[#7C3AED] bg-[#7C3AED]/10 px-1 py-0.5 rounded border border-[#7C3AED]/20">{{ $detail->unit }}</span>@endif</span>
                                                                     <div class="flex items-center gap-2">
-                                                                        <span class="font-bold {{ $detail->status === 'normal' ? 'text-green-600' : ($detail->status === 'high' ? 'text-red-600' : 'text-amber-600') }}">
+                                                                        <span class="font-bold {{ $detail->status === 'normal' ? 'text-green-600' : ($detail->status === 'high' ? 'text-red-600' : ($detail->status === 'critical' ? 'text-purple-700' : 'text-amber-600')) }}">
                                                                             {{ $detail->value }}
                                                                         </span>
                                                                         @if ($detail->reference_range)
                                                                             <span class="text-[#94a3b8]">({{ $detail->reference_range }})</span>
                                                                         @endif
-                                                                        @php $statusIcon = ['normal' => '✓', 'high' => '↑', 'low' => '↓'][$detail->status] ?? ''; @endphp
-                                                                        <span class="text-[10px] font-black {{ $detail->status === 'normal' ? 'text-green-500' : 'text-red-500' }}">{{ $statusIcon }}</span>
+                                                                        @php $statusIcon = ['normal' => '✓', 'high' => '↑', 'low' => '↓', 'critical' => '⚠'][$detail->status] ?? ''; @endphp
+                                                                        <span class="text-[10px] font-black {{ $detail->status === 'normal' ? 'text-green-500' : ($detail->status === 'critical' ? 'text-purple-600' : 'text-red-500') }}">{{ $statusIcon }}</span>
                                                                     </div>
                                                                 </div>
                                                             @endforeach

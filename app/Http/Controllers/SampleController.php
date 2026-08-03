@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ExamRequestItem;
 use App\Models\Sample;
 use App\Models\SampleBarcodeLog;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -84,31 +85,49 @@ class SampleController extends Controller
             abort(403);
         }
 
-        DB::transaction(function () use ($validated, $item, $lab, &$sample) {
-            // generate a unique sample code
-            $sampleCode = 'SMP-'.$lab->id.'-'.date('Ymd').'-'.strtoupper(substr(uniqid(), -5));
+        // idempotent: an exam request item can only produce a single sample
+        $existing = Sample::where('exam_request_item_id', $item->id)->first();
+        if ($existing) {
+            return redirect()->route('center.samples.show', $existing->id)
+                ->with('info', 'Un échantillon existe déjà pour cette analyse. Code: '.$existing->sample_code);
+        }
 
-            // create the sample record
-            $sample = Sample::create([
-                'sample_code' => $sampleCode,
-                'exam_request_item_id' => $item->id,
-                'patient_id' => $item->examRequest->patient_id,
-                'labo_id' => $lab->id,
-                'material_type' => $validated['material_type'] ?? $item->material_type,
-                'status' => 'pending',
-                'storage_location' => $validated['storage_location'] ?? null,
-                'expiry_date' => $validated['expiry_date'] ?? null,
-                'notes' => $validated['notes'] ?? null,
-            ]);
+        try {
+            DB::transaction(function () use ($validated, $item, $lab, &$sample) {
+                // generate a unique sample code (regenerate on the rare collision)
+                do {
+                    $sampleCode = 'SMP-'.$lab->id.'-'.date('Ymd').'-'.strtoupper(bin2hex(random_bytes(3)));
+                    $collides = Sample::where('sample_code', $sampleCode)->exists();
+                } while ($collides);
 
-            // log the creation action in the barcode history
-            SampleBarcodeLog::create([
-                'sample_id' => $sample->id,
-                'action' => 'created',
-                'staff_id' => auth()->user()->staff->id,
-                'notes' => 'Échantillon créé',
-            ]);
-        });
+                // create the sample record
+                $sample = Sample::create([
+                    'sample_code' => $sampleCode,
+                    'exam_request_item_id' => $item->id,
+                    'patient_id' => $item->examRequest->patient_id,
+                    'labo_id' => $lab->id,
+                    'material_type' => $validated['material_type'] ?? $item->material_type,
+                    'status' => 'pending',
+                    'storage_location' => $validated['storage_location'] ?? null,
+                    'expiry_date' => $validated['expiry_date'] ?? null,
+                    'notes' => $validated['notes'] ?? null,
+                ]);
+
+                // log the creation action in the barcode history
+                SampleBarcodeLog::create([
+                    'sample_id' => $sample->id,
+                    'action' => 'created',
+                    'staff_id' => auth()->user()->staff->id,
+                    'notes' => 'Échantillon créé',
+                ]);
+            });
+        } catch (QueryException $e) {
+            // concurrent double-submit lost the race: reuse the existing sample
+            $existing = Sample::where('exam_request_item_id', $item->id)->first();
+
+            return redirect()->route('center.samples.show', $existing->id)
+                ->with('info', 'Un échantillon existe déjà pour cette analyse. Code: '.$existing->sample_code);
+        }
 
         // redirect to the new sample page
         return redirect()->route('center.samples.show', $sample->id)
