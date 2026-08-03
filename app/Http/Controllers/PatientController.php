@@ -11,6 +11,7 @@ use App\Models\Labo;
 use App\Models\Notification;
 use App\Models\Patient;
 use App\Models\Payment;
+use App\Services\ExamReportPdf;
 use App\Services\LabRecommendationService;
 use App\Services\MultiLabSplittingService;
 use App\Services\NotificationService;
@@ -579,18 +580,18 @@ class PatientController extends Controller
     public function saveLocation(Request $request)
     {
         $validated = $request->validate([
-            'latitude'  => ['required', 'numeric', 'between:-90,90'],
+            'latitude' => ['required', 'numeric', 'between:-90,90'],
             'longitude' => ['required', 'numeric', 'between:-180,180'],
         ]);
 
         $patient = auth()->user()->patient;
 
-        if (!$patient) {
+        if (! $patient) {
             return response()->json(['success' => false, 'message' => 'Profil patient introuvable.'], 404);
         }
 
         $patient->update([
-            'latitude'  => $validated['latitude'],
+            'latitude' => $validated['latitude'],
             'longitude' => $validated['longitude'],
         ]);
 
@@ -654,6 +655,10 @@ class PatientController extends Controller
         if ($examRequest->status !== 'completed' || ! $examRequest->approved_by_doctor) {
             return redirect()->route('patient.dashboard')
                 ->with('error', 'Le rapport n\'est disponible que pour les demandes complétées et approuvées.');
+        }
+
+        if (request()->query('pdf')) {
+            return ExamReportPdf::download($examRequest);
         }
 
         $examRequest->load(['doctor.user', 'patient.user', 'laboratory', 'items.exam', 'items.resultLabo.details']);

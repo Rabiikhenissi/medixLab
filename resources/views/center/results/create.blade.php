@@ -75,6 +75,11 @@
                                 Référence: {{ $parameter->normal_range }}
                             </span>
                         @endif
+                        @if($parameter->critical_low !== null || $parameter->critical_high !== null)
+                            <span class="inline-flex items-center text-[10px] text-red-600 mt-1 bg-red-50 border border-red-200 px-2 py-0.5 rounded-md font-bold">
+                                ⚠ Critique: {{ $parameter->critical_low ?? '-' }} - {{ $parameter->critical_high ?? '-' }}
+                            </span>
+                        @endif
                         <input type="hidden" name="parameters[{{ $index }}][name]" value="{{ $parameter->name }}">
                         <input type="hidden" name="parameters[{{ $index }}][range]" value="{{ $parameter->normal_range }}">
                         <input type="hidden" name="parameters[{{ $index }}][unit]" value="{{ $parameter->unit ?? '' }}">
@@ -89,6 +94,8 @@
                                 name="parameters[{{ $index }}][value]"
                                 data-index="{{ $index }}"
                                 data-range="{{ $parameter->normal_range ?? '' }}"
+                                data-critical-low="{{ $parameter->critical_low ?? '' }}"
+                                data-critical-high="{{ $parameter->critical_high ?? '' }}"
                                 value="{{ old("parameters.{$index}.value") }}"
                                 required
                             >
@@ -103,6 +110,7 @@
                                 <option value="normal" {{ old("parameters.{$index}.status") === 'normal' ? 'selected' : '' }}>Normal</option>
                                 <option value="high" {{ old("parameters.{$index}.status") === 'high' ? 'selected' : '' }}>Elevé</option>
                                 <option value="low" {{ old("parameters.{$index}.status") === 'low' ? 'selected' : '' }}>Bas</option>
+                                <option value="critical" {{ old("parameters.{$index}.status") === 'critical' ? 'selected' : '' }}>⚠ Critique</option>
                             </select>
                         </div>
                         <span data-index="{{ $index }}" class="param-status-badge hidden text-[9px] font-bold px-1.5 py-0.5 rounded uppercase"></span>
@@ -394,7 +402,9 @@ document.addEventListener('DOMContentLoaded', function () {
         return null;
     }
 
-    function detectStatus(value, rangeStr) {
+    function detectStatus(value, rangeStr, criticalLow, criticalHigh) {
+        const cl = parseFloat(criticalLow), ch = parseFloat(criticalHigh);
+        if (!isNaN(cl) && !isNaN(ch) && (value < cl || value > ch)) return 'critical';
         const range = parseRange(rangeStr);
         if (!range || isNaN(value)) return null;
         if (range.max !== null && value > range.max) return 'high';
@@ -411,22 +421,25 @@ document.addEventListener('DOMContentLoaded', function () {
             const badge = document.querySelector(`.param-status-badge[data-index="${idx}"]`);
             if (!select) return;
 
-            if (isNaN(val) || !range) {
+            if (isNaN(val)) {
                 select.value = 'normal';
-                select.classList.remove('border-red-400','border-green-400','border-amber-400');
+                this.classList.remove('border-red-400','border-green-400','border-amber-400','border-purple-500');
                 if (badge) badge.classList.add('hidden');
                 return;
             }
 
-            const status = detectStatus(val, range);
+            const status = detectStatus(val, range, this.dataset.criticalLow, this.dataset.criticalHigh);
             if (status) {
                 select.value = status;
                 // Color the value input border + badge
-                this.classList.remove('border-red-400','border-green-400','border-amber-400');
+                this.classList.remove('border-red-400','border-green-400','border-amber-400','border-purple-500');
                 if (badge) {
-                    badge.classList.remove('hidden','bg-red-100','text-red-700','border-red-300','bg-amber-100','text-amber-700','border-amber-300','bg-green-100','text-green-700','border-green-300');
+                    badge.classList.remove('hidden','bg-red-100','text-red-700','border-red-300','bg-amber-100','text-amber-700','border-amber-300','bg-green-100','text-green-700','border-green-300','bg-purple-100','text-purple-700','border-purple-300');
                 }
-                if (status === 'high') {
+                if (status === 'critical') {
+                    this.classList.add('border-purple-500');
+                    if (badge) { badge.textContent = '⚠ Critique'; badge.classList.add('bg-purple-100','text-purple-700','border','border-purple-300'); }
+                } else if (status === 'high') {
                     this.classList.add('border-red-400');
                     if (badge) { badge.textContent = '↑ Élevé'; badge.classList.add('bg-red-100','text-red-700','border','border-red-300'); }
                 } else if (status === 'low') {

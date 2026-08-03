@@ -117,7 +117,7 @@ class CenterController extends Controller
                 ->orderByDesc('count')
                 ->limit(5)
                 ->get()
-                ->map(fn($row) => ['name' => $row->name, 'count' => (int) $row->count])
+                ->map(fn ($row) => ['name' => $row->name, 'count' => (int) $row->count])
                 ->values()
                 ->all();
 

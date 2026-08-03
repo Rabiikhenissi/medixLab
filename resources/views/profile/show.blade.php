@@ -547,6 +547,19 @@ Gérez vos informations personnelles et votre carte digitale.
                 </div>
             </form>
         </div>
+
+        <div class="form-card" style="margin-top:20px;">
+            <h3>Sécurité</h3>
+            <p style="font-size:13px; color:#64748b; line-height:1.6; margin-bottom:12px;">
+                Authentification à deux facteurs :
+                <strong style="color:{{ auth()->user()->twoFactorEnabled() ? '#059669' : '#d97706' }}">
+                    {{ auth()->user()->twoFactorEnabled() ? 'activée' : 'désactivée' }}
+                </strong>
+            </p>
+            <a href="{{ route('profile.two-factor.setup') }}" class="btn-save" style="text-decoration:none; display:inline-block;">
+                Gérer la 2FA
+            </a>
+        </div>
     </div>
 
 </div>

@@ -1,11 +1,13 @@
 <?php
 
+use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\CenterController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\FeatureController;
+use App\Http\Controllers\GdprController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\LaboratoryController;
 use App\Http\Controllers\LaboResultController;
@@ -15,6 +17,7 @@ use App\Http\Controllers\MachineController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SampleController;
+use App\Http\Controllers\TwoFactorController;
 use App\Http\Controllers\UserController;
 use App\Models\DoctorPatientAccess;
 use App\Models\ExamRequest;
@@ -315,7 +318,7 @@ Route::prefix('patient')->name('patient.')->group(function () {
             return view('patient.dashboard', ['user' => $user, 'patientStats' => $patientStats]);
         })->name('dashboard');
 
-        Route::post('/save-location', [\App\Http\Controllers\PatientController::class, 'saveLocation'])
+        Route::post('/save-location', [PatientController::class, 'saveLocation'])
             ->name('save-location');
 
         Route::get('/analytics', function () {
@@ -733,6 +736,22 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('/groups/{group}', [GroupController::class, 'destroy'])->name('groups.destroy')->middleware('permission:delete-groups');
         Route::delete('/groups/{group}/force', [GroupController::class, 'forceDelete'])->name('groups.force-delete')->middleware('permission:delete-groups');
 
+        // Audit trail (activity logs)
+        Route::get('/activity', [ActivityLogController::class, 'index'])
+            ->name('activity')
+            ->middleware('permission:view-activity');
+
+        // GDPR / RGPD (export & erasure requests)
+        Route::get('/gdpr', [GdprController::class, 'index'])
+            ->name('gdpr')
+            ->middleware('permission:view-gdpr');
+        Route::get('/gdpr/export/{user}', [GdprController::class, 'export'])
+            ->name('gdpr.export')
+            ->middleware('permission:manage-gdpr');
+        Route::post('/gdpr/erase/{user}', [GdprController::class, 'erase'])
+            ->name('gdpr.erase')
+            ->middleware('permission:manage-gdpr');
+
         // Features CRUD
         Route::get('/features', [FeatureController::class, 'index'])->name('features.index')->middleware('permission:view-features');
         Route::get('/features/create', [FeatureController::class, 'create'])->name('features.create')->middleware('permission:create-features');
@@ -754,7 +773,14 @@ Route::middleware(['auth', 'throttle:general'])->prefix('profile')->name('profil
     Route::get('/', [ProfileController::class, 'show'])->name('show');
     Route::put('/', [ProfileController::class, 'update'])->name('update');
     Route::put('/password', [ProfileController::class, 'updatePassword'])->name('password');
+    Route::get('/two-factor', [TwoFactorController::class, 'showSetup'])->name('two-factor.setup');
+    Route::post('/two-factor', [TwoFactorController::class, 'enable'])->name('two-factor.enable');
+    Route::post('/two-factor/disable', [TwoFactorController::class, 'disable'])->name('two-factor.disable');
 });
+
+// Two-factor login challenge (guest, completes a pending login)
+Route::get('/login/two-factor', [TwoFactorController::class, 'loginChallenge'])->middleware('guest')->name('two-factor.login');
+Route::post('/login/two-factor', [TwoFactorController::class, 'loginVerify'])->middleware('guest')->name('two-factor.verify');
 
 // Location routes (AJAX API endpoints)
 Route::get('/countries', [LocationController::class, 'getCountries'])->middleware('throttle:location')->name('countries.index');

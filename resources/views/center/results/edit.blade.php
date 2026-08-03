@@ -79,6 +79,11 @@
                                 Référence: {{ $detail->reference_range }}
                             </span>
                         @endif
+                        @if($matchingParam && ($matchingParam->critical_low !== null || $matchingParam->critical_high !== null))
+                            <span class="inline-flex items-center text-[10px] text-red-600 mt-1 bg-red-50 border border-red-200 px-2 py-0.5 rounded-md font-bold">
+                                ⚠ Critique: {{ $matchingParam->critical_low ?? '-' }} - {{ $matchingParam->critical_high ?? '-' }}
+                            </span>
+                        @endif
                         <input type="hidden" name="parameters[{{ $index }}][name]" value="{{ $detail->parameter }}">
                         <input type="hidden" name="parameters[{{ $index }}][range]" value="{{ $detail->reference_range }}">
                         <input type="hidden" name="parameters[{{ $index }}][unit]" value="{{ $detail->unit ?? ($matchingParam->unit ?? '') }}">
@@ -93,6 +98,8 @@
                                 name="parameters[{{ $index }}][value]"
                                 data-index="{{ $index }}"
                                 data-range="{{ $detail->reference_range ?? '' }}"
+                                data-critical-low="{{ $matchingParam->critical_low ?? '' }}"
+                                data-critical-high="{{ $matchingParam->critical_high ?? '' }}"
                                 value="{{ old("parameters.{$index}.value", $detail->value) }}"
                                 required
                             >
@@ -107,6 +114,7 @@
                                 <option value="normal" {{ old("parameters.{$index}.status", $detail->status) === 'normal' ? 'selected' : '' }}>Normal</option>
                                 <option value="high" {{ old("parameters.{$index}.status", $detail->status) === 'high' ? 'selected' : '' }}>Elevé</option>
                                 <option value="low" {{ old("parameters.{$index}.status", $detail->status) === 'low' ? 'selected' : '' }}>Bas</option>
+                                <option value="critical" {{ old("parameters.{$index}.status", $detail->status) === 'critical' ? 'selected' : '' }}>⚠ Critique</option>
                             </select>
                         </div>
                         <span data-index="{{ $index }}" class="param-status-badge hidden text-[9px] font-bold px-1.5 py-0.5 rounded uppercase"></span>
@@ -374,7 +382,9 @@ document.addEventListener('DOMContentLoaded', function () {
         return null;
     }
 
-    function detectStatus(value, rangeStr) {
+    function detectStatus(value, rangeStr, criticalLow, criticalHigh) {
+        const cl = parseFloat(criticalLow), ch = parseFloat(criticalHigh);
+        if (!isNaN(cl) && !isNaN(ch) && (value < cl || value > ch)) return 'critical';
         const range = parseRange(rangeStr);
         if (!range || isNaN(value)) return null;
         if (range.max !== null && value > range.max) return 'high';
@@ -383,10 +393,15 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function applyBadge(input, select, badge, status) {
-        input.classList.remove('border-red-400','border-green-400','border-amber-400');
+        input.classList.remove('border-red-400','border-green-400','border-amber-400','border-purple-500');
         badge.classList.add('hidden');
         badge.className = 'param-status-badge hidden text-[9px] font-bold px-1.5 py-0.5 rounded uppercase';
-        if (status === 'high') {
+        if (status === 'critical') {
+            input.classList.add('border-purple-500');
+            badge.textContent = '⚠ Critique';
+            badge.classList.add('bg-purple-100','text-purple-700','border','border-purple-300');
+            badge.classList.remove('hidden');
+        } else if (status === 'high') {
             input.classList.add('border-red-400');
             badge.textContent = '↑ Élevé';
             badge.classList.add('bg-red-100','text-red-700','border','border-red-300');
@@ -412,13 +427,14 @@ document.addEventListener('DOMContentLoaded', function () {
             const select = document.querySelector(`.param-status-select[data-index="${idx}"]`);
             const badge = document.querySelector(`.param-status-badge[data-index="${idx}"]`);
             if (!select || !badge) return;
-            if (isNaN(val) || !range) {
+            if (isNaN(val)) {
                 select.value = 'normal';
-                this.classList.remove('border-red-400','border-green-400','border-amber-400');
+                this.classList.remove('border-red-400','border-green-400','border-amber-400','border-purple-500');
                 badge.classList.add('hidden');
                 return;
             }
-            const status = detectStatus(val, range);
+
+            const status = detectStatus(val, range, this.dataset.criticalLow, this.dataset.criticalHigh);
             if (status) {
                 select.value = status;
                 applyBadge(this, select, badge, status);
