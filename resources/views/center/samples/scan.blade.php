@@ -36,7 +36,8 @@
 
             <div id="cameraView" class="hidden mt-6">
                 <div id="cameraReader" class="mx-auto overflow-hidden rounded-2xl border-2 border-dashed border-[#e2e8f0]"></div>
-                <p class="text-xs text-[#94a3b8] mt-3">Placez le code-barres devant la caméra. La recherche se lance automatiquement.</p>
+                <p id="cameraStatus" class="text-xs text-[#94a3b8] mt-3">Placez le code-barres devant la caméra. La recherche se lance automatiquement.</p>
+                <button type="button" id="cameraStopBtn" class="mt-3 border border-[#e2e8f0] hover:bg-[#f8fafc] text-[#64748b] font-bold px-4 py-2 rounded-xl text-xs transition">Arrêter la caméra</button>
             </div>
 
             <div id="scanResult" class="hidden mt-6 p-6 rounded-2xl border"></div>
@@ -49,9 +50,18 @@
     const input = document.getElementById('barcodeInput');
     const result = document.getElementById('scanResult');
     const cameraView = document.getElementById('cameraView');
+    const cameraStatus = document.getElementById('cameraStatus');
     let timeout = null;
     let html5Qr = null;
     let cameraRunning = false;
+    let pendingCameraScan = false;
+    let lastDecoded = null;
+    let lastDecodedAt = 0;
+
+    function renderError(message) {
+        result.className = 'mt-6 p-6 rounded-2xl border border-red-200 bg-red-50 text-left';
+        result.innerHTML = `<p class="text-sm font-bold text-red-600">${message}</p>`;
+    }
 
     function renderResult(data) {
         result.className = 'mt-6 p-6 rounded-2xl border border-emerald-200 bg-emerald-50';
@@ -68,7 +78,6 @@
                 <a href="${data.show_url}" class="bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold px-4 py-2 rounded-xl text-xs transition">Voir détail</a>
             </div>
         `;
-        input.value = '';
     }
 
     function performLookup(code) {
@@ -79,57 +88,102 @@
         })
         .then(r => r.json())
         .then(data => {
+            const wasCamera = pendingCameraScan;
+            pendingCameraScan = false;
+
             if (data.error) {
-                result.className = 'hidden mt-6 p-6 rounded-2xl border';
-                alert(data.error);
+                renderError(data.error);
+                if (wasCamera) cameraStatus.textContent = 'Scannez à nouveau (code non trouvé).';
                 return;
             }
+
             renderResult(data);
+            if (wasCamera) {
+                stopCamera();
+                switchTab('manual');
+            } else {
+                input.value = '';
+            }
         })
-        .catch(e => { alert('Erreur de recherche'); });
+        .catch(() => {
+            pendingCameraScan = false;
+            renderError('Erreur de recherche. Réessayez.');
+        });
     }
 
     input.addEventListener('input', function() {
         clearTimeout(timeout);
         if (this.value.length < 3) return;
+        // skip lookups triggered by the camera filling the input (camera path already ran)
+        if (pendingCameraScan && this.value === lastDecoded) return;
 
         timeout = setTimeout(() => {
-            performLookup(this.value);
+            pendingCameraScan = false;
+            performLookup(this.value.trim());
         }, 300);
     });
 
-    function stopCamera() {
-        if (html5Qr) {
-            html5Qr.stop().catch(() => {});
-            html5Qr.clear().catch(() => {});
-            html5Qr = null;
-        }
-        cameraRunning = false;
-        cameraView.classList.add('hidden');
+    function onDecoded(decodedText) {
+        const code = (decodedText || '').trim();
+        if (!code) return;
+
+        // html5-qrcode calls this on every frame while the barcode is in view:
+        // ignore repeats of the same code within a short window.
+        const now = Date.now();
+        if (code === lastDecoded && now - lastDecodedAt < 2000) return;
+        lastDecoded = code;
+        lastDecodedAt = now;
+
+        pendingCameraScan = true;
+        input.value = code;
+        cameraStatus.textContent = 'Code lu: ' + code + ' — recherche…';
+        performLookup(code);
     }
 
-    function startCamera() {
+    async function stopCamera() {
+        cameraRunning = false;
+        if (html5Qr) {
+            try { await html5Qr.stop(); } catch (e) {}
+        }
+        cameraView.classList.add('hidden');
+        cameraStatus.textContent = 'Placez le code-barres devant la caméra. La recherche se lance automatiquement.';
+    }
+
+    async function startCamera() {
         if (cameraRunning) return;
         if (!window.Html5Qrcode) {
-            alert('La bibliothèque de scan caméra n\'a pas pu être chargée.');
+            renderError('La bibliothèque de scan caméra n\'a pas pu être chargée.');
             return;
         }
+
+        // dispose any previous instance so the scanner can restart without reloading
+        if (html5Qr) {
+            try { await html5Qr.stop(); } catch (e) {}
+            try { await html5Qr.clear(); } catch (e) {}
+            html5Qr = null;
+        }
+        document.getElementById('cameraReader').innerHTML = '';
+
         cameraView.classList.remove('hidden');
-        html5Qr = new Html5Qrcode('cameraReader', { formatsToSupport: [Html5QrcodeSupportedFormats.CODE_128] });
-        html5Qr.start(
-            { facingMode: 'environment' },
-            { fps: 10, qrbox: { width: 250, height: 120 } },
-            (decodedText) => {
-                input.value = decodedText;
-                stopCamera();
-                performLookup(decodedText);
-                switchTab('manual');
-            },
-            () => {}
-        ).catch(err => {
-            alert('Impossible d\'accéder à la caméra: ' + err);
+        cameraStatus.textContent = 'Connexion à la caméra…';
+
+        try {
+            html5Qr = new Html5Qrcode('cameraReader', { formatsToSupport: [Html5QrcodeSupportedFormats.CODE_128] });
+            await html5Qr.start(
+                { facingMode: 'environment' },
+                { fps: 10, qrbox: { width: 250, height: 120 } },
+                onDecoded,
+                () => {}
+            );
+            cameraRunning = true;
+            cameraStatus.textContent = '';
+        } catch (err) {
+            cameraRunning = false;
+            cameraStatus.textContent = 'Impossible d\'accéder à la caméra: ' + err + ' — réessayez ou utilisez la saisie manuelle.';
+            result.className = 'mt-6 p-6 rounded-2xl border border-red-200 bg-red-50 text-left';
+            result.innerHTML = `<p class="text-sm font-bold text-red-600">Impossible d\'accéder à la caméra: ${err}</p>`;
             cameraView.classList.add('hidden');
-        }).then(() => { cameraRunning = true; });
+        }
     }
 
     function switchTab(tab) {
@@ -149,6 +203,7 @@
 
     document.getElementById('tabManual').addEventListener('click', () => switchTab('manual'));
     document.getElementById('tabCamera').addEventListener('click', () => switchTab('camera'));
+    document.getElementById('cameraStopBtn').addEventListener('click', () => switchTab('manual'));
 
     window.addEventListener('beforeunload', () => stopCamera());
 </script>
