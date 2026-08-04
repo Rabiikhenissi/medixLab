@@ -43,7 +43,7 @@ class CenterController extends Controller
         $lab = $user->staff->laboratory;
 
         // Cache dashboard stats for 5 minutes
-        $cacheKey = "center_dashboard_{$lab->id}_v2";
+        $cacheKey = "center_dashboard_{$lab->id}_v3";
         $cached = cache()->remember($cacheKey, 300, function () use ($lab) {
             // Retrieve statistics
             $stats = [
@@ -121,26 +121,28 @@ class CenterController extends Controller
                 ->values()
                 ->all();
 
-            // Revenue estimate (completed exams only)
-            $revenue = $lab->examRequests()
-                ->where('status', 'completed')
-                ->join('exam_request_items', 'exam_requests.id', '=', 'exam_request_items.exam_request_id')
-                ->join('available_exams', function ($j) use ($lab) {
-                    $j->on('exam_request_items.exam_id', '=', 'available_exams.exam_id')
-                        ->where('available_exams.labo_id', '=', $lab->id);
-                })
-                ->sum('available_exams.price');
+            // Billing stats derived from actual invoices (single aggregated query)
+            $invoiceAgg = Invoice::where('labo_id', $lab->id)
+                ->selectRaw("COALESCE(SUM(CASE WHEN status <> 'cancelled' THEN 1 ELSE 0 END), 0) as billed_count")
+                ->selectRaw("COALESCE(SUM(CASE WHEN status <> 'cancelled' THEN total_amount ELSE 0 END), 0) as billed_amount")
+                ->selectRaw("COALESCE(SUM(CASE WHEN status <> 'cancelled' THEN paid_amount ELSE 0 END), 0) as collected_amount")
+                ->selectRaw("COALESCE(SUM(CASE WHEN status IN ('pending', 'partially_paid') THEN patient_amount - paid_amount ELSE 0 END), 0) as outstanding_amount")
+                ->selectRaw("COALESCE(SUM(CASE WHEN status IN ('pending', 'partially_paid') THEN 1 ELSE 0 END), 0) as pending_count")
+                ->selectRaw("COALESCE(SUM(CASE WHEN status = 'paid' THEN 1 ELSE 0 END), 0) as paid_count")
+                ->first();
 
-            // Billing stats
-            $billingCount = Invoice::where('labo_id', $lab->id)->count();
-            $billingPending = Invoice::where('labo_id', $lab->id)->whereIn('status', ['pending', 'partially_paid'])->count();
-            $billingRevenue = Invoice::where('labo_id', $lab->id)->where('status', 'paid')->sum('total_amount');
+            $billingBilled = (float) $invoiceAgg->billed_amount;
+            $billingRevenue = (float) $invoiceAgg->collected_amount;
+            $billingOutstanding = (float) $invoiceAgg->outstanding_amount;
+            $billingCount = (int) $invoiceAgg->billed_count;
+            $billingPending = (int) $invoiceAgg->pending_count;
+            $billingPaid = (int) $invoiceAgg->paid_count;
 
             // Sample stats
             $sampleCount = Sample::where('labo_id', $lab->id)->count();
             $sampleActive = Sample::where('labo_id', $lab->id)->whereNotIn('status', ['completed', 'rejected'])->count();
 
-            return compact('stats', 'workload', 'last7Days', 'last7PrevDays', 'topExams', 'revenue', 'billingCount', 'billingPending', 'billingRevenue', 'sampleCount', 'sampleActive');
+            return compact('stats', 'workload', 'last7Days', 'last7PrevDays', 'topExams', 'billingBilled', 'billingRevenue', 'billingOutstanding', 'billingCount', 'billingPending', 'billingPaid', 'sampleCount', 'sampleActive');
         });
 
         return view('center.dashboard', array_merge(
