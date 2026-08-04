@@ -757,6 +757,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/features/create', [FeatureController::class, 'create'])->name('features.create')->middleware('permission:create-features');
         Route::post('/features', [FeatureController::class, 'store'])->name('features.store')->middleware('permission:create-features');
         Route::get('/features/{feature}/edit', [FeatureController::class, 'edit'])->name('features.edit')->middleware('permission:edit-features');
+        Route::get('/features/icon-grid', [FeatureController::class, 'iconGrid'])->name('features.icon-grid')->middleware('permission:edit-features');
         Route::put('/features/{feature}', [FeatureController::class, 'update'])->name('features.update')->middleware('permission:edit-features');
         Route::delete('/features/{feature}', [FeatureController::class, 'destroy'])->name('features.destroy')->middleware('permission:delete-features');
         Route::delete('/features/{feature}/force', [FeatureController::class, 'forceDelete'])->name('features.force-delete')->middleware('permission:delete-features');

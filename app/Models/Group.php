@@ -5,12 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['name', 'code', 'is_archive'])]
+#[Fillable(['name', 'code', 'role_table', 'is_archive'])]
 /**
  * A permission group that bundles users and grants them a set of actions.
  */
 class Group extends Model
 {
+    /** The profile tables a group's users can belong to. */
+    public const ROLE_TABLES = ['admin', 'doctor', 'patient', 'staff'];
+
+
     protected function casts(): array
     {
         return [

@@ -54,14 +54,19 @@
                 <div class="form-group">
                     <label class="form-label">Rôle / Groupe de Sécurité<span class="required-star">*</span></label>
                     <div style="position:relative;">
-                        <select name="group_id" id="group_id" required class="form-control" onchange="toggleLabField()">
-                            <option value="">Sélectionner un groupe...</option>
+                        <select name="group_id" id="group_id" required class="form-control" onchange="toggleLabField(); updateRoleTableHint()">
                             @foreach($groups as $group)
-                                <option value="{{ $group->id }}" data-code="{{ $group->code }}" {{ old('group_id', $user->group_id) == $group->id ? 'selected' : '' }}>{{ $group->name }}</option>
+                                <option value="{{ $group->id }}" data-role-table="{{ $group->role_table }}" {{ old('group_id', $user->group_id) == $group->id ? 'selected' : '' }}>{{ $group->name }}</option>
                             @endforeach
                         </select>
                         <svg style="position:absolute;right:12px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:#94a3b8;pointer-events:none;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
                     </div>
+                    <div id="role-table-hint" style="margin-top:8px;font-size:12px;color:#64748b;"></div>
+                    @if($user->group?->role_table)
+                        <div style="margin-top:4px;font-size:12px;color:#94a3b8;">
+                            Le groupe ne peut être modifié que vers un autre groupe de la même table de profil.
+                        </div>
+                    @endif
                 </div>
                 <div class="form-group">
                     <label class="form-label">Adresse de résidence</label>
@@ -87,11 +92,33 @@
             <div class="form-row" style="margin-bottom: 24px;">
                 <div class="form-group">
                     <label class="form-label">Nouveau Mot de Passe (Optionnel)</label>
-                    <input type="password" name="password" placeholder="Saisir 8 caractères minimum" class="form-control">
+                    <div style="position:relative;">
+                        <input type="password" name="password" id="pw1" placeholder="Saisir 8 caractères minimum" class="form-control" style="padding-right: 42px;">
+                        <button type="button" tabindex="-1" onclick="togglePw(this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#94a3b8;padding:4px;display:flex;align-items:center;justify-content:center;border-radius:6px;">
+                            <svg class="pw-eye" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                            <svg class="pw-eye-off" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="display:none;">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"/>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Confirmer le Nouveau Mot de Passe</label>
-                    <input type="password" name="password_confirmation" placeholder="Confirmer le nouveau mot de passe" class="form-control">
+                    <div style="position:relative;">
+                        <input type="password" name="password_confirmation" id="pw2" placeholder="Confirmer le nouveau mot de passe" class="form-control" style="padding-right: 42px;">
+                        <button type="button" tabindex="-1" onclick="togglePw(this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#94a3b8;padding:4px;display:flex;align-items:center;justify-content:center;border-radius:6px;">
+                            <svg class="pw-eye" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                            <svg class="pw-eye-off" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="display:none;">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"/>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -114,9 +141,9 @@
         if (!groupSelect) return;
         
         var selectedOption = groupSelect.options[groupSelect.selectedIndex];
-        var code = selectedOption ? selectedOption.getAttribute('data-code') : '';
+        var roleTable = selectedOption ? selectedOption.getAttribute('data-role-table') : '';
         
-        if (code === 'center') {
+        if (roleTable === 'staff') {
             labGroup.style.display = 'flex';
             labSelect.setAttribute('required', 'required');
         } else {
@@ -125,9 +152,44 @@
         }
     }
     
+    function togglePw(btn) {
+        var input = btn.previousElementSibling;
+        if (!input || input.tagName !== 'INPUT') return;
+        var showing = input.type === 'text';
+        input.type = showing ? 'password' : 'text';
+        var eye = btn.querySelector('.pw-eye');
+        var eyeOff = btn.querySelector('.pw-eye-off');
+        if (eye) eye.style.display = showing ? '' : 'none';
+        if (eyeOff) eyeOff.style.display = showing ? 'none' : '';
+        input.focus();
+    }
+
+    var roleTableLabels = {
+        'admin': 'Table de profil : Administrateurs (admins)',
+        'doctor': 'Table de profil : Médecins (doctors)',
+        'patient': 'Table de profil : Patients (patients)',
+        'staff': 'Table de profil : Personnel du Centre (staff)'
+    };
+
+    function updateRoleTableHint() {
+        var groupSelect = document.getElementById('group_id');
+        var hint = document.getElementById('role-table-hint');
+        if (!groupSelect || !hint) return;
+
+        var selectedOption = groupSelect.options[groupSelect.selectedIndex];
+        var roleTable = selectedOption ? selectedOption.getAttribute('data-role-table') : '';
+
+        if (roleTable && roleTableLabels[roleTable]) {
+            hint.textContent = roleTableLabels[roleTable];
+        } else {
+            hint.textContent = '';
+        }
+    }
+
     // Run on load
     document.addEventListener('DOMContentLoaded', function() {
         toggleLabField();
+        updateRoleTableHint();
     });
 </script>
 @endsection

@@ -75,6 +75,7 @@ class GroupController extends Controller
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:255|unique:groups,code',
+            'role_table' => 'nullable|in:'.implode(',', Group::ROLE_TABLES),
             'actions' => 'nullable|array',
             'actions.*' => 'exists:actions,id',
         ]);
@@ -89,6 +90,7 @@ class GroupController extends Controller
         $group = Group::create([
             'name' => $data['name'],
             'code' => $code,
+            'role_table' => $data['role_table'] ?? null,
             'is_archive' => false,
         ]);
 
@@ -135,6 +137,7 @@ class GroupController extends Controller
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:255|unique:groups,code,'.$group->id,
+            'role_table' => 'nullable|in:'.implode(',', Group::ROLE_TABLES),
             'actions' => 'nullable|array',
             'actions.*' => 'exists:actions,id',
         ]);
@@ -149,6 +152,7 @@ class GroupController extends Controller
         $group->update([
             'name' => $data['name'],
             'code' => $code,
+            'role_table' => $data['role_table'] ?? null,
         ]);
 
         // Sync actions

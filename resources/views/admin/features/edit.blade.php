@@ -22,7 +22,7 @@
             </div>
         @endif
 
-        <form action="{{ route('admin.features.update', $feature) }}" method="POST">
+        <form id="feature-form" action="{{ route('admin.features.update', $feature) }}" method="POST">
             @csrf
             @method('PUT')
 
@@ -59,17 +59,20 @@
             <!-- Form Row -->
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label">Afficher dans le sidebar ?<span class="required-star">*</span></label>
+                    <label class="form-label">Statut du module<span class="required-star">*</span></label>
                     <div style="position:relative;">
                         <select name="is_sidebar" required class="form-control">
-                            <option value="1" {{ old('is_sidebar', $feature->is_sidebar) ? 'selected' : '' }}>Oui</option>
-                            <option value="0" {{ !old('is_sidebar', $feature->is_sidebar) ? 'selected' : '' }}>Non</option>
+                            <option value="1" {{ old('is_sidebar', $feature->is_sidebar) ? 'selected' : '' }}>Active</option>
+                            <option value="0" {{ !old('is_sidebar', $feature->is_sidebar) ? 'selected' : '' }}>Inactive</option>
                         </select>
                         <svg style="position:absolute;right:12px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:#94a3b8;pointer-events:none;"
                             fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                         </svg>
                     </div>
+                    <span style="display:block;font-size:11px;color:#94a3b8;margin-top:5px;">
+                        Active = le module est visible dans la barre de navigation. Inactive = masque complet.
+                    </span>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Ordre d'affichage dans la barre de navigation<span
@@ -95,6 +98,7 @@
                     <span>▼</span>
                 </button>
             </div>
+        </form>
 
             <!-- Actions Section -->
             <div style="margin-top: 32px; border-top: 1px solid #f1f5f9; padding-top: 24px;">
@@ -224,9 +228,8 @@
 
             <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
                 <a href="{{ route('admin.features.index') }}" class="btn-cancel">Annuler</a>
-                <button type="submit" class="btn-submit">Enregistrer les modifications</button>
+                <button type="submit" form="feature-form" class="btn-submit">Enregistrer les modifications</button>
             </div>
-        </form>
     </div>
 
     <!-- Icon Picker Modal -->
@@ -234,14 +237,10 @@
         <div class="icon-modal-box" onclick="event.stopPropagation()">
             <h3>Choisir une icône</h3>
             <input id="iconSearch" type="text" placeholder="Rechercher une icône..." class="form-control">
-            <div class="icon-picker-grid">
-                @foreach ($icons as $icon)
-                    <button type="button" class="icon-option" data-name="{{ $icon }}"
-                        onclick="selectIcon(this,'{{ $icon }}')">
-                        <x-dynamic-component :component="'heroicon-o-' . $icon" class="icon-svg" />
-                        <span>{{ $icon }}</span>
-                    </button>
-                @endforeach
+            <div class="icon-picker-grid" id="iconPickerGrid">
+                <div id="iconGridLoading" style="grid-column: 1 / -1; text-align: center; color: #94a3b8; font-style: italic;">
+                    Chargement des icônes...
+                </div>
             </div>
         </div>
     </div>
@@ -250,8 +249,25 @@
 @section('scripts')
     <script>
         // ─── Icon Picker ───────────────────────────────────────────────
+        let iconsLoaded = false;
+
+        function loadIconGrid() {
+            if (iconsLoaded) return;
+            iconsLoaded = true;
+            const grid = document.getElementById('iconPickerGrid');
+            fetch('{{ route('admin.features.icon-grid') }}')
+                .then(r => r.text())
+                .then(html => { grid.innerHTML = html; })
+                .catch(() => {
+                    iconsLoaded = false;
+                    document.getElementById('iconGridLoading').innerText =
+                        'Erreur lors du chargement des icônes.';
+                });
+        }
+
         function openIconPicker() {
             document.getElementById('iconModal').classList.remove('hidden');
+            loadIconGrid();
         }
 
         function closeIconPicker() {

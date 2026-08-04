@@ -585,6 +585,15 @@
             background: #cbd5e1;
         }
 
+        .status-inactive {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+        .status-inactive .dot {
+            background: #dc2626;
+        }
+
         .table-action-btn {
             width: 32px;
             height: 32px;

@@ -73,7 +73,6 @@
                     <th>Téléphone</th>
                     <th>Rôle / Groupe</th>
                     <th>Date d'inscription</th>
-                    <th>Statut</th>
                     <th style="text-align:right;">Actions</th>
                 </tr>
             </thead>
@@ -101,7 +100,7 @@
                         </td>
                         <td>
                             @if($user->group)
-                                <span class="category-badge cat-{{ $user->group->code === 'admin' ? 'biochemistry' : ($user->group->code === 'doctor' ? 'microbiology' : ($user->group->code === 'patient' ? 'hematology' : 'other')) }}">
+                                <span class="category-badge cat-{{ $user->group->role_table === 'admin' ? 'biochemistry' : ($user->group->role_table === 'doctor' ? 'microbiology' : ($user->group->role_table === 'patient' ? 'hematology' : 'other')) }}">
                                     {{ $user->group->name }}
                                 </span>
                             @else
@@ -110,13 +109,6 @@
                         </td>
                         <td style="color:#94a3b8;font-size:12px;white-space:nowrap;">
                             {{ $user->created_at ? $user->created_at->format('d/m/Y') : '—' }}
-                        </td>
-                        <td>
-                            @if($user->is_archive)
-                                <span class="status-badge status-archived"><span class="dot"></span>Archivé</span>
-                            @else
-                                <span class="status-badge status-active"><span class="dot"></span>Actif</span>
-                            @endif
                         </td>
                         <td style="text-align:right;">
                             <div style="display:flex;align-items:center;justify-content:flex-end;gap:6px;">
@@ -163,7 +155,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7">
+                        <td colspan="6">
                             <div class="empty-state">
                                 <div class="empty-state-icon">
                                     <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">

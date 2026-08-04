@@ -117,6 +117,20 @@
                 </div>
                 <span class="field-hint">Sera automatiquement formaté en slug (minuscules, tirets).</span>
             </div>
+
+            <div class="form-group" style="margin-top: 18px;">
+                <label class="form-label">Type de rôle (Optionnel)</label>
+                <div style="position:relative;">
+                    <select name="role_table" id="role-table" class="form-control" data-initial="{{ $group->role_table ?? '' }}" onchange="updateSummary()">
+                        <option value="">Aucune (profil générique)</option>
+                        @foreach(['admin' => 'Admin', 'doctor' => 'Docteur', 'patient' => 'Patient', 'staff' => 'Centre / Laboratoire'] as $value => $label)
+                            <option value="{{ $value }}" {{ (old('role_table') ?? $group->role_table) === $value ? 'selected' : '' }}>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                    <svg style="position:absolute;right:12px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:#94a3b8;pointer-events:none;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+                </div>
+                <span class="field-hint">Détermine dans quelle table les utilisateurs de ce rôle seront ajoutés (admins, doctors, patients, staff).</span>
+            </div>
         </div>
 
         @php
@@ -141,6 +155,12 @@
             <div class="summary-row">
                 <span class="summary-label">Code</span>
                 <span class="summary-value mono" id="summary-code">{{ $group->code }}</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">Type de rôle</span>
+                <span class="summary-value" id="summary-role-table">
+                    {{ ($labels = ['admin' => 'Admin', 'doctor' => 'Docteur', 'patient' => 'Patient', 'staff' => 'Centre / Laboratoire'])[$group->role_table] ?? '—' }}
+                </span>
             </div>
             <div class="summary-divider"></div>
             <div class="summary-row">
@@ -257,12 +277,17 @@
     function updateSummary() {
         var name = document.getElementById('role-name').value.trim();
         var code = document.getElementById('role-code').value.trim();
+        var roleSelect = document.getElementById('role-table');
+        var roleLabel = roleSelect && roleSelect.selectedIndex >= 0
+            ? roleSelect.options[roleSelect.selectedIndex].text
+            : '—';
         var checks = document.querySelectorAll('.action-check');
         var total = checks.length;
         var selected = document.querySelectorAll('.action-check:checked').length;
 
         document.getElementById('summary-name').textContent = name || '—';
         document.getElementById('summary-code').textContent = code || '—';
+        document.getElementById('summary-role-table').textContent = roleLabel || '—';
         document.getElementById('summary-actions').textContent = selected;
         document.getElementById('footer-count').textContent = selected;
 
@@ -320,6 +345,8 @@
     function resetForm() {
         document.getElementById('role-name').value = document.getElementById('role-name').dataset.initial;
         document.getElementById('role-code').value = document.getElementById('role-code').dataset.initial;
+        var roleSelect = document.getElementById('role-table');
+        roleSelect.value = roleSelect.dataset.initial || '';
         document.querySelectorAll('.action-check').forEach(function(c) {
             c.checked = c.dataset.initial === '1';
         });
