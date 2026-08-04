@@ -53,14 +53,15 @@
                 <div class="form-group">
                     <label class="form-label">Role / Groupe de Securite<span class="required-star">*</span></label>
                     <div style="position:relative;">
-                        <select name="group_id" id="group_id" required class="form-control" onchange="toggleLabField()">
+                        <select name="group_id" id="group_id" required class="form-control" onchange="toggleLabField(); updateRoleTableHint()">
                             <option value="">Selectionner un groupe...</option>
                             @foreach($groups as $group)
-                                <option value="{{ $group->id }}" data-code="{{ $group->code }}" {{ old('group_id') == $group->id ? 'selected' : '' }}>{{ $group->name }}</option>
+                                <option value="{{ $group->id }}" data-role-table="{{ $group->role_table }}" {{ old('group_id') == $group->id ? 'selected' : '' }}>{{ $group->name }}</option>
                             @endforeach
                         </select>
                         <svg style="position:absolute;right:12px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:#94a3b8;pointer-events:none;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
                     </div>
+                    <div id="role-table-hint" style="margin-top:8px;font-size:12px;color:#64748b;"></div>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Adresse de residence</label>
@@ -135,9 +136,9 @@
         if (!groupSelect) return;
         
         var selectedOption = groupSelect.options[groupSelect.selectedIndex];
-        var code = selectedOption ? selectedOption.getAttribute('data-code') : '';
+        var roleTable = selectedOption ? selectedOption.getAttribute('data-role-table') : '';
         
-        if (code === 'center') {
+        if (roleTable === 'staff') {
             labGroup.style.display = 'flex';
             labSelect.setAttribute('required', 'required');
         } else {
@@ -157,10 +158,33 @@
         if (eyeOff) eyeOff.style.display = showing ? 'none' : '';
         input.focus();
     }
+
+    var roleTableLabels = {
+        'admin': 'Table de profil : Administrateurs (admins)',
+        'doctor': 'Table de profil : Médecins (doctors)',
+        'patient': 'Table de profil : Patients (patients)',
+        'staff': 'Table de profil : Personnel du Centre (staff)'
+    };
+
+    function updateRoleTableHint() {
+        var groupSelect = document.getElementById('group_id');
+        var hint = document.getElementById('role-table-hint');
+        if (!groupSelect || !hint) return;
+
+        var selectedOption = groupSelect.options[groupSelect.selectedIndex];
+        var roleTable = selectedOption ? selectedOption.getAttribute('data-role-table') : '';
+
+        if (roleTable && roleTableLabels[roleTable]) {
+            hint.textContent = roleTableLabels[roleTable];
+        } else {
+            hint.textContent = '';
+        }
+    }
     
     // Run on load
     document.addEventListener('DOMContentLoaded', function() {
         toggleLabField();
+        updateRoleTableHint();
     });
 </script>
 @endsection

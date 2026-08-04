@@ -89,10 +89,6 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        // resolve the id of the center group for validation rules
-        $centerGroup = Group::where('code', 'center')->first();
-        $centerGroupId = $centerGroup ? $centerGroup->id : null;
-
         // validate the user fields
         $data = $request->validate([
             'first_name' => 'required|string|max:255',
@@ -102,11 +98,18 @@ class UserController extends Controller
             'phone' => 'nullable|string|max:255',
             'address' => 'nullable|string',
             'group_id' => 'required|exists:groups,id',
-            'laboratory_id' => ($centerGroupId ? 'required_if:group_id,'.$centerGroupId : 'nullable').'|nullable|exists:labos,id',
         ]);
 
+        // a center-staff group requires a laboratory
+        $group = Group::find($data['group_id']);
+        if ($group && $group->role_table === 'staff') {
+            $data['laboratory_id'] = $request->validate([
+                'laboratory_id' => 'required|exists:labos,id',
+            ])['laboratory_id'];
+        }
+
         // create the user and its role record in a single transaction
-        DB::transaction(function () use ($data, $request) {
+        DB::transaction(function () use ($data, $group) {
             $user = User::create([
                 'first_name' => $data['first_name'],
                 'last_name' => $data['last_name'],
@@ -118,33 +121,26 @@ class UserController extends Controller
                 'is_archive' => false,
             ]);
 
-            // If the assigned role code is 'admin', also create a record in the admins table
-            $group = Group::find($data['group_id']);
-            if ($group && $group->code === 'admin') {
+            // create the matching role record for the group's profile table
+            if ($group && $group->role_table === 'admin') {
                 Admin::create([
                     'user_id' => $user->id,
                 ]);
-            }
-            // If the role code is 'doctor', create doctor record
-            elseif ($group && $group->code === 'doctor') {
+            } elseif ($group && $group->role_table === 'doctor') {
                 Doctor::create([
                     'user_id' => $user->id,
                     'doctor_code' => 'DOC-'.strtoupper(Str::random(6)),
                     'speciality' => 'Généraliste',
                 ]);
-            }
-            // If patient
-            elseif ($group && $group->code === 'patient') {
+            } elseif ($group && $group->role_table === 'patient') {
                 Patient::create([
                     'user_id' => $user->id,
                     'patient_code' => 'PAT-'.strtoupper(Str::random(6)),
                 ]);
-            }
-            // If Medical Center
-            elseif ($group && $group->code === 'center') {
+            } elseif ($group && $group->role_table === 'staff') {
                 Staff::create([
                     'user_id' => $user->id,
-                    'laboratory_id' => $request->input('laboratory_id'),
+                    'laboratory_id' => $data['laboratory_id'] ?? null,
                     'staff_code' => 'STF-'.strtoupper(Str::random(8)),
                 ]);
             }
@@ -160,12 +156,20 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        $groups = Group::where('is_archive', false)->orWhereNull('is_archive')->orderBy('name', 'asc')->get();
+        $groups = Group::where(function ($q) {
+            $q->where('is_archive', false)->orWhereNull('is_archive');
+        })->orderBy('name', 'asc');
+
+        // a group can only be changed into another group of the same profile table
+        if ($roleTable = $user->group?->role_table) {
+            $groups->where('role_table', $roleTable);
+        }
+
         $laboratories = Labo::where('is_archive', false)->orWhereNull('is_archive')->orderBy('name', 'asc')->get();
 
         return view('admin.users.edit', [
             'user' => $user,
-            'groups' => $groups,
+            'groups' => $groups->get(),
             'laboratories' => $laboratories,
         ]);
     }
@@ -177,10 +181,6 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        // resolve the id of the center group for validation rules
-        $centerGroup = Group::where('code', 'center')->first();
-        $centerGroupId = $centerGroup ? $centerGroup->id : null;
-
         // validate the updated fields
         $data = $request->validate([
             'first_name' => 'required|string|max:255',
@@ -190,10 +190,28 @@ class UserController extends Controller
             'phone' => 'nullable|string|max:255',
             'address' => 'nullable|string',
             'group_id' => 'required|exists:groups,id',
-            'laboratory_id' => ($centerGroupId ? 'required_if:group_id,'.$centerGroupId : 'nullable').'|nullable|exists:labos,id',
         ]);
 
-        DB::transaction(function () use ($data, $user, $request) {
+        // a group can only be changed into another group of the same profile table
+        $newGroup = Group::find($data['group_id']);
+        $oldRoleTable = $user->group?->role_table;
+
+        if ($oldRoleTable && $newGroup && $newGroup->role_table !== $oldRoleTable) {
+            return back()->withInput()->withErrors([
+                'group_id' => 'Le rôle ne peut être modifié que vers un autre groupe de la même table de profil ('
+                    .$oldRoleTable
+                    .').',
+            ]);
+        }
+
+        // a center-staff group requires a laboratory
+        if ($newGroup && $newGroup->role_table === 'staff') {
+            $data['laboratory_id'] = $request->validate([
+                'laboratory_id' => 'required|exists:labos,id',
+            ])['laboratory_id'];
+        }
+
+        DB::transaction(function () use ($data, $user, $newGroup) {
             $oldGroup = $user->group;
 
             $updateData = [
@@ -212,50 +230,52 @@ class UserController extends Controller
 
             $user->update($updateData);
 
-            // Sync with related tables if group changed
-            $newGroup = Group::find($data['group_id']);
-            if ($oldGroup && $newGroup && $oldGroup->code !== $newGroup->code) {
+            // Sync with related tables if profile table changed
+            $oldRoleTable = $oldGroup?->role_table;
+            $newRoleTable = $newGroup?->role_table;
+
+            if ($oldRoleTable !== $newRoleTable) {
                 // Delete old roles records
-                if ($oldGroup->code === 'admin') {
+                if ($oldRoleTable === 'admin') {
                     Admin::where('user_id', $user->id)->delete();
-                } elseif ($oldGroup->code === 'doctor') {
+                } elseif ($oldRoleTable === 'doctor') {
                     Doctor::where('user_id', $user->id)->delete();
-                } elseif ($oldGroup->code === 'patient') {
+                } elseif ($oldRoleTable === 'patient') {
                     Patient::where('user_id', $user->id)->delete();
-                } elseif ($oldGroup->code === 'center') {
+                } elseif ($oldRoleTable === 'staff') {
                     Staff::where('user_id', $user->id)->delete();
                 }
 
                 // Create new role record
-                if ($newGroup->code === 'admin') {
+                if ($newRoleTable === 'admin') {
                     Admin::firstOrCreate(['user_id' => $user->id]);
-                } elseif ($newGroup->code === 'doctor') {
+                } elseif ($newRoleTable === 'doctor') {
                     Doctor::firstOrCreate([
                         'user_id' => $user->id,
                     ], [
                         'doctor_code' => 'DOC-'.strtoupper(Str::random(6)),
                         'speciality' => 'Généraliste',
                     ]);
-                } elseif ($newGroup->code === 'patient') {
+                } elseif ($newRoleTable === 'patient') {
                     Patient::firstOrCreate([
                         'user_id' => $user->id,
                     ], [
                         'patient_code' => 'PAT-'.strtoupper(Str::random(6)),
                     ]);
-                } elseif ($newGroup->code === 'center') {
+                } elseif ($newRoleTable === 'staff') {
                     Staff::firstOrCreate([
                         'user_id' => $user->id,
                     ], [
-                        'laboratory_id' => $request->input('laboratory_id'),
+                        'laboratory_id' => $data['laboratory_id'] ?? null,
                         'staff_code' => 'STF-'.strtoupper(Str::random(8)),
                     ]);
                 }
-            } elseif ($newGroup && $newGroup->code === 'center') {
-                // If group is center and hasn't changed, sync the laboratory_id
+            } elseif ($newRoleTable === 'staff') {
+                // If still a staff member, sync the laboratory_id
                 Staff::updateOrCreate(
                     ['user_id' => $user->id],
                     [
-                        'laboratory_id' => $request->input('laboratory_id'),
+                        'laboratory_id' => $data['laboratory_id'] ?? null,
                         'staff_code' => $user->staff ? $user->staff->staff_code : 'STF-'.strtoupper(Str::random(8)),
                     ]
                 );

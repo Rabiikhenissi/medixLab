@@ -1,5 +1,6 @@
 @php
-    $groupCode = auth()->user()->group->code ?? 'admin';
+    $roleTable = auth()->user()->group->role_table ?? 'admin';
+    $groupCode = $roleTable === 'staff' ? 'center' : $roleTable;
     $layouts = [
         'admin'   => 'layouts.admin',
         'doctor'  => 'components.layouts.doctor',

@@ -60,7 +60,6 @@
                     <th>Code de sécurité</th>
                     <th>Nom du rôle</th>
                     <th>Utilisateurs associés</th>
-                    <th>Statut</th>
                     <th style="text-align:right;">Actions</th>
                 </tr>
             </thead>
@@ -77,13 +76,6 @@
                             <span class="category-badge cat-other" style="font-weight: 700;">
                                 {{ $group->users_count }} utilisateur(s)
                             </span>
-                        </td>
-                        <td>
-                            @if ($group->is_archive)
-                                <span class="status-badge status-archived"><span class="dot"></span>Archivé</span>
-                            @else
-                                <span class="status-badge status-active"><span class="dot"></span>Actif</span>
-                            @endif
                         </td>
                         <td style="text-align:right;">
                             <div style="display:flex;align-items:center;justify-content:flex-end;gap:6px;">
@@ -149,7 +141,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5">
+                        <td colspan="4">
                             <div class="empty-state">
                                 <div class="empty-state-icon">
                                     <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
