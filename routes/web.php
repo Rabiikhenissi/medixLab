@@ -659,11 +659,11 @@ Route::prefix('center')->name('center.')->group(function () {
         Route::get('/samples', [SampleController::class, 'index'])->name('samples.index');
         Route::get('/samples/create', [SampleController::class, 'create'])->name('samples.create');
         Route::post('/samples', [SampleController::class, 'store'])->name('samples.store');
+        Route::get('/samples/scan', [SampleController::class, 'scan'])->name('samples.scan');
+        Route::post('/samples/lookup', [SampleController::class, 'lookupByBarcode'])->name('samples.lookup');
         Route::get('/samples/{sample}', [SampleController::class, 'show'])->name('samples.show');
         Route::post('/samples/{sample}/status', [SampleController::class, 'updateStatus'])->name('samples.status');
         Route::get('/samples/{sample}/barcode', [SampleController::class, 'printBarcode'])->name('samples.barcode');
-        Route::get('/samples/scan', [SampleController::class, 'scan'])->name('samples.scan');
-        Route::post('/samples/lookup', [SampleController::class, 'lookupByBarcode'])->name('samples.lookup');
 
         // Logout
 
@@ -738,6 +738,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/features/create', [FeatureController::class, 'create'])->name('features.create')->middleware('permission:create-features');
         Route::post('/features', [FeatureController::class, 'store'])->name('features.store')->middleware('permission:create-features');
         Route::get('/features/{feature}/edit', [FeatureController::class, 'edit'])->name('features.edit')->middleware('permission:edit-features');
+        Route::get('/features/icon-grid', [FeatureController::class, 'iconGrid'])->name('features.icon-grid')->middleware('permission:edit-features');
         Route::put('/features/{feature}', [FeatureController::class, 'update'])->name('features.update')->middleware('permission:edit-features');
         Route::delete('/features/{feature}', [FeatureController::class, 'destroy'])->name('features.destroy')->middleware('permission:delete-features');
         Route::delete('/features/{feature}/force', [FeatureController::class, 'forceDelete'])->name('features.force-delete')->middleware('permission:delete-features');

@@ -12,14 +12,14 @@ class GroupSeeder extends Seeder
     public function run(): void
     {
         $groups = [
-            ['code' => 'admin', 'name' => 'Admin'],
-            ['code' => 'doctor', 'name' => 'Doctor'],
-            ['code' => 'patient', 'name' => 'Patient'],
-            ['code' => 'center', 'name' => 'Medical Center'],
+            ['code' => 'admin', 'name' => 'Admin', 'role_table' => 'admin'],
+            ['code' => 'doctor', 'name' => 'Doctor', 'role_table' => 'doctor'],
+            ['code' => 'patient', 'name' => 'Patient', 'role_table' => 'patient'],
+            ['code' => 'center', 'name' => 'Medical Center', 'role_table' => 'staff'],
         ];
 
         foreach ($groups as $g) {
-            Group::updateOrCreate(['code' => $g['code']], ['name' => $g['name'], 'is_archive' => false]);
+            Group::updateOrCreate(['code' => $g['code']], ['name' => $g['name'], 'role_table' => $g['role_table'], 'is_archive' => false]);
         }
 
         $permissions = [

@@ -106,8 +106,10 @@
                         <td>
                             @if ($feature->is_archive)
                                 <span class="status-badge status-archived"><span class="dot"></span>Archive</span>
+                            @elseif ($feature->is_sidebar)
+                                <span class="status-badge status-active"><span class="dot"></span>Active</span>
                             @else
-                                <span class="status-badge status-active"><span class="dot"></span>Actif</span>
+                                <span class="status-badge status-inactive"><span class="dot"></span>Inactive</span>
                             @endif
                         </td>
                         <td style="text-align:right;">
