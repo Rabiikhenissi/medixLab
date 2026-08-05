@@ -464,6 +464,7 @@
     @yield('scripts')
     <x-loading-overlay />
     @include('components.accessibility-widget')
+    <x-tour />
 </body>
 
 </html>

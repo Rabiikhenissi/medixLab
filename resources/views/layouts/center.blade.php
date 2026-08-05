@@ -588,6 +588,7 @@
         setInterval(centerUpdateUnreadBadge, 15000);
     </script>
     @include('components.accessibility-widget')
+ <x-tour />
 </body>
 
 </html>

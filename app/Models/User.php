@@ -13,7 +13,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Mail;
 
-#[Fillable(['first_name', 'last_name', 'email', 'email_verified_at', 'password', 'phone', 'group_id', 'address', 'is_archive', 'last_login_at', 'two_factor_secret', 'two_factor_confirmed_at', 'two_factor_code', 'two_factor_code_expires_at'])]
+#[Fillable(['first_name', 'last_name', 'email', 'email_verified_at', 'password', 'phone', 'group_id', 'address', 'is_archive', 'last_login_at', 'two_factor_secret', 'two_factor_confirmed_at', 'two_factor_code', 'two_factor_code_expires_at', 'tour_completed_at'])]
 #[Hidden(['password', 'remember_token', 'two_factor_secret'])]
 /**
  * Authenticatable user account shared by every role (admin, doctor, patient, center staff).
@@ -49,6 +49,7 @@ class User extends Authenticatable implements MustVerifyEmailContract
             'two_factor_secret' => 'encrypted',
             'two_factor_confirmed_at' => 'datetime',
             'two_factor_code_expires_at' => 'datetime',
+            'tour_completed_at' => 'datetime',
         ];
     }
 
