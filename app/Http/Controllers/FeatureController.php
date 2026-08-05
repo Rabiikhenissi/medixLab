@@ -59,7 +59,18 @@ class FeatureController extends Controller
      */
     public function create()
     {
-        return view('admin.features.create', [
+        return view('admin.features.create');
+    }
+
+    /**
+     * Return the icon picker grid (lazy-loaded so the features
+     * create/edit pages do not render 300+ heroicon components).
+     *
+     * @return View
+     */
+    public function iconGrid()
+    {
+        return view('admin.features.icon-grid', [
             'icons' => Heroicons::all(),
         ]);
     }
@@ -151,7 +162,6 @@ class FeatureController extends Controller
         return view('admin.features.edit', [
             'feature' => $feature,
             'actions' => $actions,
-            'icons' => Heroicons::all(),
         ]);
     }
 
