@@ -1077,25 +1077,27 @@
                 }
             @endphp
             <a href="{{ route($dashboardRoute) }}" class="brand">Medix <span>eSanté</span></a>
-            <button class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Menu">
+            <button class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="{{ __('layout.menu') }}">
                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
                 </svg>
             </button>
             <div class="topnav-right">
 
+                <x-language-switcher />
+
                 <div class="nav-user-info">
                     <div class="nav-user-name">{{ auth()->user()->first_name }} {{ auth()->user()->last_name }}</div>
                     <div class="nav-user-role">
-                        {{ auth()->user()->group ? auth()->user()->group->name : 'Administrateur' }}
+                        {{ auth()->user()->group ? auth()->user()->group->name : __('layout.admin') }}
                     </div>
                 </div>
-                <a href="{{ route('profile.show') }}" class="nav-avatar" title="Mon Profil" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">
+                <a href="{{ route('profile.show') }}" class="nav-avatar" title="{{ __('auth.profile') }}" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">
                     {{ strtoupper(substr(auth()->user()->first_name, 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name, 0, 1)) }}
                 </a>
                 <form action="{{ route($logoutRoute) }}" method="POST" class="m-0 p-0">
                     @csrf
-                    <button type="submit" class="btn-logout" title="Se déconnecter">
+                    <button type="submit" class="btn-logout" title="{{ __('auth.logout') }}">
                         <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />

@@ -35,6 +35,10 @@
                     <label class="form-label">Ville</label>
                     <input type="text" name="city" value="{{ old('city', $laboratory->city) }}" placeholder="Ex: Paris" class="form-control">
                 </div>
+                <div class="form-group">
+                    <label class="form-label">Pays</label>
+                    <input type="text" name="country" value="{{ old('country', $laboratory->country) }}" placeholder="Ex: France" class="form-control">
+                </div>
             </div>
 
             <!-- Form Row -->

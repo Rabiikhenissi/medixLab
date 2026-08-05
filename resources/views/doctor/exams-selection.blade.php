@@ -542,17 +542,6 @@
         /* CONFIRM REQUEST */
         document.getElementById('confirmSubmitBtn').onclick = async () => {
             if (isSubmitting) return;
-            const result = await Swal.fire({
-                title: 'Confirmer la prescription',
-                text: "Voulez-vous envoyer cette demande de prescription d'examens ?",
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#10b981',
-                cancelButtonColor: '#94a3b8',
-                confirmButtonText: 'Confirmer',
-                cancelButtonText: 'Annuler'
-            });
-            if (!result.isConfirmed) return;
             lockUI();
 
             try {

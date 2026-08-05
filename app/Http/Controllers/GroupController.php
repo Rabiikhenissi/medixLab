@@ -6,12 +6,19 @@ use App\Models\Feature;
 use App\Models\Group;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class GroupController extends Controller
 {
     protected array $systemGroups = ['admin', 'doctor', 'patient', 'center'];
+
+    /** Drop the cached permission map so sidebar/access checks reflect changes immediately. */
+    private function flushGroupPermissionCache(Group $group): void
+    {
+        Cache::forget('group_permissions_'.$group->id);
+    }
 
     /**
      * Display a listing of groups.
@@ -99,6 +106,8 @@ class GroupController extends Controller
             $group->actions()->sync($data['actions']);
         }
 
+        $this->flushGroupPermissionCache($group);
+
         // redirect back to the groups list
         return redirect()->route('admin.groups.index')->with('success', 'Rôle créé avec succès.');
     }
@@ -157,6 +166,8 @@ class GroupController extends Controller
 
         // Sync actions
         $group->actions()->sync($data['actions'] ?? []);
+
+        $this->flushGroupPermissionCache($group);
 
         return redirect()->route('admin.groups.index')->with('success', 'Rôle mis à jour avec succès.');
     }

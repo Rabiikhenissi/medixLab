@@ -2,38 +2,57 @@
 
 namespace App\Services;
 
-use PragmaRX\Google2FAQRCode\Google2FA;
+use App\Mail\TwoFactorCodeMail;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 
 class TwoFactorService
 {
-    private Google2FA $google2fa;
+    /** How many minutes a verification code stays valid. */
+    public const CODE_VALIDITY_MINUTES = 10;
 
-    public function __construct()
+    /** Generate a fresh 6-digit one-time password. */
+    public function generateCode(): string
     {
-        $this->google2fa = new Google2FA;
+        return (string) random_int(100000, 999999);
     }
 
-    /** Generate a fresh base32 TOTP secret. */
-    public function generateSecret(): string
+    /** Whether the given code matches the user's current pending code and is not expired. */
+    public function isCodeValid(User $user, string $code): bool
     {
-        return $this->google2fa->generateSecretKey();
+        if (! $user->two_factor_code || ! $user->two_factor_code_expires_at) {
+            return false;
+        }
+
+        return $user->two_factor_code_expires_at->isFuture()
+            && Hash::check(trim($code), (string) $user->two_factor_code);
     }
 
-    /** Build an otpauth:// URL used by authenticator apps. */
-    public function otpauthUrl(string $email, string $secret): string
+    /** Generate a code, store its hash (with expiry) on the user and email the plain code. */
+    public function sendCode(User $user): void
     {
-        return $this->google2fa->getQRCodeUrl('MedixLab', $email, $secret);
+        $code = $this->generateCode();
+
+        $user->update([
+            'two_factor_code' => Hash::make($code),
+            'two_factor_code_expires_at' => now()->addMinutes(self::CODE_VALIDITY_MINUTES),
+        ]);
+
+        Mail::to($user->email)
+            ->send(new TwoFactorCodeMail($code, self::CODE_VALIDITY_MINUTES));
     }
 
-    /** Return an inline SVG data-URI QR code for the provisioning URL. */
-    public function qrCodeSvg(string $email, string $secret): string
+    /** Invalidate the user's pending code. */
+    public function clearCode(User $user): void
     {
-        return $this->google2fa->getQRCodeInline('MedixLab', $email, $secret);
-    }
+        if (! $user->two_factor_code && ! $user->two_factor_code_expires_at) {
+            return;
+        }
 
-    /** Validate a 6-digit TOTP code against a secret, tolerating clock drift. */
-    public function verify(string $secret, string $code): bool
-    {
-        return $this->google2fa->verifyKey($secret, trim($code), 1);
+        $user->update([
+            'two_factor_code' => null,
+            'two_factor_code_expires_at' => null,
+        ]);
     }
 }

@@ -337,11 +337,12 @@
         <a href="{{ route('center.dashboard') }}" class="brand">Medix <span>eSanté</span></a>
 
         <div class="topnav-right">
-            <button class="mobile-menu-btn" onclick="toggleCenterSidebar()" aria-label="Menu">
+            <button class="mobile-menu-btn" onclick="toggleCenterSidebar()" aria-label="{{ __('layout.menu') }}">
                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
                 </svg>
             </button>
+            <x-language-switcher />
             {{-- Notification Bell --}}
             <div class="relative" id="centerNotifWrapper">
                 <button onclick="centerToggleNotifPanel()" class="relative w-10 h-10 bg-white border border-[#e2e8f0] rounded-xl flex items-center justify-center hover:bg-[#f8fafc] transition cursor-pointer">
@@ -352,25 +353,25 @@
                 </button>
                 <div id="centerNotifPanel" class="hidden fixed top-20 right-4 md:absolute md:top-12 md:right-0 w-80 max-w-[calc(100vw-2rem)] bg-white border border-[#e2e8f0] rounded-2xl shadow-2xl z-50 overflow-hidden">
                     <div class="flex items-center justify-between px-4 py-3 border-b border-[#f1f5f9]">
-                        <span class="text-xs font-bold text-[#1e293b] uppercase tracking-wider">Notifications</span>
-                        <button onclick="centerMarkAllRead()" class="text-[10px] font-bold text-[#7C3AED] hover:underline cursor-pointer">Tout marquer lu</button>
+                        <span class="text-xs font-bold text-[#1e293b] uppercase tracking-wider">{{ __('layout.notifications') }}</span>
+                        <button onclick="centerMarkAllRead()" class="text-[10px] font-bold text-[#7C3AED] hover:underline cursor-pointer">{{ __('layout.mark_all_read') }}</button>
                     </div>
                     <div id="centerNotifList" class="max-h-72 overflow-y-auto divide-y divide-[#f1f5f9]">
-                        <div class="px-4 py-6 text-center text-xs text-[#94a3b8]">Chargement...</div>
+                        <div class="px-4 py-6 text-center text-xs text-[#94a3b8]">{{ __('layout.loading') }}</div>
                     </div>
                 </div>
             </div>
 
             <div>
                 <div class="nav-user-name">{{ auth()->user()->first_name }} {{ auth()->user()->last_name }}</div>
-                <div class="nav-user-role">Établissement</div>
+                <div class="nav-user-role">{{ __('layout.role_center') }}</div>
             </div>
-            <a href="{{ route('profile.show') }}" class="nav-avatar" title="Mon Profil">
+            <a href="{{ route('profile.show') }}" class="nav-avatar" title="{{ __('auth.profile') }}">
                 {{ strtoupper(substr(auth()->user()->first_name, 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name, 0, 1)) }}
             </a>
             <form action="{{ route('center.logout') }}" method="POST" style="margin:0;padding:0;">
                 @csrf
-                <button type="submit" class="btn-logout" title="Se déconnecter">
+                <button type="submit" class="btn-logout" title="{{ __('auth.logout') }}">
                     <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />

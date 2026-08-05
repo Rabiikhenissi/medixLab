@@ -13,7 +13,6 @@ use App\Models\ResultLaboDetail;
 use App\Models\Sample;
 use App\Models\User;
 use App\Observers\AuditableObserver;
-use App\Services\ExamRequestService;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\Gate;
@@ -83,16 +82,5 @@ class AppServiceProvider extends ServiceProvider
         View::composer('layouts.admin', $sidebarFeaturesComposer);
         View::composer('components.layouts.auth', $sidebarFeaturesComposer);
         View::composer('layouts.center', $sidebarFeaturesComposer);
-
-        // TIER 2.3 — Check access expiry once daily on any request
-        $todayKey = 'access_expiry_check_'.now()->format('Y-m-d');
-        if (! session()->has($todayKey)) {
-            session()->put($todayKey, true);
-            try {
-                ExamRequestService::checkAccessExpiry();
-            } catch (\Exception $e) {
-                \Log::error('Access expiry check failed: '.$e->getMessage());
-            }
-        }
     }
 }

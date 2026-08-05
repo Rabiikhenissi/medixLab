@@ -1,9 +1,9 @@
 <x-layouts.auth>
-    <x-slot:title>Inscription Centre Médical - Medix eSanté</x-slot:title>
+    <x-slot:title>{{ __('center.register_title') }} - Medix eSanté</x-slot:title>
 
     <x-auth-card
-        title="Inscription Centre"
-        subtitle="Créez votre compte d'établissement"
+        title="{{ __('center.register_title') }}"
+        subtitle="{{ __('center.register_subtitle') }}"
         action="{{ route('center.register') }}"
         backUrl="{{ route('center.login') }}"
     >
@@ -20,7 +20,7 @@
         <x-input
             type="text"
             name="center_name"
-            label="Nom du centre"
+            label="{{ __('auth.center_name') }}"
             placeholder="ex. Clinique El Amen"
             :required="true"
         />
@@ -29,7 +29,7 @@
         <x-input
             type="text"
             name="responsible"
-            label="Responsable"
+            label="{{ __('auth.responsible') }}"
             placeholder="ex. Dr. Ahmed Ben Ali"
             :required="true"
         />
@@ -39,7 +39,7 @@
             <x-input
                 type="email"
                 name="email"
-                label="Email"
+                label="{{ __('auth.email') }}"
                 placeholder="contact@centre.com"
                 :required="true"
             />
@@ -48,7 +48,7 @@
             <x-input
                 type="tel"
                 name="phone"
-                label="Téléphone"
+                label="{{ __('auth.phone') }}"
                 placeholder="+216 00 000 000"
                 :required="true"
             />
@@ -59,7 +59,7 @@
             <x-input
                 type="text"
                 name="city"
-                label="Ville"
+                label="{{ __('auth.city') }}"
                 placeholder="ex. Tunis"
                 :required="true"
             />
@@ -68,15 +68,15 @@
             <x-input
                 type="select"
                 name="country"
-                label="Pays"
-                placeholder="Sélectionner"
+                label="{{ __('auth.country') }}"
+                placeholder="{{ __('auth.select') }}"
                 :required="true"
                 :options="[
-                    'TN' => 'Tunisie',
-                    'FR' => 'France',
-                    'MA' => 'Maroc',
-                    'DZ' => 'Algérie',
-                    'autre' => 'Autre'
+                    'TN' => __('country.TN'),
+                    'FR' => __('country.FR'),
+                    'MA' => __('country.MA'),
+                    'DZ' => __('country.DZ'),
+                    'autre' => __('country.autre')
                 ]"
                 value="TN"
             />
@@ -86,7 +86,7 @@
         <x-input
             type="textarea"
             name="address"
-            label="Adresse"
+            label="{{ __('auth.address') }}"
             placeholder="ex. 45 Rue du Lac, Les Berges du Lac, Tunis"
             :required="false"
         />
@@ -96,7 +96,7 @@
             <x-input
                 type="password"
                 name="password"
-                label="Mot de passe"
+                label="{{ __('auth.password') }}"
                 placeholder="••••••••"
                 :required="true"
                 :show-strength="true"
@@ -106,23 +106,39 @@
             <x-input
                 type="password"
                 name="password_confirmation"
-                label="Confirmation"
+                label="{{ __('auth.password_confirm') }}"
                 placeholder="••••••••"
                 :required="true"
             />
         </div>
 
+        <!-- Legal consents -->
+        <div class="space-y-2 pt-1">
+            <label class="flex items-start gap-2 cursor-pointer">
+                <input type="checkbox" name="accept_terms" value="1" {{ old('accept_terms') ? 'checked' : '' }} class="mt-0.5 h-4 w-4 rounded border-[#e2e8f0] text-[#0066FF] focus:ring-[#0066FF]/20">
+                <span class="text-xs text-[#64748b] leading-relaxed">
+                    {{ __('auth.terms') }} <a href="{{ route('legal.terms') }}" target="_blank" rel="noopener" class="font-semibold text-[#0066FF] hover:underline">{{ __('auth.terms_link') }}</a>
+                </span>
+            </label>
+            <label class="flex items-start gap-2 cursor-pointer">
+                <input type="checkbox" name="accept_privacy" value="1" {{ old('accept_privacy') ? 'checked' : '' }} class="mt-0.5 h-4 w-4 rounded border-[#e2e8f0] text-[#0066FF] focus:ring-[#0066FF]/20">
+                <span class="text-xs text-[#64748b] leading-relaxed">
+                    {{ __('auth.privacy') }} <a href="{{ route('legal.privacy') }}" target="_blank" rel="noopener" class="font-semibold text-[#0066FF] hover:underline">{{ __('auth.privacy_link') }}</a> {{ __('auth.privacy_rgpd') }}
+                </span>
+            </label>
+        </div>
+
         <!-- Submit Button -->
         <div class="pt-2">
             <x-button color="slate" :fullWidth="true">
-                S'INSCRIRE
+                {{ __('register.submit') }}
             </x-button>
         </div>
 
         <x-slot:footer>
             <div class="flex items-center justify-between w-full">
                 <a href="{{ route('center.login') }}" class="font-semibold text-[#64748b] hover:text-[#7C3AED] hover:underline">
-                    Déjà inscrit ?
+                    {{ __('login.already') }}
                 </a>
             </div>
         </x-slot:footer>

@@ -2,12 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Mail\TwoFactorCodeMail;
 use App\Models\Admin;
 use App\Models\User;
-use App\Services\TwoFactorService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Middleware\ThrottleRequests;
-use PragmaRX\Google2FA\Google2FA;
+use Illuminate\Support\Facades\Mail;
 use Tests\CreatesUsers;
 use Tests\TestCase;
 
@@ -19,24 +19,35 @@ class TwoFactorTest extends TestCase
     {
         parent::setUp();
         $this->withoutMiddleware(ThrottleRequests::class);
+        Mail::fake();
     }
 
-    /** Generate a valid TOTP code for a given secret. */
-    protected function currentCode(string $secret): string
+    /** Enable email-based 2FA on a user (as if the flow had been completed). */
+    protected function enableTwoFactor(User $user): void
     {
-        return (new Google2FA)->getCurrentOtp($secret);
+        $user->update(['two_factor_confirmed_at' => now()]);
     }
 
-    /** Enable 2FA on a user and return the stored secret. */
-    protected function enableTwoFactor(User $user): string
+    /** Return the plain code captured from the last sent 2FA email. */
+    protected function pendingCode(User $user): string
     {
-        $secret = app(TwoFactorService::class)->generateSecret();
-        $user->update([
-            'two_factor_secret' => $secret,
-            'two_factor_confirmed_at' => now(),
-        ]);
+        $codes = $this->sentCodes();
 
-        return $secret;
+        return (string) end($codes);
+    }
+
+    /** All plain codes captured from sent 2FA emails, oldest first. */
+    protected function sentCodes(): array
+    {
+        $codes = [];
+
+        Mail::assertSent(TwoFactorCodeMail::class, function (TwoFactorCodeMail $mail) use (&$codes) {
+            $codes[] = $mail->code;
+
+            return true;
+        });
+
+        return $codes;
     }
 
     public function test_login_without_2fa_bypasses_challenge(): void
@@ -49,9 +60,10 @@ class TwoFactorTest extends TestCase
         ])->assertRedirect(route('doctor.dashboard'));
 
         $this->assertAuthenticatedAs($doctor['user']);
+        Mail::assertNothingSent();
     }
 
-    public function test_login_with_2fa_requires_challenge_and_does_not_authenticate(): void
+    public function test_login_with_2fa_emails_code_and_requires_challenge(): void
     {
         $doctor = $this->makeDoctor();
         $this->enableTwoFactor($doctor['user']);
@@ -62,6 +74,10 @@ class TwoFactorTest extends TestCase
         ])->assertRedirect(route('two-factor.login'));
 
         $this->assertGuest();
+        $this->assertSame(6, strlen($this->pendingCode($doctor['user'])));
+        Mail::assertSent(TwoFactorCodeMail::class, function (TwoFactorCodeMail $mail) use ($doctor) {
+            return $mail->hasTo($doctor['user']->email);
+        });
 
         $this->get(route('two-factor.login'))
             ->assertOk()
@@ -76,18 +92,21 @@ class TwoFactorTest extends TestCase
     public function test_valid_code_completes_the_pending_login(): void
     {
         $doctor = $this->makeDoctor();
-        $secret = $this->enableTwoFactor($doctor['user']);
+        $this->enableTwoFactor($doctor['user']);
 
         $this->post(route('doctor.login'), [
             'email' => $doctor['user']->email,
             'password' => 'password',
         ])->assertRedirect(route('two-factor.login'));
 
+        $code = $this->pendingCode($doctor['user']);
+
         $this->post(route('two-factor.verify'), [
-            'code' => $this->currentCode($secret),
+            'code' => $code,
         ])->assertRedirect(route('doctor.dashboard'));
 
         $this->assertAuthenticatedAs($doctor['user']);
+        $this->assertNull($doctor['user']->fresh()->two_factor_code);
     }
 
     public function test_invalid_code_keeps_user_guest(): void
@@ -107,6 +126,26 @@ class TwoFactorTest extends TestCase
         $this->assertGuest();
     }
 
+    public function test_resend_challenge_issues_a_fresh_code(): void
+    {
+        $doctor = $this->makeDoctor();
+        $this->enableTwoFactor($doctor['user']);
+
+        $this->post(route('doctor.login'), [
+            'email' => $doctor['user']->email,
+            'password' => 'password',
+        ]);
+
+        $first = $this->pendingCode($doctor['user']);
+
+        $this->post(route('two-factor.resend-challenge'))
+            ->assertSessionHas('status');
+
+        $second = $this->pendingCode($doctor['user']);
+
+        $this->assertNotSame($first, $second);
+    }
+
     public function test_admin_login_also_requires_challenge(): void
     {
         $user = $this->makeUser();
@@ -121,18 +160,17 @@ class TwoFactorTest extends TestCase
         $this->assertGuest();
     }
 
-    public function test_enable_flow_confirms_the_scanned_secret(): void
+    public function test_enable_flow_confirms_the_emailed_code(): void
     {
         $doctor = $this->makeDoctor();
         $user = $doctor['user'];
 
         $this->actingAs($user)->get(route('profile.two-factor.setup'))->assertOk();
-
-        $secret = session('two_factor.setup.secret');
-        $this->assertNotEmpty($secret);
+        $code = $this->pendingCode($user);
+        $this->assertSame(6, strlen($code));
 
         $this->actingAs($user)->post(route('profile.two-factor.enable'), [
-            'code' => $this->currentCode($secret),
+            'code' => $code,
         ])->assertSessionHas('success');
 
         $this->assertTrue($user->fresh()->twoFactorEnabled());
@@ -150,6 +188,20 @@ class TwoFactorTest extends TestCase
         ])->assertSessionHasErrors('code');
 
         $this->assertFalse($user->fresh()->twoFactorEnabled());
+    }
+
+    public function test_enable_flow_resend_issues_a_fresh_code(): void
+    {
+        $doctor = $this->makeDoctor();
+        $user = $doctor['user'];
+
+        $this->actingAs($user)->get(route('profile.two-factor.setup'))->assertOk();
+        $first = $this->pendingCode($user);
+
+        $this->actingAs($user)->post(route('profile.two-factor.resend'))
+            ->assertSessionHas('status');
+
+        $this->assertNotSame($first, $this->pendingCode($user));
     }
 
     public function test_disable_requires_the_current_password(): void

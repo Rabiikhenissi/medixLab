@@ -1,10 +1,10 @@
 <x-layouts.auth>
-    <x-slot:title>Espace Centre Médical - Connexion - Medix eSanté</x-slot:title>
+    <x-slot:title>{{ __('center.login_title') }} - {{ __('login.meta') }} - Medix eSanté</x-slot:title>
 
     <x-auth-card
-        title="Espace Centre Médical"
-        subtitle="Accédez à votre espace sécurisé"
-        badge="ADMINISTRATION"
+        title="{{ __('center.login_title') }}"
+        subtitle="{{ __('login.subtitle') }}"
+        badge="{{ __('center.login_badge') }}"
         action="{{ route('center.login') }}"
         backUrl="{{ route('home') }}"
     >
@@ -26,7 +26,7 @@
         <x-input
             type="email"
             name="email"
-            label="Email"
+            label="{{ __('auth.email') }}"
             placeholder="admin@centre-medical.com"
             :required="true"
         />
@@ -35,7 +35,7 @@
         <x-input
             type="password"
             name="password"
-            label="Password"
+            label="{{ __('auth.password') }}"
             placeholder="••••••••••••"
             :required="true"
         />
@@ -45,24 +45,24 @@
             <x-input
                 type="checkbox"
                 name="remember"
-                label="Se souvenir de moi"
+                label="{{ __('login.remember') }}"
             />
 
             <a href="{{ route('center.password.request') }}" class="text-xs font-semibold text-[#7C3AED] hover:underline">
-                Mot de passe oublié ?
+                {{ __('login.forgot') }}
             </a>
         </div>
 
         <!-- Submit Button -->
         <div class="pt-2">
             <x-button color="slate" :fullWidth="true">
-                SE CONNECTER
+                {{ __('login.submit') }}
             </x-button>
         </div>
 
         <x-slot:footer>
-            <span>Vous n'avez pas de compte ? </span>
-            <a href="{{ route('center.register') }}" class="font-semibold text-[#7C3AED] hover:underline">S'inscrire</a>
+            <span>{{ __('login.no_account') }} </span>
+            <a href="{{ route('center.register') }}" class="font-semibold text-[#7C3AED] hover:underline">{{ __('login.signup') }}</a>
         </x-slot:footer>
     </x-auth-card>
 </x-layouts.auth>

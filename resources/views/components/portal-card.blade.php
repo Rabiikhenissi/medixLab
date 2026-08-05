@@ -6,7 +6,7 @@
     'loginUrl',
     'registerUrl',
     'loginText',
-    'registerText' => "Créer un compte"
+    'registerText' => null
 ])
 
 <div class="glass-card rounded-[24px] p-8 flex flex-col justify-between items-center text-center h-full max-w-[340px] w-full transition-all duration-300">
@@ -36,7 +36,7 @@
 
         <!-- Register Link -->
         <a href="{{ $registerUrl }}" class="block text-xs font-semibold text-[#64748b] hover:text-[#1e293b] transition-colors py-1">
-            {{ $registerText }}
+            {{ $registerText ?? __('register.submit') }}
         </a>
     </div>
 </div>

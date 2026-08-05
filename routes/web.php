@@ -8,9 +8,12 @@ use App\Http\Controllers\CenterController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\FeatureController;
 use App\Http\Controllers\GdprController;
+use App\Http\Controllers\GdprIncidentController;
 use App\Http\Controllers\GroupController;
+use App\Http\Controllers\InviteController;
 use App\Http\Controllers\LaboratoryController;
 use App\Http\Controllers\LaboResultController;
+use App\Http\Controllers\LegalController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\MachineConfigurationController;
 use App\Http\Controllers\MachineController;
@@ -19,6 +22,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SampleController;
 use App\Http\Controllers\TwoFactorController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\VerificationController;
 use App\Models\DoctorPatientAccess;
 use App\Models\ExamRequest;
 use Illuminate\Support\Facades\DB;
@@ -107,7 +111,7 @@ Route::prefix('doctor')->name('doctor.')->group(function () {
     });
 
     // Authenticated doctor routes
-    Route::middleware(['auth', 'doctor', 'throttle:general'])->group(function () {
+    Route::middleware(['auth', 'verified', 'doctor', 'throttle:general'])->group(function () {
         // Doctor dashboard: recent patients, filtered exam requests and cached analytics
         Route::get('/dashboard', function () {
             $user = auth()->user();
@@ -156,8 +160,18 @@ Route::prefix('doctor')->name('doctor.')->group(function () {
                 ];
             });
 
-            $doctorGroups = cache()->remember("doctor_groups_{$doctor->id}", 600, function () use ($doctor) {
-                return $doctor->examGroups()->where('is_archive', false)->with('items.exam')->get();
+            $doctorGroups = cache()->remember("doctor_groups_{$doctor->id}_v2", 600, function () use ($doctor) {
+                return $doctor->examGroups()
+                    ->where('is_archive', false)
+                    ->withCount('items')
+                    ->get()
+                    ->map(fn ($group) => [
+                        'id' => $group->id,
+                        'name' => $group->name,
+                        'description' => $group->description,
+                        'items_count' => $group->items_count,
+                    ])
+                    ->all();
             });
 
             // Cache analytics for 10 minutes
@@ -298,7 +312,7 @@ Route::prefix('patient')->name('patient.')->group(function () {
     });
 
     // Authenticated patient routes
-    Route::middleware(['auth', 'patient', 'throttle:general'])->group(function () {
+    Route::middleware(['auth', 'verified', 'patient', 'throttle:general'])->group(function () {
         // Patient dashboard: cached sidebar stats only
         Route::get('/dashboard', function () {
             if (! auth()->user()->patient) {
@@ -481,7 +495,7 @@ Route::prefix('center')->name('center.')->group(function () {
     });
 
     // Authenticated Center Routes
-    Route::middleware(['auth', 'center', 'throttle:general'])->group(function () {
+    Route::middleware(['auth', 'verified', 'center', 'throttle:general'])->group(function () {
 
         // Dashboard
         Route::get(
@@ -684,7 +698,7 @@ Route::prefix('center')->name('center.')->group(function () {
 // Admin routes
 // Admins gate every CRUD route with the permission middleware tied to the group's granted actions
 Route::prefix('admin')->name('admin.')->group(function () {
-    Route::middleware(['auth', 'admin', 'throttle:general'])->group(function () {
+    Route::middleware(['auth', 'verified', 'admin', 'throttle:general'])->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
         // Exams CRUD
         Route::get('/exams', [AdminController::class, 'exams'])->name('exams.index');
@@ -727,6 +741,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy')->middleware('permission:delete-users');
         Route::delete('/users/{user}/force', [UserController::class, 'forceDelete'])->name('users.force-delete')->middleware('permission:delete-users');
 
+        // Invite a new account by email (chosen password + legal consent at activation)
+        Route::get('/users/invite', [InviteController::class, 'create'])->name('users.invite')->middleware('permission:create-users');
+        Route::post('/users/invite', [InviteController::class, 'store'])->name('users.invite.store')->middleware('permission:create-users');
+
         // Groups CRUD
         Route::get('/groups', [GroupController::class, 'index'])->name('groups.index')->middleware('permission:view-groups');
         Route::get('/groups/create', [GroupController::class, 'create'])->name('groups.create')->middleware('permission:create-groups');
@@ -740,6 +758,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/activity', [ActivityLogController::class, 'index'])
             ->name('activity')
             ->middleware('permission:view-activity');
+        Route::get('/activity/export', [ActivityLogController::class, 'export'])
+            ->name('activity.export')
+            ->middleware('permission:view-activity');
 
         // GDPR / RGPD (export & erasure requests)
         Route::get('/gdpr', [GdprController::class, 'index'])
@@ -750,6 +771,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
             ->middleware('permission:manage-gdpr');
         Route::post('/gdpr/erase/{user}', [GdprController::class, 'erase'])
             ->name('gdpr.erase')
+            ->middleware('permission:manage-gdpr');
+
+        // GDPR incident register (RGPD art. 33/34)
+        Route::get('/gdpr/incidents', [GdprIncidentController::class, 'index'])
+            ->name('gdpr.incidents')
+            ->middleware('permission:view-gdpr');
+        Route::post('/gdpr/incidents', [GdprIncidentController::class, 'store'])
+            ->name('gdpr.incidents.store')
+            ->middleware('permission:manage-gdpr');
+        Route::post('/gdpr/incidents/{incident}/resolve', [GdprIncidentController::class, 'resolve'])
+            ->name('gdpr.incidents.resolve')
             ->middleware('permission:manage-gdpr');
 
         // Features CRUD
@@ -776,12 +808,43 @@ Route::middleware(['auth', 'throttle:general'])->prefix('profile')->name('profil
     Route::put('/password', [ProfileController::class, 'updatePassword'])->name('password');
     Route::get('/two-factor', [TwoFactorController::class, 'showSetup'])->name('two-factor.setup');
     Route::post('/two-factor', [TwoFactorController::class, 'enable'])->name('two-factor.enable');
+    Route::post('/two-factor/resend', [TwoFactorController::class, 'resendSetup'])->name('two-factor.resend');
     Route::post('/two-factor/disable', [TwoFactorController::class, 'disable'])->name('two-factor.disable');
 });
 
 // Two-factor login challenge (guest, completes a pending login)
 Route::get('/login/two-factor', [TwoFactorController::class, 'loginChallenge'])->middleware('guest')->name('two-factor.login');
 Route::post('/login/two-factor', [TwoFactorController::class, 'loginVerify'])->middleware('guest')->name('two-factor.verify');
+Route::post('/login/two-factor/resend', [TwoFactorController::class, 'resendChallenge'])->middleware('guest')->name('two-factor.resend-challenge');
+
+// Legal pages (public)
+Route::prefix('legal')->name('legal.')->group(function () {
+    Route::get('/terms', [LegalController::class, 'terms'])->name('terms');
+    Route::get('/privacy', [LegalController::class, 'privacy'])->name('privacy');
+    Route::get('/mentions', [LegalController::class, 'mentions'])->name('mentions');
+});
+
+// Invitation activation (public, single-use token link from the invite email)
+Route::middleware('guest')->group(function () {
+    Route::get('/invite/{token}', [InviteController::class, 'accept'])->name('invite.accept');
+    Route::post('/invite/{token}', [InviteController::class, 'acceptStore'])
+        ->middleware('throttle:register')
+        ->name('invite.accept.store');
+});
+
+// Email verification — the dashboard groups above require the `verified` middleware
+Route::middleware('auth')->group(function () {
+    Route::get('/email/verify', [VerificationController::class, 'notice'])
+        ->name('verification.notice');
+
+    Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])
+        ->middleware('signed')
+        ->name('verification.verify');
+
+    Route::post('/email/verification-notification', [VerificationController::class, 'send'])
+        ->middleware('throttle:6,1')
+        ->name('verification.send');
+});
 
 // Location routes (AJAX API endpoints)
 Route::get('/countries', [LocationController::class, 'getCountries'])->middleware('throttle:location')->name('countries.index');

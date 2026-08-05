@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Consent;
 use App\Models\Doctor;
 use App\Models\Group;
 use App\Models\Labo;
@@ -9,6 +10,7 @@ use App\Models\Patient;
 use App\Models\Staff;
 use App\Models\User;
 use App\Services\CodeGeneratorService;
+use App\Services\TwoFactorService;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,6 +23,8 @@ use Illuminate\View\View;
 
 class AuthController extends Controller
 {
+    public function __construct(private readonly TwoFactorService $twoFactor) {}
+
     /**
      * Handle login requests for a given role.
      *
@@ -43,8 +47,8 @@ class AuthController extends Controller
             $request->session()->regenerate();
             $user = Auth::user();
 
-            // Two-factor challenge: do not authenticate yet, stash the pending
-            // login in the session and ask for the TOTP code.
+            // Two-factor challenge: do not authenticate yet, email a one-time
+            // code, stash the pending login in the session and ask for the code.
             if ($user->twoFactorEnabled()) {
                 $intended = $user->admin
                     ? $this->safeIntended($request, 'admin.dashboard')
@@ -56,6 +60,12 @@ class AuthController extends Controller
                     'intended' => $intended,
                 ]);
                 Auth::logout();
+
+                try {
+                    $this->twoFactor->sendCode($user->fresh());
+                } catch (\Throwable $e) {
+                    \Log::error('2FA email could not be sent: '.$e->getMessage());
+                }
 
                 return redirect()->route('two-factor.login');
             }
@@ -150,6 +160,8 @@ class AuthController extends Controller
                 'specialty' => 'required|string|max:255',
                 'address' => 'nullable|string',
                 'password' => 'required|string|min:8|confirmed',
+                'accept_terms' => 'required|accepted',
+                'accept_privacy' => 'required|accepted',
             ]);
 
             // run doctor creation in a database transaction
@@ -181,6 +193,8 @@ class AuthController extends Controller
             });
 
             Auth::login($user);
+            $user->sendEmailVerificationNotification();
+            $this->recordConsents($user);
 
             return redirect()->route('doctor.dashboard');
         }
@@ -199,6 +213,8 @@ class AuthController extends Controller
                 'birth_date' => 'nullable|date',
                 'gender' => 'nullable|in:M,F',
                 'password' => 'required|string|min:8|confirmed',
+                'accept_terms' => 'required|accepted',
+                'accept_privacy' => 'required|accepted',
             ]);
 
             // run patient creation in a database transaction
@@ -234,6 +250,8 @@ class AuthController extends Controller
             });
 
             Auth::login($user);
+            $user->sendEmailVerificationNotification();
+            $this->recordConsents($user);
 
             return redirect()->route('patient.dashboard');
         }
@@ -246,18 +264,30 @@ class AuthController extends Controller
                 'email' => 'required|string|email|max:255|unique:users',
                 'phone' => 'required|string|max:255',
                 'city' => 'required|string|max:255',
+                'country' => 'nullable|string|max:255',
                 'address' => 'nullable|string',
                 'password' => 'required|string|min:8|confirmed',
+                'accept_terms' => 'required|accepted',
+                'accept_privacy' => 'required|accepted',
             ]);
 
             // run center creation in a database transaction
             $user = DB::transaction(function () use ($data) {
+                $countries = [
+                    'TN' => 'Tunisie',
+                    'FR' => 'France',
+                    'MA' => 'Maroc',
+                    'DZ' => 'Algérie',
+                    'autre' => 'Autre',
+                ];
+
                 // create the laboratory for the center
                 $labo = Labo::create([
                     'name' => $data['center_name'],
                     'email' => $data['email'],
                     'phone' => $data['phone'],
                     'city' => $data['city'],
+                    'country' => $countries[$data['country'] ?? ''] ?? ($data['country'] ?? null),
                     'address' => $data['address'] ?? null,
                 ]);
 
@@ -293,6 +323,8 @@ class AuthController extends Controller
             });
 
             Auth::login($user);
+            $user->sendEmailVerificationNotification();
+            $this->recordConsents($user);
 
             return redirect()->route('center.dashboard');
         }
@@ -392,5 +424,28 @@ class AuthController extends Controller
         }
 
         return back()->withErrors(['email' => __($status)])->withInput();
+    }
+
+    /**
+     * Log the registration consent given for the current versions of the
+     * legal documents, alongside the technical context (IP + user agent).
+     */
+    private function recordConsents(User $user): void
+    {
+        $now = now();
+
+        foreach ([
+            [Consent::TYPE_TERMS, config('legal.terms_version')],
+            [Consent::TYPE_PRIVACY, config('legal.privacy_version')],
+        ] as [$type, $version]) {
+            Consent::create([
+                'user_id' => $user->id,
+                'consent_type' => $type,
+                'version' => $version,
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'accepted_at' => $now,
+            ]);
+        }
     }
 }

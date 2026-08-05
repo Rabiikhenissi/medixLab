@@ -33,6 +33,7 @@ class LaboratoryController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('city', 'like', "%{$search}%")
+                    ->orWhere('country', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%")
                     ->orWhere('phone', 'like', "%{$search}%");
             });
@@ -68,6 +69,7 @@ class LaboratoryController extends Controller
             'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:255',
             'city' => 'nullable|string|max:255',
+            'country' => 'nullable|string|max:255',
             'address' => 'nullable|string',
         ]);
 
@@ -102,6 +104,7 @@ class LaboratoryController extends Controller
             'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:255',
             'city' => 'nullable|string|max:255',
+            'country' => 'nullable|string|max:255',
             'address' => 'nullable|string',
         ]);
 

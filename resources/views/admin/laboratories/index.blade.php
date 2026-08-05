@@ -33,7 +33,7 @@
                                 d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                         </svg>
                         <input type="text" name="search" value="{{ $search }}"
-                            placeholder="Rechercher par nom, ville, email..." class="filter-input">
+                            placeholder="Rechercher par nom, ville, pays, email..." class="filter-input">
                     </div>
                 </div>
 
@@ -59,6 +59,7 @@
                 <tr>
                     <th>Nom du Laboratoire</th>
                     <th>Ville</th>
+                    <th>Pays</th>
                     <th>Email / Téléphone</th>
                     <th>Adresse</th>
                     <th>Statut</th>
@@ -74,6 +75,9 @@
                         </td>
                         <td>
                             <span class="category-badge cat-biochemistry" style="font-weight: 700;">{{ $labo->city ?? 'Non renseignée' }}</span>
+                        </td>
+                        <td>
+                            <span style="font-weight: 500;">{{ $labo->country ?? '-' }}</span>
                         </td>
                         <td>
                             <div style="font-weight:500;">{{ $labo->email ?? '-' }}</div>

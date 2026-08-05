@@ -19,6 +19,7 @@ trait CreatesUsers
             'last_name' => fake()->lastName(),
             'email' => fake()->unique()->safeEmail(),
             'password' => 'password',
+            'email_verified_at' => now(),
         ], $overrides));
     }
 

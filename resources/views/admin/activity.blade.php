@@ -5,6 +5,15 @@
 @section('page-title', 'Journal d\'Activité')
 @section('page-subtitle', 'Traçabilité médico-légale : toutes les actions sensibles, horodatées et immuables.')
 
+@section('header-actions')
+    <a href="{{ route('admin.activity.export', request()->query()) }}" class="btn-add-exam" style="background:#0D9488;">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
+        </svg>
+        Exporter en PDF
+    </a>
+@endsection
+
 @section('content')
     <div class="data-section anim anim-1">
         <div class="data-header">
@@ -94,7 +103,20 @@
                             @endif
                         </td>
                         <td>
-                            <span class="exam-code">{{ $log->entity_type }}</span>
+                            @php
+                                $entityLabels = [
+                                    'User' => 'Compte utilisateur',
+                                    'ExamRequest' => 'Demande d\'analyse',
+                                    'ExamRequestItem' => 'Élément de demande',
+                                    'Sample' => 'Échantillon',
+                                    'ResultLabo' => 'Résultat de laboratoire',
+                                    'ResultLaboDetail' => 'Détail de résultat',
+                                    'MachineConfiguration' => 'Configuration machine',
+                                    'ExamParameter' => 'Paramètre d\'examen',
+                                    'DoctorPatientAccess' => 'Accès médecin-patient',
+                                ];
+                            @endphp
+                            <span class="exam-code">{{ $entityLabels[$log->entity_type] ?? $log->entity_type }}</span>
                             @if($log->entity_id)
                                 <span style="color:#94a3b8;font-size:12px;">#{{ $log->entity_id }}</span>
                             @endif

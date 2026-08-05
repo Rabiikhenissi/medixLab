@@ -9,7 +9,7 @@
 <div class="w-full max-w-[458px] mx-auto py-8">
     <div class="glass-card rounded-[20px] p-8 md:p-10 relative overflow-hidden">
         @if($backUrl)
-            <a href="{{ $backUrl }}" class="absolute top-6 left-6 text-[#64748b] hover:text-[#1e293b] transition-colors duration-200" title="Retour">
+            <a href="{{ $backUrl }}" class="absolute top-6 left-6 text-[#64748b] hover:text-[#1e293b] transition-colors duration-200" title="{{ __('auth.back') }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                 </svg>
