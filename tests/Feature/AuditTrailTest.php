@@ -127,6 +127,39 @@ class AuditTrailTest extends TestCase
         );
     }
 
+    public function test_login_timestamp_update_is_not_audited(): void
+    {
+        $user = $this->makeUser();
+        $before = AuditLog::where('entity_type', 'User')->where('entity_id', $user->id)->count();
+
+        $user->update(['last_login_at' => now()]);
+
+        $this->assertSame(
+            $before,
+            AuditLog::where('entity_type', 'User')->where('entity_id', $user->id)->count()
+        );
+    }
+
+    public function test_user_update_description_is_human_readable(): void
+    {
+        $user = $this->makeUser(['first_name' => 'Sarra', 'last_name' => 'Trabelsi']);
+        $this->actingAs($this->makeUser());
+
+        $user->update(['email' => 'sarra.nouvelle@medixlab.test']);
+
+        $entry = AuditLog::where('entity_type', 'User')
+            ->where('entity_id', $user->id)
+            ->where('action', 'updated')
+            ->latest('id')
+            ->first();
+
+        $this->assertNotNull($entry);
+        $this->assertSame(
+            'Modification de Compte utilisateur #'.$user->id.' (Sarra Trabelsi) — champs modifiés : email',
+            $entry->description
+        );
+    }
+
     public function test_admin_with_permission_can_view_activity_page(): void
     {
         $admin = $this->makeAdminWithPermission();
@@ -143,6 +176,27 @@ class AuditTrailTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('admin.activity'))
+            ->assertForbidden();
+    }
+
+    public function test_admin_with_permission_can_export_activity_pdf(): void
+    {
+        $admin = $this->makeAdminWithPermission();
+        $this->makeSampleChain();
+
+        $this->actingAs($admin)
+            ->get(route('admin.activity.export'))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'application/pdf')
+            ->assertHeader('Content-Disposition', 'attachment; filename=journal-activite-'.now()->format('Ymd-Hi').'.pdf');
+    }
+
+    public function test_admin_without_permission_cannot_export_activity_pdf(): void
+    {
+        $admin = $this->makeAdminWithoutPermission();
+
+        $this->actingAs($admin)
+            ->get(route('admin.activity.export'))
             ->assertForbidden();
     }
 }

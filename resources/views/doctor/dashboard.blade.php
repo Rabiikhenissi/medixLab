@@ -306,37 +306,37 @@
                         </div>
                     </div>
 
-                    @if($doctorGroups->count() > 0)
+                    @if(count($doctorGroups) > 0)
                         <div class="space-y-3 max-h-[460px] overflow-y-auto pr-1">
                             @foreach($doctorGroups as $group)
                                 <div class="bg-white border border-[#e2e8f0]/80 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shadow-xs hover:border-[#0066FF]/25 transition group-card-item"
-                                    data-id="{{ $group->id }}">
+                                    data-id="{{ $group['id'] }}">
                                     <div class="min-w-0 flex-1">
                                         <div class="flex items-center gap-2">
                                             <p class="font-bold text-sm text-[#1e293b] group-name-label">
-                                                {{ $group->name }}
+                                                {{ $group['name'] }}
                                             </p>
                                             <span
                                                 class="text-[9px] text-[#0066FF] font-bold bg-[#0066FF]/10 px-2 py-0.5 rounded border border-[#0066FF]/20">
-                                                {{ $group->items->count() }} examen(s)
+                                                {{ $group['items_count'] }} examen(s)
                                             </span>
                                         </div>
                                         <p class="text-[11px] text-[#64748b] truncate mt-1 group-desc-label">
-                                            {{ $group->description ?? 'Aucune description' }}
+                                            {{ $group['description'] ?? 'Aucune description' }}
                                         </p>
                                     </div>
                                     <div class="flex items-center gap-1.5 self-start sm:self-auto flex-shrink-0">
-                                        <a href="{{ route('doctor.exam-groups.edit', $group->id) }}"
+                                        <a href="{{ route('doctor.exam-groups.edit', $group['id']) }}"
                                             class="inline-flex items-center gap-1 bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] font-bold px-2.5 py-1.5 rounded-lg border border-[#e2e8f0] text-[10px] uppercase tracking-wider">
                                             Voir
                                         </a>
-                                        <a href="{{ route('doctor.exam-groups.edit', $group->id) }}"
+                                        <a href="{{ route('doctor.exam-groups.edit', $group['id']) }}"
                                             class="inline-flex items-center gap-1 bg-[#EFF6FF] hover:bg-[#DBEAFE] text-[#0066FF] font-bold px-2.5 py-1.5 rounded-lg border border-[#BFDBFE] text-[10px] uppercase tracking-wider">
                                             Modifier
                                         </a>
-                                        <form action="{{ route('doctor.exam-groups.destroy', $group->id) }}" method="POST"
+                                        <form action="{{ route('doctor.exam-groups.destroy', $group['id']) }}" method="POST"
                                             class="inline"
-                                            onsubmit="return swalConfirmSubmit(this, 'Supprimer définitivement « {{ addslashes($group->name) }} » ?');">
+                                            onsubmit="return swalConfirmSubmit(this, 'Supprimer définitivement « {{ addslashes($group['name']) }} » ?');">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit"

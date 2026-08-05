@@ -9,6 +9,7 @@
     <div class="data-section anim anim-1">
         <div class="data-header">
             <div class="data-title">Comptes utilisateurs</div>
+            <a href="{{ route('admin.gdpr.incidents') }}" class="btn-export">Registre des incidents RGPD &rarr;</a>
         </div>
 
         @if (session('success'))
@@ -100,6 +101,21 @@
                 {{ $users->links() }}
             </div>
         @endif
+    </div>
+
+    <div class="data-section anim anim-2">
+        <div class="data-header">
+            <div class="data-title">Analyse d'impact (DPIA)</div>
+        </div>
+        <p style="font-size:13px;color:#475569;line-height:1.7;margin:0;">
+            Le traitement de données de santé réalisé par la plateforme a fait l'objet d'une
+            <strong>analyse d'impact relative à la protection des données (DPIA / AIPD)</strong> conformément à
+            l'article 35 du RGPD. Les mesures d'atténuation mises en œuvre comprennent : chiffrement des
+            mots de passe, authentification à deux facteurs par email, journalisation immuable des accès,
+            contrôle d'accès par rôle et permission, enregistrement du consentement et politique de
+            conservation limitée. Toute modification substantielle d'un traitement doit donner lieu à une
+            mise à jour de la DPIA avant sa mise en œuvre.
+        </p>
     </div>
 @endsection
 

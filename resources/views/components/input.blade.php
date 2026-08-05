@@ -44,14 +44,14 @@
             @if($type === 'password' && $showStrength)
                 <div class="mt-2 text-xs font-semibold text-gray-500">
                     <div class="flex items-center gap-1.5">
-                        <span class="text-[10px] uppercase text-[#64748b] tracking-wider select-none">Sécurité :</span>
+                        <span class="text-[10px] uppercase text-[#64748b] tracking-wider select-none">{{ __('password.security') }}</span>
                         <div class="flex-1 h-1.5 bg-gray-250 rounded-full overflow-hidden flex gap-0.5">
                             <div id="password-strength-bar-1" class="h-full w-1/4 rounded-full transition-all duration-300 bg-gray-200"></div>
                             <div id="password-strength-bar-2" class="h-full w-1/4 rounded-full transition-all duration-300 bg-gray-200"></div>
                             <div id="password-strength-bar-3" class="h-full w-1/4 rounded-full transition-all duration-300 bg-gray-200"></div>
                             <div id="password-strength-bar-4" class="h-full w-1/4 rounded-full transition-all duration-300 bg-gray-200"></div>
                         </div>
-                        <span id="password-strength-label" class="text-[10px] font-bold text-[#64748b] select-none min-w-[60px] text-right">Très faible</span>
+                        <span id="password-strength-label" class="text-[10px] font-bold text-[#64748b] select-none min-w-[60px] text-right">{{ __('password.very_weak') }}</span>
                     </div>
                 </div>
                 <script>
@@ -86,19 +86,19 @@
                             });
 
                             if (val.length === 0) {
-                                label.textContent = 'Très faible';
+                                label.textContent = '{{ __('password.very_weak') }}';
                                 label.style.color = '#64748b';
                             } else if (score === 1) {
-                                label.textContent = 'Faible';
+                                label.textContent = '{{ __('password.weak') }}';
                                 label.style.color = '#ef4444';
                             } else if (score === 2) {
-                                label.textContent = 'Moyen';
+                                label.textContent = '{{ __('password.medium') }}';
                                 label.style.color = '#f59e0b';
                             } else if (score === 3) {
-                                label.textContent = 'Fort';
+                                label.textContent = '{{ __('password.strong') }}';
                                 label.style.color = '#3b82f6';
                             } else if (score === 4) {
-                                label.textContent = 'Très fort';
+                                label.textContent = '{{ __('password.very_strong') }}';
                                 label.style.color = '#10b981';
                             }
                         });

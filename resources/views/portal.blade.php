@@ -1,23 +1,23 @@
 <x-layouts.auth>
-    <x-slot:title>Solutions Santé Avancées - Medix eSanté</x-slot:title>
+    <x-slot:title>{{ __('portal.meta_title') }}</x-slot:title>
 
     <div class="flex flex-col items-center justify-center w-full py-10">
         <!-- Main Headings -->
         <h1
             class="text-4xl md:text-5xl font-extrabold text-center tracking-tight text-[#1e293b] max-w-2xl leading-tight mb-4 select-none">
-            Des <span class="text-[#0066FF] relative inline-block">Solutions</span> Santé Avancées pour Tous.
+            {{ __('portal.hero_before') }} <span class="text-[#0066FF] relative inline-block">{{ __('portal.hero_highlight') }}</span> {{ __('portal.hero_after') }}
         </h1>
         <p class="text-sm md:text-base text-[#64748b] text-center max-w-xl mb-14 font-medium leading-relaxed">
-            Découvrez une plateforme de santé moderne, sécurisée et intelligente.
+            {{ __('portal.hero_subtitle') }}
         </p>
 
         <!-- Portals Cards Grid -->
         <div class="flex flex-col lg:flex-row items-stretch justify-center gap-8 w-full max-w-5xl px-4">
             <!-- Doctor Portal -->
-            <x-portal-card title="Espace Médecin"
-                description="Accédez aux dossiers patients, gérez les prescriptions et suivez les résultats d'analyses."
+            <x-portal-card title="{{ __('portal.doctor_title') }}"
+                description="{{ __('portal.doctor_desc') }}"
                 iconBg="bg-emerald-100/60" primaryColor="blue" loginUrl="{{ route('doctor.login') }}"
-                registerUrl="{{ route('doctor.register') }}" loginText="Connexion Médecin">
+                registerUrl="{{ route('doctor.register') }}" loginText="{{ __('portal.doctor_login') }}">
                 <svg class="w-8 h-8 text-[#0066FF]" fill="none" stroke="currentColor" stroke-width="2"
                     viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -26,10 +26,10 @@
             </x-portal-card>
 
             <!-- Patient Portal -->
-            <x-portal-card title="Espace Patient"
-                description="Consultez votre historique médical, suivez vos analyses et communiquez avec votre médecin."
+            <x-portal-card title="{{ __('portal.patient_title') }}"
+                description="{{ __('portal.patient_desc') }}"
                 iconBg="bg-sky-100/60" primaryColor="teal" loginUrl="{{ route('patient.login') }}"
-                registerUrl="{{ route('patient.register') }}" loginText="Connexion Patient">
+                registerUrl="{{ route('patient.register') }}" loginText="{{ __('portal.patient_login') }}">
                 <svg class="w-8 h-8 text-[#0D9488]" fill="none" stroke="currentColor" stroke-width="2"
                     viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -38,10 +38,10 @@
             </x-portal-card>
 
             <!-- Medical Center Portal -->
-            <x-portal-card title="Espace Laboratoire"
-                description="Gérez votre établissement, supervisez le personnel, les stocks et la facturation."
+            <x-portal-card title="{{ __('portal.lab_title') }}"
+                description="{{ __('portal.lab_desc') }}"
                 iconBg="bg-rose-100/60" primaryColor="purple" loginUrl="{{ route('center.login') }}"
-                registerUrl="{{ route('center.register') }}" loginText="Connexion Laboratoire">
+                registerUrl="{{ route('center.register') }}" loginText="{{ __('portal.lab_login') }}">
                 <svg class="w-8 h-8 text-[#7C3AED]" fill="none" stroke="currentColor" stroke-width="2"
                     viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round"

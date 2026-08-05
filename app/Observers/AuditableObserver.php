@@ -3,6 +3,8 @@
 namespace App\Observers;
 
 use App\Models\AuditLog;
+use App\Models\Sample;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -12,7 +14,50 @@ use Illuminate\Database\Eloquent\Model;
 class AuditableObserver
 {
     private const IGNORED_FIELDS = [
-        'password', 'remember_token', 'updated_at', 'last_activity',
+        'password', 'remember_token', 'updated_at', 'last_activity', 'last_login_at',
+        'two_factor_code', 'two_factor_code_expires_at',
+    ];
+
+    /** Friendly French label for each audited entity. */
+    private const ENTITY_LABELS = [
+        'User' => 'Compte utilisateur',
+        'ExamRequest' => 'Demande d\'analyse',
+        'ExamRequestItem' => 'Élément de demande',
+        'Sample' => 'Échantillon',
+        'ResultLabo' => 'Résultat de laboratoire',
+        'ResultLaboDetail' => 'Détail de résultat',
+        'MachineConfiguration' => 'Configuration machine',
+        'ExamParameter' => 'Paramètre d\'examen',
+        'DoctorPatientAccess' => 'Accès médecin-patient',
+    ];
+
+    /** French labels for the most common changed fields. */
+    private const FIELD_LABELS = [
+        'status' => 'statut',
+        'value' => 'valeur',
+        'interpretation' => 'interprétation',
+        'quantity' => 'quantité',
+        'min_quantity' => 'seuil minimum',
+        'price' => 'prix',
+        'total_amount' => 'total',
+        'patient_amount' => 'montant patient',
+        'paid_amount' => 'montant payé',
+        'cnam_amount' => 'part CNAM',
+        'first_name' => 'prénom',
+        'last_name' => 'nom',
+        'email' => 'email',
+        'phone' => 'téléphone',
+        'address' => 'adresse',
+        'blood_group' => 'groupe sanguin',
+        'gender' => 'sexe',
+        'date_of_birth' => 'date de naissance',
+        'sample_code' => 'code échantillon',
+        'storage_location' => 'emplacement',
+        'collection_date' => 'date de prélèvement',
+        'expiry_date' => 'date d\'expiration',
+        'rejection_reason' => 'motif de rejet',
+        'access_status' => 'statut d\'accès',
+        'clinical_notes' => 'notes cliniques',
     ];
 
     public function created(Model $model): void
@@ -28,7 +73,9 @@ class AuditableObserver
             return;
         }
 
-        $this->write($model, 'updated', 'Modification de '.$this->label($model), $changes);
+        $fields = implode(', ', array_map(fn ($field) => self::FIELD_LABELS[$field] ?? $field, array_keys($changes)));
+
+        $this->write($model, 'updated', 'Modification de '.$this->label($model).' — champs modifiés : '.$fields, $changes);
     }
 
     public function deleted(Model $model): void
@@ -43,7 +90,22 @@ class AuditableObserver
 
     private function label(Model $model): string
     {
-        return class_basename($model).' #'.$model->getKey();
+        $type = self::ENTITY_LABELS[class_basename($model)] ?? class_basename($model);
+
+        $label = $type.' #'.$model->getKey();
+        $hint = $this->nameHint($model);
+
+        return $hint ? $label." ({$hint})" : $label;
+    }
+
+    /** Human-readable hint (person name, sample code…) when easily available. */
+    private function nameHint(Model $model): string
+    {
+        return match (true) {
+            $model instanceof User => trim(($model->first_name ?? '').' '.($model->last_name ?? '')),
+            $model instanceof Sample => (string) ($model->sample_code ?? ''),
+            default => '',
+        };
     }
 
     /** Diff of dirty attributes vs their previous values, ignoring sensitive noise. */

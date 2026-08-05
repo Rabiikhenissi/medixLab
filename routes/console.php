@@ -13,3 +13,13 @@ Schedule::command('backup:database')
     ->at('02:00')
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/backups.log'));
+
+Schedule::command('access:expiry-check')
+    ->dailyAt('03:00')
+    ->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/schedule.log'));
+
+Schedule::command('gdpr:retention-purge')
+    ->dailyAt('04:00')
+    ->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/schedule.log'));

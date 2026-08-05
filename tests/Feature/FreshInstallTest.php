@@ -21,6 +21,7 @@ class FreshInstallTest extends TestCase
         // use a real file-backed SQLite database so `migrate:fresh` (which
         // runs VACUUM) works, unlike the :memory: connection used by default
         $this->tempDb = tempnam(sys_get_temp_dir(), 'medix-install-').'.sqlite';
+        file_put_contents($this->tempDb, '');
         config()->set('database.default', 'sqlite');
         config()->set('database.connections.sqlite.database', $this->tempDb);
     }
@@ -60,6 +61,18 @@ class FreshInstallTest extends TestCase
         // new schema objects introduced by the hardening phase are present
         $this->assertTrue(Schema::hasColumn('users', 'two_factor_secret'));
         $this->assertTrue(Schema::hasColumn('users', 'two_factor_confirmed_at'));
+        $this->assertTrue(Schema::hasColumn('users', 'two_factor_code'));
+        $this->assertTrue(Schema::hasColumn('users', 'two_factor_code_expires_at'));
+
+        // hashed 2FA codes (60-char bcrypt) must fit in the two_factor_code column
+        $twoFactorCode = collect(Schema::getColumns('users'))
+            ->firstWhere('name', 'two_factor_code');
+        $this->assertGreaterThanOrEqual(
+            60,
+            $twoFactorCode['length'] ?? 255,
+            'two_factor_code column must be wide enough for bcrypt hashes'
+        );
+
         $this->assertTrue(Schema::hasTable('audit_logs'));
     }
 

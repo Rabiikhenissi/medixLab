@@ -2,23 +2,38 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Mail\VerificationMail;
 use Database\Factories\UserFactory;
+use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
+use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Mail;
 
-#[Fillable(['first_name', 'last_name', 'email', 'password', 'phone', 'group_id', 'address', 'is_archive', 'last_login_at', 'two_factor_secret', 'two_factor_confirmed_at'])]
+#[Fillable(['first_name', 'last_name', 'email', 'email_verified_at', 'password', 'phone', 'group_id', 'address', 'is_archive', 'last_login_at', 'two_factor_secret', 'two_factor_confirmed_at', 'two_factor_code', 'two_factor_code_expires_at'])]
 #[Hidden(['password', 'remember_token', 'two_factor_secret'])]
 /**
  * Authenticatable user account shared by every role (admin, doctor, patient, center staff).
  */
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmailContract
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, MustVerifyEmailTrait, Notifiable;
+
+    /**
+     * Send the branded email-verification link.
+     */
+    public function sendEmailVerificationNotification(): void
+    {
+        if ($this->hasVerifiedEmail()) {
+            return;
+        }
+
+        Mail::to($this->email)->send(new VerificationMail($this));
+    }
 
     /**
      * Get the attributes that should be cast.
@@ -33,13 +48,14 @@ class User extends Authenticatable
             'is_archive' => 'boolean',
             'two_factor_secret' => 'encrypted',
             'two_factor_confirmed_at' => 'datetime',
+            'two_factor_code_expires_at' => 'datetime',
         ];
     }
 
     /** Whether two-factor authentication is configured for this account. */
     public function twoFactorEnabled(): bool
     {
-        return filled($this->two_factor_secret);
+        return filled($this->two_factor_confirmed_at);
     }
 
     /** The permission group this user belongs to. */

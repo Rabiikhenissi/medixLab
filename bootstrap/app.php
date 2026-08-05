@@ -6,6 +6,7 @@ use App\Http\Middleware\EnsureIsCenter;
 use App\Http\Middleware\EnsureIsDoctor;
 use App\Http\Middleware\EnsureIsPatient;
 use App\Http\Middleware\SecurityHeaders;
+use App\Http\Middleware\SetLocale;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -25,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->redirectGuestsTo(fn () => route('home'));
         $middleware->web(append: [
+            SetLocale::class,
             SecurityHeaders::class,
         ]);
         $middleware->alias([

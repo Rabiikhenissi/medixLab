@@ -16,6 +16,7 @@
     ];
     $colors = $roleColors[$groupCode] ?? $roleColors['admin'];
     $enabled = auth()->user()->twoFactorEnabled();
+    $email = auth()->user()->email;
 @endphp
 
 @extends($layouts[$groupCode] ?? 'layouts.admin')
@@ -27,7 +28,7 @@ Sécurité <span style="color:{{ $colors['primary'] }};">2FA</span>
 @endsection
 
 @section('page-subtitle')
-Activez la double authentification pour protéger votre compte.
+Protégez votre compte avec une double authentification par email.
 @endsection
 
 @section('content')
@@ -39,12 +40,18 @@ Activez la double authentification pour protéger votre compte.
         </div>
     @endif
 
+    @if(session('status'))
+        <div class="mb-4 p-3 text-xs font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-xl">
+            {{ session('status') }}
+        </div>
+    @endif
+
     <div class="form-card">
-        <h3>Authentification à deux facteurs (TOTP)</h3>
+        <h3>Authentification à deux facteurs (par email)</h3>
         <p style="font-size:13px; color:#64748b; line-height:1.6; margin-bottom:16px;">
             Renforcez la sécurité de votre compte : en plus du mot de passe, un code à 6 chiffres
-            généré par votre application d'authentification (Google Authenticator, Authy, 1Password…) sera
-            demandé à chaque connexion.
+            vous sera envoyé par email (votre boîte Gmail par exemple) à chaque connexion.
+            Aucune application d'authentification n'est nécessaire.
         </p>
 
         <div style="display:flex; align-items:center; gap:12px; padding:14px 16px; border-radius:12px;
@@ -68,6 +75,9 @@ Activez la double authentification pour protéger votre compte.
     @if($enabled)
         <div class="form-card" style="margin-top:20px;">
             <h3>Désactiver la double authentification</h3>
+            <p style="font-size:13px; color:#64748b; line-height:1.6; margin-bottom:16px;">
+                Après désactivation, un simple mot de passe suffira à vous connecter.
+            </p>
             <form action="{{ route('profile.two-factor.disable') }}" method="POST">
                 @csrf
                 <div class="form-field full">
@@ -88,22 +98,23 @@ Activez la double authentification pour protéger votre compte.
         <div class="form-card" style="margin-top:20px;">
             <h3>Activer la double authentification</h3>
             <ol style="font-size:13px; color:#475569; line-height:1.8; padding-left:20px; margin-bottom:18px;">
-                <li>Scannez le code QR ci-dessous avec votre application d'authentification.</li>
-                <li>Si le scan est impossible, saisissez la clé manuellement.</li>
-                <li>Saisissez ensuite le code à 6 chiffres affiché par l'application.</li>
+                <li>Cliquez sur « Envoyer le code de vérification » ci-dessous.</li>
+                <li>Le code sera envoyé à votre adresse email <strong>{{ $email }}</strong>.</li>
+                <li>Saisissez le code reçu pour activer la protection.</li>
             </ol>
 
-            <div style="display:flex; justify-content:center; margin-bottom:18px;">
-                {!! $qrCode !!}
-            </div>
-
-            <div style="text-align:center; margin-bottom:18px;">
-                <span style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Clé secrète</span>
-                <div style="margin-top:6px; font-family:monospace; font-size:14px; letter-spacing:0.08em; color:#0f172a; background:#f8fafc; border:1px dashed #cbd5e1; border-radius:10px; padding:10px;">
-                    {{ $secret }}
+            <div style="display:flex; align-items:center; gap:14px; padding:14px 16px; border-radius:12px; background:#EFF6FF; border:1px solid #BFDBFE; margin-bottom:18px;">
+                <div style="flex-shrink:0; width:40px; height:40px; border-radius:10px; background:#0066FF; display:flex; align-items:center; justify-content:center;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="4" width="20" height="16" rx="3"/>
+                        <path d="M2 7l9.3 6a1 1 0 0 0 1.4 0L22 7"/>
+                    </svg>
                 </div>
-                <div style="margin-top:6px; font-size:11px; color:#94a3b8;">
-                    {{ $otpauthUrl }}
+                <div>
+                    <strong style="font-size:13px; color:#0f172a;">Code envoyé à {{ $email }}</strong>
+                    <div style="font-size:12px; color:#475569;">
+                        Vérifiez votre boîte de réception (et les spams). Le code expire après 10 minutes.
+                    </div>
                 </div>
             </div>
 
@@ -111,7 +122,8 @@ Activez la double authentification pour protéger votre compte.
                 @csrf
                 <div class="form-field full">
                     <label>Code à 6 chiffres</label>
-                    <input type="text" name="code" maxlength="6" inputmode="numeric" placeholder="••••••" required>
+                    <input type="text" name="code" maxlength="6" inputmode="numeric" placeholder="••••••" required
+                        style="letter-spacing:0.4em; font-weight:700; text-align:center;">
                     @error('code')
                         <span style="font-size:11px; color:#e11d48;">{{ $message }}</span>
                     @enderror
@@ -119,6 +131,13 @@ Activez la double authentification pour protéger votre compte.
                 <div class="form-actions">
                     <button type="submit" class="btn-save">Activer la 2FA</button>
                 </div>
+            </form>
+
+            <form action="{{ route('profile.two-factor.resend') }}" method="POST" style="margin-top:14px;">
+                @csrf
+                <button type="submit" style="background:none; border:none; padding:0; font-size:12px; font-weight:600; color:#0066FF; cursor:pointer; text-decoration:underline;">
+                    Je n'ai pas reçu le code — renvoyer
+                </button>
             </form>
         </div>
     @endif

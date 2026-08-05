@@ -1,9 +1,9 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "medixlab/medix-esante",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
+    "description": "Connected healthcare ecosystem & medical analysis platform: digital prescription-to-result workflows with RGPD-compliant privacy, email verification, 2FA and audit trails.",
+    "keywords": ["laravel", "healthcare", "laboratory", "medical", "rgpd", "e-sante"],
     "license": "MIT",
     "require": {
         "php": "^8.3",

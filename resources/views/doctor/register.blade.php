@@ -1,9 +1,9 @@
 <x-layouts.auth>
-    <x-slot:title>Inscription Médecin - Medix eSanté</x-slot:title>
+    <x-slot:title>{{ __('doctor.register_title') }} - Medix eSanté</x-slot:title>
 
     <x-auth-card
-        title="Inscription Médecin"
-        subtitle="Créez votre compte pour accéder aux services"
+        title="{{ __('doctor.register_title') }}"
+        subtitle="{{ __('doctor.register_subtitle') }}"
         action="{{ route('doctor.register') }}"
         backUrl="{{ route('doctor.login') }}"
     >
@@ -22,7 +22,7 @@
             <x-input
                 type="text"
                 name="first_name"
-                label="Prénom"
+                label="{{ __('auth.first_name') }}"
                 placeholder="ex. Jean"
                 :required="true"
             />
@@ -31,7 +31,7 @@
             <x-input
                 type="text"
                 name="last_name"
-                label="Nom de famille"
+                label="{{ __('auth.last_name_full') }}"
                 placeholder="ex. Dupont"
                 :required="true"
             />
@@ -42,7 +42,7 @@
             <x-input
                 type="date"
                 name="birth_date"
-                label="Date de naissance"
+                label="{{ __('auth.date_of_birth') }}"
                 :required="true"
             />
 
@@ -50,10 +50,10 @@
             <x-input
                 type="select"
                 name="gender"
-                label="Genre"
-                placeholder="Sélectionner"
+                label="{{ __('auth.gender_genre') }}"
+                placeholder="{{ __('auth.select') }}"
                 :required="true"
-                :options="['M' => 'Masculin', 'F' => 'Féminin', 'O' => 'Autre']"
+                :options="['M' => __('auth.gender_m'), 'F' => __('auth.gender_f'), 'O' => __('auth.gender_o')]"
             />
         </div>
 
@@ -63,16 +63,16 @@
         <x-input
             type="select"
             name="specialty"
-            label="Spécialité"
-            placeholder="Sélectionner une spécialité"
+            label="{{ __('doctor.specialty_label') }}"
+            placeholder="{{ __('doctor.select_specialty') }}"
             :required="true"
             :options="[
-                'generaliste' => 'Médecin Généraliste',
-                'cardiologue' => 'Cardiologue',
-                'pediatre' => 'Pédiatre',
-                'dermatologue' => 'Dermatologue',
-                'gynecologue' => 'Gynécologue',
-                'autre' => 'Autre spécialité'
+                'generaliste' => __('doctor.specialty_generaliste'),
+                'cardiologue' => __('doctor.specialty_cardiologue'),
+                'pediatre' => __('doctor.specialty_pediatre'),
+                'dermatologue' => __('doctor.specialty_dermatologue'),
+                'gynecologue' => __('doctor.specialty_gynecologue'),
+                'autre' => __('doctor.specialty_autre')
             ]"
         />
 
@@ -80,7 +80,7 @@
         <x-input
             type="email"
             name="email"
-            label="Email"
+            label="{{ __('auth.email') }}"
             placeholder="doctor@esante.com"
             :required="true"
         />
@@ -89,7 +89,7 @@
         <x-input
             type="tel"
             name="phone"
-            label="Téléphone"
+            label="{{ __('auth.phone') }}"
             placeholder="+216 00 000 000"
             :required="true"
         />
@@ -98,15 +98,15 @@
         <x-input
             type="select"
             name="country"
-            label="Pays"
-            placeholder="Sélectionner"
+            label="{{ __('auth.country') }}"
+            placeholder="{{ __('auth.select') }}"
             :required="true"
             :options="[
-                'TN' => 'TN Tunisie',
-                'FR' => 'FR France',
-                'MA' => 'MA Maroc',
-                'DZ' => 'DZ Algérie',
-                'autre' => 'Autre Pays'
+                'TN' => __('country.TN'),
+                'FR' => __('country.FR'),
+                'MA' => __('country.MA'),
+                'DZ' => __('country.DZ'),
+                'autre' => __('country.autre')
             ]"
             value="TN"
         />
@@ -115,7 +115,7 @@
         <x-input
             type="textarea"
             name="address"
-            label="Adresse"
+            label="{{ __('auth.address') }}"
             placeholder="ex. Rue de la Liberté, Tunis"
             :required="false"
         />
@@ -125,7 +125,7 @@
             <x-input
                 type="password"
                 name="password"
-                label="Mot de passe"
+                label="{{ __('auth.password') }}"
                 placeholder="••••••••"
                 :required="true"
                 :show-strength="true"
@@ -135,23 +135,39 @@
             <x-input
                 type="password"
                 name="password_confirmation"
-                label="Confirmer"
+                label="{{ __('auth.password_confirm') }}"
                 placeholder="••••••••"
                 :required="true"
             />
         </div>
 
+        <!-- Legal consents -->
+        <div class="space-y-2 pt-1">
+            <label class="flex items-start gap-2 cursor-pointer">
+                <input type="checkbox" name="accept_terms" value="1" {{ old('accept_terms') ? 'checked' : '' }} class="mt-0.5 h-4 w-4 rounded border-[#e2e8f0] text-[#0066FF] focus:ring-[#0066FF]/20">
+                <span class="text-xs text-[#64748b] leading-relaxed">
+                    {{ __('auth.terms') }} <a href="{{ route('legal.terms') }}" target="_blank" rel="noopener" class="font-semibold text-[#0066FF] hover:underline">{{ __('auth.terms_link') }}</a>
+                </span>
+            </label>
+            <label class="flex items-start gap-2 cursor-pointer">
+                <input type="checkbox" name="accept_privacy" value="1" {{ old('accept_privacy') ? 'checked' : '' }} class="mt-0.5 h-4 w-4 rounded border-[#e2e8f0] text-[#0066FF] focus:ring-[#0066FF]/20">
+                <span class="text-xs text-[#64748b] leading-relaxed">
+                    {{ __('auth.privacy') }} <a href="{{ route('legal.privacy') }}" target="_blank" rel="noopener" class="font-semibold text-[#0066FF] hover:underline">{{ __('auth.privacy_link') }}</a> {{ __('auth.privacy_rgpd') }}
+                </span>
+            </label>
+        </div>
+
         <!-- Submit Button -->
         <div class="pt-2">
             <x-button color="slate" :fullWidth="true">
-                S'INSCRIRE
+                {{ __('register.submit') }}
             </x-button>
         </div>
 
         <x-slot:footer>
             <div class="flex items-center justify-between w-full">
                 <a href="{{ route('doctor.login') }}" class="font-semibold text-[#64748b] hover:text-[#0066FF] hover:underline">
-                    Déjà inscrit ?
+                    {{ __('login.already') }}
                 </a>
             </div>
         </x-slot:footer>

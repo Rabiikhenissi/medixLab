@@ -1,10 +1,9 @@
-```blade
 <x-layouts.auth>
-    <x-slot:title>Mot de passe oublié - Medix eSanté</x-slot:title>
+    <x-slot:title>{{ __('forgot.meta_title') }}</x-slot:title>
 
     <x-auth-card
-        title="Mot de passe oublié"
-        subtitle="Réinitialisez votre mot de passe sécurisé"
+        title="{{ __('forgot.title') }}"
+        subtitle="{{ __('forgot.subtitle') }}"
         badge="{{ strtoupper($role) }}"
         action="{{ route($role . '.password.email') }}"
         backUrl="{{ route($role . '.login') }}"
@@ -28,14 +27,14 @@
 
 
         <p class="text-sm text-slate-500 mb-5">
-            Entrez votre adresse email et nous vous enverrons un lien pour réinitialiser votre mot de passe.
+            {{ __('forgot.help') }}
         </p>
 
 
         <x-input
             type="email"
             name="email"
-            label="Email"
+            label="{{ __('auth.email') }}"
             placeholder="patient@esante.com"
             :required="true"
         />
@@ -43,7 +42,7 @@
 
         <div class="pt-4">
             <x-button color="slate" :fullWidth="true">
-                ENVOYER LE LIEN
+                {{ __('forgot.submit') }}
             </x-button>
         </div>
 
@@ -52,7 +51,7 @@
             <div class="flex items-center justify-center w-full">
                 <a href="{{ route($role . '.login') }}"
                    class="font-semibold text-[#64748b] hover:text-[#0D9488] hover:underline">
-                    Retour à la connexion
+                    {{ __('login.back') }}
                 </a>
             </div>
         </x-slot:footer>
@@ -60,4 +59,3 @@
     </x-auth-card>
 
 </x-layouts.auth>
-```

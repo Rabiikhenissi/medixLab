@@ -265,7 +265,7 @@
 
         <div class="auth-sidebar-bottom">
             <!-- Profile -->
-            <a href="{{ route('profile.show') }}" class="auth-sidebar-item" title="Mon Profil">
+            <a href="{{ route('profile.show') }}" class="auth-sidebar-item" title="{{ __('auth.profile') }}">
                 <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:20px;height:20px;">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
@@ -292,22 +292,23 @@
         <a href="{{ route($dashboardRoute) }}" class="brand">Medix <span>eSanté</span></a>
 
         <div class="topnav-right">
+            <x-language-switcher />
             <div>
                 <div class="nav-user-name">{{ auth()->user()->first_name }} {{ auth()->user()->last_name }}</div>
                 <div class="nav-user-role">
-                    @if(auth()->user()->doctor) Médecin
-                    @elseif(auth()->user()->patient) Patient
-                    @elseif(auth()->user()->staff) Établissement
-                    @else {{ auth()->user()->group?->name ?? 'Utilisateur' }}
+                    @if(auth()->user()->doctor) {{ __('layout.role_doctor') }}
+                    @elseif(auth()->user()->patient) {{ __('layout.role_patient') }}
+                    @elseif(auth()->user()->staff) {{ __('layout.role_center') }}
+                    @else {{ auth()->user()->group?->name ?? __('layout.role') }}
                     @endif
                 </div>
             </div>
-            <a href="{{ route('profile.show') }}" class="nav-avatar" title="Mon Profil">
+            <a href="{{ route('profile.show') }}" class="nav-avatar" title="{{ __('auth.profile') }}">
                 {{ strtoupper(substr(auth()->user()->first_name, 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name, 0, 1)) }}
             </a>
             <form action="{{ route($logoutRoute) }}" method="POST" style="margin:0;padding:0;">
                 @csrf
-                <button type="submit" class="btn-logout" title="Se déconnecter">
+                <button type="submit" class="btn-logout" title="{{ __('auth.logout') }}">
                     <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
@@ -327,6 +328,9 @@
     </main>
     @else
     {{-- Guest layout (login/register pages) - no sidebar --}}
+    <div class="fixed top-4 right-4 z-50">
+        <x-language-switcher />
+    </div>
     <x-background-animation />
     <div class="relative z-10 min-h-screen flex flex-col justify-center items-center p-4 md:p-8 w-full">
         {{ $slot }}

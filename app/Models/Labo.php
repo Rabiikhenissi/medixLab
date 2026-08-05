@@ -6,7 +6,7 @@ use App\Models\Traits\ActiveScoped;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['name', 'address', 'city', 'phone', 'email', 'latitude', 'longitude', 'is_archive'])]
+#[Fillable(['name', 'address', 'city', 'country', 'phone', 'email', 'latitude', 'longitude', 'is_archive'])]
 /**
  * Medical laboratory (center) that runs exams, keeps stock and machines.
  */

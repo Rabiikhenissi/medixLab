@@ -9,9 +9,9 @@
 
 <div align="center">
   
-  [![Laravel](https://img.shields.io/badge/Laravel-11.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)](https://laravel.com)
+  [![Laravel](https://img.shields.io/badge/Laravel-13.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)](https://laravel.com)
   [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.x-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
-  [![PHP](https://img.shields.io/badge/PHP-8.2%2B-777BB4?style=for-the-badge&logo=php&logoColor=white)](https://php.net)
+  [![PHP](https://img.shields.io/badge/PHP-8.3%2B-777BB4?style=for-the-badge&logo=php&logoColor=white)](https://php.net)
   [![License](https://img.shields.io/badge/License-MIT-000000?style=for-the-badge)](LICENSE)
 
 </div>
@@ -71,21 +71,29 @@ A platform control center to oversee operations:
 *   **Interactive Analytics Board**: Visual Chart.js charts representing 15-day volume trends, request status distributions, and Top 5 most prescribed exams.
 *   **Catalogs Management**: Manage, update, or archive the list of available medical exams and reference values.
 *   **User & Laboratory Registrations**: Fully audit user roles, laboratory networks, and staff permissions.
+*   **Invitations by Email**: Send secure, expiring activation links instead of manually provisioning passwords.
+*   **Immutable Audit Trail**: Every sensitive action is timestamped, IP-tagged, and searchable — exportable to PDF.
+*   **RGPD Command Center**: Consent logs, data export/erasure requests, and an incident register (art. 33/34).
 
 ---
 
 ## 🛠 Tech Stack & Architecture
 
-- **Backend Framework**: Laravel 11.x (PHP 8.2+)
+- **Backend Framework**: Laravel 13.x (PHP 8.3+)
 - **Frontend Architecture**: TailwindCSS 3.x, Vanilla JavaScript (Fast, responsive, zero-bloat compilation).
 - **Database**: Relational Database (MySQL, PostgreSQL, or SQLite).
 - **Charting & Visuals**: Chart.js for interactive analytics.
-- **Code Organization**: Clean separation of concerns with dedicated **Service layers** (`ExamRequestService`, `NotificationService`, `StockService`) and strict Form Requests validation.
+- **Server-Side PDF**: dompdf for official clinical reports and audit-trail exports.
+- **i18n**: French-first UI with an English mode — a `?lang=`/session/cookie based `SetLocale` middleware and a FR/EN switcher in every top navigation bar. Centralized strings live in `lang/fr.json` / `lang/en.json`.
+- **Code Organization**: Clean separation of concerns with dedicated **Service layers** (`ExamRequestService`, `NotificationService`, `StockService`, `TwoFactorService`) and strict Form Requests validation.
 - **Security & Reliability**:
   - Rate limiting on authentication routes.
+  - Email verification on registration (signed, time-boxed links).
+  - One-time 2FA codes delivered by email, stored hashed.
   - Password strength validation bar in registration forms.
   - Multi-step DB writes wrapped in transactions.
   - Anti-collision generator for medical codes (CNOM, Staff ID, Patient Identifier).
+  - Centralized scheduled tasks for access expiry, RGPD retention purge and database backups.
 
 ---
 
@@ -146,4 +154,14 @@ Visit the app at `https://medixlab.alwaysdata.net/`.
 ---
 
 ## 🔒 Security & Privacy Compliance
-MedixLab takes security seriously. Patient identifiers are generated using collision-free mathematical sequences (e.g. ID-based checksum codes) rather than public timestamps. No doctor can read a patient's historical analysis without explicit authorization from the patient. Access tokens expire automatically after 6 months to guarantee maximum user data protection.
+MedixLab takes security seriously. Patient identifiers are generated using collision-free mathematical sequences (e.g. ID-based checksum codes) rather than public timestamps. No doctor can read a patient's historical analysis without explicit authorization from the patient. Access tokens expire automatically to guarantee maximum user data protection.
+
+### RGPD / GDPR readiness
+*   **Consent logs** — each registration records the accepted versions of the Terms and the Privacy Policy, with IP and user-agent (immutable `consents` table).
+*   **Data portability** — admins export a structured JSON of a patient's full account.
+*   **Right to erasure** — anonymisation keeps clinical data under the laboratory's legal retention duty; fully-anonymised accounts are purged after the configured retention period (`gdpr:retention-purge`).
+*   **Incident register** — data-breach incidents (art. 33/34) are declared, tracked and resolved from the RGPD console.
+*   **Legal pages** — public Terms, Privacy Policy and Legal Mentions, versioned for consent tracking.
+
+### 🌍 Languages
+The application ships in **French** (default) and **English**. Use the FR / EN switcher in the top navigation (or append `?lang=en` to any URL) to change the interface language; the choice is remembered per visitor via session + a persistent cookie.

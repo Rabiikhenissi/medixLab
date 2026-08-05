@@ -1,9 +1,9 @@
 <x-layouts.auth>
-    <x-slot:title>Réinitialiser le mot de passe - Medix eSanté</x-slot:title>
+    <x-slot:title>{{ __('reset.meta_title') }}</x-slot:title>
 
    <x-auth-card
-    title="Nouveau mot de passe"
-    subtitle="Choisissez un nouveau mot de passe sécurisé"
+    title="{{ __('reset.title') }}"
+    subtitle="{{ __('reset.subtitle') }}"
     badge="{{ strtoupper($role) }}"
     action="{{ route($role.'.password.update') }}"
 >
@@ -24,7 +24,7 @@
         <x-input
             type="email"
             name="email"
-            label="Email"
+            label="{{ __('auth.email') }}"
             value="{{ $email }}"
             :required="true"
         />
@@ -33,7 +33,7 @@
         <x-input
             type="password"
             name="password"
-            label="Nouveau mot de passe"
+            label="{{ __('auth.new_password') }}"
             placeholder="••••••••"
             :required="true"
         />
@@ -42,7 +42,7 @@
         <x-input
             type="password"
             name="password_confirmation"
-            label="Confirmation du mot de passe"
+            label="{{ __('auth.password_confirm_full') }}"
             placeholder="••••••••"
             :required="true"
         />
@@ -50,7 +50,7 @@
 
         <div class="pt-4">
             <x-button color="slate" :fullWidth="true">
-                RÉINITIALISER
+                {{ __('reset.submit') }}
             </x-button>
         </div>
 
@@ -59,7 +59,7 @@
             <div class="flex justify-center w-full">
                 <a href="{{ route($role . '.login') }}"
                    class="font-semibold text-[#64748b] hover:text-[#0D9488] hover:underline">
-                    Retour à la connexion
+                    {{ __('login.back') }}
                 </a>
             </div>
         </x-slot:footer>
