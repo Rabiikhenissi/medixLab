@@ -1,5 +1,5 @@
 <x-layouts.patient>
-<x-slot:title>Choisir un laboratoire — Medix eSanté</x-slot:title>
+<x-slot:title>{{ __('patient.choose_lab.title') }} — Medix eSanté</x-slot:title>
 
 @section('styles')
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -89,7 +89,7 @@
         <svg class="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
         </svg>
-        Retour au tableau de board
+        {{ __('patient.dashboard.back_label') }}
     </a>
 
     {{-- Map section --}}
@@ -112,8 +112,8 @@
                 </svg>
             </div>
             <div>
-                <h1 class="text-xl font-bold text-[#1e293b]">Choisir un laboratoire</h1>
-                <p class="text-xs text-[#64748b] mt-0.5">Sélectionnez le laboratoire qui effectuera vos analyses</p>
+                <h1 class="text-xl font-bold text-[#1e293b]">{{ __('patient.choose_lab.title') }}</h1>
+                <p class="text-xs text-[#64748b] mt-0.5">{{ __('patient.choose_lab.subtitle') }}</p>
             </div>
         </div>
 
@@ -124,9 +124,9 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
                 <p class="text-sm text-[#1e293b]">
-                    Prescription <span class="font-bold">#{{ $examRequest->id }}</span>
+                    {{ __('patient.choose_lab.prescription') }} <span class="font-bold">#{{ $examRequest->id }}</span>
                     @if($examRequest->laboratory)
-                        · Laboratoire actuel : <strong class="text-[#0D9488]">{{ $examRequest->laboratory->name }}</strong>
+                        · {{ __('patient.choose_lab.current_laboratory') }} <strong class="text-[#0D9488]">{{ $examRequest->laboratory->name }}</strong>
                     @endif
                 </p>
             </div>
@@ -135,7 +135,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
                 </svg>
-                Répartir entre labos
+                {{ __('patient.choose_lab.split_between_labs') }}
             </button>
         </div>
 
@@ -145,48 +145,48 @@
                 <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94a3b8]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                 </svg>
-                <input type="text" id="labSearchInput" placeholder="Rechercher un laboratoire..."
+                <input type="text" id="labSearchInput" placeholder="{{ __('patient.choose_lab.search_placeholder') }}"
                     class="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-[#e2e8f0] bg-white focus:outline-none focus:ring-2 focus:ring-[#0D9488]/30 focus:border-[#0D9488] transition text-[#1e293b]">
             </div>
             <div class="flex items-center gap-3">
                 @if(count($requiredExamIds) > 0)
-                <label class="flex items-center gap-2 cursor-pointer select-none" title="N'afficher que les labs couvrant tous vos examens">
+                <label class="flex items-center gap-2 cursor-pointer select-none" title="{{ __('patient.choose_lab.compat_tooltip') }}">
                     <div class="relative">
                         <input type="checkbox" id="compatFilter" class="sr-only peer">
                         <div class="w-9 h-5 bg-[#e2e8f0] rounded-full peer-checked:bg-[#0D9488] transition-colors duration-200"></div>
                         <div class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200 peer-checked:translate-x-4"></div>
                     </div>
-                    <span class="text-xs font-bold text-[#475569] whitespace-nowrap">Labs compatibles</span>
+                    <span class="text-xs font-bold text-[#475569] whitespace-nowrap">{{ __('patient.choose_lab.compatible_labs') }}</span>
                 </label>
                 @endif
                 <span id="labResultCount" class="text-sm text-[#94a3b8] font-medium whitespace-nowrap">
-                    {{ count($laboratories) }} laboratoire(s)
+                    {{ __('patient.choose_lab.lab_count', ['n' => count($laboratories)]) }}
                 </span>
             </div>
         </div>
 
         {{-- Sort controls --}}
         <div class="flex items-center gap-2 mb-5 flex-wrap">
-            <span class="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider">Trier par :</span>
+            <span class="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider">{{ __('patient.choose_lab.sort_by') }}</span>
             <span id="locStatus" class="hidden inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-[#94a3b8] bg-slate-100 border border-[#e2e8f0]">
                 <svg class="w-3 h-3 animate-spin" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                <span id="locStatusText">Localisation...</span>
+                <span id="locStatusText">{{ __('patient.choose_lab.locating') }}</span>
             </span>
             <button type="button" data-sort="recommended" class="sort-btn active inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold border border-[#e2e8f0] bg-white text-[#64748b] transition">
                 <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                Recommandé
+                {{ __('patient.choose_lab.sort_recommended') }}
             </button>
             <button type="button" data-sort="price" class="sort-btn inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold border border-[#e2e8f0] bg-white text-[#64748b] transition">
                 <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                Prix
+                {{ __('patient.choose_lab.sort_price') }}
             </button>
             <button type="button" data-sort="distance" class="sort-btn inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold border border-[#e2e8f0] bg-white text-[#64748b] transition">
                 <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                Distance
+                {{ __('patient.choose_lab.sort_distance') }}
             </button>
             <button type="button" data-sort="compat" class="sort-btn inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold border border-[#e2e8f0] bg-white text-[#64748b] transition">
                 <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                Compatibilité
+                {{ __('patient.choose_lab.sort_compatibility') }}
             </button>
         </div>
 
@@ -198,20 +198,20 @@
         @if($countries->count() > 1 || $cities->count() > 1)
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-6">
             <div class="flex items-center gap-2">
-                <label for="countryFilter" class="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider whitespace-nowrap">Pays :</label>
+                <label for="countryFilter" class="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider whitespace-nowrap">{{ __('patient.choose_lab.country') }}</label>
                 <select id="countryFilter"
                     class="w-full sm:w-44 px-3 py-2.5 rounded-xl border border-[#e2e8f0] bg-white text-sm text-[#1e293b] focus:outline-none focus:ring-2 focus:ring-[#0D9488]/30 focus:border-[#0D9488] transition cursor-pointer">
-                    <option value="all">Tous les pays ({{ count($laboratories) }})</option>
+                    <option value="all">{{ __('patient.choose_lab.all_countries', ['n' => count($laboratories)]) }}</option>
                     @foreach($countries as $country)
                     <option value="{{ $country }}">{{ $country }} ({{ $laboratories->where('country', $country)->count() }})</option>
                     @endforeach
                 </select>
             </div>
             <div class="flex items-center gap-2">
-                <label for="cityFilter" class="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider whitespace-nowrap">Ville :</label>
+                <label for="cityFilter" class="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider whitespace-nowrap">{{ __('patient.choose_lab.city') }}</label>
                 <select id="cityFilter"
                     class="w-full sm:w-52 px-3 py-2.5 rounded-xl border border-[#e2e8f0] bg-white text-sm text-[#1e293b] focus:outline-none focus:ring-2 focus:ring-[#0D9488]/30 focus:border-[#0D9488] transition cursor-pointer">
-                    <option value="all">Toutes les villes ({{ count($laboratories) }})</option>
+                    <option value="all">{{ __('patient.choose_lab.all_cities', ['n' => count($laboratories)]) }}</option>
                     @foreach($cities as $city)
                     <option value="{{ $city }}">{{ $city }} ({{ $laboratories->where('city', $city)->count() }})</option>
                     @endforeach
@@ -322,7 +322,7 @@
                                      style="width: {{ $compatPct }}%"></div>
                             </div>
                             <span class="text-[10px] font-bold whitespace-nowrap {{ $isFullyCompatible ? 'text-green-600' : ($coveredCount > 0 ? 'text-amber-600' : 'text-red-500') }}">
-                                {{ $coveredCount }}/{{ $totalRequired }} examens
+                                {{ $coveredCount }}/{{ $totalRequired }} @lang('patient.choose_lab.exams_covered').replace(':n','')
                             </span>
                         </div>
                         @endif
@@ -355,7 +355,7 @@
                 @if($totalRequired > 0 && $totalPrice > 0)
                 <div class="mb-4 p-3 bg-gradient-to-r from-[#0D9488]/5 to-teal-50 rounded-xl border border-[#0D9488]/10">
                     <div class="flex items-center justify-between">
-                        <span class="text-[10px] font-bold text-[#64748b] uppercase tracking-wider">Total prescription</span>
+                        <span class="text-[10px] font-bold text-[#64748b] uppercase tracking-wider">{{ __('patient.choose_lab.total_prescription') }}</span>
                         <span class="price-highlight text-lg font-black">{{ number_format($totalPrice, 2) }} <span class="text-xs font-bold">TND</span></span>
                     </div>
                 </div>
@@ -368,16 +368,16 @@
                         <svg class="w-3.5 h-3.5 text-[#0D9488] transition-transform group-open:rotate-90" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
                         </svg>
-                        Horaires & Jours de Repos
+                        {{ __('patient.choose_lab.hours_rest_days') }}
                     </summary>
                     <div class="mt-2 space-y-1 pl-5">
-                        <p class="text-[10px] font-bold text-[#64748b] uppercase tracking-wider mb-1">Horaires habituels :</p>
+                        <p class="text-[10px] font-bold text-[#64748b] uppercase tracking-wider mb-1">{{ __('patient.choose_lab.regular_hours') }}</p>
                         @foreach($lab->workingHours->whereNull('date_close') as $hours)
                         <p class="text-xs text-[#64748b] flex justify-between">
                             <span class="font-medium text-[#475569]">{{ $hours->day }}</span>
                             <span>
                                 @if($hours->is_closed)
-                                    <span class="text-red-500 font-semibold">Fermé</span>
+                                    <span class="text-red-500 font-semibold">{{ __('patient.choose_lab.closed') }}</span>
                                 @else
                                     {{ substr($hours->start_time, 0, 5) }} – {{ substr($hours->end_time, 0, 5) }}
                                 @endif
@@ -390,7 +390,7 @@
                         @endphp
                         @if($exceptions->count() > 0)
                         <div class="mt-3 pt-2.5 border-t border-[#e2e8f0]/60">
-                            <p class="text-[10px] font-bold text-[#dc2626] uppercase tracking-wider mb-1.5">Fermetures / Repos exceptionnels :</p>
+                            <p class="text-[10px] font-bold text-[#dc2626] uppercase tracking-wider mb-1.5">{{ __('patient.choose_lab.exception_closures') }}</p>
                             <div class="space-y-1">
                                 @foreach($exceptions as $exc)
                                 <p class="text-xs text-[#dc2626] flex justify-between items-center bg-red-50/50 px-2.5 py-1.5 rounded-lg border border-red-100/50">
@@ -413,7 +413,7 @@
                 @endphp
                 @if($matchingExams->count() > 0)
                 <div class="mb-4">
-                    <p class="text-[10px] font-bold text-[#1e293b] uppercase tracking-wider mb-1.5">Examens disponibles pour cette prescription :</p>
+                    <p class="text-[10px] font-bold text-[#1e293b] uppercase tracking-wider mb-1.5">{{ __('patient.choose_lab.exams_for_prescription') }}</p>
                     <div class="space-y-1">
                         @foreach($matchingExams as $ae)
                         <div class="flex items-center justify-between text-xs">
@@ -440,7 +440,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
-                    Voir sur la carte
+                    {{ __('patient.choose_lab.view_on_map') }}
                 </button>
 
                 {{-- Action button --}}
@@ -452,7 +452,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
                         </svg>
-                        Choisir ce laboratoire
+                        {{ __('patient.choose_lab.choose_this') }}
                     </button>
                 </form>
             </div>
@@ -464,8 +464,8 @@
             <svg class="w-14 h-14 mx-auto mb-3 opacity-40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
             </svg>
-            <p class="text-sm font-semibold">Aucun laboratoire trouvé</p>
-            <p class="text-xs mt-1">Essayez un autre pays ou une autre ville, ou effacez la recherche</p>
+            <p class="text-sm font-semibold">{{ __('patient.choose_lab.no_labs_found') }}</p>
+            <p class="text-xs mt-1">{{ __('patient.choose_lab.no_labs_hint') }}</p>
         </div>
 
         {{-- Pagination --}}
@@ -541,13 +541,13 @@
             return;
         }
         if (!('geolocation' in navigator)) {
-            setLocStatus('Localisation indisponible', true);
+            setLocStatus('@lang('patient.choose_lab.loc_unavailable')', true);
             return;
         }
-        setLocStatus('Localisation en cours...', false);
+        setLocStatus('@lang('patient.choose_lab.loc_in_progress')', false);
         navigator.geolocation.getCurrentPosition(
             function (pos) {
-                setLocStatus('Localisation activée', true);
+                setLocStatus('@lang('patient.choose_lab.loc_enabled')', true);
                 applyDistances(pos.coords.latitude, pos.coords.longitude);
                 window.dispatchEvent(new CustomEvent('patient-location', {
                     detail: { lat: pos.coords.latitude, lng: pos.coords.longitude }
@@ -568,7 +568,7 @@
                 }
             },
             function () {
-                setLocStatus('Localisation refusée', true);
+                setLocStatus('@lang('patient.choose_lab.loc_denied')', true);
             },
             { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 }
         );
@@ -639,7 +639,7 @@
         allCards.forEach(c => c.classList.add('hidden'));
         visible.slice(start, end).forEach(c => c.classList.remove('hidden'));
 
-        labCount.textContent = `${total} laboratoire(s)`;
+        labCount.textContent = `@lang('patient.choose_lab.lab_count')`.replace(':n', total);
 
         labEmpty.classList.toggle('hidden', total > 0);
         labGrid.classList.toggle('hidden', total === 0);
@@ -648,7 +648,7 @@
             labPag.classList.add('hidden');
         } else {
             labPag.classList.remove('hidden');
-            labInfo.textContent = `${start + 1}–${end} sur ${total}`;
+            labInfo.textContent = `@lang('patient.choose_lab.page_info')`.replace(':start', start + 1).replace(':end', end).replace(':total', total);
 
             const pages = [];
             for (let i = Math.max(1, labCurrentPage - 2); i <= Math.min(totalPages, labCurrentPage + 2); i++) pages.push(i);
@@ -713,7 +713,7 @@
                 .filter((v, i, a) => a.indexOf(v) === i)
                 .sort();
         }
-        cityFilter.innerHTML = '<option value="all">Toutes les villes (' + total + ')</option>' +
+        cityFilter.innerHTML = '<option value="all">@lang('patient.choose_lab.all_cities').replace(':n', total) + '</option>' +
             cities.map(c => '<option value="' + c + '">' + c + ' (' + countFor('cityExact', c) + ')</option>').join('');
     }
 
@@ -753,8 +753,8 @@
     <div class="bg-white rounded-[20px] w-full max-w-lg p-6 md:p-8 shadow-2xl max-h-[85vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-5 pb-4 border-b border-[#e2e8f0]">
             <div>
-                <h3 class="text-base font-bold text-[#1e293b]">Répartition entre laboratoires</h3>
-                <p class="text-[11px] text-[#64748b] mt-0.5">Optimisation pour couvrir tous vos examens</p>
+                <h3 class="text-base font-bold text-[#1e293b]">{{ __('patient.choose_lab.split_modal_title') }}</h3>
+                <p class="text-[11px] text-[#64748b] mt-0.5">{{ __('patient.choose_lab.split_modal_subtitle') }}</p>
             </div>
             <button onclick="closeSplitModal()" class="w-8 h-8 rounded-full bg-[#f1f5f9] hover:bg-[#e2e8f0] flex items-center justify-center text-[#64748b] hover:text-[#1e293b] transition cursor-pointer">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -763,7 +763,7 @@
         <div id="splitContent">
             <div class="text-center py-8">
                 <div class="animate-spin w-6 h-6 border-2 border-[#0D9488] border-t-transparent rounded-full mx-auto mb-3"></div>
-                <p class="text-xs text-[#64748b]">Analyse des laboratoires disponibles...</p>
+                <p class="text-xs text-[#64748b]">{{ __('patient.choose_lab.analyzing_labs') }}</p>
             </div>
         </div>
     </div>
@@ -774,7 +774,7 @@
 @section('scripts')
 <script>
     window.openLabOnMap = function() {
-        Swal.fire({ icon: 'info', title: 'Localisation', text: 'Chargement de la carte en cours...', confirmButtonColor: '#0D9488' });
+        Swal.fire({ icon: 'info', title: '@lang('patient.choose_lab.location')', text: '@lang('patient.choose_lab.loading_map')', confirmButtonColor: '#0D9488' });
     };
 </script>
 @if($labsWithCoords->count() > 0)
@@ -825,7 +825,7 @@
                 return;
             }
             patientMarker = L.marker([lat, lng], { icon: patientIcon }).addTo(map);
-            patientMarker.bindPopup('<div style="font-family:Inter,sans-serif"><b>Ma position</b></div>');
+            patientMarker.bindPopup('<div style="font-family:Inter,sans-serif"><b>@lang('patient.choose_lab.my_position')</b></div>');
             allMarkers.push(patientMarker);
             fitMap();
         }
@@ -862,7 +862,7 @@
                     markers[labId].openPopup();
                 }, 400);
             } else {
-                Swal.fire({ icon: 'info', title: 'Localisation', text: 'Ce laboratoire n\'a pas de position géographique enregistrée.', confirmButtonColor: '#0D9488' });
+                Swal.fire({ icon: 'info', title: '@lang('patient.choose_lab.location')', text: '@lang('patient.choose_lab.no_map_position')', confirmButtonColor: '#0D9488' });
             }
         };
     })();
@@ -883,7 +883,7 @@
         content.innerHTML = `
             <div class="text-center py-8">
                 <div class="animate-spin w-6 h-6 border-2 border-[#0D9488] border-t-transparent rounded-full mx-auto mb-3"></div>
-                <p class="text-xs text-[#64748b]">Analyse des laboratoires disponibles...</p>
+                <p class="text-xs text-[#64748b]">@lang('patient.choose_lab.analyzing_labs')</p>
             </div>`;
 
         try {
@@ -893,14 +893,14 @@
                 content.innerHTML = `
                     <div class="text-center py-8">
                         <svg class="w-10 h-10 mx-auto mb-2 opacity-30" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                        <p class="text-sm font-semibold text-[#1e293b]">Un seul laboratoire suffit</p>
-                        <p class="text-xs text-[#94a3b8] mt-1">Tous vos examens sont couverts par au moins un labo</p>
+                        <p class="text-sm font-semibold text-[#1e293b]">@lang('patient.choose_lab.single_lab_suffices')</p>
+                        <p class="text-xs text-[#94a3b8] mt-1">@lang('patient.choose_lab.single_lab_hint')</p>
                     </div>`;
                 return;
             }
             renderSplit(data.split);
         } catch(e) {
-            content.innerHTML = '<p class="text-xs text-red-500 text-center py-4">Erreur de chargement</p>';
+            content.innerHTML = '<p class="text-xs text-red-500 text-center py-4">@lang('patient.choose_lab.loading_error')</p>';
         }
     }
 
@@ -916,7 +916,7 @@
 
         if (covered.length > 1) {
             html += `<div class="mb-4 p-3 bg-purple-50 border border-purple-200 rounded-xl">
-                <p class="text-[11px] font-bold text-purple-700">${covered.length} laboratoire(s) nécessaires pour couvrir tous vos examens</p>
+                <p class="text-[11px] font-bold text-purple-700">@lang('patient.choose_lab.needed_labs').replace(':n', covered.length)</p>
             </div>`;
         }
 
@@ -935,20 +935,20 @@
                         <span class="w-7 h-7 rounded-full ${group.is_primary ? 'bg-[#0D9488] text-white' : 'bg-purple-100 text-purple-700'} flex items-center justify-center text-[11px] font-black flex-shrink-0">${i + 1}</span>
                         <div class="min-w-0">
                             <div class="text-sm font-bold text-[#1e293b] truncate">${group.lab_name}</div>
-                            ${group.is_primary ? '<span class="inline-block mt-0.5 text-[9px] font-bold text-[#0D9488] bg-[#0D9488]/10 px-1.5 py-0.5 rounded">PRINCIPAL</span>' : ''}
+                            ${group.is_primary ? '<span class="inline-block mt-0.5 text-[9px] font-bold text-[#0D9488] bg-[#0D9488]/10 px-1.5 py-0.5 rounded">@lang('patient.choose_lab.principal')</span>' : ''}
                         </div>
                     </div>
                     ${group.total_price > 0 ? `<span class="text-sm font-black text-[#0D9488] flex-shrink-0 ml-2">${Number(group.total_price).toFixed(2)} TND</span>` : ''}
                 </div>
                 <div class="flex items-center gap-1.5 text-[10px] text-[#64748b] mb-2">
                     <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                    ${group.exam_ids.length} examen(s) couverts
+                    @lang('patient.choose_lab.exams_covered').replace(':n', group.exam_ids.length)
                 </div>
                 <div id="splitExamList_${i}" class="hidden pt-2 border-t border-[#e2e8f0]/60">
                     ${renderExamTags(group)}
                 </div>
                 <button type="button" onclick="event.stopPropagation(); toggleExamList(${i})" class="mt-1 text-[10px] font-bold text-[#0D9488] hover:text-[#0a7068] transition cursor-pointer">
-                    Voir les examens ▾
+                    @lang('patient.choose_lab.view_exams')
                 </button>
             </div>`;
         });
@@ -958,15 +958,15 @@
             <div class="p-4 border-2 border-dashed border-red-300 rounded-xl bg-red-50 mb-4">
                 <div class="flex items-center gap-2 mb-1">
                     <svg class="w-4 h-4 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                    <span class="text-sm font-bold text-red-700">Examen(s) non couvert(s)</span>
+                    <span class="text-sm font-bold text-red-700">@lang('patient.choose_lab.uncovered_exams')</span>
                 </div>
-                <p class="text-[11px] text-red-600">${uncovered[0].exam_ids.length} examen(s) sans laboratoire disponible</p>
+                <p class="text-[11px] text-red-600">@lang('patient.choose_lab.uncovered_exams_hint').replace(':n', uncovered[0].exam_ids.length)</p>
             </div>`;
         }
 
         html += `<div class="flex gap-3 pt-4 border-t border-[#e2e8f0]">
-            <button onclick="closeSplitModal()" class="flex-1 py-3 rounded-xl bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] font-bold text-xs uppercase tracking-wider transition cursor-pointer">Annuler</button>
-            <button onclick="applySplit()" id="applySplitBtn" class="flex-1 py-3 rounded-xl bg-[#0D9488] hover:bg-[#0a7068] text-white font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md shadow-teal-200">Appliquer la répartition</button>
+            <button onclick="closeSplitModal()" class="flex-1 py-3 rounded-xl bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] font-bold text-xs uppercase tracking-wider transition cursor-pointer">@lang('common.cancel')</button>
+            <button onclick="applySplit()" id="applySplitBtn" class="flex-1 py-3 rounded-xl bg-[#0D9488] hover:bg-[#0a7068] text-white font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md shadow-teal-200">@lang('patient.choose_lab.apply_split')</button>
         </div>`;
 
         content.innerHTML = html;
@@ -995,7 +995,7 @@
     function renderExamTags(group) {
         return `<div class="flex flex-wrap gap-1">${group.exam_ids.map(eid => {
             const exam = allExams.find(e => e.id === eid);
-            const name = exam ? exam.name : 'Examen #' + eid;
+            const name = exam ? exam.name : '@lang('patient.choose_lab.exam') #' + eid;
             return `<span class="px-2 py-0.5 bg-[#0D9488]/10 text-[#0D9488] text-[9px] font-bold rounded-full border border-[#0D9488]/15">${name}</span>`;
         }).join('')}</div>`;
     }

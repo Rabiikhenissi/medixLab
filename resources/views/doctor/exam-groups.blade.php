@@ -1,5 +1,5 @@
 <x-layouts.doctor>
-    <x-slot:title>Groupes d'Examens – Medix eSanté</x-slot:title>
+    <x-slot:title>{{ __('doctor.exam_groups.title') }} – {{ __('app.brand') }}</x-slot:title>
 
     @section('content')
 
@@ -163,20 +163,20 @@
                     </svg>
                 </a>
                 <div>
-                    <h1 class="text-lg font-bold text-[#1e293b] tracking-tight">Groupes d'Examens</h1>
-                    <p class="text-xs text-[#64748b] mt-0.5">Créez et gérez vos groupes d'examens personnalisés</p>
+                    <h1 class="text-lg font-bold text-[#1e293b] tracking-tight">{{ __('doctor.exam_groups.title') }}</h1>
+                    <p class="text-xs text-[#64748b] mt-0.5">{{ __('doctor.exam_groups.subtitle') }}</p>
                 </div>
             </div>
             <div class="flex items-center gap-2">
                 <span class="badge text-[11px] px-3 py-1">
-                    {{ $examGroups->count() }} groupe(s)
+                    {{ __('doctor.group_count', ['n' => $examGroups->count()]) }}
                 </span>
                 @if(!$editGroup)
                 <a href="{{ route('doctor.exam-groups.create') }}" class="btn-primary">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
                     </svg>
-                    Nouveau groupe
+                    {{ __('doctor.new_group') }}
                 </a>
                 @endif
             </div>
@@ -213,30 +213,30 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                             </svg>
                         </div>
-                        <h2 class="text-sm font-bold text-[#1e293b]">Modifier le groupe</h2>
+                        <h2 class="text-sm font-bold text-[#1e293b]">{{ __('doctor.exam_groups.edit_group') }}</h2>
                     </div>
 
                     <form action="{{ route('doctor.exam-groups.update', $editGroup->id) }}" method="POST" class="space-y-4">
                         @csrf
                         @method('PUT')
                         <div>
-                            <label class="section-label block mb-1.5">Nom du groupe</label>
+                            <label class="section-label block mb-1.5">{{ __('doctor.group_name') }}</label>
                             <input type="text" name="name" class="form-input" value="{{ old('name', $editGroup->name) }}" required/>
                             @error('name')<p class="text-red-500 text-[10px] mt-1 font-semibold">{{ $message }}</p>@enderror
                         </div>
 
                         <div>
-                            <label class="section-label block mb-1.5">Description</label>
+                            <label class="section-label block mb-1.5">{{ __('doctor.description') }}</label>
                             <textarea name="description" rows="2" class="form-input resize-none">{{ old('description', $editGroup->description) }}</textarea>
                         </div>
 
                         <div>
-                            <label class="section-label block mb-2">Examens sélectionnés</label>
+                            <label class="section-label block mb-2">{{ __('doctor.selected_exams') }}</label>
                             <div class="relative mb-2">
                                 <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#94a3b8]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                 </svg>
-                                <input type="text" id="editSearchInput" class="form-input pl-9" placeholder="Filtrer les examens..."/>
+                                <input type="text" id="editSearchInput" class="form-input pl-9" placeholder="{{ __('doctor.exam_groups.filter_placeholder') }}"/>
                             </div>
                             @error('exam_ids')<p class="text-red-500 text-[10px] mb-1 font-semibold">{{ $message }}</p>@enderror
                             @php $editGroupExamIds = $editGroup->items->pluck('exam_id')->toArray(); @endphp
@@ -254,7 +254,7 @@
                                         </div>
                                     </label>
                                 @empty
-                                    <p class="text-center text-[11px] text-[#94a3b8] py-4 italic">Aucun examen disponible</p>
+                                    <p class="text-center text-[11px] text-[#94a3b8] py-4 italic">{{ __('doctor.no_exams_available') }}</p>
                                 @endforelse
                             </div>
                         </div>
@@ -264,9 +264,9 @@
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
                                 </svg>
-                                Enregistrer
+                                {{ __('common.save') }}
                             </button>
-                            <a href="{{ route('doctor.exam-groups.index') }}" class="btn-secondary">Annuler</a>
+                            <a href="{{ route('doctor.exam-groups.index') }}" class="btn-secondary">{{ __('common.cancel') }}</a>
                         </div>
                     </form>
                 </div>
@@ -281,14 +281,14 @@
                             <svg class="w-4 h-4 text-[#0066FF]" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                             </svg>
-                            Mes groupes
+                            {{ __('doctor.exam_groups.my_groups') }}
                         </h2>
                         {{-- Search across list --}}
                         <div class="relative">
                             <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-[#94a3b8]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                             </svg>
-                            <input type="text" id="listSearchInput" placeholder="Rechercher..." class="pl-7 pr-3 py-1.5 text-[11px] font-semibold border border-[#e2e8f0] rounded-lg outline-none focus:border-[#0066FF] transition w-[160px]"/>
+                            <input type="text" id="listSearchInput" placeholder="{{ __('common.search_placeholder') }}" class="pl-7 pr-3 py-1.5 text-[11px] font-semibold border border-[#e2e8f0] rounded-lg outline-none focus:border-[#0066FF] transition w-[160px]"/>
                         </div>
                     </div>
 
@@ -300,10 +300,10 @@
                                         <div class="min-w-0 flex-1">
                                             <div class="flex items-center gap-2 flex-wrap">
                                                 <p class="font-bold text-sm text-[#1e293b]">{{ $group->name }}</p>
-                                                <span class="badge">{{ $group->items->count() }} examen(s)</span>
+                                                <span class="badge">{{ __('doctor.exam_count', ['n' => $group->items->count()]) }}</span>
                                             </div>
                                             <p class="text-[11px] text-[#64748b] mt-1 truncate">
-                                                {{ $group->description ?: 'Aucune description' }}
+                                                {{ $group->description ?: __('doctor.no_description') }}
                                             </p>
                                             {{-- Exam tags --}}
                                             @if($group->items->count() > 0)
@@ -317,7 +317,7 @@
                                                     @endforeach
                                                     @if($group->items->count() > 5)
                                                         <span class="text-[9px] font-bold bg-[#F8FAFC] border border-[#e2e8f0] text-[#94a3b8] px-2 py-0.5 rounded-full">
-                                                            +{{ $group->items->count() - 5 }} autres
+                                                            {{ __('doctor.more_count', ['n' => $group->items->count() - 5]) }}
                                                         </span>
                                                     @endif
                                                 </div>
@@ -329,22 +329,22 @@
                                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                                 </svg>
-                                                Modifier
+                                                {{ __('common.edit') }}
                                             </a>
-                                            <form action="{{ route('doctor.exam-groups.destroy', $group->id) }}" method="POST" class="inline" onsubmit="return swalConfirmSubmit(this, 'Supprimer définitivement « {{ addslashes($group->name) }} » ?');">
+                                            <form action="{{ route('doctor.exam-groups.destroy', $group->id) }}" method="POST" class="inline" onsubmit="return swalConfirmSubmit(this, '{{ __('doctor.delete_group_confirm', ['name' => addslashes($group->name)]) }}');">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn-danger">
                                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                                     </svg>
-                                                    Supprimer
+                                                    {{ __('common.delete') }}
                                                 </button>
                                             </form>
                                         </div>
                                     </div>
                                     <p class="text-[9px] text-[#94a3b8] font-semibold mt-2 pt-2 border-t border-[#f1f5f9]">
-                                        Créé le {{ $group->created_at->format('d/m/Y') }}
+                                        {{ __('common.created_at') }} {{ $group->created_at->format('d/m/Y') }}
                                     </p>
                                 </div>
                             @endforeach
@@ -356,12 +356,12 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                                 </svg>
                             </div>
-                            <p class="text-xs font-semibold text-[#94a3b8]">Aucun groupe créé pour le moment.</p>
+                            <p class="text-xs font-semibold text-[#94a3b8]">{{ __('doctor.exam_groups.no_groups') }}</p>
                             <a href="{{ route('doctor.exam-groups.create') }}" class="inline-flex items-center gap-1.5 mt-3 btn-primary">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
                                 </svg>
-                                Créer un groupe
+                                {{ __('doctor.create_group') }}
                             </a>
                         </div>
                     @endif

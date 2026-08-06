@@ -1,13 +1,13 @@
 @extends('layouts.admin')
 
-@section('title', 'Incidents RGPD')
-@section('page-title', 'Registre des incidents de données')
-@section('page-subtitle', 'Notifier et tracer les violations de données personnelles (RGPD art. 33 & 34).')
+@section('title', __('admin.gdpr_incidents.title'))
+@section('page-title', __('admin.gdpr_incidents.register_title'))
+@section('page-subtitle', __('admin.gdpr_incidents.page_subtitle'))
 
 @section('content')
     <div class="data-section anim anim-1">
         <div class="data-header">
-            <div class="data-title">Déclarer un incident</div>
+            <div class="data-title">{{ __('admin.gdpr_incidents.declare') }}</div>
         </div>
 
         @if (session('success'))
@@ -30,38 +30,38 @@
             @csrf
             <div class="filters-bar">
                 <div>
-                    <span class="filter-label">Type</span>
+                    <span class="filter-label">{{ __('admin.gdpr_incidents.type') }}</span>
                     <div class="filter-group">
                         <select name="incident_type" class="filter-input" required>
-                            <option value="" disabled selected>Type d'incident</option>
-                            <option value="data_breach">Violation de données</option>
-                            <option value="unauthorized_access">Accès non autorisé</option>
-                            <option value="data_loss">Perte de données</option>
-                            <option value="privacy_violation">Violation de la vie privée</option>
-                            <option value="other">Autre</option>
+                            <option value="" disabled selected>{{ __('admin.gdpr_incidents.type_placeholder') }}</option>
+                            <option value="data_breach">{{ __('admin.gdpr_incidents.type_data_breach') }}</option>
+                            <option value="unauthorized_access">{{ __('admin.gdpr_incidents.type_unauthorized_access') }}</option>
+                            <option value="data_loss">{{ __('admin.gdpr_incidents.type_data_loss') }}</option>
+                            <option value="privacy_violation">{{ __('admin.gdpr_incidents.type_privacy_violation') }}</option>
+                            <option value="other">{{ __('admin.gdpr_incidents.type_other') }}</option>
                         </select>
                     </div>
                 </div>
                 <div>
-                    <span class="filter-label">Gravité</span>
+                    <span class="filter-label">{{ __('admin.gdpr_incidents.severity') }}</span>
                     <div class="filter-group">
                         <select name="severity" class="filter-input" required>
-                            <option value="" disabled selected>Gravité</option>
-                            <option value="low">Faible</option>
-                            <option value="medium">Moyenne</option>
-                            <option value="high">Élevée</option>
-                            <option value="critical">Critique</option>
+                            <option value="" disabled selected>{{ __('admin.gdpr_incidents.severity_placeholder') }}</option>
+                            <option value="low">{{ __('admin.gdpr_incidents.severity_low') }}</option>
+                            <option value="medium">{{ __('admin.gdpr_incidents.severity_medium') }}</option>
+                            <option value="high">{{ __('admin.gdpr_incidents.severity_high') }}</option>
+                            <option value="critical">{{ __('admin.gdpr_incidents.severity_critical') }}</option>
                         </select>
                     </div>
                 </div>
                 <div>
-                    <span class="filter-label">Détecté le</span>
+                    <span class="filter-label">{{ __('admin.gdpr_incidents.detected_at') }}</span>
                     <div class="filter-group">
                         <input type="date" name="detected_at" class="filter-input" value="{{ old('detected_at', now()->format('Y-m-d')) }}" required>
                     </div>
                 </div>
                 <div>
-                    <span class="filter-label">Comptes affectés (optionnel)</span>
+                    <span class="filter-label">{{ __('admin.gdpr_incidents.affected_accounts_optional') }}</span>
                     <div class="filter-group">
                         <input type="number" name="affected_users_count" min="0" class="filter-input" value="{{ old('affected_users_count') }}">
                     </div>
@@ -69,33 +69,33 @@
             </div>
 
             <div class="filter-group" style="margin-top:12px;width:100%;">
-                <textarea name="description" class="filter-input" rows="3" placeholder="Décrivez l'incident, les données concernées et les mesures prises..." required>{{ old('description') }}</textarea>
+                <textarea name="description" class="filter-input" rows="3" placeholder="{{ __('admin.gdpr_incidents.description_placeholder') }}" required>{{ old('description') }}</textarea>
             </div>
 
             <div style="margin-top:12px;">
-                <button type="submit" class="btn-filter">Enregistrer l'incident</button>
+                <button type="submit" class="btn-filter">{{ __('admin.gdpr_incidents.save_incident') }}</button>
             </div>
         </form>
     </div>
 
     <div class="data-section anim anim-2">
         <div class="data-header">
-            <div class="data-title">Historique des incidents ({{ $incidents->total() }})</div>
+            <div class="data-title">{{ __('admin.gdpr_incidents.history', ['count' => $incidents->total()]) }}</div>
         </div>
 
         <table class="data-table">
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Type</th>
-                    <th>Gravité</th>
-                    <th>Comptes</th>
-                    <th>Détecté le</th>
-                    <th>Description</th>
-                    <th>Autorité</th>
-                    <th>Affectés</th>
-                    <th>Statut</th>
-                    <th>Actions</th>
+                    <th>{{ __('admin.gdpr_incidents.type') }}</th>
+                    <th>{{ __('admin.gdpr_incidents.severity') }}</th>
+                    <th>{{ __('admin.gdpr_incidents.accounts') }}</th>
+                    <th>{{ __('admin.gdpr_incidents.detected_on') }}</th>
+                    <th>{{ __('admin.gdpr_incidents.description') }}</th>
+                    <th>{{ __('admin.gdpr_incidents.authority') }}</th>
+                    <th>{{ __('admin.gdpr_incidents.affected') }}</th>
+                    <th>{{ __('common.status') }}</th>
+                    <th>{{ __('common.actions') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -112,16 +112,16 @@
                         <td>{{ optional($incident->notified_authority_at)->format('d/m/Y') ?? '—' }}</td>
                         <td>{{ optional($incident->notified_affected_at)->format('d/m/Y') ?? '—' }}</td>
                         <td>
-                            <span class="status-badge status-{{ $incident->status }}">{{ $incident->status === 'open' ? 'Ouvert' : 'Résolu' }}</span>
+                            <span class="status-badge status-{{ $incident->status }}">{{ $incident->status === 'open' ? __('admin.gdpr_incidents.status_open') : __('admin.gdpr_incidents.status_resolved') }}</span>
                         </td>
                         <td>
                             @if ($incident->isOpen())
                                 <details>
-                                    <summary class="btn-resolve">Résoudre</summary>
+                                    <summary class="btn-resolve">{{ __('admin.gdpr_incidents.resolve') }}</summary>
                                     <form method="POST" action="{{ route('admin.gdpr.incidents.resolve', $incident) }}" style="margin-top:8px;">
                                         @csrf
-                                        <textarea name="resolution" class="filter-input" rows="2" placeholder="Mesures correctives..." required></textarea>
-                                        <button type="submit" class="btn-filter" style="margin-top:6px;">Marquer résolu</button>
+                                        <textarea name="resolution" class="filter-input" rows="2" placeholder="{{ __('admin.gdpr_incidents.resolution_placeholder') }}" required></textarea>
+                                        <button type="submit" class="btn-filter" style="margin-top:6px;">{{ __('admin.gdpr_incidents.mark_resolved') }}</button>
                                     </form>
                                 </details>
                             @else
@@ -131,7 +131,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="10" class="text-center">Aucun incident déclaré.</td>
+                        <td colspan="10" class="text-center">{{ __('admin.gdpr_incidents.no_incidents') }}</td>
                     </tr>
                 @endforelse
             </tbody>

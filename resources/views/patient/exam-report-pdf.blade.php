@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
-    <title>Rapport d'Analyses — Medix eSanté</title>
+    <title>{{ __('patient.report.title') }} — Medix eSanté</title>
     <style>
         * { box-sizing: border-box; }
         body { font-family: Helvetica, Arial, sans-serif; color: #1e293b; font-size: 12px; line-height: 1.5; margin: 0; padding: 0; }
@@ -40,11 +40,11 @@
             <tr>
                 <td style="width:60%; vertical-align:top;">
                     <div class="brand">Medix eSanté</div>
-                    <div class="brand-sub">Rapport officiel d'analyses médicales</div>
+                    <div class="brand-sub">{{ __('patient.report.official_subtitle') }}</div>
                 </td>
                 <td class="meta" style="vertical-align:top;">
-                    <div class="ref">Réf. #{{ $examRequest->id }}</div>
-                    <div>Émis le {{ now()->format('d/m/Y à H:i') }}</div>
+                    <div class="ref">{{ __('patient.report.ref_prefix') }} #{{ $examRequest->id }}</div>
+                    <div>{{ __('patient.report.issued_on') }} {{ now()->format(__('patient.report.date_time_format')) }}</div>
                     @if($examRequest->laboratory)
                         <div style="font-weight:bold;color:#1e293b;margin-top:4px;">
                             {{ $examRequest->laboratory->name }}
@@ -56,38 +56,38 @@
         </table>
     </div>
 
-    <div class="section">Informations du patient</div>
+    <div class="section">{{ __('patient.report.patient_info') }}</div>
     <table class="info">
         <tr>
             <td>
-                <div class="label">Patient</div>
+                <div class="label">{{ __('layout.role_patient') }}</div>
                 <div class="value">{{ $examRequest->patient->user->first_name }} {{ $examRequest->patient->user->last_name }}</div>
-                <div class="sub">Code : {{ $examRequest->patient->patient_code }}</div>
+                <div class="sub">{{ __('patient.invoices.patient_code') }} : {{ $examRequest->patient->patient_code }}</div>
             </td>
             <td>
-                <div class="label">Médecin prescripteur</div>
+                <div class="label">{{ __('patient.report.prescribing_doctor') }}</div>
                 <div class="value">Dr. {{ $examRequest->doctor->user->first_name }} {{ $examRequest->doctor->user->last_name }}</div>
                 <div class="sub">{{ $examRequest->doctor->speciality }}</div>
             </td>
         </tr>
         <tr>
             <td>
-                <div class="label">Date de prescription</div>
-                <div class="value">{{ $examRequest->created_at->format('d/m/Y') }} à {{ $examRequest->created_at->format('H:i') }}</div>
+                <div class="label">{{ __('patient.report.prescription_date') }}</div>
+                <div class="value">{{ $examRequest->created_at->format(__('patient.report.date_time_format')) }}</div>
             </td>
             <td>
-                <div class="label">Statut</div>
-                <div class="value">Complétée &amp; Approuvée</div>
+                <div class="label">{{ __('common.status') }}</div>
+                <div class="value">{{ __('patient.report.completed_approved') }}</div>
             </td>
         </tr>
     </table>
 
     @if($examRequest->clinical_notes)
-        <div class="section">Notes cliniques</div>
+        <div class="section">{{ __('patient.dashboard.clinical_notes') }}</div>
         <div class="notes">"{{ $examRequest->clinical_notes }}"</div>
     @endif
 
-    <div class="section">Résultats des analyses ({{ $examRequest->items->count() }} examen(s))</div>
+    <div class="section">{{ __('patient.report.results_count', ['n' => $examRequest->items->count()]) }}</div>
 
     @foreach($examRequest->items as $item)
         <table class="results">
@@ -96,10 +96,10 @@
             </tr>
             @if($item->resultLabo && $item->resultLabo->details->count() > 0)
                 <tr>
-                    <th style="width:38%;">Paramètre</th>
-                    <th style="width:18%;">Valeur</th>
-                    <th style="width:28%;">Plage normale</th>
-                    <th style="width:16%;">Statut</th>
+                    <th style="width:38%;">{{ __('patient.report.parameter') }}</th>
+                    <th style="width:18%;">{{ __('patient.report.value') }}</th>
+                    <th style="width:28%;">{{ __('patient.report.normal_range') }}</th>
+                    <th style="width:16%;">{{ __('common.status') }}</th>
                 </tr>
                 @foreach($item->resultLabo->details as $detail)
                     <tr>
@@ -111,10 +111,10 @@
                                 $map = ['normal' => 'normal', 'high' => 'high', 'low' => 'low', 'critical' => 'critical'];
                                 $cls = $map[$detail->status] ?? 'normal';
                                 $label = match ($detail->status) {
-                                    'normal' => '✓ Normal',
-                                    'high' => '↑ Élevé',
-                                    'low' => '↓ Bas',
-                                    'critical' => '⚠ CRITIQUE',
+                                    'normal' => '✓ ' . __('patient.report.status_normal'),
+                                    'high' => '↑ ' . __('patient.report.status_high'),
+                                    'low' => '↓ ' . __('patient.report.status_low'),
+                                    'critical' => '⚠ ' . __('patient.report.status_critical'),
                                     default => $detail->status,
                                 };
                             @endphp
@@ -124,12 +124,12 @@
                 @endforeach
                 @if($item->resultLabo->interpretation)
                     <tr>
-                        <td colspan="4" class="interp">Interprétation : {{ $item->resultLabo->interpretation }}</td>
+                        <td colspan="4" class="interp">{{ __('patient.report.interpretation') }} {{ $item->resultLabo->interpretation }}</td>
                     </tr>
                 @endif
             @else
                 <tr>
-                    <td class="no-results">Aucun résultat détaillé disponible.</td>
+                    <td class="no-results">{{ __('patient.report.no_detailed_results') }}</td>
                 </tr>
             @endif
         </table>
@@ -137,13 +137,13 @@
 
     @if($examRequest->doctor_interpretation)
         <div class="doctor-interp">
-            <div class="section" style="margin-top:0; color:#6d28d9;">Interprétation du médecin</div>
+            <div class="section" style="margin-top:0; color:#6d28d9;">{{ __('patient.report.doctor_interpretation') }}</div>
             {{ $examRequest->doctor_interpretation }}
         </div>
     @endif
 
     <div class="footer">
-        Medix eSanté — Plateforme de santé numérique — Document généré automatiquement le {{ now()->format('d/m/Y à H:i') }}
+        Medix eSanté — {{ __('patient.report.digital_health_platform') }} — {{ __('patient.report.auto_generated') }} {{ now()->format(__('patient.report.date_time_format')) }}
     </div>
 
     <div class="signature">

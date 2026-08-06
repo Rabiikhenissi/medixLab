@@ -1,5 +1,5 @@
 <x-layouts.doctor>
-    <x-slot:title>Nouveau Groupe d'Examens - Medix eSanté</x-slot:title>
+    <x-slot:title>{{ __('doctor.exam_groups.create_title') }} - {{ __('app.brand') }}</x-slot:title>
 
     @section('content')
 
@@ -94,8 +94,8 @@
                 </svg>
             </a>
             <div>
-                <h1 class="text-lg font-bold text-[#1e293b] tracking-tight">Nouveau Groupe d'Examens</h1>
-                <p class="text-xs text-[#64748b] mt-0.5">Créez un groupe d'examens réutilisable</p>
+                <h1 class="text-lg font-bold text-[#1e293b] tracking-tight">{{ __('doctor.exam_groups.create_title') }}</h1>
+                <p class="text-xs text-[#64748b] mt-0.5">{{ __('doctor.exam_groups.create_subtitle') }}</p>
             </div>
         </div>
 
@@ -113,22 +113,22 @@
             <form action="{{ route('doctor.exam-groups.store') }}" method="POST" class="space-y-5">
                 @csrf
                 <div>
-                    <label class="section-label block mb-1.5">Nom du groupe</label>
-                    <input type="text" name="name" class="form-input" placeholder="Ex: Bilan Lipidique, Diabète..." value="{{ old('name') }}" required/>
+                    <label class="section-label block mb-1.5">{{ __('doctor.group_name') }}</label>
+                    <input type="text" name="name" class="form-input" placeholder="{{ __('doctor.exam_groups.name_placeholder') }}" value="{{ old('name') }}" required/>
                 </div>
 
                 <div>
-                    <label class="section-label block mb-1.5">Description</label>
-                    <textarea name="description" rows="3" class="form-input resize-none" placeholder="Description succincte...">{{ old('description') }}</textarea>
+                    <label class="section-label block mb-1.5">{{ __('doctor.description') }}</label>
+                    <textarea name="description" rows="3" class="form-input resize-none" placeholder="{{ __('doctor.exam_groups.desc_placeholder') }}">{{ old('description') }}</textarea>
                 </div>
 
                 <div>
-                    <label class="section-label block mb-2">Examens ({{ $exams->count() }} disponibles)</label>
+                    <label class="section-label block mb-2">{{ __('doctor.exams_available_label', ['n' => $exams->count()]) }}</label>
                     <div class="relative mb-2">
                         <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#94a3b8]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
-                        <input type="text" id="createSearchInput" class="form-input pl-9" placeholder="Filtrer les examens..."/>
+                        <input type="text" id="createSearchInput" class="form-input pl-9" placeholder="{{ __('doctor.exam_groups.filter_placeholder') }}"/>
                     </div>
                     <div class="border border-[#e2e8f0] rounded-xl p-2.5 max-h-[320px] overflow-y-auto space-y-1.5 bg-[#F8FAFC]">
                         @forelse($exams as $exam)
@@ -144,7 +144,7 @@
                                 </div>
                             </label>
                         @empty
-                            <p class="text-center text-[11px] text-[#94a3b8] py-4 italic">Aucun examen disponible</p>
+                            <p class="text-center text-[11px] text-[#94a3b8] py-4 italic">{{ __('doctor.no_exams_available') }}</p>
                         @endforelse
                     </div>
                 </div>
@@ -154,9 +154,9 @@
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
                         </svg>
-                        Créer le groupe
+                        {{ __('doctor.create_the_group') }}
                     </button>
-                    <a href="{{ route('doctor.exam-groups.index') }}" class="btn-secondary">Annuler</a>
+                    <a href="{{ route('doctor.exam-groups.index') }}" class="btn-secondary">{{ __('common.cancel') }}</a>
                 </div>
             </form>
         </div>

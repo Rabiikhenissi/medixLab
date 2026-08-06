@@ -3,12 +3,12 @@
 @section('content')
     @php
         $iconMap = [
-            'access_request' => ['icon' => 'key', 'color' => 'blue', 'label' => 'Demande d\'accès'],
-            'exam_request'   => ['icon' => 'flask', 'color' => 'teal', 'label' => 'Demande d\'analyses'],
-            'stock_alert'    => ['icon' => 'alert', 'color' => 'amber', 'label' => 'Alerte stock'],
-            'results_ready'  => ['icon' => 'check', 'color' => 'green', 'label' => 'Résultats disponibles'],
+            'access_request' => ['icon' => 'key', 'color' => 'blue', 'label' => __('emails.notification.label_access_request')],
+            'exam_request'   => ['icon' => 'flask', 'color' => 'teal', 'label' => __('emails.notification.label_exam_request')],
+            'stock_alert'    => ['icon' => 'alert', 'color' => 'amber', 'label' => __('emails.notification.label_stock_alert')],
+            'results_ready'  => ['icon' => 'check', 'color' => 'green', 'label' => __('emails.notification.label_results_ready')],
         ];
-        $cfg = $iconMap[$type] ?? ['icon' => 'bell', 'color' => 'blue', 'label' => 'Notification'];
+        $cfg = $iconMap[$type] ?? ['icon' => 'bell', 'color' => 'blue', 'label' => __('emails.notification.label_generic')];
     @endphp
 
     <div class="icon-badge icon-{{ $cfg['color'] }}">
@@ -46,16 +46,16 @@
 
     <div class="info-box">
         <p>
-            <strong>Type :</strong> {{ $cfg['label'] }}<br>
-            <strong>Date :</strong> {{ now()->format('d/m/Y à H:i') }}
+            <strong>{{ __('emails.type_label') }}</strong> {{ $cfg['label'] }}<br>
+            <strong>{{ __('emails.date_label') }}</strong> {{ now()->format(__('common.datetime_format')) }}
         </p>
     </div>
 
     <a href="{{ $actionUrl ?? config('app.url') }}" class="btn {{ $cfg['color'] === 'teal' ? 'btn-teal' : ($cfg['color'] === 'amber' ? 'btn-amber' : '') }}">
-        {{ $actionLabel ?? 'Ouvrir mon espace' }}
+        {{ $actionLabel ?? __('emails.notification.open_space') }}
     </a>
 
     <p class="expire-note">
-        Connectez-vous à votre espace Medix eSanté pour consulter cette notification et y répondre.
+        {{ __('emails.notification.expire_note') }}
     </p>
 @endsection

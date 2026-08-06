@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Espace Patient') - Medix eSanté</title>
+    <title>@yield('title', __('components.layouts_patient.default_title')) - Medix eSanté</title>
 
     <!-- Google Fonts: Outfit & Instrument Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -397,16 +397,16 @@
 
             @php $patientRoute = request()->route()->getName(); @endphp
             <div class="flex items-center gap-2 text-[10px] uppercase tracking-wider font-extrabold text-[#64748b] bg-[#f8fafc]/40 px-4 py-2.5 rounded-xl border border-[#e2e8f0]/40 mb-6 select-none">
-                <a href="{{ route('patient.dashboard') }}" class="hover:text-[#0D9488] transition">Espace Patient</a>
+                <a href="{{ route('patient.dashboard') }}" class="hover:text-[#0D9488] transition">{{ __('components.layouts_patient.patient_space') }}</a>
                 <svg class="w-3 h-3 text-[#94a3b8]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
                 @if($patientRoute === 'patient.dashboard')
-                    <span class="text-[#1e293b]">Tableau de Bord</span>
+                    <span class="text-[#1e293b]">{{ __('components.layouts_patient.dashboard') }}</span>
                 @elseif($patientRoute === 'patient.analytics')
-                    <span class="text-[#1e293b]">Mes Statistiques</span>
+                    <span class="text-[#1e293b]">{{ __('components.layouts_patient.my_statistics') }}</span>
                 @elseif($patientRoute === 'patient.medical-history')
-                    <span class="text-[#1e293b]">Historique Médical</span>
+                    <span class="text-[#1e293b]">{{ __('components.layouts_patient.medical_history') }}</span>
                 @elseif($patientRoute === 'profile.show')
-                    <span class="text-[#1e293b]">Mon Profil</span>
+                    <span class="text-[#1e293b]">{{ __('auth.profile') }}</span>
                 @else
                     <span class="text-[#1e293b]">{{ ucfirst(str_replace(['patient.', '-'], ['', ' '], $patientRoute)) }}</span>
                 @endif
@@ -426,14 +426,14 @@
     <script>
         function swalConfirmSubmit(form, message) {
             Swal.fire({
-                title: 'Confirmer',
+                title: @json(__('common.confirm')),
                 text: message,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#0066FF',
                 cancelButtonColor: '#94a3b8',
-                confirmButtonText: 'Confirmer',
-                cancelButtonText: 'Annuler'
+                confirmButtonText: @json(__('common.confirm')),
+                cancelButtonText: @json(__('common.cancel'))
             }).then((result) => {
                 if (result.isConfirmed) form.submit();
             });

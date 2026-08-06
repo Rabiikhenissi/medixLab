@@ -44,7 +44,7 @@
                 class="custom-input w-full px-4 py-2.5 bg-[#F8FAFC] border border-[#e2e8f0] rounded-xl text-sm text-[#1e293b] placeholder-[#94a3b8] focus:outline-none focus:bg-white {{ $type === 'password' ? 'pr-10' : '' }}">
             @if($type === 'password')
                 <button type="button" tabindex="-1" onclick="togglePasswordVisibility(this)" class="password-toggle"
-                    style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#94a3b8;padding:4px;display:flex;align-items:center;justify-content:center;border-radius:6px;transition:color 0.15s;" aria-label="Afficher/Masquer le mot de passe">
+                    style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#94a3b8;padding:4px;display:flex;align-items:center;justify-content:center;border-radius:6px;transition:color 0.15s;" aria-label="{{ __('components.input.toggle_password') }}">
                     <svg class="pw-eye w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -64,7 +64,7 @@
                         var eyeOff = btn.querySelector('.pw-eye-off');
                         if (eye) eye.style.display = showing ? '' : 'none';
                         if (eyeOff) eyeOff.style.display = showing ? 'none' : '';
-                        btn.setAttribute('aria-label', showing ? 'Afficher le mot de passe' : 'Masquer le mot de passe');
+                        btn.setAttribute('aria-label', showing ? '{{ __('components.input.show_password') }}' : '{{ __('components.input.hide_password') }}');
                         input.focus();
                     }
                 </script>

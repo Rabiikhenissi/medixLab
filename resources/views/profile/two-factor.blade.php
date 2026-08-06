@@ -21,122 +21,166 @@
 
 @extends($layouts[$groupCode] ?? 'layouts.admin')
 
-@section('title', 'Sécurité - Authentification à deux facteurs')
+@section('title', __('profile.two_factor_meta'))
 
 @section('page-title')
-Sécurité <span style="color:{{ $colors['primary'] }};">2FA</span>
+{{ __('profile.security') }} <span style="color:{{ $colors['primary'] }};">2FA</span>
 @endsection
 
 @section('page-subtitle')
-Protégez votre compte avec une double authentification par email.
+{{ __('profile.two_factor_subtitle') }}
 @endsection
 
 @section('content')
 
-<div class="max-w-2xl">
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
     @if(session('success'))
-        <div class="mb-4 p-3 text-xs font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-xl">
+        <div class="mb-5 p-4 text-sm font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-2">
+            <svg class="w-5 h-5 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             {{ session('success') }}
         </div>
     @endif
 
     @if(session('status'))
-        <div class="mb-4 p-3 text-xs font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-xl">
+        <div class="mb-5 p-4 text-sm font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-2">
+            <svg class="w-5 h-5 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             {{ session('status') }}
         </div>
     @endif
 
-    <div class="form-card">
-        <h3>Authentification à deux facteurs (par email)</h3>
-        <p style="font-size:13px; color:#64748b; line-height:1.6; margin-bottom:16px;">
-            Renforcez la sécurité de votre compte : en plus du mot de passe, un code à 6 chiffres
-            vous sera envoyé par email (votre boîte Gmail par exemple) à chaque connexion.
-            Aucune application d'authentification n'est nécessaire.
-        </p>
-
-        <div style="display:flex; align-items:center; gap:12px; padding:14px 16px; border-radius:12px;
-            {{ $enabled ? 'background:#ecfdf5; border:1px solid #a7f3d0;' : 'background:#fffbeb; border:1px solid #fde68a;' }}">
-            <span style="font-size:20px;">{{ $enabled ? '✅' : '⚠️' }}</span>
-            <div>
-                <strong style="font-size:13px; color:#0f172a;">
-                    {{ $enabled ? 'Activée' : 'Non activée' }}
-                </strong>
-                @if($enabled)
-                    <div style="font-size:12px; color:#475569;">
-                        Activée le {{ auth()->user()->two_factor_confirmed_at?->format('d/m/Y à H:i') }}
-                    </div>
-                @else
-                    <div style="font-size:12px; color:#475569;">Votre compte n'est pas encore protégé.</div>
-                @endif
+    <div class="glass-card rounded-2xl p-5 md:p-8">
+        <div class="flex items-center gap-3 mb-2">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0066FF] to-[#00A3FF] flex items-center justify-center shadow-md shadow-[#0066FF]/20">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
             </div>
+            <div>
+                <h3 class="text-lg font-extrabold text-[#0f172a]">{{ __('profile.two_factor_heading') }}</h3>
+                <p class="text-xs text-[#64748b]">{{ __('profile.two_factor_description') }}</p>
+            </div>
+        </div>
+
+        <div class="mt-5 flex items-center justify-between p-4 rounded-xl
+            {{ $enabled ? 'bg-emerald-50 border border-emerald-200' : 'bg-amber-50 border border-amber-200' }}">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl">{{ $enabled ? '✅' : '⚠️' }}</span>
+                <div>
+                    <strong class="text-sm text-[#0f172a]">{{ $enabled ? __('profile.two_factor_enabled') : __('profile.two_factor_not_enabled') }}</strong>
+                    @if($enabled)
+                        <p class="text-xs text-[#475569] mt-0.5">{{ __('profile.two_factor_enabled_on', ['date' => auth()->user()->two_factor_confirmed_at?->format(__('common.datetime_format'))]) }}</p>
+                    @else
+                        <p class="text-xs text-[#475569] mt-0.5">{{ __('profile.two_factor_not_protected') }}</p>
+                    @endif
+                </div>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" class="sr-only peer" {{ $enabled ? 'checked' : '' }} disabled>
+                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#0066FF]"></div>
+            </label>
         </div>
     </div>
 
     @if($enabled)
-        <div class="form-card" style="margin-top:20px;">
-            <h3>Désactiver la double authentification</h3>
-            <p style="font-size:13px; color:#64748b; line-height:1.6; margin-bottom:16px;">
-                Après désactivation, un simple mot de passe suffira à vous connecter.
-            </p>
-            <form action="{{ route('profile.two-factor.disable') }}" method="POST">
+        <div class="glass-card rounded-2xl p-5 md:p-8 mt-5 w-full">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#e11d48] to-[#be123c] flex items-center justify-center shadow-md shadow-[#e11d48]/20">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-extrabold text-[#0f172a]">{{ __('profile.disable_2fa_heading') }}</h3>
+                    <p class="text-xs text-[#64748b]">{{ __('profile.disable_2fa_help') }}</p>
+                </div>
+            </div>
+
+            <form action="{{ route('profile.two-factor.disable') }}" method="POST" class="space-y-4">
                 @csrf
-                <div class="form-field full">
-                    <label>Mot de passe actuel</label>
-                    <input type="password" name="password" required>
+                <div>
+                    <label for="disable-password" class="block text-xs font-bold text-[#475569] uppercase tracking-wider mb-2">{{ __('profile.current_password') }}</label>
+                    <input id="disable-password" type="password" name="password" required autocomplete="current-password"
+                        class="w-full bg-white border-2 border-[#e2e8f0] rounded-xl px-4 py-3 text-sm text-[#1e293b] placeholder:text-[#CBD5E1] focus:outline-none focus:ring-4 focus:ring-[#e11d48]/10 focus:border-[#e11d48] transition-all duration-200"
+                        placeholder="••••••••">
                     @error('password')
-                        <span style="font-size:11px; color:#e11d48;">{{ $message }}</span>
+                        <span class="mt-1.5 text-xs font-semibold text-rose-600">{{ $message }}</span>
                     @enderror
                 </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn-save" style="background:#e11d48; border-color:#e11d48;">
-                        Désactiver la 2FA
-                    </button>
-                </div>
+                <button type="submit" class="w-full bg-gradient-to-r from-[#e11d48] to-[#be123c] hover:from-[#be123c] hover:to-[#9f1239] text-white rounded-xl py-3 px-5 text-sm font-bold tracking-wide transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-[#e11d48]/20 cursor-pointer flex items-center justify-center gap-2 active:scale-[0.98] shadow-lg shadow-[#e11d48]/20">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75M16.5 10.5l-4.5 4.5m0 0L10.5 10.5" />
+                    </svg>
+                    {{ __('profile.disable_2fa') }}
+                </button>
             </form>
         </div>
     @else
-        <div class="form-card" style="margin-top:20px;">
-            <h3>Activer la double authentification</h3>
-            <ol style="font-size:13px; color:#475569; line-height:1.8; padding-left:20px; margin-bottom:18px;">
-                <li>Cliquez sur « Envoyer le code de vérification » ci-dessous.</li>
-                <li>Le code sera envoyé à votre adresse email <strong>{{ $email }}</strong>.</li>
-                <li>Saisissez le code reçu pour activer la protection.</li>
-            </ol>
+        <div class="glass-card rounded-2xl p-5 md:p-8 mt-5 w-full">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0066FF] to-[#00A3FF] flex items-center justify-center shadow-md shadow-[#0066FF]/20">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-extrabold text-[#0f172a]">{{ __('profile.enable_2fa_heading') }}</h3>
+                    <p class="text-xs text-[#64748b]">{{ __('profile.enable_2fa_help') }}</p>
+                </div>
+            </div>
 
-            <div style="display:flex; align-items:center; gap:14px; padding:14px 16px; border-radius:12px; background:#EFF6FF; border:1px solid #BFDBFE; margin-bottom:18px;">
-                <div style="flex-shrink:0; width:40px; height:40px; border-radius:10px; background:#0066FF; display:flex; align-items:center; justify-content:center;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <div class="space-y-3 mb-5">
+                <div class="flex items-start gap-3 p-3 rounded-lg bg-[#F8FAFC] border border-[#e2e8f0]">
+                    <span class="w-6 h-6 rounded-full bg-[#0066FF] text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">1</span>
+                    <p class="text-sm text-[#475569]">{{ __('profile.enable_step1') }}</p>
+                </div>
+                <div class="flex items-start gap-3 p-3 rounded-lg bg-[#F8FAFC] border border-[#e2e8f0]">
+                    <span class="w-6 h-6 rounded-full bg-[#0066FF] text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">2</span>
+                    <p class="text-sm text-[#475569]">{{ __('profile.enable_step2_prefix') }} <strong class="text-[#0f172a]">{{ $email }}</strong>.</p>
+                </div>
+                <div class="flex items-start gap-3 p-3 rounded-lg bg-[#F8FAFC] border border-[#e2e8f0]">
+                    <span class="w-6 h-6 rounded-full bg-[#0066FF] text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">3</span>
+                    <p class="text-sm text-[#475569]">{{ __('profile.enable_step3') }}</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4 p-4 rounded-xl bg-blue-50 border border-blue-200 mb-5">
+                <div class="w-10 h-10 rounded-xl bg-[#0066FF] flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <rect x="2" y="4" width="20" height="16" rx="3"/>
                         <path d="M2 7l9.3 6a1 1 0 0 0 1.4 0L22 7"/>
                     </svg>
                 </div>
                 <div>
-                    <strong style="font-size:13px; color:#0f172a;">Code envoyé à {{ $email }}</strong>
-                    <div style="font-size:12px; color:#475569;">
-                        Vérifiez votre boîte de réception (et les spams). Le code expire après 10 minutes.
-                    </div>
+                    <strong class="text-sm text-[#0f172a]">{{ __('profile.code_sent_to') }} {{ $email }}</strong>
+                    <p class="text-xs text-[#475569]">{{ __('profile.code_check_hint') }}</p>
                 </div>
             </div>
 
-            <form action="{{ route('profile.two-factor.enable') }}" method="POST">
+            <form action="{{ route('profile.two-factor.enable') }}" method="POST" class="space-y-4">
                 @csrf
-                <div class="form-field full">
-                    <label>Code à 6 chiffres</label>
-                    <input type="text" name="code" maxlength="6" inputmode="numeric" placeholder="••••••" required
-                        style="letter-spacing:0.4em; font-weight:700; text-align:center;">
+                <div>
+                    <label for="enable-code" class="block text-xs font-bold text-[#475569] uppercase tracking-wider mb-2">{{ __('profile.code_6_digits') }}</label>
+                    <input id="enable-code" type="text" name="code" maxlength="6" inputmode="numeric" placeholder="• • • • • •" required
+                        class="w-full text-center text-lg sm:text-xl font-bold tracking-[0.3em] sm:tracking-[0.4em] text-[#1e293b] placeholder:text-[#CBD5E1] bg-white border-2 border-[#e2e8f0] rounded-xl px-4 py-3 sm:px-5 sm:py-4 focus:outline-none focus:ring-4 focus:ring-[#0066FF]/10 focus:border-[#0066FF] transition-all duration-200">
                     @error('code')
-                        <span style="font-size:11px; color:#e11d48;">{{ $message }}</span>
+                        <span class="mt-1.5 text-xs font-semibold text-rose-600">{{ $message }}</span>
                     @enderror
                 </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn-save">Activer la 2FA</button>
-                </div>
+                <button type="submit" class="w-full bg-gradient-to-r from-[#0066FF] to-[#0088FF] hover:from-[#0052CC] hover:to-[#0066CC] text-white rounded-xl py-3 px-5 text-sm font-bold tracking-wide transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-[#0066FF]/20 cursor-pointer flex items-center justify-center gap-2 active:scale-[0.98] shadow-lg shadow-[#0066FF]/20">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    {{ __('profile.enable_2fa') }}
+                </button>
             </form>
 
-            <form action="{{ route('profile.two-factor.resend') }}" method="POST" style="margin-top:14px;">
+            <form action="{{ route('profile.two-factor.resend') }}" method="POST" class="mt-4">
                 @csrf
-                <button type="submit" style="background:none; border:none; padding:0; font-size:12px; font-weight:600; color:#0066FF; cursor:pointer; text-decoration:underline;">
-                    Je n'ai pas reçu le code — renvoyer
+                <button type="submit" class="w-full bg-white border-2 border-[#e2e8f0] hover:border-[#0066FF] hover:bg-[#F0F7FF] text-[#0066FF] rounded-xl py-3 px-5 text-sm font-bold tracking-wide transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-[#0066FF]/20 cursor-pointer flex items-center justify-center gap-2 active:scale-[0.98]">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182" />
+                    </svg>
+                    {{ __('profile.resend_code') }}
                 </button>
             </form>
         </div>

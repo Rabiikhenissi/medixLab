@@ -1,16 +1,16 @@
 @extends('layouts.admin')
 
-@section('title', 'Gestion des Rôles & Permissions')
+@section('title', __('admin.groups.manage_title'))
 
-@section('page-title', 'Rôles & Permissions')
-@section('page-subtitle', 'Gérez les groupes de sécurité et définissez leurs privilèges d\'accès.')
+@section('page-title', __('admin.groups.index_title'))
+@section('page-subtitle', __('admin.groups.page_subtitle'))
 
 @section('header-actions')
     <a href="{{ route('admin.groups.create') }}" class="btn-add-exam">
         <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
         </svg>
-        Ajouter un Rôle
+        {{ __('admin.groups.add_role') }}
     </a>
 @endsection
 
@@ -18,7 +18,7 @@
     <div class="data-section anim anim-1">
         <!-- Table Header -->
         <div class="data-header">
-            <div class="data-title">Liste des Groupes / Rôles</div>
+            <div class="data-title">{{ __('admin.groups.group_list') }}</div>
         </div>
 
         <!-- Filters -->
@@ -26,14 +26,14 @@
             <div class="filters-bar">
                 <!-- Search -->
                 <div>
-                    <span class="filter-label">Recherche rapide</span>
+                    <span class="filter-label">{{ __('admin.groups.quick_search') }}</span>
                     <div class="filter-group" style="position:relative;display:inline-block;">
                         <svg class="search-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                         </svg>
                         <input type="text" name="search" value="{{ $search }}"
-                            placeholder="Rechercher par nom, code..." class="filter-input">
+                            placeholder="{{ __('admin.groups.search_placeholder') }}" class="filter-input">
                     </div>
                 </div>
 
@@ -42,13 +42,13 @@
                     <label class="filter-checkbox-wrap">
                         <input type="checkbox" name="show_archived" value="1" {{ $showArchived ? 'checked' : '' }}
                             onchange="document.getElementById('filter-form').submit()">
-                        Afficher archivés
+                        {{ __('admin.groups.show_archived') }}
                     </label>
                 </div>
 
                 <!-- Filter Button -->
                 <div style="align-self:flex-end;">
-                    <button type="submit" class="btn-filter">Rechercher</button>
+                    <button type="submit" class="btn-filter">{{ __('common.search') }}</button>
                 </div>
             </div>
         </form>
@@ -57,10 +57,10 @@
         <table class="data-table">
             <thead>
                 <tr>
-                    <th>Code de sécurité</th>
-                    <th>Nom du rôle</th>
-                    <th>Utilisateurs associés</th>
-                    <th style="text-align:right;">Actions</th>
+                    <th>{{ __('admin.groups.code') }}</th>
+                    <th>{{ __('admin.groups.role_name') }}</th>
+                    <th>{{ __('admin.groups.associated_users') }}</th>
+                    <th style="text-align:right;">{{ __('common.actions') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -74,7 +74,7 @@
                         </td>
                         <td>
                             <span class="category-badge cat-other" style="font-weight: 700;">
-                                {{ $group->users_count }} utilisateur(s)
+                                {{ __('admin.groups.users_count', ['count' => $group->users_count]) }}
                             </span>
                         </td>
                         <td style="text-align:right;">
@@ -82,7 +82,7 @@
                                 
                                     <!-- Edit Link -->
                                     <a href="{{ route('admin.groups.edit', $group) }}" class="table-action-btn"
-                                        title="Modifier">
+                                        title="{{ __('common.edit') }}">
                                         <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                 d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
@@ -93,12 +93,12 @@
                                     @if ($group->users_count == 0)
                                         <form action="{{ route('admin.groups.destroy', $group) }}" method="POST"
                                             style="display:inline;margin:0;"
-                                            onsubmit="return swalConfirmSubmit(this, '{{ $group->is_archive ? 'Restaurer ce rôle ?' : 'Archiver ce rôle ?' }}')">
+                                            onsubmit="return swalConfirmSubmit(this, '{{ $group->is_archive ? __('admin.groups.restore_confirm') : __('admin.groups.archive_confirm') }}')">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit"
                                                 class="table-action-btn {{ $group->is_archive ? 'restore-btn' : 'archive-btn' }}"
-                                                title="{{ $group->is_archive ? 'Restaurer' : 'Archiver' }}">
+                                                title="{{ $group->is_archive ? __('admin.groups.restore') : __('admin.groups.archive') }}">
                                                 @if ($group->is_archive)
                                                     <svg fill="none" stroke="currentColor" stroke-width="2"
                                                         viewBox="0 0 24 24">
@@ -116,10 +116,10 @@
                                         </form>
                                         @if($group->is_archive)
                                             <form action="{{ route('admin.groups.force-delete', $group) }}" method="POST" style="display:inline;margin:0;"
-                                                  onsubmit="return swalConfirmSubmit(this, 'Supprimer définitivement ce rôle ? Cette action est irréversible.')">
+                                                  onsubmit="return swalConfirmSubmit(this, '{{ __('admin.groups.force_delete_confirm') }}')">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="table-action-btn delete-btn" title="Supprimer définitivement">
+                                                <button type="submit" class="table-action-btn delete-btn" title="{{ __('admin.groups.force_delete') }}">
                                                     <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                                                     </svg>
@@ -128,7 +128,7 @@
                                         @endif
                                     @else
                                         <button class="table-action-btn" style="opacity: 0.3; cursor: not-allowed;"
-                                            title="Ce rôle contient des membres et ne peut pas être archivé.">
+                                            title="{{ __('admin.groups.cannot_archive') }}">
                                             <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round"
                                                     d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
@@ -149,8 +149,8 @@
                                             d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
                                     </svg>
                                 </div>
-                                <h3>Aucun rôle trouvé</h3>
-                                <p>Créez un nouveau rôle de sécurité pour démarrer.</p>
+                                <h3>{{ __('admin.groups.empty_title') }}</h3>
+                                <p>{{ __('admin.groups.empty_hint') }}</p>
                             </div>
                         </td>
                     </tr>
@@ -165,11 +165,11 @@
                     @if ($groups->onFirstPage())
                         <span
                             style="padding:6px 12px;background:#f1f5f9;color:#94a3b8;border-radius:6px;font-size:13px;cursor:not-allowed;">«
-                            Précédent</span>
+                            {{ __('admin.common.previous') }}</span>
                     @else
                         <a href="{{ $groups->previousPageUrl() }}"
                             style="padding:6px 12px;background:white;border:1px solid #e2e8f0;color:#374151;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none;">«
-                            Précédent</a>
+                            {{ __('admin.common.previous') }}</a>
                     @endif
 
                     @foreach ($groups->getUrlRange(max(1, $groups->currentPage() - 2), min($groups->lastPage(), $groups->currentPage() + 2)) as $page => $url)
@@ -184,11 +184,11 @@
 
                     @if ($groups->hasMorePages())
                         <a href="{{ $groups->nextPageUrl() }}"
-                            style="padding:6px 12px;background:white;border:1px solid #e2e8f0;color:#374151;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none;">Suivant
+                            style="padding:6px 12px;background:white;border:1px solid #e2e8f0;color:#374151;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none;">{{ __('admin.common.next') }}
                             »</a>
                     @else
                         <span
-                            style="padding:6px 12px;background:#f1f5f9;color:#94a3b8;border-radius:6px;font-size:13px;cursor:not-allowed;">Suivant
+                            style="padding:6px 12px;background:#f1f5f9;color:#94a3b8;border-radius:6px;font-size:13px;cursor:not-allowed;">{{ __('admin.common.next') }}
                             »</span>
                     @endif
                 </div>

@@ -189,7 +189,7 @@ html.a11y-focus *:focus-visible {
 }
 </style>
 
-<button id="a11y-toggle" aria-label="Accessibilité" title="Accessibilité">
+<button id="a11y-toggle" aria-label="{{ __('components.accessibility.title') }}" title="{{ __('components.accessibility.title') }}">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="16" cy="4" r="1"/>
         <path d="m18 19 1-7-6 1"/>
@@ -199,7 +199,7 @@ html.a11y-focus *:focus-visible {
     </svg>
 </button>
 
-<div id="a11y-panel" role="dialog" aria-label="Paramètres d'accessibilité">
+<div id="a11y-panel" role="dialog" aria-label="{{ __('components.accessibility.settings_title') }}">
     <h3>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="16" cy="4" r="1"/>
@@ -208,25 +208,25 @@ html.a11y-focus *:focus-visible {
             <path d="M4.24 14.5a5 5 0 0 0 6.88 6"/>
             <path d="M13.76 17.5a5 5 0 0 0-6.88-6"/>
         </svg>
-        Accessibilité
-        <small>paramètres</small>
+        {{ __('components.accessibility.title') }}
+        <small>{{ __('components.accessibility.parameters') }}</small>
     </h3>
 
     {{-- Text Size --}}
     <div class="a11y-group">
-        <span class="a11y-group-label">Taille du texte</span>
+        <span class="a11y-group-label">{{ __('components.accessibility.text_size') }}</span>
         <div class="a11y-row">
             <button class="a11y-btn" data-a11y="font-size" data-value="normal">
                 <span class="a11y-btn-icon">Aa</span>
-                Normal
+                {{ __('components.accessibility.normal') }}
             </button>
             <button class="a11y-btn" data-a11y="font-size" data-value="large">
                 <span class="a11y-btn-icon" style="font-size:15px">Aa</span>
-                Grand
+                {{ __('components.accessibility.large') }}
             </button>
             <button class="a11y-btn" data-a11y="font-size" data-value="xlarge">
                 <span class="a11y-btn-icon" style="font-size:17px">Aa</span>
-                Très grand
+                {{ __('components.accessibility.xlarge') }}
             </button>
         </div>
     </div>
@@ -236,42 +236,42 @@ html.a11y-focus *:focus-visible {
         <div class="a11y-row" style="flex-wrap:wrap">
             <button class="a11y-btn" style="flex:1;min-width:calc(50% - 3px)" data-a11y="toggle" data-key="contrast">
                 <span class="a11y-btn-icon">◐</span>
-                Contraste
+                {{ __('components.accessibility.contrast') }}
             </button>
             <button class="a11y-btn" style="flex:1;min-width:calc(50% - 3px)" data-a11y="toggle" data-key="grayscale">
                 <span class="a11y-btn-icon">⚫</span>
-                Niveaux de gris
+                {{ __('components.accessibility.grayscale') }}
             </button>
             <button class="a11y-btn" style="flex:1;min-width:calc(50% - 3px)" data-a11y="toggle" data-key="hide-images">
                 <span class="a11y-btn-icon">🖼</span>
-                Cacher images
+                {{ __('components.accessibility.hide_images') }}
             </button>
             <button class="a11y-btn" style="flex:1;min-width:calc(50% - 3px)" data-a11y="toggle" data-key="motion">
                 <span class="a11y-btn-icon">▸</span>
-                Réduire animations
+                {{ __('components.accessibility.reduce_motion') }}
             </button>
             <button class="a11y-btn" style="flex:1;min-width:calc(50% - 3px)" data-a11y="toggle" data-key="dyslexic">
                 <span class="a11y-btn-icon">D</span>
-                Police dyslexie
+                {{ __('components.accessibility.dyslexia_font') }}
             </button>
             <button class="a11y-btn" style="flex:1;min-width:calc(50% - 3px)" data-a11y="toggle" data-key="spacing">
                 <span class="a11y-btn-icon">↕</span>
-                Espacement
+                {{ __('components.accessibility.spacing') }}
             </button>
             <button class="a11y-btn" style="flex:1;min-width:calc(50% - 3px)" data-a11y="toggle" data-key="cursor">
                 <span class="a11y-btn-icon">↖</span>
-                Grand curseur
+                {{ __('components.accessibility.large_cursor') }}
             </button>
             <button class="a11y-btn" style="flex:1;min-width:calc(50% - 3px)" data-a11y="toggle" data-key="focus">
                 <span class="a11y-btn-icon">◎</span>
-                Focus renforcé
+                {{ __('components.accessibility.enhanced_focus') }}
             </button>
         </div>
     </div>
 
     {{-- Reset --}}
     <button class="a11y-btn-danger" data-a11y="reset">
-        ↺ Réinitialiser tout
+        ↺ {{ __('components.accessibility.reset_all') }}
     </button>
 </div>
 

@@ -1,9 +1,9 @@
 @extends('layouts.admin')
 
-@section('title', 'Modifier le Rôle')
+@section('title', __('admin.groups.edit_title'))
 
-@section('page-title', 'Modifier le Rôle : ' . $group->name)
-@section('page-subtitle', 'Mettez à jour le nom, le code du rôle et ajustez ses habilitations de sécurité.')
+@section('page-title', __('admin.groups.edit_title') . ' : ' . $group->name)
+@section('page-subtitle', __('admin.groups.edit_subtitle'))
 
 @section('content')
 <style>
@@ -85,8 +85,8 @@
                     <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:20px;height:20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
                 </div>
                 <div>
-                    <h3 class="group-card-title">Identité du Rôle</h3>
-                    <p class="group-card-desc">Nom public et code technique unique</p>
+                    <h3 class="group-card-title">{{ __('admin.groups.identity') }}</h3>
+                    <p class="group-card-desc">{{ __('admin.groups.identity_hint') }}</p>
                 </div>
             </div>
 
@@ -101,35 +101,35 @@
             @endif
 
             <div class="form-group">
-                <label class="form-label">Nom du Rôle <span class="required-star">*</span></label>
+                <label class="form-label">{{ __('admin.groups.name_label') }} <span class="required-star">*</span></label>
                 <input type="text" name="name" value="{{ old('name', $group->name) }}" required
-                    placeholder="Ex: Directeur de Laboratoire" class="form-control"
+                    placeholder="{{ __('admin.groups.placeholder_name') }}" class="form-control"
                     id="role-name" data-initial="{{ $group->name }}" oninput="updateSummary()">
             </div>
 
             <div class="form-group" style="margin-bottom: 0;">
-                <label class="form-label">Code de sécurité (Unique) <span class="required-star">*</span></label>
+                <label class="form-label">{{ __('admin.groups.security_code') }} <span class="required-star">*</span></label>
                 <div class="code-input-wrap">
                     
                     <input type="text" name="code" value="{{ old('code', $group->code) }}" required
-                        placeholder="directeur-labo" class="form-control code-input"
+                        placeholder="{{ __('admin.groups.placeholder_code') }}" class="form-control code-input"
                         id="role-code" data-initial="{{ $group->code }}" oninput="updateSummary()">
                 </div>
-                <span class="field-hint">Sera automatiquement formaté en slug (minuscules, tirets).</span>
+                <span class="field-hint">{{ __('admin.groups.slug_hint') }}</span>
             </div>
 
             <div class="form-group" style="margin-top: 18px;">
-                <label class="form-label">Type de rôle (Optionnel)</label>
+                <label class="form-label">{{ __('admin.groups.role_type') }}</label>
                 <div style="position:relative;">
                     <select name="role_table" id="role-table" class="form-control" data-initial="{{ $group->role_table ?? '' }}" onchange="updateSummary()">
-                        <option value="">Aucune (profil générique)</option>
-                        @foreach(['admin' => 'Admin', 'doctor' => 'Docteur', 'patient' => 'Patient', 'staff' => 'Centre / Laboratoire'] as $value => $label)
+                        <option value="">{{ __('admin.groups.no_profile_generic') }}</option>
+                        @foreach(['admin' => __('admin.groups.role_admin'), 'doctor' => __('admin.groups.role_doctor'), 'patient' => __('admin.groups.role_patient'), 'staff' => __('admin.groups.role_staff')] as $value => $label)
                             <option value="{{ $value }}" {{ (old('role_table') ?? $group->role_table) === $value ? 'selected' : '' }}>{{ $label }}</option>
                         @endforeach
                     </select>
                     <svg style="position:absolute;right:12px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:#94a3b8;pointer-events:none;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
                 </div>
-                <span class="field-hint">Détermine dans quelle table les utilisateurs de ce rôle seront ajoutés (admins, doctors, patients, staff).</span>
+                <span class="field-hint">{{ __('admin.groups.role_type_hint') }}</span>
             </div>
         </div>
 
@@ -143,32 +143,32 @@
                     <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:20px;height:20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
                 </div>
                 <div>
-                    <h3 class="group-card-title">Résumé en Direct</h3>
-                    <p class="group-card-desc">Aperçu de votre configuration</p>
+                    <h3 class="group-card-title">{{ __('admin.groups.live_summary') }}</h3>
+                    <p class="group-card-desc">{{ __('admin.groups.live_summary_hint') }}</p>
                 </div>
             </div>
 
             <div class="summary-row">
-                <span class="summary-label">Nom</span>
+                <span class="summary-label">{{ __('admin.groups.name') }}</span>
                 <span class="summary-value" id="summary-name">{{ $group->name }}</span>
             </div>
             <div class="summary-row">
-                <span class="summary-label">Code</span>
+                <span class="summary-label">{{ __('admin.groups.code_label') }}</span>
                 <span class="summary-value mono" id="summary-code">{{ $group->code }}</span>
             </div>
             <div class="summary-row">
-                <span class="summary-label">Type de rôle</span>
+                <span class="summary-label">{{ __('admin.groups.role_type_label') }}</span>
                 <span class="summary-value" id="summary-role-table">
-                    {{ ($labels = ['admin' => 'Admin', 'doctor' => 'Docteur', 'patient' => 'Patient', 'staff' => 'Centre / Laboratoire'])[$group->role_table] ?? '—' }}
+                    {{ $group->role_table ? __('admin.groups.role_' . $group->role_table) : '—' }}
                 </span>
             </div>
             <div class="summary-divider"></div>
             <div class="summary-row">
-                <span class="summary-label">Modules couverts</span>
+                <span class="summary-label">{{ __('admin.groups.modules_covered') }}</span>
                 <span class="summary-badge blue" id="summary-features">0</span>
             </div>
             <div class="summary-row">
-                <span class="summary-label">Actions sélectionnées</span>
+                <span class="summary-label">{{ __('admin.groups.actions_selected') }}</span>
                 <span class="summary-badge green" id="summary-actions">0</span>
             </div>
             <div class="summary-divider"></div>
@@ -176,7 +176,7 @@
                 <div class="summary-progress-bar">
                     <div class="summary-progress-fill" id="summary-progress"></div>
                 </div>
-                <span class="summary-progress-text" id="summary-progress-text">0% des actions disponibles</span>
+                <span class="summary-progress-text" id="summary-progress-text">{{ __('admin.groups.percent_actions_available', ['count' => 0]) }}</span>
             </div>
         </div>
     </div>
@@ -184,24 +184,24 @@
     <div class="data-section anim anim-2" style="margin-top: 20px;">
         <div class="group-matrix-header">
             <div>
-                <h3 class="data-title" style="margin: 0;">Matrice des Habilitations</h3>
-                <p style="font-size: 12px; color: #94a3b8; margin: 4px 0 0 0;">Cochez les actions que ce rôle aura le droit d'effectuer.</p>
+                <h3 class="data-title" style="margin: 0;">{{ __('admin.groups.permission_matrix') }}</h3>
+                <p style="font-size: 12px; color: #94a3b8; margin: 4px 0 0 0;">{{ __('admin.groups.permission_matrix_hint') }}</p>
             </div>
             <div class="matrix-controls">
                 <div class="matrix-search-wrap">
                     <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:16px;height:16px;position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#94a3b8;pointer-events:none;">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
                     </svg>
-                    <input type="text" id="permission-search" placeholder="Rechercher une action..."
+                    <input type="text" id="permission-search" placeholder="{{ __('admin.groups.search_action') }}"
                         class="filter-input" style="width: 220px;" oninput="filterPermissions()">
                 </div>
                 <button type="button" class="btn-matrix-action" onclick="selectAll()">
                     <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    Tout cocher
+                    {{ __('admin.groups.select_all') }}
                 </button>
                 <button type="button" class="btn-matrix-action" onclick="deselectAll()">
                     <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    Tout décocher
+                    {{ __('admin.groups.deselect_all') }}
                 </button>
             </div>
         </div>
@@ -230,7 +230,7 @@
                                 <span class="action-chip-label">{{ $action->name }}</span>
                             </label>
                         @empty
-                            <div class="feature-empty">Aucune action enregistrée</div>
+                            <div class="feature-empty">{{ __('admin.groups.no_actions') }}</div>
                         @endforelse
                     </div>
                 </div>
@@ -244,8 +244,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
                     </svg>
                 </div>
-                <h3>Aucune fonctionnalité disponible</h3>
-                <p>Créez d'abord des modules et des actions dans la section Fonctionnalités.</p>
+                <h3>{{ __('admin.groups.no_features') }}</h3>
+                <p>{{ __('admin.groups.no_features_hint') }}</p>
             </div>
         @endif
     </div>
@@ -254,18 +254,18 @@
         <div class="group-footer-left">
             <span class="footer-perm-count">
                 <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
-                <span id="footer-count">0</span> habilitation(s) sélectionnée(s)
+                <span id="footer-count">0</span> {{ __('admin.groups.permissions_selected') }}
             </span>
         </div>
         <div class="group-footer-right">
             <button type="button" class="btn-cancel" onclick="resetForm()" style="display: inline-flex; align-items: center; gap: 5px;">
                 <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182"/></svg>
-                Réinitialiser
+                {{ __('admin.groups.reset') }}
             </button>
-            <a href="{{ route('admin.groups.index') }}" class="btn-cancel">Annuler</a>
+            <a href="{{ route('admin.groups.index') }}" class="btn-cancel">{{ __('common.cancel') }}</a>
             <button type="submit" class="btn-submit">
                 
-                Enregistrer les modifications
+                {{ __('admin.groups.save_changes') }}
             </button>
         </div>
     </div>
@@ -297,7 +297,7 @@
 
         var pct = total > 0 ? Math.round((selected / total) * 100) : 0;
         document.getElementById('summary-progress').style.width = pct + '%';
-        document.getElementById('summary-progress-text').textContent = pct + '% des actions disponibles';
+        document.getElementById('summary-progress-text').textContent = @json(__('admin.groups.percent_actions_available', ['count' => 0])).replace('0', pct);
 
         document.querySelectorAll('[data-count]').forEach(function(el) {
             var fid = el.dataset.count;

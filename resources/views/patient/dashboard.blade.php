@@ -1,5 +1,5 @@
 <x-layouts.patient>
-    <x-slot:title>{{ __('Tableau de bord Patient - Medix eSanté') }}</x-slot:title>
+    <x-slot:title>{{ __('patient.dashboard.title') }} - Medix eSanté</x-slot:title>
 
     @section('content')
     <div class="w-full max-w-[1400px] mx-auto">
@@ -17,7 +17,7 @@
                         </svg>
                     </div>
                     <div>
-                        <h2 class="text-xl font-bold text-[#1e293b]">{{ __('Espace Patient') }}</h2>
+                        <h2 class="text-xl font-bold text-[#1e293b]">{{ __('patient.dashboard.space') }}</h2>
                         <span
                             class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-bold tracking-wider text-[#0D9488] bg-[#0D9488]/10 border border-[#0D9488]/20 uppercase mt-1">
                             PATIENT
@@ -29,7 +29,7 @@
                     <!-- Notification Bell -->
                     <div class="relative">
                         <button id="notificationBell" type="button"
-                            class="relative p-2 text-[#64748b] hover:text-[#0D9488] transition" title="Notifications">
+                            class="relative p-2 text-[#64748b] hover:text-[#0D9488] transition" title="{{ __('patient.dashboard.notifications') }}">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -44,18 +44,18 @@
                             class="hidden fixed top-20 right-4 w-80 max-w-[calc(100vw-2rem)] bg-white rounded-xl shadow-lg border border-[#e2e8f0] z-50 overflow-hidden md:absolute md:top-auto md:right-0 md:mt-2">
                             <div class="bg-gradient-to-r from-[#0D9488] to-[#0a7068] p-4 text-white flex justify-between items-center">
                                 <div>
-                                    <h3 class="font-bold text-sm">{{ __('Notifications') }}</h3>
-                                    <p class="text-[10px] text-[#ffffff]/90">{!! __('Vous avez :count notification(s)', ['count' => '<span id="unreadNotifCount">0</span>']) !!}</p>
+                                    <h3 class="font-bold text-sm">{{ __('patient.dashboard.notifications') }}</h3>
+                                    <p class="text-[10px] text-[#ffffff]/90">{!! __('patient.dashboard.notifications_count', ['count' => '<span id="unreadNotifCount">0</span>']) !!}</p>
                                 </div>
                                 <button id="markAllReadBtn" type="button" class="text-[10px] font-bold underline text-white hover:text-teal-200 transition cursor-pointer">
-                                    {{ __('Tout marquer lu') }}
+                                    {{ __('patient.dashboard.mark_all_read') }}
                                 </button>
                             </div>
 
                             <div id="notificationList" class="max-h-96 overflow-y-auto">
                                 <!-- Notifications loaded here -->
                                 <div class="p-4 text-center text-[#94a3b8]">
-                                    <p class="text-sm">{{ __('Chargement des notifications...') }}</p>
+                                    <p class="text-sm">{{ __('patient.dashboard.loading_notifications') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -63,41 +63,41 @@
 
                     <a href="{{ route('profile.show') }}"
                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-[#0D9488] bg-[#0D9488]/10 border border-[#0D9488]/20 hover:bg-[#0D9488] hover:text-white transition uppercase tracking-wider"
-                       title="Mon profil">
+                       title="{{ __('patient.dashboard.my_profile') }}">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                         </svg>
-                        Profil
+                        {{ __('patient.dashboard.profile') }}
                     </a>
                     <a href="{{ route('patient.analytics') }}"
                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-[#0D9488] bg-[#0D9488]/10 border border-[#0D9488]/20 hover:bg-[#0D9488] hover:text-white transition uppercase tracking-wider"
-                       title="Mes statistiques">
+                       title="{{ __('patient.dashboard.my_stats') }}">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75z"/>
                         </svg>
-                        Stats
+                        {{ __('patient.dashboard.stats') }}
                     </a>
                     <a href="{{ route('patient.medical-history') }}"
                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-[#0D9488] bg-[#0D9488]/10 border border-[#0D9488]/20 hover:bg-[#0D9488] hover:text-white transition uppercase tracking-wider"
-                       title="Voir l'historique médical complet">
+                       title="{{ __('patient.dashboard.history_tooltip') }}">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
-                        Historique
+                        {{ __('patient.dashboard.history') }}
                     </a>
                     <button type="button" id="scanDoctorBtn"
                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-[#0D9488] bg-[#0D9488]/10 border border-[#0D9488]/20 hover:bg-[#0D9488] hover:text-white transition uppercase tracking-wider cursor-pointer"
-                       title="Scanner le QR Code d'un médecin">
+                       title="{{ __('patient.dashboard.scan_tooltip') }}">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z"/>
                             <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5z"/>
                         </svg>
-                        Scanner
+                        {{ __('patient.dashboard.scan') }}
                     </button>
                     <form action="{{ route('patient.logout') }}" method="POST">
                         @csrf
                         <x-button type="submit" color="slate" :fullWidth="false" class="!py-1.5 !px-4 !text-xs">
-                            {{ __('SE DÉCONNECTER') }}
+                            {{ __('patient.dashboard.logout') }}
                         </x-button>
                     </form>
                 </div>
@@ -108,10 +108,10 @@
                 <!-- Greeting -->
                 <div>
                     <h1 class="text-2xl font-bold text-[#1e293b]">
-                        {{ __('Bonjour, ') }}<span class="text-[#0D9488]">{{ $user->first_name }} {{ $user->last_name }}</span> !
+                        {{ __('patient.dashboard.greeting') }}<span class="text-[#0D9488]">{{ $user->first_name }} {{ $user->last_name }}</span> !
                     </h1>
                     <p class="text-sm text-[#64748b] mt-1 font-medium leading-relaxed">
-                        {{ __("Bienvenue sur votre espace patient sécurisé. Vous pouvez consulter vos demandes d'examens et informations personnelles.") }}
+                        {{ __('patient.dashboard.welcome_message') }}
                     </p>
                 </div>
 
@@ -128,25 +128,25 @@
                                     <path stroke-linecap="round" stroke-linejoin="round"
                                         d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                                 </svg>
-                                {{ __('Informations Personnelles') }}
+                                {{ __('patient.dashboard.personal_info') }}
                             </h3>
                             <div class="space-y-2 text-sm">
                                 <div class="flex justify-between py-1 border-b border-[#e2e8f0]/40">
-                                    <span class="text-[#64748b] font-medium">{{ __('Code Unique Patient :') }}</span>
+                                    <span class="text-[#64748b] font-medium">{{ __('patient.dashboard.unique_code') }}</span>
                                     <span class="font-bold text-[#1e293b]">{{ $user->patient->patient_code }}</span>
                                 </div>
                                 <div class="flex justify-between py-1 border-b border-[#e2e8f0]/40">
-                                    <span class="text-[#64748b] font-medium">{{ __('Adresse Email :') }}</span>
+                                    <span class="text-[#64748b] font-medium">{{ __('patient.dashboard.email_label') }}</span>
                                     <span class="font-semibold text-[#1e293b]">{{ $user->email }}</span>
                                 </div>
                                 <div class="flex justify-between py-1 border-b border-[#e2e8f0]/40">
-                                    <span class="text-[#64748b] font-medium">{{ __('Téléphone :') }}</span>
+                                    <span class="text-[#64748b] font-medium">{{ __('patient.dashboard.phone_label') }}</span>
                                     <span class="font-semibold text-[#1e293b]">{{ $user->phone }}</span>
                                 </div>
                                 <div class="flex justify-between py-1">
-                                    <span class="text-[#64748b] font-medium">{{ __('Adresse :') }}</span>
+                                    <span class="text-[#64748b] font-medium">{{ __('patient.dashboard.address_label') }}</span>
                                     <span
-                                        class="font-semibold text-[#1e293b]">{{ $user->address ?? __('Non renseignée') }}</span>
+                                        class="font-semibold text-[#1e293b]">{{ $user->address ?? __('patient.dashboard.not_provided') }}</span>
                                 </div>
                             </div>
                         </div>
@@ -159,7 +159,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round"
                                         d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
-                                {{ __('Activité Médicale') }}
+                                {{ __('patient.dashboard.medical_activity') }}
                             </h3>
                             <div class="space-y-4">
                                 <div
@@ -169,7 +169,7 @@
                                             class="w-8 h-8 rounded-lg bg-[#0D9488]/10 flex items-center justify-center text-[#0D9488] font-bold text-sm">
                                             {{ $patientStats['examRequestsCount'] }}
                                         </div>
-                                        <span class="text-xs font-semibold text-[#64748b]">{{ __("Demandes d'analyses") }}</span>
+                                        <span class="text-xs font-semibold text-[#64748b]">{{ __('patient.dashboard.exam_requests') }}</span>
                                     </div>
                                 </div>
 
@@ -180,7 +180,7 @@
                                             class="w-8 h-8 rounded-lg bg-[#0D9488]/10 flex items-center justify-center text-[#0D9488] font-bold text-sm">
                                             {{ $patientStats['grantedDoctorsCount'] }}
                                         </div>
-                                        <span class="text-xs font-semibold text-[#64748b]">{{ __('Médecins autorisés') }}</span>
+                                        <span class="text-xs font-semibold text-[#64748b]">{{ __('patient.dashboard.granted_doctors') }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -197,12 +197,12 @@
                                     <path stroke-linecap="round" stroke-linejoin="round"
                                         d="M12 4.354a4 4 0 110 5.292M15 10H9m6 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
-                                {{ __("Demandes d'Accès en Attente") }}
+                                {{ __('patient.dashboard.pending_access_requests') }}
                             </h3>
                             <div id="accessRequestsList" class="space-y-3">
                                 <!-- Access requests loaded here -->
                                 <div class="p-4 text-center text-[#94a3b8]">
-                                    <p class="text-sm">{{ __('Chargement des demandes...') }}</p>
+                                    <p class="text-sm">{{ __('patient.dashboard.loading_requests') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -213,11 +213,11 @@
                                 <svg class="w-5 h-5 text-[#0D9488] mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                 </svg>
-                                {{ __('Médecins Autorisés') }}
+                                {{ __('patient.dashboard.granted_doctors') }}
                             </h3>
                             <div id="grantedDoctorsList" class="space-y-3">
                                 <div class="p-4 text-center text-[#94a3b8]">
-                                    <p class="text-sm">{{ __('Chargement...') }}</p>
+                                    <p class="text-sm">{{ __('common.loading') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -228,11 +228,11 @@
                                 <svg class="w-5 h-5 text-red-500 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
                                 </svg>
-                                {{ __('Médecins Bloqués') }}
+                                {{ __('patient.dashboard.blocked_doctors') }}
                             </h3>
                             <div id="blockedList" class="space-y-3">
                                 <div class="p-4 text-center text-[#94a3b8]">
-                                    <p class="text-sm">{{ __('Chargement...') }}</p>
+                                    <p class="text-sm">{{ __('common.loading') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -245,12 +245,12 @@
                                     <path stroke-linecap="round" stroke-linejoin="round"
                                         d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
-                                {{ __("Vos Demandes d'Analyses") }}
+                                {{ __('patient.dashboard.your_exam_requests') }}
                             </h3>
                             <div id="examRequestsList" class="grid grid-cols-1 gap-4">
                                 <!-- Exam requests loaded here -->
                                 <div class="p-4 text-center text-[#94a3b8]">
-                                    <p class="text-sm">{{ __('Chargement des demandes...') }}</p>
+                                    <p class="text-sm">{{ __('patient.dashboard.loading_requests') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -268,7 +268,7 @@
             <div class="p-8">
                 <!-- Header -->
                 <div class="flex items-center justify-between mb-6 pb-4 border-b border-[#e2e8f0]/80">
-                    <h3 class="text-lg font-bold text-[#1e293b]">{{ __('Détails de la Demande') }}</h3>
+                    <h3 class="text-lg font-bold text-[#1e293b]">{{ __('patient.dashboard.request_details') }}</h3>
                     <button type="button" class="closeExamModal text-[#94a3b8] hover:text-[#1e293b]">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
                             viewBox="0 0 24 24">
@@ -279,36 +279,36 @@
 
                 <!-- Doctor Info -->
                 <div class="mb-6 p-4 bg-[#0D9488]/10 border border-[#0D9488]/20 rounded-xl">
-                    <p class="text-xs font-bold text-[#0D9488] uppercase tracking-wider mb-2">{{ __('Prescrit par') }}</p>
+                    <p class="text-xs font-bold text-[#0D9488] uppercase tracking-wider mb-2">{{ __('patient.dashboard.prescribed_by') }}</p>
                     <p id="modalDoctorName" class="text-lg font-bold text-[#1e293b]"></p>
                     <p id="modalDoctorSpeciality" class="text-sm text-[#64748b]"></p>
-                    <p id="modalDoctorPhone" class="text-sm text-[#64748b] mt-2"><strong>Tel:</strong> <span
+                    <p id="modalDoctorPhone" class="text-sm text-[#64748b] mt-2"><strong>{{ __('patient.dashboard.tel') }}</strong> <span
                             id="phoneValue"></span></p>
                 </div>
 
                 <!-- Status -->
                 <div class="mb-6">
-                    <p class="text-xs font-bold text-[#1e293b] uppercase tracking-wider mb-2">{{ __('Statut') }}</p>
+                    <p class="text-xs font-bold text-[#1e293b] uppercase tracking-wider mb-2">{{ __('common.status') }}</p>
                     <span id="modalStatus"
                         class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold text-[#0D9488] bg-[#0D9488]/10 border border-[#0D9488]/20 uppercase"></span>
                 </div>
 
                 <!-- Clinical Notes -->
                 <div id="clinicalNotesSection" class="mb-6 hidden">
-                    <p class="text-xs font-bold text-[#1e293b] uppercase tracking-wider mb-2">{{ __('Notes Cliniques') }}</p>
+                    <p class="text-xs font-bold text-[#1e293b] uppercase tracking-wider mb-2">{{ __('patient.dashboard.clinical_notes') }}</p>
                     <div id="modalClinicalNotes"
                         class="p-3 bg-[#F8FAFC]/50 border border-[#e2e8f0]/60 rounded-xl text-sm text-[#64748b]"></div>
                 </div>
 
                 <!-- Exams List -->
                 <div class="mb-6">
-                    <p class="text-xs font-bold text-[#1e293b] uppercase tracking-wider mb-3">{{ __('Examens Prescrits') }}</p>
+                    <p class="text-xs font-bold text-[#1e293b] uppercase tracking-wider mb-3">{{ __('patient.dashboard.prescribed_exams') }}</p>
                     <div id="modalExamsList" class="space-y-3">
     <!-- Exams will be loaded here -->
 </div>
 <!-- Doctor Interpretation Section (visible after approval) -->
 <div id="modalDoctorInterpretationSection" class="mt-4 hidden">
-    <p class="text-xs font-bold text-[#1e293b] uppercase tracking-wider mb-2">{{ __('Interprétation du Médecin') }}</p>
+    <p class="text-xs font-bold text-[#1e293b] uppercase tracking-wider mb-2">{{ __('patient.dashboard.doctor_interpretation') }}</p>
     <div id="modalDoctorInterpretation" class="p-3 bg-purple-50/50 border border-[#7C3AED]/10 rounded-lg text-sm text-[#475569]"></div>
 </div>
                 </div>
@@ -320,11 +320,11 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
                         </svg>
-                        Exporter PDF
+                        {{ __('patient.dashboard.export_pdf') }}
                     </button>
                     <button type="button"
                         class="closeExamModal flex-1 bg-[#0D9488] hover:bg-[#0a7068] text-white font-bold py-2.5 rounded-xl transition uppercase tracking-wider text-sm">
-                        {{ __('Fermer') }}
+                        {{ __('common.close') }}
                     </button>
                 </div>
             </div>
@@ -394,10 +394,10 @@
                             actions = `
                                 <div class="flex gap-2 mt-3">
                                     <button class="flex-1 text-xs bg-green-500 hover:bg-green-600 text-white px-2 py-1.5 rounded font-bold notif-accept-btn" data-access-id="${notif.reference_id}" data-notif-id="${notif.id}">
-                                        ✓ Accepter
+                                        ✓ @lang('patient.dashboard.accept')
                                     </button>
                                     <button class="flex-1 text-xs bg-red-500 hover:bg-red-600 text-white px-2 py-1.5 rounded font-bold notif-decline-btn" data-access-id="${notif.reference_id}" data-notif-id="${notif.id}">
-                                        ✗ Refuser
+                                        ✗ @lang('patient.dashboard.decline')
                                     </button>
                                 </div>
                             `;
@@ -414,7 +414,7 @@
                                     ${!notif.is_read ? `
                                         <div class="flex flex-col items-end gap-1 flex-shrink-0 ml-2">
                                             <div class="w-2 h-2 bg-[#0D9488] rounded-full"></div>
-                                            <button class="text-[10px] font-bold text-[#0D9488] hover:underline cursor-pointer notif-mark-read-btn" data-notif-id="${notif.id}">Marquer lu</button>
+                                            <button class="text-[10px] font-bold text-[#0D9488] hover:underline cursor-pointer notif-mark-read-btn" data-notif-id="${notif.id}">@lang('patient.dashboard.mark_read')</button>
                                         </div>` : ''}
                                 </div>
                                 ${actions}
@@ -438,7 +438,7 @@
                             <svg class="w-12 h-12 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <p class="text-sm">Aucune notification</p>
+                            <p class="text-sm">@lang('patient.dashboard.no_notifications')</p>
                         </div>
                     `;
                 }
@@ -446,7 +446,7 @@
                 updateUnreadCount();
             } catch (error) {
                 console.error('Error loading notifications:', error);
-                notificationList.innerHTML = '<div class="p-4 text-center text-red-500 text-sm">Erreur du chargement</div>';
+                notificationList.innerHTML = '<div class="p-4 text-center text-red-500 text-sm">@lang('patient.dashboard.loading_error')</div>';
             }
         }
 
@@ -503,7 +503,7 @@
                 else { showMessage(data.message, 'error'); }
             } catch (error) {
                 console.error('Error responding to access:', error);
-                showMessage('Une erreur est survenue', 'error');
+                showMessage('@lang('common.error_generic')', 'error');
             }
         }
 
@@ -525,12 +525,12 @@
         };
 
         const statusLabels = {
-            'pending':    'En attente',
-            'assigned':   'Laboratoire sélectionné',
-            'collected':  'Collectée',
-            'processing': 'En traitement',
-            'completed':  'Complétée',
-            'cancelled':  'Annulée',
+            'pending':    '@lang('patient.status.pending')',
+            'assigned':   '@lang('patient.status.assigned')',
+            'collected':  '@lang('patient.status.collected')',
+            'processing': '@lang('patient.status.processing')',
+            'completed':  '@lang('patient.status.completed')',
+            'cancelled':  '@lang('patient.status.cancelled')',
         };
 
         const statusBadgeColors = {
@@ -543,13 +543,13 @@
         };
 
         const filterDefs = [
-            { key: 'all',        label: 'Toutes',           base: 'text-[#0D9488] bg-[#0D9488]/10 border-[#0D9488]/30', active: 'bg-[#0D9488] text-white border-[#0D9488]' },
-            { key: 'pending',    label: 'En attente',       base: 'text-amber-600 bg-amber-50 border-amber-200',          active: 'bg-amber-500 text-white border-amber-500' },
-            { key: 'assigned',   label: 'Labo sélectionné', base: 'text-teal-600 bg-teal-50 border-teal-200',            active: 'bg-teal-600 text-white border-teal-600' },
-            { key: 'collected',  label: 'Collectée',        base: 'text-blue-600 bg-blue-50 border-blue-200',            active: 'bg-blue-500 text-white border-blue-500' },
-            { key: 'processing', label: 'En traitement',    base: 'text-purple-600 bg-purple-50 border-purple-200',       active: 'bg-purple-500 text-white border-purple-500' },
-            { key: 'completed',  label: 'Complétée',        base: 'text-green-600 bg-green-50 border-green-200',         active: 'bg-green-500 text-white border-green-500' },
-            { key: 'cancelled',  label: 'Annulée',          base: 'text-red-600 bg-red-50 border-red-200',               active: 'bg-red-500 text-white border-red-500' },
+            { key: 'all',        label: '@lang('patient.status.all')',           base: 'text-[#0D9488] bg-[#0D9488]/10 border-[#0D9488]/30', active: 'bg-[#0D9488] text-white border-[#0D9488]' },
+            { key: 'pending',    label: '@lang('patient.status.pending')',       base: 'text-amber-600 bg-amber-50 border-amber-200',          active: 'bg-amber-500 text-white border-amber-500' },
+            { key: 'assigned',   label: '@lang('patient.status.assigned')',      base: 'text-teal-600 bg-teal-50 border-teal-200',            active: 'bg-teal-600 text-white border-teal-600' },
+            { key: 'collected',  label: '@lang('patient.status.collected')',     base: 'text-blue-600 bg-blue-50 border-blue-200',            active: 'bg-blue-500 text-white border-blue-500' },
+            { key: 'processing', label: '@lang('patient.status.processing')',    base: 'text-purple-600 bg-purple-50 border-purple-200',       active: 'bg-purple-500 text-white border-purple-500' },
+            { key: 'completed',  label: '@lang('patient.status.completed')',     base: 'text-green-600 bg-green-50 border-green-200',         active: 'bg-green-500 text-white border-green-500' },
+            { key: 'cancelled',  label: '@lang('patient.status.cancelled')',     base: 'text-red-600 bg-red-50 border-red-200',               active: 'bg-red-500 text-white border-red-500' },
         ];
 
         async function loadExamRequests() {
@@ -565,7 +565,7 @@
                 }
             } catch (error) {
                 console.error('Error loading exam requests:', error);
-                examRequestsList.innerHTML = '<div class="p-4 text-center text-red-500 text-sm">Erreur du chargement</div>';
+                examRequestsList.innerHTML = '<div class="p-4 text-center text-red-500 text-sm">@lang('patient.dashboard.loading_error')</div>';
             }
         }
 
@@ -597,17 +597,17 @@
 
         /* ── Status stepper helper (Task 3.8) ─────────────────────────────── */
         const STATUS_STEPS = [
-            { key: 'pending',    icon: '📋', label: 'Prescription' },
-            { key: 'assigned',   icon: '🏥', label: 'Labo choisi'  },
-            { key: 'collected',  icon: '🩸', label: 'Collectée'    },
-            { key: 'processing', icon: '🔬', label: 'En traitement'},
-            { key: 'completed',  icon: '✅', label: 'Résultats'    },
+            { key: 'pending',    icon: '📋', label: '@lang('patient.dashboard.step_prescription')' },
+            { key: 'assigned',   icon: '🏥', label: '@lang('patient.dashboard.step_lab')'  },
+            { key: 'collected',  icon: '🩸', label: '@lang('patient.status.collected')'    },
+            { key: 'processing', icon: '🔬', label: '@lang('patient.status.processing')'},
+            { key: 'completed',  icon: '✅', label: '@lang('patient.dashboard.step_results')'    },
         ];
 
         function renderStatusStepper(status) {
             if (status === 'cancelled') {
                 return `<div class="my-3 flex items-center gap-2 text-xs font-bold text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
-                    <span>❌</span><span>Demande annulée</span>
+                    <span>❌</span><span>@lang('patient.dashboard.request_cancelled')</span>
                 </div>`;
             }
             const currentIdx = STATUS_STEPS.findIndex(s => s.key === status);
@@ -657,7 +657,7 @@
                         <a href="/patient/exam-requests/${request.id}/choose-laboratory"
                             class="flex items-center justify-center gap-1.5 w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded-lg transition uppercase tracking-wider text-xs">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
-                            Changer le laboratoire
+                            @lang('patient.dashboard.change_laboratory')
                         </a>` : ''}
                     </div>`;
             } else if (request.status === 'pending' || request.status === 'assigned') {
@@ -665,13 +665,13 @@
                     <a href="/patient/exam-requests/${request.id}/choose-laboratory"
                         class="flex items-center justify-center gap-1.5 w-full mt-3 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 rounded-xl transition uppercase tracking-wider text-xs">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                        Choisir un laboratoire
+                        @lang('patient.dashboard.choose_laboratory')
                     </a>`;
             }
 
             const detailBtn = request.approved_by_doctor
-                ? `<button type="button" class="viewExamsBtn mt-4 w-full bg-[#0D9488] hover:bg-[#0a7068] text-white font-bold py-2.5 rounded-xl transition uppercase tracking-wider text-xs" data-exam-request-id="${request.id}">Voir les Détails</button>`
-                : `<button type="button" class="mt-4 w-full bg-gray-300 text-gray-500 font-bold py-2.5 rounded-xl uppercase tracking-wider text-xs cursor-not-allowed" disabled>En attente d'approbation</button>`;
+                ? `<button type="button" class="viewExamsBtn mt-4 w-full bg-[#0D9488] hover:bg-[#0a7068] text-white font-bold py-2.5 rounded-xl transition uppercase tracking-wider text-xs" data-exam-request-id="${request.id}">@lang('patient.dashboard.view_details')</button>`
+                : `<button type="button" class="mt-4 w-full bg-gray-300 text-gray-500 font-bold py-2.5 rounded-xl uppercase tracking-wider text-xs cursor-not-allowed" disabled>@lang('patient.dashboard.pending_approval')</button>`;
 
             return `
                 <div class="${cardColor} border rounded-2xl p-5 transition-all duration-200 hover:shadow-md">
@@ -685,7 +685,7 @@
                         </span>
                     </div>
                     <div class="flex items-center gap-4 text-xs text-[#64748b] mb-1">
-                        <span><strong class="text-[#1e293b]">${request.exams_count}</strong> examen(s)</span>
+                        <span><strong class="text-[#1e293b]">${request.exams_count}</strong> @lang('patient.dashboard.exams_count').replace(':n','')</span>
                         <span class="text-[#94a3b8]">${request.created_at_relative}</span>
                     </div>
                     ${renderStatusStepper(request.status)}
@@ -707,7 +707,7 @@
             ).join('');
             return `
                 <div class="flex items-center justify-between mt-5 pt-4 border-t border-[#e2e8f0]/60">
-                    <p class="text-xs text-[#94a3b8] font-medium">${start}–${end} sur ${filtered.length}</p>
+                    <p class="text-xs text-[#94a3b8] font-medium">${start}–${end} @lang('patient.dashboard.pagination_of') ${filtered.length}</p>
                     <div class="flex items-center gap-1">
                         <button type="button" id="examPrevBtn" ${currentPage === 1 ? 'disabled' : ''}
                             class="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200
@@ -739,8 +739,8 @@
                     <svg class="w-12 h-12 mx-auto mb-3 opacity-40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
-                    <p class="text-sm font-semibold">Aucune demande pour ce filtre</p>
-                    <p class="text-xs mt-1 opacity-70">Essayez un autre statut</p>
+                    <p class="text-sm font-semibold">@lang('patient.dashboard.no_requests_for_filter')</p>
+                    <p class="text-xs mt-1 opacity-70">@lang('patient.dashboard.try_another_status')</p>
                 </div>`;
             } else {
                 html += `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">${paginated.map(renderExamCard).join('')}</div>`;
@@ -770,8 +770,8 @@
                     <svg class="w-12 h-12 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    <p class="text-sm font-semibold">Aucune demande d'analyse</p>
-                    <p class="text-xs mt-1">Les demandes d'examens prescrits par vos médecins apparaîtront ici.</p>
+                    <p class="text-sm font-semibold">@lang('patient.dashboard.no_exam_requests')</p>
+                    <p class="text-xs mt-1">@lang('patient.dashboard.no_exam_requests_hint')</p>
                 </div>`;
         }
 
@@ -798,20 +798,20 @@
                                         </div>
                                     </div>
                                     <p class="text-sm text-[#64748b] mt-2">
-                                        <strong>Demande reçue:</strong> ${request.created_at_relative}
+                                        <strong>@lang('patient.dashboard.request_received')</strong> ${request.created_at_relative}
                                     </p>
                                 </div>
                                 <span class="px-3 py-1 text-xs font-bold text-amber-700 bg-amber-100 border border-amber-200 rounded-full uppercase">
-                                    EN ATTENTE
+                                    @lang('patient.status.pending')
                                 </span>
                             </div>
 
                             <div class="flex gap-3 pt-4 border-t border-blue-200">
                                 <button type="button" class="flex-1 bg-[#0D9488] hover:bg-[#0a7068] text-white font-bold py-2.5 rounded-xl transition uppercase tracking-wider text-xs access-accept-btn" data-access-id="${request.id}">
-                                    ✓ Accepter
+                                    ✓ @lang('patient.dashboard.accept')
                                 </button>
                                 <button type="button" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-2.5 rounded-xl transition uppercase tracking-wider text-xs access-decline-btn" data-access-id="${request.id}">
-                                    ✗ Refuser
+                                    ✗ @lang('patient.dashboard.decline')
                                 </button>
                             </div>
                         </div>
@@ -832,15 +832,15 @@
                             <svg class="w-12 h-12 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <p class="text-sm font-semibold">Aucune demande en attente</p>
-                            <p class="text-xs mt-1">Les demandes d'accès des médecins apparaîtront ici.</p>
+                            <p class="text-sm font-semibold">@lang('patient.dashboard.no_pending_requests')</p>
+                            <p class="text-xs mt-1">@lang('patient.dashboard.no_pending_requests_hint')</p>
                         </div>
                     `;
                 }
             } catch (error) {
                 console.error('Error loading access requests:', error);
                 document.getElementById('accessRequestsList').innerHTML =
-                    '<div class="p-4 text-center text-red-500 text-sm">Erreur du chargement</div>';
+                    '<div class="p-4 text-center text-red-500 text-sm">@lang('patient.dashboard.loading_error')</div>';
             }
         }
 
@@ -862,16 +862,16 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    showMessage(`Demande d'accès ${action === 'accepted' ? 'acceptée ✓' : 'refusée ✗'}`, 'success');
+                    showMessage(action === 'accepted' ? '@lang('patient.dashboard.access_accepted')' : '@lang('patient.dashboard.access_declined')', 'success');
                     loadAccessRequests();
                     loadNotifications();
                     updateUnreadCount();
                 } else {
-                    showMessage(data.message || 'Erreur lors du traitement', 'error');
+                    showMessage(data.message || '@lang('patient.dashboard.process_error')', 'error');
                 }
             } catch (error) {
                 console.error('Error responding to access:', error);
-                showMessage('Une erreur est survenue', 'error');
+                showMessage('@lang('common.error_generic')', 'error');
             }
         }
 
@@ -887,12 +887,12 @@
                     
                     document.getElementById('modalDoctorName').textContent = `Dr. ${exam.doctor_name}`;
                     document.getElementById('modalDoctorSpeciality').textContent = exam.doctor_speciality;
-                    document.getElementById('modalDoctorPhone').textContent = exam.doctor_phone || 'Non disponible';
+                    document.getElementById('modalDoctorPhone').textContent = exam.doctor_phone || '@lang('common.not_available')';
                     document.getElementById('modalStatus').textContent = exam.status;
 
                     if (exam.approved_by_doctor) {
                         document.getElementById('modalDoctorInterpretationSection').classList.remove('hidden');
-                        document.getElementById('modalDoctorInterpretation').textContent = exam.doctor_interpretation || 'Aucune interprétation.';
+                        document.getElementById('modalDoctorInterpretation').textContent = exam.doctor_interpretation || '@lang('patient.dashboard.no_interpretation')';
                     } else {
                         document.getElementById('modalDoctorInterpretationSection').classList.add('hidden');
                     }
@@ -930,7 +930,7 @@
                 }
             } catch (error) {
                 console.error('Error loading exam details:', error);
-                showMessage('Erreur du chargement des détails', 'error');
+                showMessage('@lang('patient.dashboard.details_load_error')', 'error');
             }
         }
 
@@ -958,7 +958,7 @@
 
         // Show global loader instantly, hide after all data loads
         if (window.__setDashboardLoading) window.__setDashboardLoading(true);
-        if (window.__showLoading) window.__showLoading('Chargement...', true);
+        if (window.__showLoading) window.__showLoading('@lang('common.loading')', true);
 
         Promise.allSettled([
             loadNotifications(),
@@ -992,36 +992,36 @@
                                 <div>
                                     <p class="text-sm font-bold text-[#1e293b]">Dr. ${doc.doctor_name}</p>
                                     <p class="text-[11px] text-[#64748b]">${doc.speciality || ''}</p>
-                                    ${doc.expires_at ? `<p class="text-[10px] text-[#94a3b8]">Expire le ${doc.expires_at}</p>` : ''}
+                                    ${doc.expires_at ? `<p class="text-[10px] text-[#94a3b8]">@lang('patient.dashboard.expires_on').replace(':date', doc.expires_at)</p>` : ''}
                                 </div>
                             </div>
                             <div class="flex items-center gap-2">
-                                <a href="/patient/chat/${doc.doctor_id}" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-[#0D9488] text-white hover:bg-[#0a7068] transition" title="Envoyer un message">
+                                <a href="/patient/chat/${doc.doctor_id}" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-[#0D9488] text-white hover:bg-[#0a7068] transition" title="@lang('patient.dashboard.send_message')">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-                                    Chat
+                                    @lang('patient.dashboard.chat')
                                 </a>
-                                <button onclick="blockDoctor(${doc.doctor_id})" class="text-[10px] font-bold text-red-500 hover:underline cursor-pointer uppercase">Bloquer</button>
+                                <button onclick="blockDoctor(${doc.doctor_id})" class="text-[10px] font-bold text-red-500 hover:underline cursor-pointer uppercase">@lang('patient.dashboard.block')</button>
                             </div>
                         </div>
                     `).join('');
                 } else {
-                    list.innerHTML = '<p class="text-xs text-[#94a3b8] text-center py-2">Aucun médecin autorisé</p>';
+                    list.innerHTML = '<p class="text-xs text-[#94a3b8] text-center py-2">@lang('patient.dashboard.no_granted_doctors')</p>';
                 }
             } catch (e) {
-                list.innerHTML = '<p class="text-xs text-[#94a3b8] text-center py-2">Erreur de chargement</p>';
+                list.innerHTML = '<p class="text-xs text-[#94a3b8] text-center py-2">@lang('patient.dashboard.loading_error')</p>';
             }
         }
 
         async function blockDoctor(doctorId) {
             const result = await Swal.fire({
-                title: 'Bloquer ce médecin ?',
-                text: "Il ne pourra plus voir votre profil ni accéder à votre dossier.",
+                title: '@lang('patient.dashboard.block_title')',
+                text: '@lang('patient.dashboard.block_text')',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#ef4444',
                 cancelButtonColor: '#94a3b8',
-                confirmButtonText: 'Oui, bloquer',
-                cancelButtonText: 'Annuler'
+                confirmButtonText: '@lang('patient.dashboard.yes_block')',
+                cancelButtonText: '@lang('common.cancel')'
             });
             if (!result.isConfirmed) return;
             try {
@@ -1040,21 +1040,21 @@
                     loadBlockedDoctors();
                     loadAccessRequests();
                 } else {
-                    showMessage(data.message || 'Erreur', 'error');
+                    showMessage(data.message || '@lang('patient.dashboard.error')', 'error');
                 }
             } catch (e) { showMessage('Une erreur est survenue', 'error'); }
         }
 
         async function unblockDoctor(doctorId) {
             const result = await Swal.fire({
-                title: 'Débloquer ce médecin ?',
-                text: "Le médecin pourra à nouveau accéder à votre profil.",
+                title: '@lang('patient.dashboard.unblock_title')',
+                text: '@lang('patient.dashboard.unblock_text')',
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#10b981',
                 cancelButtonColor: '#94a3b8',
-                confirmButtonText: 'Oui, débloquer',
-                cancelButtonText: 'Annuler'
+                confirmButtonText: '@lang('patient.dashboard.yes_unblock')',
+                cancelButtonText: '@lang('common.cancel')'
             });
             if (!result.isConfirmed) return;
             try {
@@ -1072,7 +1072,7 @@
                     loadGrantedDoctors();
                     loadBlockedDoctors();
                 } else {
-                    showMessage(data.message || 'Erreur', 'error');
+                    showMessage(data.message || '@lang('patient.dashboard.error')', 'error');
                 }
             } catch (e) { showMessage('Une erreur est survenue', 'error'); }
         }
@@ -1094,14 +1094,14 @@
                                     <p class="text-[11px] text-[#64748b]">${doc.speciality || ''}</p>
                                 </div>
                             </div>
-                            <button onclick="unblockDoctor(${doc.doctor_id})" class="text-[10px] font-bold text-[#0D9488] hover:underline cursor-pointer uppercase">Débloquer</button>
+                            <button onclick="unblockDoctor(${doc.doctor_id})" class="text-[10px] font-bold text-[#0D9488] hover:underline cursor-pointer uppercase">@lang('patient.dashboard.unblock')</button>
                         </div>
                     `).join('');
                 } else {
-                    list.innerHTML = '<p class="text-xs text-[#94a3b8] text-center py-2">Aucun médecin bloqué</p>';
+                    list.innerHTML = '<p class="text-xs text-[#94a3b8] text-center py-2">@lang('patient.dashboard.no_blocked_doctors')</p>';
                 }
             } catch (e) {
-                list.innerHTML = '<p class="text-xs text-[#94a3b8] text-center py-2">Erreur de chargement</p>';
+                list.innerHTML = '<p class="text-xs text-[#94a3b8] text-center py-2">@lang('patient.dashboard.loading_error')</p>';
             }
         }
     </script>
@@ -1111,8 +1111,8 @@
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden">
             <div class="bg-gradient-to-r from-[#0D9488] to-[#0a7068] p-4 flex justify-between items-center">
                 <div>
-                    <h3 class="text-sm font-bold text-white">Scanner QR Code Médecin</h3>
-                    <p class="text-[10px] text-white/80">Pointez la caméra vers le QR Code du médecin</p>
+                    <h3 class="text-sm font-bold text-white">@lang('patient.dashboard.scan_qr_title')</h3>
+                    <p class="text-[10px] text-white/80">@lang('patient.dashboard.scan_qr_hint')</p>
                 </div>
                 <button id="closeDocScannerBtn" type="button" class="text-white/70 hover:text-white transition cursor-pointer p-1">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
@@ -1122,10 +1122,10 @@
             </div>
             <div class="p-5">
                 <div id="docQrReaderRegion" class="rounded-xl overflow-hidden bg-black min-h-[220px]"></div>
-                <p id="docQrScannerStatus" class="text-center text-[11px] text-[#64748b] mt-3 font-semibold">En attente de la caméra...</p>
+                <p id="docQrScannerStatus" class="text-center text-[11px] text-[#64748b] mt-3 font-semibold">@lang('patient.dashboard.camera_pending')</p>
                 <button id="cancelDocScanBtn" type="button"
                     class="w-full mt-4 py-2.5 rounded-xl text-xs font-bold text-[#64748b] bg-[#f1f5f9] hover:bg-[#e2e8f0] transition cursor-pointer uppercase">
-                    Annuler
+                    @lang('common.cancel')
                 </button>
             </div>
         </div>
@@ -1154,7 +1154,7 @@
 
             function startDocScanner() {
                 overlay.classList.remove('hidden');
-                statusEl.textContent = 'Pointez la caméra vers le QR Code du médecin...';
+                statusEl.textContent = '@lang('patient.dashboard.scan_qr_hint')...';
                 docQrCodeScanner = new Html5Qrcode('docQrReaderRegion');
                 docQrCodeScanner.start(
                     { facingMode: 'environment' },
@@ -1171,10 +1171,10 @@
                     },
                     function(err) {
                         if (err && err.includes('No MultiFormat')) return;
-                        statusEl.textContent = 'Caméra indisponible. Veuillez réessayer.';
+                        statusEl.textContent = '@lang('patient.dashboard.camera_unavailable')';
                     }
                 ).catch(function(e) {
-                    statusEl.textContent = 'Caméra indisponible. Vérifiez les permissions.';
+                    statusEl.textContent = '@lang('patient.dashboard.camera_permissions')';
                 });
             }
 

@@ -8,22 +8,19 @@
         </svg>
     </div>
 
-    <h2>Confirmez votre adresse email</h2>
+    <h2>{{ __('emails.verify.title') }}</h2>
 
     <p>
-        Bienvenue sur Medix eSanté ! Pour activer votre compte et accéder à votre
-        espace, cliquez sur le bouton ci-dessous. Le lien est valable
-        <strong>60 minutes</strong>.
+        {!! __('emails.verify.intro', ['minutes' => 60]) !!}
     </p>
 
     <div style="text-align:center; margin-bottom:24px;">
         <a href="{{ $url }}" style="display:inline-block; background:#0066FF; color:#ffffff; text-decoration:none; font-weight:700; font-size:15px; padding:14px 32px; border-radius:12px;">
-            Vérifier mon adresse email
+            {{ __('emails.verify.button') }}
         </a>
     </div>
 
     <p class="expire-note">
-        Si vous n'avez pas créé de compte sur Medix eSanté, vous pouvez ignorer
-        cet email en toute sécurité.
+        {{ __('emails.verify.expire_note') }}
     </p>
 @endsection

@@ -1,15 +1,15 @@
 @extends('layouts.center')
 
-@section('title', 'Gestion du Stock - Medix eSanté')
+@section('title', __('center.consumables.title').' - Medix eSanté')
 
 @section('content')
     <!-- Tabs Header -->
     <div class="flex space-x-2 border-b border-[#e2e8f0]/60 pb-3 mb-6 select-none">
         <button onclick="switchTab('stock')" id="tab-btn-stock" class="px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-xl transition duration-150 bg-[#7C3AED]/10 text-[#7C3AED]">
-            Stock des Consommables
+            {{ __('center.consumables.stock_tab') }}
         </button>
         <button onclick="switchTab('history')" id="tab-btn-history" class="px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-xl transition duration-150 text-[#64748b] hover:text-[#1e293b]">
-            Historique des Mouvements
+            {{ __('center.consumables.history_tab') }}
         </button>
     </div>
 
@@ -24,10 +24,10 @@
                     <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7C3AED]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
-                    <input type="text" name="search" value="{{ $search }}" placeholder="Rechercher consommable..." class="pl-9 pr-4 py-2 border border-[#e2e8f0] rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/20 focus:border-[#7C3AED] w-full sm:w-64 text-[#1e293b] bg-white shadow-3xs">
+                    <input type="text" name="search" value="{{ $search }}" placeholder="{{ __('center.consumables.search_placeholder') }}" class="pl-9 pr-4 py-2 border border-[#e2e8f0] rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/20 focus:border-[#7C3AED] w-full sm:w-64 text-[#1e293b] bg-white shadow-3xs">
                 </div>
                 <button type="submit" class="bg-[#7C3AED] hover:bg-[#5B21B6] text-white font-bold px-4 py-2 rounded-xl text-xs uppercase tracking-wider shadow-md shadow-[#7C3AED]/20 transition cursor-pointer">
-                    Filtrer
+                    {{ __('common.filter') }}
                 </button>
             </form>
 
@@ -36,7 +36,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>
-                Nouveau Consommable
+                {{ __('center.consumables.new') }}
             </button>
         </div>
 
@@ -45,11 +45,11 @@
             <table class="w-full text-left border-collapse min-w-[600px]">
                 <thead>
                     <tr class="bg-[#F8FAFC]/80 border-b border-[#e2e8f0]/80">
-                        <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider">Désignation</th>
-                        <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider text-center">Quantité En Stock</th>
-                        <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider text-center">Stock Minimum</th>
-                        <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider text-center">Statut Alerte</th>
-                        <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider text-right">Actions</th>
+                        <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider">{{ __('center.consumables.designation') }}</th>
+                        <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider text-center">{{ __('center.consumables.qty_stock') }}</th>
+                        <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider text-center">{{ __('center.consumables.min_stock') }}</th>
+                        <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider text-center">{{ __('center.consumables.alert_status') }}</th>
+                        <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider text-right">{{ __('common.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 text-sm">
@@ -60,7 +60,7 @@
                         <tr class="hover:bg-[#F8FAFC]/50 transition">
                             <td class="p-4">
                                 <div class="font-bold text-[#1e293b]">{{ $item->name }}</div>
-                                <div class="text-[10px] font-bold text-[#64748b] mt-0.5 uppercase">Unité : {{ $item->unit }}</div>
+                                <div class="text-[10px] font-bold text-[#64748b] mt-0.5 uppercase">{{ __('center.consumables.unit_prefix', ['unit' => $item->unit]) }}</div>
                             </td>
                             <td class="p-4 text-center font-bold text-[#1e293b]">
                                 {{ $item->quantity }} <span class="text-xs text-[#64748b] font-medium">{{ $item->unit }}</span>
@@ -72,24 +72,24 @@
                                 @if($isLowStock)
                                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold text-red-600 bg-red-50 border border-red-200">
                                         <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                                        Rupture / Stock Bas
+                                        {{ __('center.consumables.low_stock') }}
                                     </span>
                                 @else
                                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200">
                                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                        Stock Suffisant
+                                        {{ __('center.consumables.stock_ok') }}
                                     </span>
                                 @endif
                             </td>
                             <td class="p-4 text-right">
                                 <div class="inline-flex gap-2">
                                     <!-- Movement Button -->
-                                    <button onclick="openMovementModal({{ $item->id }}, '{{ addslashes($item->name) }}', '{{ $item->unit }}')" class="px-3 py-1.5 bg-[#7C3AED]/10 hover:bg-[#7C3AED]/20 text-[#7C3AED] font-bold text-xs rounded-lg transition" title="Mouvement Stock">
-                                        Mouvement
+                                    <button onclick="openMovementModal({{ $item->id }}, '{{ addslashes($item->name) }}', '{{ $item->unit }}')" class="px-3 py-1.5 bg-[#7C3AED]/10 hover:bg-[#7C3AED]/20 text-[#7C3AED] font-bold text-xs rounded-lg transition" title="{{ __('center.consumables.movement_title') }}">
+                                        {{ __('center.consumables.movement') }}
                                     </button>
                                     
                                     <!-- Edit Button -->
-                                    <button onclick="openEditConsumableModal({{ $item->id }}, '{{ addslashes($item->name) }}', '{{ addslashes($item->unit) }}', {{ $item->min_quantity }})" class="p-1.5 border border-[#e2e8f0] text-gray-400 hover:text-[#7C3AED] hover:border-[#7C3AED]/30 rounded-lg transition" title="Modifier">
+                                    <button onclick="openEditConsumableModal({{ $item->id }}, '{{ addslashes($item->name) }}', '{{ addslashes($item->unit) }}', {{ $item->min_quantity }})" class="p-1.5 border border-[#e2e8f0] text-gray-400 hover:text-[#7C3AED] hover:border-[#7C3AED]/30 rounded-lg transition" title="{{ __('common.edit') }}">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
                                         </svg>
@@ -100,7 +100,7 @@
                     @empty
                         <tr>
                             <td colspan="5" class="p-8 text-center text-gray-400">
-                                Aucun consommable enregistré.
+                                {{ __('center.consumables.empty') }}
                             </td>
                         </tr>
                     @endforelse
@@ -122,18 +122,18 @@
             <table class="w-full text-left border-collapse min-w-[600px]">
                 <thead>
                     <tr class="bg-[#F8FAFC]/80 border-b border-[#e2e8f0]/80">
-                        <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider">Date & Heure</th>
-                        <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider">Consommable</th>
-                        <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider text-center">Type</th>
-                        <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider text-center">Quantité</th>
-                        <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider">Motif / Justification</th>
+                        <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider">{{ __('center.consumables.date_time') }}</th>
+                        <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider">{{ __('center.consumables.consumable') }}</th>
+                        <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider text-center">{{ __('center.consumables.type') }}</th>
+                        <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider text-center">{{ __('center.consumables.quantity') }}</th>
+                        <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider">{{ __('center.consumables.reason') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 text-sm">
                     @forelse($movements as $log)
                         <tr class="hover:bg-[#F8FAFC]/50 transition">
                             <td class="p-4 text-xs font-semibold text-[#64748b]">
-                                {{ $log->created_at->format('d/m/Y H:i') }}
+                                {{ $log->created_at->format(__('common.datetime_format')) }}
                             </td>
                             <td class="p-4 font-bold text-[#1e293b]">
                                 {{ $log->consumable->name }}
@@ -141,11 +141,11 @@
                             <td class="p-4 text-center select-none">
                                 @if($log->type === 'in')
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-100 uppercase tracking-wider">
-                                        Entrée (+)
+                                        {{ __('center.consumables.entry') }}
                                     </span>
                                 @else
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-red-50 text-red-600 border border-red-100 uppercase tracking-wider">
-                                        Sortie (-)
+                                        {{ __('center.consumables.exit') }}
                                     </span>
                                 @endif
                             </td>
@@ -159,7 +159,7 @@
                     @empty
                         <tr>
                             <td colspan="5" class="p-8 text-center text-gray-400">
-                                Aucun mouvement de stock enregistré.
+                                {{ __('center.consumables.empty_movements') }}
                             </td>
                         </tr>
                     @endforelse
@@ -183,32 +183,32 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </button>
-            <h3 class="text-sm font-bold text-[#1e293b] uppercase tracking-wider mb-4 pb-2 border-b border-gray-100">Ajouter un Consommable</h3>
+            <h3 class="text-sm font-bold text-[#1e293b] uppercase tracking-wider mb-4 pb-2 border-b border-gray-100">{{ __('center.consumables.add_title') }}</h3>
             
             <form action="{{ route('center.consumables.store') }}" method="POST" class="space-y-4">
                 @csrf
                 <div>
-                    <label for="name" class="text-xs font-bold text-[#475569] uppercase tracking-wider">Nom du consommable</label>
-                    <input type="text" name="name" id="name" required placeholder="Ex: Aiguilles de prélèvement" class="w-full mt-1 px-3 py-2 border border-[#e2e8f0] rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/10 focus:border-[#7C3AED] bg-white text-[#1e293b]">
+                    <label for="name" class="text-xs font-bold text-[#475569] uppercase tracking-wider">{{ __('center.consumables.name_label') }}</label>
+                    <input type="text" name="name" id="name" required placeholder="{{ __('center.consumables.name_placeholder') }}" class="w-full mt-1 px-3 py-2 border border-[#e2e8f0] rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/10 focus:border-[#7C3AED] bg-white text-[#1e293b]">
                 </div>
                 <div>
-                    <label for="unit" class="text-xs font-bold text-[#475569] uppercase tracking-wider">Unité de mesure</label>
-                    <input type="text" name="unit" id="unit" required placeholder="Ex: pièces, flacons, boîtes" class="w-full mt-1 px-3 py-2 border border-[#e2e8f0] rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/10 focus:border-[#7C3AED] bg-white text-[#1e293b]">
+                    <label for="unit" class="text-xs font-bold text-[#475569] uppercase tracking-wider">{{ __('center.consumables.unit_label') }}</label>
+                    <input type="text" name="unit" id="unit" required placeholder="{{ __('center.consumables.unit_placeholder') }}" class="w-full mt-1 px-3 py-2 border border-[#e2e8f0] rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/10 focus:border-[#7C3AED] bg-white text-[#1e293b]">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label for="quantity" class="text-xs font-bold text-[#475569] uppercase tracking-wider">Quantité Initiale</label>
+                        <label for="quantity" class="text-xs font-bold text-[#475569] uppercase tracking-wider">{{ __('center.consumables.initial_qty') }}</label>
                         <input type="number" name="quantity" id="quantity" min="0" required placeholder="0" class="w-full mt-1 px-3 py-2 border border-[#e2e8f0] rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/10 focus:border-[#7C3AED] bg-white text-[#1e293b]">
                     </div>
                     <div>
-                        <label for="min_quantity" class="text-xs font-bold text-[#475569] uppercase tracking-wider">Alerte Stock Bas (min)</label>
+                        <label for="min_quantity" class="text-xs font-bold text-[#475569] uppercase tracking-wider">{{ __('center.consumables.min_alert') }}</label>
                         <input type="number" name="min_quantity" id="min_quantity" min="0" required placeholder="10" class="w-full mt-1 px-3 py-2 border border-[#e2e8f0] rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/10 focus:border-[#7C3AED] bg-white text-[#1e293b]">
                     </div>
                 </div>
                 
                 <div class="flex justify-end space-x-3 pt-2">
-                    <button type="button" onclick="closeConsumableModal()" class="px-4 py-2 border border-gray-200 rounded-xl text-xs font-bold text-gray-500 hover:bg-gray-50 uppercase tracking-wider">Annuler</button>
-                    <x-button type="submit" color="purple" :fullWidth="false" class="!py-2 !px-5 !text-xs font-bold uppercase tracking-wider">Créer</x-button>
+                    <button type="button" onclick="closeConsumableModal()" class="px-4 py-2 border border-gray-200 rounded-xl text-xs font-bold text-gray-500 hover:bg-gray-50 uppercase tracking-wider">{{ __('common.cancel') }}</button>
+                    <x-button type="submit" color="purple" :fullWidth="false" class="!py-2 !px-5 !text-xs font-bold uppercase tracking-wider">{{ __('center.consumables.create') }}</x-button>
                 </div>
             </form>
         </div>
@@ -222,27 +222,27 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </button>
-            <h3 class="text-sm font-bold text-[#1e293b] uppercase tracking-wider mb-4 pb-2 border-b border-gray-100">Modifier un Consommable</h3>
+            <h3 class="text-sm font-bold text-[#1e293b] uppercase tracking-wider mb-4 pb-2 border-b border-gray-100">{{ __('center.consumables.edit_title') }}</h3>
             
             <form id="edit-consumable-form" method="POST" class="space-y-4">
                 @csrf
                 @method('PUT')
                 <div>
-                    <label for="edit_name" class="text-xs font-bold text-[#475569] uppercase tracking-wider">Nom du consommable</label>
+                    <label for="edit_name" class="text-xs font-bold text-[#475569] uppercase tracking-wider">{{ __('center.consumables.name_label') }}</label>
                     <input type="text" name="name" id="edit_name" required class="w-full mt-1 px-3 py-2 border border-[#e2e8f0] rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/10 focus:border-[#7C3AED] bg-white text-[#1e293b]">
                 </div>
                 <div>
-                    <label for="edit_unit" class="text-xs font-bold text-[#475569] uppercase tracking-wider">Unité de mesure</label>
+                    <label for="edit_unit" class="text-xs font-bold text-[#475569] uppercase tracking-wider">{{ __('center.consumables.unit_label') }}</label>
                     <input type="text" name="unit" id="edit_unit" required class="w-full mt-1 px-3 py-2 border border-[#e2e8f0] rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/10 focus:border-[#7C3AED] bg-white text-[#1e293b]">
                 </div>
                 <div>
-                    <label for="edit_min_quantity" class="text-xs font-bold text-[#475569] uppercase tracking-wider">Alerte Stock Bas (min)</label>
+                    <label for="edit_min_quantity" class="text-xs font-bold text-[#475569] uppercase tracking-wider">{{ __('center.consumables.min_alert') }}</label>
                     <input type="number" name="min_quantity" id="edit_min_quantity" min="0" required class="w-full mt-1 px-3 py-2 border border-[#e2e8f0] rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/10 focus:border-[#7C3AED] bg-white text-[#1e293b]">
                 </div>
                 
                 <div class="flex justify-end space-x-3 pt-2">
-                    <button type="button" onclick="closeEditConsumableModal()" class="px-4 py-2 border border-gray-200 rounded-xl text-xs font-bold text-gray-500 hover:bg-gray-50 uppercase tracking-wider">Annuler</button>
-                    <x-button type="submit" color="purple" :fullWidth="false" class="!py-2 !px-5 !text-xs font-bold uppercase tracking-wider">Enregistrer</x-button>
+                    <button type="button" onclick="closeEditConsumableModal()" class="px-4 py-2 border border-gray-200 rounded-xl text-xs font-bold text-gray-500 hover:bg-gray-50 uppercase tracking-wider">{{ __('common.cancel') }}</button>
+                    <x-button type="submit" color="purple" :fullWidth="false" class="!py-2 !px-5 !text-xs font-bold uppercase tracking-wider">{{ __('common.save') }}</x-button>
                 </div>
             </form>
         </div>
@@ -256,33 +256,33 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </button>
-            <h3 class="text-sm font-bold text-[#1e293b] uppercase tracking-wider mb-4 pb-2 border-b border-gray-100">Enregistrer un Mouvement de Stock</h3>
+            <h3 class="text-sm font-bold text-[#1e293b] uppercase tracking-wider mb-4 pb-2 border-b border-gray-100">{{ __('center.consumables.movement_title_full') }}</h3>
             
             <form id="movement-form" method="POST" class="space-y-4">
                 @csrf
                 <div>
-                    <label class="text-xs font-bold text-[#475569] uppercase tracking-wider">Consommable</label>
+                    <label class="text-xs font-bold text-[#475569] uppercase tracking-wider">{{ __('center.consumables.consumable') }}</label>
                     <div id="modal-consumable-name" class="mt-1 text-sm font-bold text-[#7C3AED]"></div>
                 </div>
                 <div>
-                    <label for="move_type" class="text-xs font-bold text-[#475569] uppercase tracking-wider">Type de Mouvement</label>
+                    <label for="move_type" class="text-xs font-bold text-[#475569] uppercase tracking-wider">{{ __('center.consumables.movement_type') }}</label>
                     <select name="type" id="move_type" required class="w-full mt-1 px-3 py-2 border border-[#e2e8f0] rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/10 focus:border-[#7C3AED] bg-white text-[#1e293b]">
-                        <option value="in">Entrée (+) [Réapprovisionnement, Don]</option>
-                        <option value="out">Sortie (-) [Utilisation, Casse/Périmé]</option>
+                        <option value="in">{{ __('center.consumables.entry_option') }}</option>
+                        <option value="out">{{ __('center.consumables.exit_option') }}</option>
                     </select>
                 </div>
                 <div>
-                    <label for="move_qty" class="text-xs font-bold text-[#475569] uppercase tracking-wider">Quantité Modifiée (<span id="modal-consumable-unit"></span>)</label>
-                    <input type="number" name="quantity_change" id="move_qty" min="1" required placeholder="Ex: 50" class="w-full mt-1 px-3 py-2 border border-[#e2e8f0] rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/10 focus:border-[#7C3AED] bg-white text-[#1e293b]">
+                    <label for="move_qty" class="text-xs font-bold text-[#475569] uppercase tracking-wider">{!! __('center.consumables.qty_changed', ['unit' => '<span id="modal-consumable-unit"></span>']) !!}</label>
+                    <input type="number" name="quantity_change" id="move_qty" min="1" required placeholder="{{ __('center.consumables.qty_placeholder') }}" class="w-full mt-1 px-3 py-2 border border-[#e2e8f0] rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/10 focus:border-[#7C3AED] bg-white text-[#1e293b]">
                 </div>
                 <div>
-                    <label for="move_reason" class="text-xs font-bold text-[#475569] uppercase tracking-wider">Motif / Réf. (Reason)</label>
-                    <input type="text" name="reason" id="move_reason" required placeholder="Ex: Utilisation prélèvement, Restock" class="w-full mt-1 px-3 py-2 border border-[#e2e8f0] rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/10 focus:border-[#7C3AED] bg-white text-[#1e293b]">
+                    <label for="move_reason" class="text-xs font-bold text-[#475569] uppercase tracking-wider">{{ __('center.consumables.motif_ref') }}</label>
+                    <input type="text" name="reason" id="move_reason" required placeholder="{{ __('center.consumables.motif_placeholder') }}" class="w-full mt-1 px-3 py-2 border border-[#e2e8f0] rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/10 focus:border-[#7C3AED] bg-white text-[#1e293b]">
                 </div>
                 
                 <div class="flex justify-end space-x-3 pt-2">
-                    <button type="button" onclick="closeMovementModal()" class="px-4 py-2 border border-gray-200 rounded-xl text-xs font-bold text-gray-500 hover:bg-gray-50 uppercase tracking-wider">Annuler</button>
-                    <x-button type="submit" color="purple" :fullWidth="false" class="!py-2 !px-5 !text-xs font-bold uppercase tracking-wider">Enregistrer</x-button>
+                    <button type="button" onclick="closeMovementModal()" class="px-4 py-2 border border-gray-200 rounded-xl text-xs font-bold text-gray-500 hover:bg-gray-50 uppercase tracking-wider">{{ __('common.cancel') }}</button>
+                    <x-button type="submit" color="purple" :fullWidth="false" class="!py-2 !px-5 !text-xs font-bold uppercase tracking-wider">{{ __('common.save') }}</x-button>
                 </div>
             </form>
         </div>

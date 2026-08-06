@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Espace Médecin') - Medix eSanté</title>
+    <title>@yield('title', __('components.layouts_doctor.default_title')) - Medix eSanté</title>
 
     <!-- Google Fonts: Outfit & Instrument Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -289,7 +289,7 @@
             <!-- Dashboard -->
             <a href="{{ route('doctor.dashboard') }}"
                class="doctor-sidebar-item {{ $currentRoute === 'doctor.dashboard' ? 'active' : '' }}"
-               title="Tableau de bord">
+               title="{{ __('components.layouts_doctor.dashboard') }}">
                 <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:20px;height:20px;">
                     <path stroke-linecap="round" stroke-linejoin="round"
                         d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75" />
@@ -299,7 +299,7 @@
             <!-- My Patients -->
             <a href="{{ route('doctor.my-patients') }}"
                class="doctor-sidebar-item {{ $currentRoute === 'doctor.my-patients' ? 'active' : '' }}"
-               title="Mes Patients">
+               title="{{ __('components.layouts_doctor.my_patients') }}">
                 <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:20px;height:20px;">
                     <path stroke-linecap="round" stroke-linejoin="round"
                         d="M15 19l-7-7 7-7" />
@@ -311,7 +311,7 @@
             <!-- Patient Search -->
             <a href="{{ route('doctor.patient-search') }}"
                class="doctor-sidebar-item {{ $currentRoute === 'doctor.patient-search' ? 'active' : '' }}"
-               title="Rechercher Patient">
+               title="{{ __('components.layouts_doctor.search_patient') }}">
                 <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:20px;height:20px;">
                     <path stroke-linecap="round" stroke-linejoin="round"
                         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -321,7 +321,7 @@
             <!-- Exam Groups -->
             <a href="{{ route('doctor.exam-groups.index') }}"
                class="doctor-sidebar-item {{ str_starts_with($currentRoute, 'doctor.exam-groups') ? 'active' : '' }}"
-               title="Groupes d'Examens">
+               title="{{ __('components.layouts_doctor.exam_groups') }}">
                 <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:20px;height:20px;">
                     <path stroke-linecap="round" stroke-linejoin="round"
                         d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -406,20 +406,20 @@
 
             @php $doctorRoute = request()->route()->getName(); @endphp
             <div class="flex items-center gap-2 text-[10px] uppercase tracking-wider font-extrabold text-[#64748b] bg-[#f8fafc]/40 px-4 py-2.5 rounded-xl border border-[#e2e8f0]/40 mb-6 select-none">
-                <a href="{{ route('doctor.dashboard') }}" class="hover:text-[#0066FF] transition">Espace Médecin</a>
+                <a href="{{ route('doctor.dashboard') }}" class="hover:text-[#0066FF] transition">{{ __('components.layouts_doctor.doctor_space') }}</a>
                 <svg class="w-3 h-3 text-[#94a3b8]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
                 @if($doctorRoute === 'doctor.dashboard')
-                    <span class="text-[#1e293b]">Tableau de Bord</span>
+                    <span class="text-[#1e293b]">{{ __('components.layouts_doctor.dashboard') }}</span>
                 @elseif(str_starts_with($doctorRoute, 'doctor.exam-groups'))
-                    <span class="text-[#1e293b]">Groupes d'Examens</span>
+                    <span class="text-[#1e293b]">{{ __('components.layouts_doctor.exam_groups') }}</span>
                 @elseif($doctorRoute === 'doctor.my-patients')
-                    <span class="text-[#1e293b]">Mes Patients</span>
+                    <span class="text-[#1e293b]">{{ __('components.layouts_doctor.my_patients') }}</span>
                 @elseif($doctorRoute === 'doctor.patient-search')
-                    <a href="{{ route('doctor.my-patients') }}" class="hover:text-[#0066FF] transition">Mes Patients</a>
+                    <a href="{{ route('doctor.my-patients') }}" class="hover:text-[#0066FF] transition">{{ __('components.layouts_doctor.my_patients') }}</a>
                     <svg class="w-3 h-3 text-[#94a3b8]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
-                    <span class="text-[#1e293b]">Rechercher Patient</span>
+                    <span class="text-[#1e293b]">{{ __('components.layouts_doctor.search_patient') }}</span>
                 @elseif($doctorRoute === 'profile.show')
-                    <span class="text-[#1e293b]">Mon Profil</span>
+                    <span class="text-[#1e293b]">{{ __('auth.profile') }}</span>
                 @else
                     <span class="text-[#1e293b]">{{ ucfirst(str_replace(['doctor.', '-'], ['', ' '], $doctorRoute)) }}</span>
                 @endif
@@ -439,14 +439,14 @@
     <script>
         function swalConfirmSubmit(form, message) {
             Swal.fire({
-                title: 'Confirmer',
+                title: @json(__('common.confirm')),
                 text: message,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#0066FF',
                 cancelButtonColor: '#94a3b8',
-                confirmButtonText: 'Confirmer',
-                cancelButtonText: 'Annuler'
+                confirmButtonText: @json(__('common.confirm')),
+                cancelButtonText: @json(__('common.cancel'))
             }).then((result) => {
                 if (result.isConfirmed) form.submit();
             });

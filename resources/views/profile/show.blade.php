@@ -20,14 +20,14 @@
 
 @extends($layouts[$groupCode] ?? 'layouts.admin')
 
-@section('title', 'Mon Profil')
+@section('title', __('profile.title'))
 
 @section('page-title')
-Mon <span style="color:{{ $colors['primary'] }};">Profil</span>
+{{ __('profile.title_first') }} <span style="color:{{ $colors['primary'] }};">{{ __('profile.title_second') }}</span>
 @endsection
 
 @section('page-subtitle')
-Gérez vos informations personnelles et votre carte digitale.
+{{ __('profile.subtitle_card') }}
 @endsection
 
 @section('content')
@@ -336,16 +336,16 @@ Gérez vos informations personnelles et votre carte digitale.
                 <!-- FRONT -->
                 <div class="flip-card-front">
                     <div class="card-header">
-                        <div class="card-logo">Medix <span>eSanté</span></div>
+                        <div class="card-logo">{{ __('app.brand') }}</div>
                         <div class="card-role">
                             @if($user->doctor)
-                                Médecin
+                                {{ __('layout.role_doctor') }}
                             @elseif($user->patient)
-                                Patient
+                                {{ __('layout.role_patient') }}
                             @elseif($user->staff)
-                                Établissement
+                                {{ __('layout.role_center') }}
                             @else
-                                Administrateur
+                                {{ __('layout.admin') }}
                             @endif
                         </div>
                     </div>
@@ -371,30 +371,30 @@ Gérez vos informations personnelles et votre carte digitale.
                 <div class="flip-card-back">
                     <div class="qr-label">QR Code</div>
                     <div id="qrcode"></div>
-                    <div class="flip-hint">Cliquez pour retourner</div>
+                    <div class="flip-hint">{{ __('profile.flip_hint') }}</div>
                 </div>
 
             </div>
         </div>
 
         <p style="font-size:11px; color:#94a3b8; text-align:center; margin-top:10px;">
-            Cliquez sur la carte pour voir le QR Code
+            {{ __('profile.qr_hint') }}
         </p>
     </div>
     @endif
 
         <!-- Quick info -->
         <div class="form-card" style="margin-top:20px;">
-            <h3>Informations du compte</h3>
+            <h3>{{ __('profile.account_info') }}</h3>
             <div style="display:flex; flex-direction:column; gap:12px;">
                 <div style="display:flex; justify-content:space-between; font-size:13px;">
-                    <span style="color:#94a3b8; font-weight:600;">Rôle</span>
+                    <span style="color:#94a3b8; font-weight:600;">{{ __('profile.role') }}</span>
                     <span style="color:#0f172a; font-weight:700;">
                         {{ $user->group->name ?? '—' }}
                     </span>
                 </div>
                 <div style="display:flex; justify-content:space-between; font-size:13px;">
-                    <span style="color:#94a3b8; font-weight:600;">Code unique</span>
+                    <span style="color:#94a3b8; font-weight:600;">{{ __('profile.unique_code') }}</span>
                     <span style="color:{{ $colors['primary'] }}; font-weight:700; font-family:monospace;">
                         @if($user->doctor)
                             {{ $user->doctor->doctor_code }}
@@ -409,19 +409,19 @@ Gérez vos informations personnelles et votre carte digitale.
                 </div>
                 @if($user->doctor && $user->doctor->speciality)
                 <div style="display:flex; justify-content:space-between; font-size:13px;">
-                    <span style="color:#94a3b8; font-weight:600;">Spécialité</span>
+                    <span style="color:#94a3b8; font-weight:600;">{{ __('doctor.specialty_label') }}</span>
                     <span style="color:#0f172a; font-weight:700;">{{ $user->doctor->speciality }}</span>
                 </div>
                 @endif
                 @if($user->patient && $user->patient->blood_group)
                 <div style="display:flex; justify-content:space-between; font-size:13px;">
-                    <span style="color:#94a3b8; font-weight:600;">Groupe sanguin</span>
+                    <span style="color:#94a3b8; font-weight:600;">{{ __('auth.blood_group') }}</span>
                     <span style="color:#0f172a; font-weight:700;">{{ $user->patient->blood_group }}</span>
                 </div>
                 @endif
                 @if($user->staff && $user->staff->laboratory)
                 <div style="display:flex; justify-content:space-between; font-size:13px;">
-                    <span style="color:#94a3b8; font-weight:600;">Établissement</span>
+                    <span style="color:#94a3b8; font-weight:600;">{{ __('layout.role_center') }}</span>
                     <span style="color:#0f172a; font-weight:700;">{{ $user->staff->laboratory->name }}</span>
                 </div>
                 @endif
@@ -432,46 +432,46 @@ Gérez vos informations personnelles et votre carte digitale.
     <!-- ── RIGHT: EDIT FORM ── -->
     <div>
         <div class="form-card">
-            <h3>Modifier le profil</h3>
+            <h3>{{ __('profile.edit') }}</h3>
             <form action="{{ route('profile.update') }}" method="POST">
                 @csrf
                 @method('PUT')
                 <div class="form-grid">
                     <div class="form-field">
-                        <label>Prénom</label>
+                        <label>{{ __('auth.first_name') }}</label>
                         <input type="text" name="first_name" value="{{ old('first_name', $user->first_name) }}" required>
                     </div>
                     <div class="form-field">
-                        <label>Nom</label>
+                        <label>{{ __('auth.last_name') }}</label>
                         <input type="text" name="last_name" value="{{ old('last_name', $user->last_name) }}" required>
                     </div>
                     <div class="form-field">
-                        <label>Email</label>
+                        <label>{{ __('auth.email') }}</label>
                         <input type="email" name="email" value="{{ old('email', $user->email) }}" required>
                     </div>
                     <div class="form-field">
-                        <label>Téléphone</label>
+                        <label>{{ __('auth.phone') }}</label>
                         <input type="text" name="phone" value="{{ old('phone', $user->phone) }}">
                     </div>
                     <div class="form-field full">
-                        <label>Adresse</label>
+                        <label>{{ __('auth.address') }}</label>
                         <textarea name="address">{{ old('address', $user->address) }}</textarea>
                     </div>
 
                     @if($user->doctor)
                     <div class="form-field">
-                        <label>Spécialité</label>
+                        <label>{{ __('doctor.specialty_label') }}</label>
                         <input type="text" name="speciality" value="{{ old('speciality', $user->doctor->speciality) }}">
                     </div>
                     <div class="form-field">
-                        <label>Code médecin</label>
+                        <label>{{ __('profile.doctor_code') }}</label>
                         <input type="text" class="readonly" value="{{ $user->doctor->doctor_code }}" readonly>
                     </div>
                     @endif
 
                     @if($user->patient)
                     <div class="form-field">
-                        <label>Groupe sanguin</label>
+                        <label>{{ __('auth.blood_group') }}</label>
                         <select name="blood_group">
                             <option value="">—</option>
                             @foreach(['A+','A-','B+','B-','AB+','AB-','O+','O-'] as $bg)
@@ -480,41 +480,41 @@ Gérez vos informations personnelles et votre carte digitale.
                         </select>
                     </div>
                     <div class="form-field">
-                        <label>Date de naissance</label>
+                        <label>{{ __('auth.date_of_birth') }}</label>
                         <input type="date" name="date_of_birth" value="{{ old('date_of_birth', $user->patient->date_of_birth?->format('Y-m-d')) }}">
                     </div>
                     <div class="form-field">
-                        <label>Genre</label>
+                        <label>{{ __('auth.gender_genre') }}</label>
                         <select name="gender">
                             <option value="">—</option>
-                            <option value="M" {{ old('gender', $user->patient->gender) === 'M' ? 'selected' : '' }}>Homme</option>
-                            <option value="F" {{ old('gender', $user->patient->gender) === 'F' ? 'selected' : '' }}>Femme</option>
+                            <option value="M" {{ old('gender', $user->patient->gender) === 'M' ? 'selected' : '' }}>{{ __('auth.gender_m') }}</option>
+                            <option value="F" {{ old('gender', $user->patient->gender) === 'F' ? 'selected' : '' }}>{{ __('auth.gender_f') }}</option>
                         </select>
                     </div>
                     <div class="form-field">
-                        <label>Code patient</label>
+                        <label>{{ __('profile.patient_code') }}</label>
                         <input type="text" class="readonly" value="{{ $user->patient->patient_code }}" readonly>
                     </div>
                     @endif
 
                     @if($user->staff)
                     <div class="form-field">
-                        <label>Code staff</label>
+                        <label>{{ __('profile.staff_code') }}</label>
                         <input type="text" class="readonly" value="{{ $user->staff->staff_code }}" readonly>
                     </div>
                     @if($user->staff->laboratory)
                     <div class="form-field">
-                        <label>Établissement</label>
+                        <label>{{ __('layout.role_center') }}</label>
                         <input type="text" class="readonly" value="{{ $user->staff->laboratory->name }}" readonly>
                     </div>
                     <div class="form-field full">
-                        <label>Localisation du laboratoire (cliquez sur la carte)</label>
+                        <label>{{ __('profile.lab_location') }}</label>
                         <div id="profileMapPicker" style="width:100%;height:280px;border-radius:12px;border:1px solid #e2e8f0;cursor:crosshair;"></div>
                         <input type="hidden" id="profileLat" name="latitude" value="{{ old('latitude', $user->staff->laboratory->latitude) }}">
                         <input type="hidden" id="profileLng" name="longitude" value="{{ old('longitude', $user->staff->laboratory->longitude) }}">
                         <p class="text-[10px] text-[#94a3b8] mt-1.5">
-                            Position : <span id="profileCoords" class="font-bold text-[#1e293b]">
-                                {{ $user->staff->laboratory->latitude && $user->staff->laboratory->longitude ? $user->staff->laboratory->latitude . ', ' . $user->staff->laboratory->longitude : 'Non définie' }}
+                            {{ __('profile.position') }} <span id="profileCoords" class="font-bold text-[#1e293b]">
+                                {{ $user->staff->laboratory->latitude && $user->staff->laboratory->longitude ? $user->staff->laboratory->latitude . ', ' . $user->staff->laboratory->longitude : __('profile.not_set') }}
                             </span>
                         </p>
                     </div>
@@ -522,19 +522,19 @@ Gérez vos informations personnelles et votre carte digitale.
                     @endif
                 </div>
                 <div class="form-actions">
-                    <button type="submit" class="btn-save">Enregistrer</button>
+                    <button type="submit" class="btn-save">{{ __('common.save') }}</button>
                 </div>
             </form>
         </div>
 
         <div class="form-card" style="margin-top:20px;">
-            <h3>Changer le mot de passe</h3>
+            <h3>{{ __('profile.change_password') }}</h3>
             <form action="{{ route('profile.password') }}" method="POST">
                 @csrf
                 @method('PUT')
                 <div class="form-grid">
                     <div class="form-field full">
-                        <label>Mot de passe actuel</label>
+                        <label>{{ __('profile.current_password') }}</label>
                         <div style="position:relative;">
                             <input type="password" name="current_password" required style="padding-right: 42px;">
                             <button type="button" tabindex="-1" onclick="togglePw(this)" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#94a3b8;padding:4px;display:flex;align-items:center;justify-content:center;border-radius:6px;">
@@ -544,7 +544,7 @@ Gérez vos informations personnelles et votre carte digitale.
                         </div>
                     </div>
                     <div class="form-field">
-                        <label>Nouveau mot de passe</label>
+                        <label>{{ __('auth.new_password') }}</label>
                         <div style="position:relative;">
                             <input type="password" name="password" required minlength="8" style="padding-right: 42px;">
                             <button type="button" tabindex="-1" onclick="togglePw(this)" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#94a3b8;padding:4px;display:flex;align-items:center;justify-content:center;border-radius:6px;">
@@ -554,7 +554,7 @@ Gérez vos informations personnelles et votre carte digitale.
                         </div>
                     </div>
                     <div class="form-field">
-                        <label>Confirmer</label>
+                        <label>{{ __('auth.password_confirm') }}</label>
                         <div style="position:relative;">
                             <input type="password" name="password_confirmation" required minlength="8" style="padding-right: 42px;">
                             <button type="button" tabindex="-1" onclick="togglePw(this)" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#94a3b8;padding:4px;display:flex;align-items:center;justify-content:center;border-radius:6px;">
@@ -565,21 +565,21 @@ Gérez vos informations personnelles et votre carte digitale.
                     </div>
                 </div>
                 <div class="form-actions">
-                    <button type="submit" class="btn-save">Modifier le mot de passe</button>
+                    <button type="submit" class="btn-save">{{ __('profile.change_password') }}</button>
                 </div>
             </form>
         </div>
 
         <div class="form-card" style="margin-top:20px;">
-            <h3>Sécurité</h3>
+            <h3>{{ __('profile.security') }}</h3>
             <p style="font-size:13px; color:#64748b; line-height:1.6; margin-bottom:12px;">
-                Authentification à deux facteurs :
+                {{ __('profile.two_factor_label') }}
                 <strong style="color:{{ auth()->user()->twoFactorEnabled() ? '#059669' : '#d97706' }}">
-                    {{ auth()->user()->twoFactorEnabled() ? 'activée' : 'désactivée' }}
+                    {{ auth()->user()->twoFactorEnabled() ? __('profile.two_factor_enabled') : __('profile.two_factor_disabled') }}
                 </strong>
             </p>
             <a href="{{ route('profile.two-factor.setup') }}" class="btn-save" style="text-decoration:none; display:inline-block;">
-                Gérer la 2FA
+                {{ __('profile.manage_2fa') }}
             </a>
         </div>
     </div>

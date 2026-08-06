@@ -1,8 +1,8 @@
 @extends('layouts.admin')
 
-@section('title', 'Mon Profil')
-@section('page-title', 'Mon Profil')
-@section('page-subtitle', 'Gérez vos informations personnelles et mettez à jour votre mot de passe.')
+@section('title', __('profile.title'))
+@section('page-title', __('profile.title'))
+@section('page-subtitle', __('profile.subtitle'))
 
 @section('content')
     <div style="display: grid; grid-template-columns: 1fr; gap: 24px; max-width: 800px; margin: 0 auto;">
@@ -10,7 +10,7 @@
         <div class="data-section anim anim-1" style="padding: 28px;">
             <h3 class="data-title"
                 style="margin-top: 0; margin-bottom: 24px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; font-size: 16px;">
-                Détails du compte
+                {{ __('profile.account_details') }}
             </h3>
 
             @if ($errors->any())
@@ -30,59 +30,59 @@
                 <!-- Basic User Fields -->
                 <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
                     <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-                        <label class="form-label" style="font-size: 12px; font-weight: 600; color: #475569;">Prénom <span style="color:#ef4444;">*</span></label>
+                        <label class="form-label" style="font-size: 12px; font-weight: 600; color: #475569;">{{ __('auth.first_name') }} <span style="color:#ef4444;">*</span></label>
                         <input type="text" name="first_name" value="{{ old('first_name', $user->first_name) }}" required class="form-control" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px;">
                     </div>
                     <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-                        <label class="form-label" style="font-size: 12px; font-weight: 600; color: #475569;">Nom de famille <span style="color:#ef4444;">*</span></label>
+                        <label class="form-label" style="font-size: 12px; font-weight: 600; color: #475569;">{{ __('auth.last_name_full') }} <span style="color:#ef4444;">*</span></label>
                         <input type="text" name="last_name" value="{{ old('last_name', $user->last_name) }}" required class="form-control" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px;">
                     </div>
                 </div>
 
                 <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
                     <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-                        <label class="form-label" style="font-size: 12px; font-weight: 600; color: #475569;">Adresse Email <span style="color:#ef4444;">*</span></label>
+                        <label class="form-label" style="font-size: 12px; font-weight: 600; color: #475569;">{{ __('auth.email') }} <span style="color:#ef4444;">*</span></label>
                         <input type="email" name="email" value="{{ old('email', $user->email) }}" required class="form-control" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px;">
                     </div>
                     <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-                        <label class="form-label" style="font-size: 12px; font-weight: 600; color: #475569;">Téléphone</label>
+                        <label class="form-label" style="font-size: 12px; font-weight: 600; color: #475569;">{{ __('auth.phone') }}</label>
                         <input type="text" name="phone" value="{{ old('phone', $user->phone) }}" class="form-control" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px;">
                     </div>
                 </div>
 
                 <div class="form-group" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px;">
-                    <label class="form-label" style="font-size: 12px; font-weight: 600; color: #475569;">Adresse Physique</label>
+                    <label class="form-label" style="font-size: 12px; font-weight: 600; color: #475569;">{{ __('profile.physical_address') }}</label>
                     <textarea name="address" rows="3" class="form-control" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-family: inherit;">{{ old('address', $user->address) }}</textarea>
                 </div>
 
                 <!-- Role Specific Fields -->
                 @if ($user->doctor)
                     <div style="margin-top: 24px; padding-top: 16px; border-top: 1px dashed #e2e8f0; margin-bottom: 16px;">
-                        <h4 style="font-size: 14px; font-weight: 700; color: #1e293b; margin-top: 0; margin-bottom: 16px;">Informations Professionnelles (Médecin)</h4>
+                        <h4 style="font-size: 14px; font-weight: 700; color: #1e293b; margin-top: 0; margin-bottom: 16px;">{{ __('profile.doctor_info') }}</h4>
                         <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                             <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-                                <label class="form-label" style="font-size: 12px; font-weight: 600; color: #475569;">Code Unique Médecin (CNOM)</label>
+                                <label class="form-label" style="font-size: 12px; font-weight: 600; color: #475569;">{{ __('profile.doctor_code') }}</label>
                                 <input type="text" value="{{ $user->doctor->doctor_code }}" readonly class="form-control" style="width: 100%; padding: 8px 12px; border: 1px solid #e2e8f0; background-color: #f8fafc; border-radius: 8px; font-size: 13px; font-family: monospace; font-weight: 700; color: #64748b;">
                             </div>
                             <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-                                <label class="form-label" style="font-size: 12px; font-weight: 600; color: #475569;">Spécialité <span style="color:#ef4444;">*</span></label>
+                                <label class="form-label" style="font-size: 12px; font-weight: 600; color: #475569;">{{ __('doctor.specialty_label') }} <span style="color:#ef4444;">*</span></label>
                                 <input type="text" name="speciality" value="{{ old('speciality', $user->doctor->speciality) }}" required class="form-control" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px;">
                             </div>
                         </div>
                     </div>
                 @elseif ($user->patient)
                     <div style="margin-top: 24px; padding-top: 16px; border-top: 1px dashed #e2e8f0; margin-bottom: 16px;">
-                        <h4 style="font-size: 14px; font-weight: 700; color: #1e293b; margin-top: 0; margin-bottom: 16px;">Informations Médicales (Patient)</h4>
+                        <h4 style="font-size: 14px; font-weight: 700; color: #1e293b; margin-top: 0; margin-bottom: 16px;">{{ __('profile.patient_info') }}</h4>
                         <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                             <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-                                <label class="form-label" style="font-size: 12px; font-weight: 600; color: #475569;">Code Patient Unique</label>
+                                <label class="form-label" style="font-size: 12px; font-weight: 600; color: #475569;">{{ __('profile.patient_code') }}</label>
                                 <input type="text" value="{{ $user->patient->patient_code }}" readonly class="form-control" style="width: 100%; padding: 8px 12px; border: 1px solid #e2e8f0; background-color: #f8fafc; border-radius: 8px; font-size: 13px; font-family: monospace; font-weight: 700; color: #64748b;">
                             </div>
                             <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-                                <label class="form-label" style="font-size: 12px; font-weight: 600; color: #475569;">Groupe Sanguin</label>
+                                <label class="form-label" style="font-size: 12px; font-weight: 600; color: #475569;">{{ __('auth.blood_group') }}</label>
                                 <div style="position:relative;">
                                     <select name="blood_group" class="form-control" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; appearance: none;">
-                                        <option value="">Non spécifié</option>
+                                        <option value="">{{ __('profile.not_specified') }}</option>
                                         @foreach(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] as $bg)
                                             <option value="{{ $bg }}" {{ old('blood_group', $user->patient->blood_group) == $bg ? 'selected' : '' }}>{{ $bg }}</option>
                                         @endforeach
@@ -96,14 +96,14 @@
                     </div>
                 @elseif ($user->staff)
                     <div style="margin-top: 24px; padding-top: 16px; border-top: 1px dashed #e2e8f0; margin-bottom: 16px;">
-                        <h4 style="font-size: 14px; font-weight: 700; color: #1e293b; margin-top: 0; margin-bottom: 16px;">Établissement & Centre Médical</h4>
+                        <h4 style="font-size: 14px; font-weight: 700; color: #1e293b; margin-top: 0; margin-bottom: 16px;">{{ __('profile.staff_info') }}</h4>
                         <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                             <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-                                <label class="form-label" style="font-size: 12px; font-weight: 600; color: #475569;">Nom du Laboratoire</label>
+                                <label class="form-label" style="font-size: 12px; font-weight: 600; color: #475569;">{{ __('profile.lab_name') }}</label>
                                 <input type="text" value="{{ $user->staff->laboratory->name ?? 'N/A' }}" readonly class="form-control" style="width: 100%; padding: 8px 12px; border: 1px solid #e2e8f0; background-color: #f8fafc; border-radius: 8px; font-size: 13px; font-weight: 600; color: #64748b;">
                             </div>
                             <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-                                <label class="form-label" style="font-size: 12px; font-weight: 600; color: #475569;">Code Employé (Staff Code)</label>
+                                <label class="form-label" style="font-size: 12px; font-weight: 600; color: #475569;">{{ __('profile.staff_code') }}</label>
                                 <input type="text" value="{{ $user->staff->staff_code }}" readonly class="form-control" style="width: 100%; padding: 8px 12px; border: 1px solid #e2e8f0; background-color: #f8fafc; border-radius: 8px; font-size: 13px; font-family: monospace; font-weight: 700; color: #64748b;">
                             </div>
                         </div>
@@ -112,13 +112,13 @@
 
                 <!-- Password Update Section -->
                 <div style="margin-top: 24px; padding-top: 16px; border-top: 1px dashed #e2e8f0; margin-bottom: 24px;">
-                    <h4 style="font-size: 14px; font-weight: 700; color: #1e293b; margin-top: 0; margin-bottom: 8px;">Modifier le mot de passe</h4>
-                    <p style="font-size: 12px; color: #64748b; margin-top: 0; margin-bottom: 16px;">Laissez ces champs vides si vous ne souhaitez pas modifier votre mot de passe.</p>
+                    <h4 style="font-size: 14px; font-weight: 700; color: #1e293b; margin-top: 0; margin-bottom: 8px;">{{ __('profile.change_password') }}</h4>
+                    <p style="font-size: 12px; color: #64748b; margin-top: 0; margin-bottom: 16px;">{{ __('profile.password_help') }}</p>
                     <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                         <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-                            <label class="form-label" style="font-size: 12px; font-weight: 600; color: #475569;">Nouveau mot de passe</label>
+                            <label class="form-label" style="font-size: 12px; font-weight: 600; color: #475569;">{{ __('auth.new_password') }}</label>
                             <div style="position:relative;">
-                                <input type="password" name="password" class="form-control" placeholder="Min. 8 caractères" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; padding-right: 42px;">
+                                <input type="password" name="password" class="form-control" placeholder="{{ __('profile.password_min') }}" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; padding-right: 42px;">
                                 <button type="button" tabindex="-1" onclick="togglePw(this)" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#94a3b8;padding:4px;display:flex;align-items:center;justify-content:center;border-radius:6px;">
                                     <svg class="pw-eye" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                                     <svg class="pw-eye-off" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="display:none;"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"/></svg>
@@ -126,9 +126,9 @@
                             </div>
                         </div>
                         <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-                            <label class="form-label" style="font-size: 12px; font-weight: 600; color: #475569;">Confirmer le mot de passe</label>
+                            <label class="form-label" style="font-size: 12px; font-weight: 600; color: #475569;">{{ __('auth.password_confirm_full') }}</label>
                             <div style="position:relative;">
-                                <input type="password" name="password_confirmation" class="form-control" placeholder="Répéter le mot de passe" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; padding-right: 42px;">
+                                <input type="password" name="password_confirmation" class="form-control" placeholder="{{ __('profile.password_repeat') }}" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; padding-right: 42px;">
                                 <button type="button" tabindex="-1" onclick="togglePw(this)" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#94a3b8;padding:4px;display:flex;align-items:center;justify-content:center;border-radius:6px;">
                                     <svg class="pw-eye" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                                     <svg class="pw-eye-off" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="display:none;"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"/></svg>
@@ -140,7 +140,7 @@
 
                 <div style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid #f1f5f9; padding-top: 20px;">
                     <button type="submit" class="btn-submit" style="padding: 10px 20px; font-size: 13px; font-weight: 600; background: #0066ff; color: white; border: none; border-radius: 8px; cursor: pointer; transition: background 0.2s;">
-                        Mettre à jour mon profil
+                        {{ __('profile.update') }}
                     </button>
                 </div>
             </form>

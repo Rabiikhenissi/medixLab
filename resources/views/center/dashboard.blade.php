@@ -1,6 +1,6 @@
 @extends('layouts.center')
 
-@section('title', 'Tableau de bord Centre Médical')
+@section('title', __('center.dashboard.title'))
 
 @section('content')
 
@@ -9,7 +9,7 @@
     <!-- Header -->
     <div>
         <h1 class="text-3xl font-bold text-[#1e293b]">
-            Bienvenue,
+            {{ __('center.dashboard.welcome') }}
             <span class="text-[#7C3AED]">
                 {{ auth()->user()->staff->laboratory->name }}
             </span>
@@ -17,7 +17,7 @@
         </h1>
 
         <p class="text-sm text-[#64748b] mt-2">
-            Gérez votre laboratoire, les demandes d'analyses, les stocks et les équipements médicaux.
+            {{ __('center.dashboard.subtitle') }}
         </p>
     </div>
 
@@ -33,7 +33,7 @@
             </div>
 
             <p class="text-xs uppercase font-bold text-slate-500 mt-2">
-                Équipements
+                {{ __('center.dashboard.equipment') }}
             </p>
         </div>
 
@@ -47,7 +47,7 @@
             </div>
 
             <p class="text-xs uppercase font-bold text-slate-500 mt-2">
-                Consommables
+                {{ __('center.dashboard.consumables') }}
             </p>
 
         </div>
@@ -63,7 +63,7 @@
             </div>
 
             <p class="text-xs uppercase font-bold text-slate-500 mt-2">
-                Stock faible
+                {{ __('center.dashboard.low_stock') }}
             </p>
 
         </div>
@@ -79,7 +79,7 @@
             </div>
 
             <p class="text-xs uppercase font-bold text-slate-500 mt-2">
-                Maintenance
+                {{ __('center.dashboard.maintenance') }}
             </p>
 
         </div>
@@ -92,7 +92,7 @@
                 {{ $workload['total'] }}
             </div>
             <p class="text-xs uppercase font-bold text-purple-700 mt-2">
-                Demandes d'analyses
+                {{ __('center.dashboard.exam_requests') }}
             </p>
         </div>
 
@@ -102,22 +102,22 @@
                 {{ $billingPending ?? 0 }}
             </div>
             <p class="text-xs uppercase font-bold text-emerald-700 mt-2">
-                Factures en attente
+                {{ __('center.dashboard.invoices_pending') }}
             </p>
             @if(($billingCount ?? 0) > 0)
-            <p class="text-[10px] text-emerald-600 mt-1">{{ $billingCount }} facture(s) · {{ number_format($billingRevenue ?? 0, 2) }} DT encaissés</p>
+            <p class="text-[10px] text-emerald-600 mt-1">{{ __('center.dashboard.billing_revenue_detail', ['count' => $billingCount, 'amount' => number_format($billingRevenue ?? 0, 2)]) }}</p>
             @endif
         </div>
 
-        <!-- Échantillons -->
+        <!-- Samples -->
         <div class="bg-cyan-50 border border-cyan-200 rounded-2xl p-5 shadow-sm">
             <div class="text-3xl font-black text-cyan-700">
                 {{ $sampleActive ?? 0 }}
             </div>
             <p class="text-xs uppercase font-bold text-cyan-700 mt-2">
-                Échantillons actifs
+                {{ __('center.dashboard.samples_active') }}
             </p>
-            <p class="text-[10px] text-cyan-600 mt-1">{{ $sampleCount ?? 0 }} totale(s)</p>
+            <p class="text-[10px] text-cyan-600 mt-1">{{ $sampleCount ?? 0 }} {{ __('center.dashboard.samples_total') }}</p>
         </div>
 
     </div>
@@ -135,7 +135,7 @@
         <div class="bg-white border border-slate-200 rounded-2xl p-6">
 
             <h3 class="font-bold text-slate-800 mb-5">
-                Informations du laboratoire
+                {{ __('center.dashboard.laboratory_info') }}
             </h3>
 
 
@@ -145,7 +145,7 @@
                 <div class="flex justify-between border-b pb-2">
 
                     <span class="text-slate-500">
-                        Nom
+                        {{ __('common.name') }}
                     </span>
 
                     <span class="font-semibold">
@@ -159,7 +159,7 @@
                 <div class="flex justify-between border-b pb-2">
 
                     <span class="text-slate-500">
-                        Responsable
+                        {{ __('center.dashboard.responsible') }}
                     </span>
 
                     <span class="font-semibold">
@@ -174,7 +174,7 @@
                 <div class="flex justify-between border-b pb-2">
 
                     <span class="text-slate-500">
-                        Email
+                        {{ __('common.email') }}
                     </span>
 
                     <span class="font-semibold">
@@ -188,11 +188,11 @@
                 <div class="flex justify-between">
 
                     <span class="text-slate-500">
-                        Ville
+                        {{ __('center.dashboard.city') }}
                     </span>
 
                     <span class="font-semibold">
-                        {{ auth()->user()->staff->laboratory->city ?? 'Non renseignée' }}
+                        {{ auth()->user()->staff->laboratory->city ?? __('center.dashboard.not_provided') }}
                     </span>
 
                 </div>
@@ -211,7 +211,7 @@
 
 
             <h3 class="font-bold text-slate-800 mb-5">
-                Actions rapides
+                {{ __('center.dashboard.quick_actions') }}
             </h3>
 
 
@@ -221,28 +221,28 @@
 
                 <a href="{{ route('center.working-hours') }}"
                    class="p-4 rounded-xl bg-slate-50 hover:bg-purple-50 text-sm font-semibold text-center transition">
-                    Horaires
+                    {{ __('center.dashboard.hours') }}
                 </a>
 
 
 
                 <a href="{{ route('center.consumables') }}"
                    class="p-4 rounded-xl bg-slate-50 hover:bg-purple-50 text-sm font-semibold text-center transition">
-                    Stock
+                    {{ __('center.dashboard.stock') }}
                 </a>
 
 
 
                 <a href="{{ route('center.equipment') }}"
                    class="p-4 rounded-xl bg-slate-50 hover:bg-purple-50 text-sm font-semibold text-center transition">
-                    Équipements
+                    {{ __('center.dashboard.equipment') }}
                 </a>
 
 
 
                 <a href="{{ route('center.exam-requests') }}"
                    class="p-4 rounded-xl bg-purple-50 text-purple-700 font-semibold text-center transition">
-                    Analyses
+                    {{ __('center.dashboard.analyses') }}
                 </a>
 
 
@@ -266,10 +266,10 @@
                 <svg class="w-5 h-5 text-[#7C3AED]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zm6.75-9.75c0-.621.504-1.125 1.125-1.125h2.25C13.496 2.25 14 2.754 14 3.375v16.5c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V3.375zm6.75 5.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v10.875c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V9z"/>
                 </svg>
-                Charge de travail actuelle
+                {{ __('center.dashboard.current_workload') }}
             </h2>
             <a href="{{ route('center.exam-requests') }}" class="text-xs font-bold text-[#7C3AED] hover:underline uppercase tracking-wider">
-                Voir les demandes →
+                {{ __('center.dashboard.view_requests') }}
             </a>
         </div>
 
@@ -278,18 +278,18 @@
             <!-- Per-status breakdown -->
             <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
                 <h3 class="text-sm font-bold text-slate-600 uppercase tracking-wider mb-5">
-                    Répartition par statut
-                    <span class="ml-2 text-xs text-slate-400 normal-case font-medium">(total : {{ $workload['total'] }})</span>
+                    {{ __('center.dashboard.status_breakdown') }}
+                    <span class="ml-2 text-xs text-slate-400 normal-case font-medium">{{ __('center.dashboard.total_badge', ['total' => $workload['total']]) }}</span>
                 </h3>
 
                 @php
                     $statusRows = [
-                        ['key' => 'pending',    'label' => 'En attente',      'color' => 'bg-amber-400',   'text' => 'text-amber-700'],
-                        ['key' => 'assigned',   'label' => 'Labo sélectionné','color' => 'bg-teal-500',    'text' => 'text-teal-700'],
-                        ['key' => 'collected',  'label' => 'Collectée',        'color' => 'bg-blue-400',    'text' => 'text-blue-700'],
-                        ['key' => 'processing', 'label' => 'En traitement',   'color' => 'bg-purple-500',  'text' => 'text-purple-700'],
-                        ['key' => 'completed',  'label' => 'Complétée',        'color' => 'bg-green-400',   'text' => 'text-green-700'],
-                        ['key' => 'cancelled',  'label' => 'Annulée',          'color' => 'bg-red-400',     'text' => 'text-red-700'],
+                        ['key' => 'pending',    'label' => __('center.status.pending'),      'color' => 'bg-amber-400',   'text' => 'text-amber-700'],
+                        ['key' => 'assigned',   'label' => __('center.status.lab_selected'), 'color' => 'bg-teal-500',    'text' => 'text-teal-700'],
+                        ['key' => 'collected',  'label' => __('center.status.collected'),     'color' => 'bg-blue-400',    'text' => 'text-blue-700'],
+                        ['key' => 'processing', 'label' => __('center.status.processing'),    'color' => 'bg-purple-500',  'text' => 'text-purple-700'],
+                        ['key' => 'completed',  'label' => __('center.status.completed_alt'), 'color' => 'bg-green-400',   'text' => 'text-green-700'],
+                        ['key' => 'cancelled',  'label' => __('center.status.cancelled'),     'color' => 'bg-red-400',     'text' => 'text-red-700'],
                     ];
                     $total = max($workload['total'], 1);
                 @endphp
@@ -315,7 +315,7 @@
             <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
                 <div class="flex items-center justify-between mb-5">
                     <h3 class="text-sm font-bold text-slate-600 uppercase tracking-wider">
-                        Volume — 7 derniers jours
+                        {{ __('center.dashboard.volume_7days') }}
                     </h3>
                     @php
                         $values = array_values($last7Days);
@@ -335,7 +335,7 @@
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14"/></svg>
                             0%
                         @endif
-                        <span class="text-[10px] text-slate-400 font-semibold">vs semaine préc.</span>
+                        <span class="text-[10px] text-slate-400 font-semibold">{{ __('center.dashboard.vs_prev_week') }}</span>
                     </div>
                 </div>
 
@@ -354,7 +354,7 @@
                     <div class="flex items-center gap-4">
                         <div class="flex items-center gap-1.5">
                             <span class="w-2.5 h-2.5 rounded-full bg-[#7C3AED]"></span>
-                            <span class="text-[10px] font-semibold text-slate-500">Demandes</span>
+                            <span class="text-[10px] font-semibold text-slate-500">{{ __('center.dashboard.requests_label') }}</span>
                         </div>
                         @php
                             $avg = $total7 / 7;
@@ -362,13 +362,13 @@
                             $peakDay = $days[array_search($peak, $values)];
                         @endphp
                         <div class="text-[10px] text-slate-400">
-                            Moy. <strong class="text-slate-600">{{ number_format($avg, 1) }}</strong>/jour
+                            {{ __('center.dashboard.avg_per_day', ['avg' => number_format($avg, 1)]) }}
                         </div>
                     </div>
                     <div class="text-[10px] text-slate-400">
-                        Total 7j : <strong class="text-slate-600">{{ $total7 }}</strong> demande(s)
+                        {{ __('center.dashboard.total_7d', ['total' => $total7]) }}
                         @if($peak > 0)
-                            · Pic : <strong class="text-[#7C3AED]">{{ $peak }}</strong> {{ \Carbon\Carbon::parse($peakDay)->format('D') }}
+                            · {{ __('center.dashboard.peak_label', ['peak' => $peak, 'day' => \Carbon\Carbon::parse($peakDay)->format('D')]) }}
                         @endif
                     </div>
                 </div>
@@ -386,23 +386,23 @@
                 <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                Revenus (Facturation)
+                {{ __('center.dashboard.revenue') }}
             </h3>
             <div class="text-4xl font-black text-green-600 mb-2">
                 {{ number_format($billingRevenue ?? 0, 2) }} DT
             </div>
-            <p class="text-xs text-slate-500">Total encaissé — factures payées</p>
+            <p class="text-xs text-slate-500">{{ __('center.dashboard.total_collected') }}</p>
             <div class="grid grid-cols-3 gap-3 pt-4 mt-4 border-t border-slate-100">
                 <div>
-                    <p class="text-[10px] font-semibold text-slate-400 uppercase">Facturé</p>
+                    <p class="text-[10px] font-semibold text-slate-400 uppercase">{{ __('center.dashboard.billed') }}</p>
                     <p class="text-sm font-bold text-slate-700">{{ number_format($billingBilled ?? 0, 2) }} DT</p>
                 </div>
                 <div>
-                    <p class="text-[10px] font-semibold text-slate-400 uppercase">En attente</p>
+                    <p class="text-[10px] font-semibold text-slate-400 uppercase">{{ __('center.status.pending') }}</p>
                     <p class="text-sm font-bold text-amber-600">{{ number_format($billingOutstanding ?? 0, 2) }} DT</p>
                 </div>
                 <div>
-                    <p class="text-[10px] font-semibold text-slate-400 uppercase">Payées</p>
+                    <p class="text-[10px] font-semibold text-slate-400 uppercase">{{ __('center.dashboard.paid_label') }}</p>
                     <p class="text-sm font-bold text-emerald-600">{{ $billingPaid ?? 0 }}</p>
                 </div>
             </div>
@@ -414,7 +414,7 @@
                 <svg class="w-5 h-5 text-[#7C3AED]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75z"/>
                 </svg>
-                Top 5 Examens Demandés
+                {{ __('center.dashboard.top_exams') }}
             </h3>
             @if(count($topExams) > 0)
                 <div class="space-y-3">
@@ -427,7 +427,7 @@
                     @endforeach
                 </div>
             @else
-                <p class="text-sm text-slate-400 italic">Aucune donnée disponible.</p>
+                <p class="text-sm text-slate-400 italic">{{ __('center.dashboard.no_data') }}</p>
             @endif
         </div>
 
@@ -458,7 +458,7 @@
         data: {
             labels: labels,
             datasets: [{
-                label: 'Demandes',
+                label: @json(__('center.dashboard.requests_label')),
                 data: data,
                 borderColor: '#7C3AED',
                 backgroundColor: gradient,
@@ -496,7 +496,7 @@
                             return items[0].label;
                         },
                         label: function(item) {
-                            return item.formattedValue + ' demande(s)';
+                            return item.formattedValue + ' ' + @json(__('center.dashboard.requests_suffix'));
                         }
                     }
                 }

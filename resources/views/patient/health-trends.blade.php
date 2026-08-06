@@ -1,5 +1,5 @@
 <x-layouts.patient>
-<x-slot:title>Évolution de ma santé — Medix eSanté</x-slot:title>
+<x-slot:title>{{ __('patient.health_trends.title') }} — Medix eSanté</x-slot:title>
 
 @section('styles')
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -19,7 +19,7 @@
         <svg class="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
         </svg>
-        Retour
+        {{ __('common.back') }}
     </a>
 
     <div class="flex items-center gap-3 mb-6">
@@ -29,27 +29,27 @@
             </svg>
         </div>
         <div>
-            <h1 class="text-xl font-bold text-[#1e293b]">Évolution de ma santé</h1>
-            <p class="text-xs text-[#64748b] mt-0.5">Historique et tendances de vos analyses</p>
+            <h1 class="text-xl font-bold text-[#1e293b]">{{ __('patient.health_trends.title') }}</h1>
+            <p class="text-xs text-[#64748b] mt-0.5">{{ __('patient.health_trends.subtitle') }}</p>
         </div>
     </div>
 
     {{-- Summary Cards --}}
     <div id="summaryCards" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
         <div class="stat-card bg-white rounded-xl p-4 border border-[#e2e8f0]">
-            <p class="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider">Examens réalisés</p>
+            <p class="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider">{{ __('patient.health_trends.exams_completed') }}</p>
             <p id="totalResults" class="text-2xl font-black text-[#1e293b] mt-1">—</p>
         </div>
         <div class="stat-card bg-white rounded-xl p-4 border border-[#e2e8f0]">
-            <p class="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider">Taux d'achèvement</p>
+            <p class="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider">{{ __('patient.health_trends.completion_rate') }}</p>
             <p id="completionRate" class="text-2xl font-black text-[#0D9488] mt-1">—</p>
         </div>
         <div class="stat-card bg-white rounded-xl p-4 border border-[#e2e8f0]">
-            <p class="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider">Anomalies détectées</p>
+            <p class="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider">{{ __('patient.health_trends.abnormalities') }}</p>
             <p id="abnormalRate" class="text-2xl font-black text-amber-500 mt-1">—</p>
         </div>
         <div class="stat-card bg-white rounded-xl p-4 border border-[#e2e8f0]">
-            <p class="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider">Dernier examen</p>
+            <p class="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider">{{ __('patient.health_trends.last_exam') }}</p>
             <p id="lastExam" class="text-lg font-bold text-[#1e293b] mt-1">—</p>
         </div>
     </div>
@@ -57,12 +57,12 @@
     {{-- Parameters List with Collapsible Charts --}}
     <div class="glass-card rounded-[20px] p-6 md:p-8 relative overflow-hidden">
         <div class="absolute -top-20 -right-20 w-60 h-60 rounded-full bg-gradient-to-br from-blue-500/10 to-[#0D9488]/10 blur-3xl pointer-events-none"></div>
-        <h2 class="text-sm font-bold text-[#1e293b] mb-1">Paramètres suivis</h2>
-        <p class="text-xs text-[#64748b] mb-5">Cliquez sur un paramètre pour voir son évolution</p>
+        <h2 class="text-sm font-bold text-[#1e293b] mb-1">{{ __('patient.health_trends.tracked_params') }}</h2>
+        <p class="text-xs text-[#64748b] mb-5">{{ __('patient.health_trends.click_hint') }}</p>
         <div id="paramsList" class="space-y-2">
             <div class="text-center py-8 text-[#94a3b8]">
                 <div class="animate-spin w-5 h-5 border-2 border-[#0D9488] border-t-transparent rounded-full mx-auto mb-2"></div>
-                <p class="text-xs">Chargement des données...</p>
+                <p class="text-xs">@lang('patient.health_trends.loading_data')</p>
             </div>
         </div>
     </div>
@@ -99,19 +99,19 @@
     function renderParamsList(trends) {
         const el = document.getElementById('paramsList');
         if (trends.length === 0) {
-            el.innerHTML = '<p class="text-xs text-[#94a3b8] text-center py-4">Aucun paramètre disponible</p>';
+            el.innerHTML = '<p class="text-xs text-[#94a3b8] text-center py-4">@lang('patient.health_trends.no_params')</p>';
             return;
         }
 
         el.innerHTML = trends.map((t, idx) => {
             const stats = t.stats;
             const trendIcon = stats.trend === 'rising'
-                ? '<span class="text-red-500 font-bold">↑ Hausse</span>'
+                ? '<span class="text-red-500 font-bold">@lang('patient.health_trends.trend_rising')</span>'
                 : (stats.trend === 'falling'
-                    ? '<span class="text-blue-500 font-bold">↓ Baisse</span>'
-                    : '<span class="text-emerald-500 font-bold">→ Stable</span>');
+                    ? '<span class="text-blue-500 font-bold">@lang('patient.health_trends.trend_falling')</span>'
+                    : '<span class="text-emerald-500 font-bold">@lang('patient.health_trends.trend_stable')</span>');
             const abnormalBadge = stats.abnormal_count > 0
-                ? '<span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-amber-50 text-amber-700 border border-amber-200">' + stats.abnormal_count + ' anomalie(s)</span>'
+                ? '<span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-amber-50 text-amber-700 border border-amber-200">' + @lang('patient.health_trends.abnormal_count').replace(':n', stats.abnormal_count) + '</span>'
                 : '';
 
             return `
@@ -134,7 +134,7 @@
                     <div class="flex items-center gap-3 flex-shrink-0">
                         <div class="text-right hidden sm:block">
                             <span class="text-sm font-black text-[#1e293b]">${stats.latest ?? '—'}</span>
-                            <span class="text-[10px] text-[#94a3b8] block">dernière</span>
+                            <span class="text-[10px] text-[#94a3b8] block">@lang('patient.health_trends.latest')</span>
                         </div>
                         <div class="text-[11px] min-w-[60px] text-right">${trendIcon}</div>
                         <svg id="chevron-${idx}" class="w-4 h-4 text-[#94a3b8] transition-transform duration-200 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
@@ -147,7 +147,7 @@
                         </div>
                         <div class="flex items-center justify-between mt-3 text-[10px] text-[#94a3b8]">
                             <span>${t.parameter} ${t.unit ? '(' + t.unit + ')' : ''}</span>
-                            <span>Min: ${stats.min} · Max: ${stats.max} · Réf: ${t.data_points[0]?.reference_range || '—'}</span>
+                            <span>@lang('patient.health_trends.min'): ${stats.min} · @lang('patient.health_trends.max'): ${stats.max} · @lang('patient.health_trends.ref'): ${t.data_points[0]?.reference_range || '—'}</span>
                         </div>
                     </div>
                 </div>

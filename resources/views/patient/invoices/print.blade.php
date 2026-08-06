@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ app()->getLocale() }}">
 <head>
 <meta charset="utf-8">
-<title>Facture {{ $invoice->invoice_number }}</title>
+<title>{{ __('patient.invoices.invoice_title', ['n' => $invoice->invoice_number]) }}</title>
 <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 12pt; color: #1e293b; padding: 30px; }
@@ -30,35 +30,35 @@
 </head>
 <body>
     <div class="print-bar">
-        <button onclick="window.print()">Imprimer / PDF</button>
-        <a href="{{ route('patient.invoices.show', $invoice->id) }}">Retour</a>
+        <button onclick="window.print()">{{ __('patient.invoices.print_pdf') }}</button>
+        <a href="{{ route('patient.invoices.show', $invoice->id) }}">{{ __('common.back') }}</a>
     </div>
 
     <div class="header">
         <h1>Medix eSanté</h1>
-        <p>Facture {{ $invoice->invoice_number }}</p>
-        <p>Émise le {{ $invoice->created_at->format('d/m/Y') }}</p>
+        <p>{{ __('patient.invoices.invoice_title', ['n' => $invoice->invoice_number]) }}</p>
+        <p>{{ __('patient.invoices.issued_on') }} {{ $invoice->created_at->format('d/m/Y') }}</p>
     </div>
 
     <div class="info-grid">
         <div class="info-box">
-            <h3>Laboratoire</h3>
+            <h3>{{ __('patient.invoices.laboratory') }}</h3>
             <p>{{ $invoice->labo->name ?? '-' }}</p>
             <p style="font-size:9pt;color:#64748b;">{{ $invoice->labo->address ?? '' }}</p>
         </div>
         <div class="info-box">
-            <h3>Patient</h3>
+            <h3>{{ __('layout.role_patient') }}</h3>
             <p>{{ $invoice->patient->user->first_name ?? '' }} {{ $invoice->patient->user->last_name ?? '' }}</p>
-            <p style="font-size:9pt;color:#64748b;">Code: {{ $invoice->patient->patient_code ?? '' }}</p>
+            <p style="font-size:9pt;color:#64748b;">{{ __('patient.invoices.patient_code') }}: {{ $invoice->patient->patient_code ?? '' }}</p>
         </div>
     </div>
 
     <table>
         <thead><tr>
-            <th>Examen</th>
-            <th>Qté</th>
-            <th>Prix unit.</th>
-            <th>Total</th>
+            <th>{{ __('patient.invoices.exam') }}</th>
+            <th>{{ __('patient.invoices.qty') }}</th>
+            <th>{{ __('patient.invoices.unit_price') }}</th>
+            <th>{{ __('patient.invoices.total') }}</th>
         </tr></thead>
         <tbody>
             @foreach($invoice->items as $item)
@@ -74,17 +74,17 @@
 
     <div class="totals">
         @if($invoice->cnam_amount > 0)
-        <div class="row"><span>Total</span><span>{{ number_format($invoice->total_amount, 3) }} TND</span></div>
-        <div class="row"><span>Part CNAM</span><span>- {{ number_format($invoice->cnam_amount, 3) }} TND</span></div>
+        <div class="row"><span>{{ __('patient.invoices.total') }}</span><span>{{ number_format($invoice->total_amount, 3) }} TND</span></div>
+        <div class="row"><span>{{ __('patient.invoices.cnam_share') }}</span><span>- {{ number_format($invoice->cnam_amount, 3) }} TND</span></div>
         @endif
-        <div class="row total"><span>Net à payer</span><span>{{ number_format($invoice->patient_amount, 3) }} TND</span></div>
+        <div class="row total"><span>{{ __('patient.invoices.net_to_pay') }}</span><span>{{ number_format($invoice->patient_amount, 3) }} TND</span></div>
         @if($invoice->paid_amount > 0)
-        <div class="row" style="color:#059669;"><span>Payé</span><span>{{ number_format($invoice->paid_amount, 3) }} TND</span></div>
+        <div class="row" style="color:#059669;"><span>{{ __('patient.invoices.paid') }}</span><span>{{ number_format($invoice->paid_amount, 3) }} TND</span></div>
         @endif
     </div>
 
     <div class="footer">
-        <p>Généré automatiquement par Medix eSanté le {{ now()->format('d/m/Y à H:i') }}</p>
+        <p>{{ __('patient.invoices.auto_generated', ['brand' => 'Medix eSanté']) }} {{ now()->format(__('patient.invoices.date_time_format')) }}</p>
     </div>
 
     @if(request()->has('auto'))

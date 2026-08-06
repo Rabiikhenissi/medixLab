@@ -1,5 +1,5 @@
 <x-layouts.doctor>
-    <x-slot:title>Sélectionner les Examens - Medix eSanté</x-slot:title>
+    <x-slot:title>{{ __('doctor.exam_selection.title') }} - {{ __('app.brand') }}</x-slot:title>
 
     @section('content')
     <div class="w-full max-w-7xl mx-auto">
@@ -15,10 +15,10 @@
                     </div>
                     <div>
                         <h1 class="text-xl font-bold text-[#1e293b]">
-                            Prescription d'Analyses
+                            {{ __('doctor.exam_selection.prescription') }}
                         </h1>
                         <p class="text-xs text-[#64748b] mt-1 font-semibold">
-                            Patient : 
+                            {{ __('doctor.patient_label') }} : 
                             <span class="text-[#0066FF] font-bold">
                                 {{ $patient->user->first_name }} {{ $patient->user->last_name }}
                             </span>
@@ -34,7 +34,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
                     </svg>
-                    Retour
+                    {{ __('common.back') }}
                 </a>
             </div>
 
@@ -51,7 +51,7 @@
                         <input
                             id="searchExams"
                             type="text"
-                            placeholder="Rechercher un examen par nom ou catégorie..."
+                            placeholder="{{ __('doctor.exam_selection.search_placeholder') }}"
                             class="w-full pl-10 pr-10 py-2.5 border border-[#e2e8f0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0066FF]/20 focus:border-[#0066FF] transition text-[#1e293b] text-xs bg-white shadow-xs font-semibold"
                         >
                         <button id="clearSearchBtn"
@@ -105,7 +105,7 @@
                                 </label>
                             @empty
                                 <div class="text-center py-10 text-[#64748b] italic">
-                                    Aucun examen disponible
+                                    {{ __('doctor.no_exams_available') }}
                                 </div>
                             @endforelse
                         </div>
@@ -118,7 +118,7 @@
                     <!-- Selected counter -->
                     <div class="bg-gradient-to-br from-[#0066FF]/5 to-[#0066FF]/10 border border-[#0066FF]/20 rounded-2xl p-5 text-center">
                         <p class="text-[10px] font-bold text-[#64748b] uppercase tracking-wider">
-                            Examens sélectionnés
+                            {{ __('doctor.selected_exams') }}
                         </p>
                         <p id="selectedCount" class="text-4xl font-black text-[#0066FF] mt-1 select-none">
                             0
@@ -131,7 +131,7 @@
                             <svg class="w-4 h-4 text-[#0066FF]" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                             </svg>
-                            Groupes rapides
+                            {{ __('doctor.exam_selection.quick_groups') }}
                         </h3>
 
                         <div class="space-y-2.5 max-h-60 overflow-y-auto pr-1">
@@ -141,7 +141,7 @@
                                     class="quickGroupBtn w-full text-left p-3.5 rounded-xl border border-[#e2e8f0] bg-gradient-to-br from-[#F8FAFC] to-[#EFF6FF]/20 hover:border-[#0066FF]/35 transition shadow-xs flex items-center justify-between cursor-pointer"
                                     data-group-id="{{ $group->id }}"
                                     data-group-name="{{ $group->name }}"
-                                    data-group-desc="{{ $group->description ?? 'Aucune description' }}"
+                                    data-group-desc="{{ $group->description ?? __('doctor.no_description') }}"
                                     data-group-exams="{{ json_encode($group->items->map(fn($item)=>$item->exam->name ?? 'Examen')) }}"
                                 >
                                     <div class="min-w-0 flex-1">
@@ -149,7 +149,7 @@
                                             {{ $group->name }}
                                         </p>
                                         <p class="text-[10px] text-[#64748b] mt-0.5 font-semibold">
-                                            {{ $group->items->count() }} examen(s)
+                                            {{ __('doctor.exam_count', ['n' => $group->items->count()]) }}
                                         </p>
                                     </div>
                                     <svg class="w-4 h-4 text-[#0066FF] flex-shrink-0 ml-2" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
@@ -158,7 +158,7 @@
                                 </button>
                             @empty
                                 <p class="text-xs text-[#94a3b8] italic">
-                                    Aucun groupe enregistré
+                                    {{ __('doctor.exam_selection.no_groups') }}
                                 </p>
                             @endforelse
                         </div>
@@ -170,12 +170,12 @@
                             <svg class="w-4 h-4 text-[#0D9488]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
                             </svg>
-                            Suggestions intelligentes
+                            {{ __('doctor.exam_selection.smart_suggestions') }}
                         </h3>
                         <div id="smartSuggestionsList" class="space-y-2">
                             <div class="text-center py-4">
                                 <div class="animate-spin w-4 h-4 border-2 border-[#0D9488] border-t-transparent rounded-full mx-auto mb-1"></div>
-                                <p class="text-[10px] text-[#94a3b8]">Analyse en cours...</p>
+                                <p class="text-[10px] text-[#94a3b8]">{{ __('doctor.exam_selection.analyzing') }}</p>
                             </div>
                         </div>
                     </div>
@@ -183,12 +183,12 @@
                     <!-- Notes -->
                     <div class="bg-white border border-[#e2e8f0] rounded-2xl p-5 shadow-xs">
                         <label class="text-xs font-bold text-[#64748b] uppercase tracking-widest block mb-2">
-                            Notes cliniques
+                            {{ __('doctor.clinical_notes') }}
                         </label>
                         <textarea
                             id="clinicalNotes"
                             rows="3"
-                            placeholder="Ajouter une observation..."
+                            placeholder="{{ __('doctor.exam_selection.notes_placeholder') }}"
                             class="w-full border border-[#e2e8f0] rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-[#0066FF]/20 focus:border-[#0066FF] transition text-[#1e293b] font-semibold bg-white resize-none"
                         ></textarea>
                     </div>
@@ -200,7 +200,7 @@
                             disabled
                             class="w-full py-3 rounded-xl bg-[#0066FF] hover:bg-[#0052CC] text-white font-bold transition transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-45 disabled:scale-100 text-xs uppercase tracking-wider shadow-md cursor-pointer"
                         >
-                            Confirmer la prescription
+                            {{ __('doctor.exam_selection.confirm_prescription') }}
                         </button>
 
                         <button
@@ -208,14 +208,14 @@
                             disabled
                             class="w-full py-3 rounded-xl bg-white border border-[#0066FF]/30 hover:bg-[#EFF6FF]/40 text-[#0066FF] font-bold transition transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-45 disabled:scale-100 text-xs uppercase tracking-wider shadow-xs cursor-pointer"
                         >
-                            Sauvegarder en groupe
+                            {{ __('doctor.exam_selection.save_as_group_btn') }}
                         </button>
 
                         <button
                             id="cancelBtn"
                             class="w-full py-3 rounded-xl bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] font-bold transition border border-[#e2e8f0] text-xs uppercase tracking-wider cursor-pointer"
                         >
-                            Annuler
+                            {{ __('common.cancel') }}
                         </button>
                     </div>
 
@@ -231,7 +231,7 @@
         <div class="glass-card rounded-[20px] w-full max-w-md p-8 shadow-2xl">
             <div class="flex justify-between items-center mb-6 pb-4 border-b border-[#e2e8f0]/80">
                 <h3 class="text-base font-bold text-[#1e293b]">
-                    Détails du groupe
+                    {{ __('doctor.exam_selection.group_details') }}
                 </h3>
                 <button class="closeGroupDetailsModalBtn text-[#94a3b8] hover:text-[#1e293b] text-xl cursor-pointer">
                     ×
@@ -240,17 +240,17 @@
 
             <div class="space-y-4 text-xs">
                 <div>
-                    <span class="text-[#64748b] font-medium block">Nom :</span>
+                    <span class="text-[#64748b] font-medium block">{{ __('common.name') }} :</span>
                     <span id="modalGroupName" class="font-bold text-sm text-[#1e293b]"></span>
                 </div>
 
                 <div>
-                    <span class="text-[#64748b] font-medium block">Description :</span>
+                    <span class="text-[#64748b] font-medium block">{{ __('doctor.description') }} :</span>
                     <div id="modalGroupDesc" class="p-3 bg-[#F8FAFC] border border-[#e2e8f0] rounded-xl text-[#64748b] leading-relaxed mt-1"></div>
                 </div>
 
                 <div>
-                    <span class="text-[#64748b] font-medium block mb-2">Examens inclus :</span>
+                    <span class="text-[#64748b] font-medium block mb-2">{{ __('doctor.exam_selection.included_exams') }} :</span>
                     <div id="modalGroupExamsList" class="space-y-1.5 max-h-48 overflow-y-auto pr-1"></div>
                 </div>
             </div>
@@ -260,12 +260,12 @@
                     id="modalApplyGroupBtn"
                     class="flex-1 bg-[#0066FF] hover:bg-[#0052CC] text-white rounded-xl py-2.5 font-bold transition transform hover:scale-[1.02] active:scale-[0.98] text-xs uppercase tracking-wider shadow-md cursor-pointer"
                 >
-                    Appliquer le Groupe
+                    {{ __('doctor.exam_selection.apply_group') }}
                 </button>
                 <button
                     class="closeGroupDetailsModalBtn flex-1 bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] font-bold rounded-xl py-2.5 transition border border-[#e2e8f0] text-xs uppercase tracking-wider cursor-pointer"
                 >
-                    Fermer
+                    {{ __('common.close') }}
                 </button>
             </div>
         </div>
@@ -275,7 +275,7 @@
     <div id="confirmationModal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="glass-card rounded-[20px] max-w-md w-full p-8 shadow-2xl">
             <h3 class="text-base font-bold text-[#1e293b] mb-4 pb-3 border-b border-[#e2e8f0]/80">
-                Confirmer la prescription
+                {{ __('doctor.exam_selection.confirm_prescription') }}
             </h3>
 
             <div id="confirmationExamsList" class="space-y-1.5 max-h-60 overflow-y-auto pr-1"></div>
@@ -285,12 +285,12 @@
                     id="confirmSubmitBtn"
                     class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-2.5 font-bold transition transform hover:scale-[1.02] active:scale-[0.98] text-xs uppercase tracking-wider shadow-md cursor-pointer"
                 >
-                    Confirmer
+                    {{ __('common.confirm') }}
                 </button>
                 <button
                     class="closeModalBtn flex-1 bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] font-bold rounded-xl py-2.5 transition border border-[#e2e8f0] text-xs uppercase tracking-wider cursor-pointer"
                 >
-                    Annuler
+                    {{ __('common.cancel') }}
                 </button>
             </div>
         </div>
@@ -301,7 +301,7 @@
         <div class="glass-card rounded-[20px] max-w-md w-full p-8 shadow-2xl">
             <div class="flex justify-between items-center mb-6 pb-4 border-b border-[#e2e8f0]/80">
                 <h3 class="text-base font-bold text-[#1e293b]">
-                    Sauvegarder comme groupe
+                    {{ __('doctor.exam_selection.save_as_group') }}
                 </h3>
                 <button class="closeSaveGroupModalBtn text-[#94a3b8] hover:text-[#1e293b] text-xl cursor-pointer">
                     ×
@@ -310,23 +310,23 @@
 
             <div class="space-y-4">
                 <div>
-                    <label class="text-[10px] font-bold text-[#64748b] uppercase tracking-widest block mb-1.5">Nom du groupe *</label>
+                    <label class="text-[10px] font-bold text-[#64748b] uppercase tracking-widest block mb-1.5">{{ __('doctor.group_name') }} *</label>
                     <input
                         id="saveGroupName"
                         type="text"
-                        placeholder="Ex: Bilan hépatique complet"
+                        placeholder="{{ __('doctor.exam_selection.group_name_placeholder') }}"
                         maxlength="255"
                         required
                         class="w-full border border-[#e2e8f0] rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-[#0066FF]/20 focus:border-[#0066FF] transition text-[#1e293b] font-semibold bg-white"
                     >
                 </div>
                 <div>
-                    <label class="text-[10px] font-bold text-[#64748b] uppercase tracking-widest block mb-1.5">Description</label>
+                    <label class="text-[10px] font-bold text-[#64748b] uppercase tracking-widest block mb-1.5">{{ __('doctor.description') }}</label>
                     <textarea
                         id="saveGroupDesc"
                         rows="3"
                         maxlength="500"
-                        placeholder="Description du groupe (optionnel)..."
+                        placeholder="{{ __('doctor.exam_selection.desc_placeholder') }}"
                         class="w-full border border-[#e2e8f0] rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-[#0066FF]/20 focus:border-[#0066FF] transition text-[#1e293b] font-semibold bg-white resize-none"
                     ></textarea>
                 </div>
@@ -338,12 +338,12 @@
                     id="confirmSaveGroupBtn"
                     class="flex-1 bg-[#0066FF] hover:bg-[#0052CC] text-white rounded-xl py-2.5 font-bold transition transform hover:scale-[1.02] active:scale-[0.98] text-xs uppercase tracking-wider shadow-md cursor-pointer"
                 >
-                    Enregistrer
+                    {{ __('common.save') }}
                 </button>
                 <button
                     class="closeSaveGroupModalBtn flex-1 bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] font-bold rounded-xl py-2.5 transition border border-[#e2e8f0] text-xs uppercase tracking-wider cursor-pointer"
                 >
-                    Annuler
+                    {{ __('common.cancel') }}
                 </button>
             </div>
         </div>
@@ -365,12 +365,12 @@
                 const res = await fetch(`/doctor/api/smart-suggestions/${patientId}?${params.toString()}`);
                 const data = await res.json();
                 if (!data.success || data.suggestions.length === 0) {
-                    el.innerHTML = '<p class="text-[10px] text-[#94a3b8] italic text-center py-2">Aucune suggestion disponible</p>';
+                    el.innerHTML = '<p class="text-[10px] text-[#94a3b8] italic text-center py-2">@lang('doctor.exam_selection.no_suggestions')</p>';
                     return;
                 }
                 el.innerHTML = data.suggestions.map(s => {
                     const typeColor = s.type === 'follow_up' ? 'amber' : (s.type === 'age_based' ? 'purple' : 'teal');
-                    const typeLabel = s.type === 'follow_up' ? 'Suivi' : (s.type === 'age_based' ? 'Âge' : 'Prévention');
+                    const typeLabel = s.type === 'follow_up' ? "@lang('doctor.suggestion_follow_up')" : (s.type === 'age_based' ? "@lang('doctor.suggestion_age')" : "@lang('doctor.suggestion_prevention')");
                     return `
                         <div class="p-3 bg-gradient-to-r from-[#0D9488]/5 to-transparent border border-[#0D9488]/15 rounded-xl">
                             <div class="flex items-center gap-2 mb-1">
@@ -380,12 +380,12 @@
                             <p class="text-[10px] text-[#64748b] leading-relaxed">${s.reason}</p>
                             <button type="button" onclick="addSuggestedExam(${s.exam_id})"
                                 class="mt-1.5 text-[10px] font-bold text-[#0D9488] hover:text-[#0a7068] transition cursor-pointer">
-                                + Ajouter cette suggestion
+                                + @lang('doctor.exam_selection.add_suggestion')
                             </button>
                         </div>`;
                 }).join('');
             } catch(e) {
-                el.innerHTML = '<p class="text-[10px] text-[#94a3b8] italic text-center py-2">Erreur de chargement</p>';
+                el.innerHTML = '<p class="text-[10px] text-[#94a3b8] italic text-center py-2">@lang('doctor.exam_selection.load_error')</p>';
             }
         }
 
@@ -496,14 +496,14 @@
         document.getElementById('modalApplyGroupBtn').onclick = async () => {
             if (isSubmitting) return;
             const result = await Swal.fire({
-                title: 'Appliquer le groupe',
-                text: `Voulez-vous prescrire le groupe « ${activeGroupName} » à ce patient ?`,
+                title: "@lang('doctor.exam_selection.apply_group')",
+                text: "@lang('doctor.exam_selection.apply_group_confirm')".replace(':name', activeGroupName),
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#0066FF',
                 cancelButtonColor: '#94a3b8',
-                confirmButtonText: 'Oui, prescrire',
-                cancelButtonText: 'Annuler'
+                confirmButtonText: "@lang('doctor.yes_prescribe')",
+                cancelButtonText: "@lang('common.cancel')"
             });
             if (!result.isConfirmed) return;
             lockUI();
@@ -529,12 +529,12 @@
                 if (data.success) {
                     window.location.href = '{{ route('doctor.dashboard') }}';
                 } else {
-                    Swal.fire({ icon: 'error', title: 'Erreur', text: data.message || 'Une erreur est survenue.', confirmButtonColor: '#0066FF' });
+                    Swal.fire({ icon: 'error', title: "@lang('doctor.error')", text: data.message || "@lang('common.error_generic')", confirmButtonColor: '#0066FF' });
                     unlockUI();
                 }
             } catch (e) {
                 console.error(e);
-                Swal.fire({ icon: 'error', title: 'Erreur', text: 'Une erreur est survenue. Veuillez réessayer.', confirmButtonColor: '#0066FF' });
+                Swal.fire({ icon: 'error', title: "@lang('doctor.error')", text: "@lang('doctor.error_retry')", confirmButtonColor: '#0066FF' });
                 unlockUI();
             }
         }
@@ -563,7 +563,7 @@
                     window.location.href = '{{ route('doctor.dashboard') }}';
                 }
             } catch (e) {
-                Swal.fire({ icon: 'error', title: 'Erreur', text: 'Une erreur est survenue.', confirmButtonColor: '#0066FF' });
+                Swal.fire({ icon: 'error', title: "@lang('doctor.error')", text: "@lang('common.error_generic')", confirmButtonColor: '#0066FF' });
                 unlockUI();
             }
         };
@@ -581,7 +581,7 @@
         /* SAVE AS GROUP */
         document.getElementById('saveAsGroupBtn').addEventListener('click', () => {
             const list = document.getElementById('saveGroupExamsPreview');
-            list.innerHTML = '<span class="font-bold text-[#1e293b]">' + selectedExamIds.length + '</span> examen(s) seront inclus dans ce groupe.';
+            list.innerHTML = '<span class="font-bold text-[#1e293b]">' + selectedExamIds.length + '</span> ' + "@lang('doctor.exam_selection.will_be_included')";
             document.getElementById('saveGroupName').value = '';
             document.getElementById('saveGroupDesc').value = '';
             document.getElementById('saveGroupModal').classList.remove('hidden');
@@ -616,16 +616,16 @@
 
                 const data = await response.json();
                 if (data.success) {
-                    Swal.fire({ icon: 'success', title: 'Succès', text: data.message, confirmButtonColor: '#0066FF' }).then(() => {
+                    Swal.fire({ icon: 'success', title: "@lang('doctor.success')", text: data.message, confirmButtonColor: '#0066FF' }).then(() => {
                         try { sessionStorage.setItem('pendingExamSelection', JSON.stringify(selectedExamIds)); } catch (e) {}
                         window.location.reload();
                     });
                 } else {
-                    Swal.fire({ icon: 'error', title: 'Erreur', text: data.message || 'Une erreur est survenue.', confirmButtonColor: '#0066FF' });
+                    Swal.fire({ icon: 'error', title: "@lang('doctor.error')", text: data.message || "@lang('common.error_generic')", confirmButtonColor: '#0066FF' });
                     unlockUI();
                 }
             } catch (e) {
-                Swal.fire({ icon: 'error', title: 'Erreur', text: 'Une erreur est survenue lors de la création du groupe.', confirmButtonColor: '#0066FF' });
+                Swal.fire({ icon: 'error', title: "@lang('doctor.error')", text: "@lang('doctor.exam_selection.group_error')", confirmButtonColor: '#0066FF' });
                 unlockUI();
             }
         };

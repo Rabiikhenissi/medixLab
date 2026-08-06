@@ -1,6 +1,6 @@
 @extends('layouts.center')
 
-@section('title', 'Configuration Machine')
+@section('title', __('center.machines.index_title'))
 
 @section('styles')
 <style>
@@ -36,15 +36,15 @@
     {{-- Header --}}
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
         <div>
-            <h1 class="text-xl font-bold text-[#1e293b]">Configuration Machine</h1>
-            <p class="text-xs text-[#64748b] mt-1">Connectez votre laboratoire à un analyseur HL7 (TCP ou Série), RS-232/USB ou HTTP</p>
+            <h1 class="text-xl font-bold text-[#1e293b]">{{ __('center.machines.index_title') }}</h1>
+            <p class="text-xs text-[#64748b] mt-1">{{ __('center.machines.index_subtitle') }}</p>
         </div>
         <a href="{{ route('center.machine-configurations.create') }}"
            class="mt-3 sm:mt-0 inline-flex items-center gap-2 px-4 py-2 bg-[#7C3AED] text-white rounded-xl text-xs font-bold hover:bg-[#6D28D9] transition whitespace-nowrap">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
             </svg>
-            Nouvelle machine
+            {{ __('center.machines.new_machine') }}
         </a>
     </div>
 
@@ -54,14 +54,14 @@
             <svg class="w-14 h-14 mx-auto mb-4 text-[#cbd5e1]" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
             </svg>
-            <h3 class="text-base font-bold text-[#1e293b] mb-1">Aucune machine configurée</h3>
-            <p class="text-xs text-[#94a3b8] mb-5">Ajoutez une machine pour envoyer les examens automatiquement.</p>
+            <h3 class="text-base font-bold text-[#1e293b] mb-1">{{ __('center.machines.empty_title') }}</h3>
+            <p class="text-xs text-[#94a3b8] mb-5">{{ __('center.machines.empty_hint') }}</p>
             <a href="{{ route('center.machine-configurations.create') }}"
                class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#7C3AED] text-white rounded-xl text-xs font-bold hover:bg-[#6D28D9] transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
                 </svg>
-                Ajouter une machine
+                {{ __('center.machines.add_one') }}
             </a>
         </div>
     @else
@@ -82,7 +82,7 @@
                             </div>
                         </div>
                         <span class="mc-badge {{ $config->enabled ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-50 text-slate-400 border border-slate-200' }}">
-                            {{ $config->enabled ? 'Actif' : 'Inactif' }}
+                            {{ $config->enabled ? __('center.status.active') : __('center.status.inactive') }}
                         </span>
                     </div>
 
@@ -90,34 +90,34 @@
                     <div class="space-y-1.5 text-xs text-[#64748b] mb-5">
                         @if($config->protocol === 'serial_hl7')
                             <div class="flex justify-between">
-                                <span>Port série</span>
+                                <span>{{ __('center.machines.serial_port_label') }}</span>
                                 <strong class="text-[#1e293b] font-mono">{{ $config->serial_port ?? '—' }}</strong>
                             </div>
                             <div class="flex justify-between">
-                                <span>Débit</span>
+                                <span>{{ __('center.machines.baud_label') }}</span>
                                 <strong class="text-[#1e293b] font-mono">{{ $config->baud_rate }} baud</strong>
                             </div>
                             <div class="flex justify-between">
-                                <span>Format</span>
+                                <span>{{ __('center.machines.format') }}</span>
                                 <strong class="text-[#1e293b] font-mono">{{ $config->data_bits }}{{ $config->parity }}{{ $config->stop_bits }}</strong>
                             </div>
                         @else
                             <div class="flex justify-between">
-                                <span>Hôte</span>
+                                <span>{{ __('center.machines.host') }}</span>
                                 <strong class="text-[#1e293b] font-mono">{{ $config->host }}</strong>
                             </div>
                             <div class="flex justify-between">
-                                <span>Port</span>
+                                <span>{{ __('center.machines.port') }}</span>
                                 <strong class="text-[#1e293b] font-mono">{{ $config->protocol === 'hl7_mllp' && $config->mllp_port ? $config->mllp_port : $config->port }}</strong>
                             </div>
                         @endif
                         <div class="flex justify-between">
-                            <span>Timeout</span>
+                            <span>{{ __('center.machines.timeout_label') }}</span>
                             <strong class="text-[#1e293b]">{{ $config->timeout }}s</strong>
                         </div>
                         @if($config->api_key)
                             <div class="flex justify-between">
-                                <span>API Key</span>
+                                <span>{{ __('center.machines.api_key_label') }}</span>
                                 <strong class="text-[#1e293b] font-mono">••••••••</strong>
                             </div>
                         @endif
@@ -127,7 +127,7 @@
                     <div class="flex gap-2">
                         <button type="button" onclick="testMachine({{ $config->id }}, this)"
                             class="flex-1 text-center text-xs font-semibold py-2 px-3 bg-white text-[#7C3AED] border border-[#7C3AED] rounded-xl hover:bg-[#f5f3ff] transition test-btn">
-                            <span class="btn-text">Tester</span>
+                            <span class="btn-text">{{ __('center.machines.test') }}</span>
                             <svg class="btn-spinner hidden w-4 h-4 animate-spin mx-auto" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
@@ -135,14 +135,14 @@
                         </button>
                         <a href="{{ route('center.machine-configurations.edit', $config) }}"
                            class="flex-1 text-center text-xs font-semibold py-2 px-3 bg-white text-[#64748b] border border-[#e2e8f0] rounded-xl hover:bg-[#f8fafc] transition">
-                            Modifier
+                            {{ __('common.edit') }}
                         </a>
                         <form method="POST" action="{{ route('center.machine-configurations.destroy', $config) }}"
-                            onsubmit="return confirm('Supprimer cette configuration machine ?');" class="flex-1">
+                            onsubmit="return swalConfirmSubmit(this, '{{ __('center.machines.delete_confirm') }}');" class="flex-1">
                             @csrf @method('DELETE')
                             <button type="submit"
                                 class="w-full text-xs font-semibold py-2 px-3 bg-white text-red-500 border border-red-200 rounded-xl hover:bg-red-50 transition">
-                                Suppr.
+                                {{ __('center.machines.delete_short') }}
                             </button>
                         </form>
                     </div>
@@ -179,17 +179,17 @@
 
             resultEl.classList.remove('hidden');
             if (data.online) {
-                const info = data.info ? ' — ' + (data.info.name || data.info.status || 'Connecté') : '';
+                const info = data.info ? ' — ' + (data.info.name || data.info.status || @json(__('center.machines.connected'))) : '';
                 resultEl.className = 'test-result mt-3 text-[10px] font-semibold text-emerald-600';
-                resultEl.textContent = '✓ Connecté' + info;
+                resultEl.textContent = @json(__('center.machines.connected_ok')) + info;
             } else {
                 resultEl.className = 'test-result mt-3 text-[10px] font-semibold text-red-500';
-                resultEl.textContent = '✗ Machine inaccessible';
+                resultEl.textContent = @json(__('center.machines.machine_unreachable'));
             }
         } catch (e) {
             resultEl.classList.remove('hidden');
             resultEl.className = 'test-result mt-3 text-[10px] font-semibold text-red-500';
-            resultEl.textContent = '✗ Erreur de connexion';
+            resultEl.textContent = @json(__('center.machines.connection_error'));
         }
 
         btn.disabled = false;

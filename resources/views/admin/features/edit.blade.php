@@ -1,15 +1,15 @@
 @extends('layouts.admin')
 
-@section('title', 'Modifier le Module')
+@section('title', __('admin.features.edit_title'))
 
-@section('page-title', 'Modifier le Module')
-@section('page-subtitle', 'Mettez a jour la configuration du module et pilotez ses actions de securite.')
+@section('page-title', __('admin.features.edit_title'))
+@section('page-subtitle', __('admin.features.edit_subtitle'))
 
 @section('content')
     <div class="data-section anim anim-1" style="padding: 28px;">
         <h3 class="data-title"
             style="margin-top: 0; margin-bottom: 24px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; font-size: 16px;">
-            Configuration Generale
+            {{ __('admin.features.general_config') }}
         </h3>
 
         @if ($errors->any() && !$errors->has('action_name') && !$errors->has('action_code'))
@@ -29,14 +29,14 @@
             <!-- Form Row -->
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label">Nom du Module<span class="required-star">*</span></label>
+                    <label class="form-label">{{ __('admin.features.module_name') }}<span class="required-star">*</span></label>
                     <input type="text" name="name" value="{{ old('name', $feature->name) }}" required
-                        placeholder="Ex: Gestion des Utilisateurs" class="form-control">
+                        placeholder="{{ __('admin.features.name_placeholder') }}" class="form-control">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Code du Module (Unique)<span class="required-star">*</span></label>
+                    <label class="form-label">{{ __('admin.features.code_module') }}<span class="required-star">*</span></label>
                     <input type="text" name="code" value="{{ old('code', $feature->code) }}" required
-                        placeholder="Ex: users-management" class="form-control"
+                        placeholder="{{ __('admin.features.code_placeholder') }}" class="form-control"
                         style="font-family:'SF Mono','Consolas',monospace;font-weight:600;letter-spacing:0.5px;">
                 </div>
             </div>
@@ -44,26 +44,26 @@
             <!-- Form Row -->
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label">Route de Navigation (Nom de route Laravel)</label>
+                    <label class="form-label">{{ __('admin.features.navigation_route') }}</label>
                     <input type="text" name="route_name" value="{{ old('route_name', $feature->route_name) }}"
                         placeholder="Ex: admin.users.index" class="form-control" style="font-family:monospace;">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Permission requise pour voir ce module (Action code)</label>
+                    <label class="form-label">{{ __('admin.features.permission_required') }}</label>
                     <input type="text" name="view_permission"
                         value="{{ old('view_permission', $feature->view_permission) }}"
-                        placeholder="Ex: view-users" class="form-control" style="font-family:monospace;">
+                        placeholder="{{ __('admin.features.permission_placeholder') }}" class="form-control" style="font-family:monospace;">
                 </div>
             </div>
 
             <!-- Form Row -->
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label">Statut du module<span class="required-star">*</span></label>
+                    <label class="form-label">{{ __('admin.features.module_status') }}<span class="required-star">*</span></label>
                     <div style="position:relative;">
                         <select name="is_sidebar" required class="form-control">
-                            <option value="1" {{ old('is_sidebar', $feature->is_sidebar) ? 'selected' : '' }}>Active</option>
-                            <option value="0" {{ !old('is_sidebar', $feature->is_sidebar) ? 'selected' : '' }}>Inactive</option>
+                            <option value="1" {{ old('is_sidebar', $feature->is_sidebar) ? 'selected' : '' }}>{{ __('admin.common.active') }}</option>
+                            <option value="0" {{ !old('is_sidebar', $feature->is_sidebar) ? 'selected' : '' }}>{{ __('admin.common.inactive') }}</option>
                         </select>
                         <svg style="position:absolute;right:12px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:#94a3b8;pointer-events:none;"
                             fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -71,11 +71,11 @@
                         </svg>
                     </div>
                     <span style="display:block;font-size:11px;color:#94a3b8;margin-top:5px;">
-                        Active = le module est visible dans la barre de navigation. Inactive = masque complet.
+                        {{ __('admin.features.status_help') }}
                     </span>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Ordre d'affichage dans la barre de navigation<span
+                    <label class="form-label">{{ __('admin.features.navigation_order') }}<span
                             class="required-star">*</span></label>
                     <input type="number" name="order" value="{{ old('order', $feature->order) }}" required min="0"
                         class="form-control">
@@ -83,7 +83,7 @@
             </div>
 
             <div class="form-group" style="margin-bottom: 24px;">
-                <label class="form-label">Icône du module</label>
+                <label class="form-label">{{ __('admin.features.icon_module') }}</label>
 
                 <input type="hidden" name="icon" id="selectedIcon"
                     value="{{ old('icon', $feature->icon ?? 'users') }}">
@@ -103,7 +103,7 @@
             <!-- Actions Section -->
             <div style="margin-top: 32px; border-top: 1px solid #f1f5f9; padding-top: 24px;">
                 <h3 class="data-title" style="margin-top: 0; margin-bottom: 20px; font-size: 15px;">
-                    Actions Habilitées pour ce Module
+                    {{ __('admin.features.actions_enabled_edit') }}
                 </h3>
 
                 @if ($errors->has('action_name') || $errors->has('action_code'))
@@ -122,16 +122,16 @@
                 <!-- Add new action inline bar -->
                 <div style="display: flex; gap: 16px; margin-bottom: 16px;">
                     <div style="flex: 1;">
-                        <label class="form-label" style="font-size: 12px; margin-bottom: 4px;">Nom de l'Action</label>
-                        <input type="text" id="new-action-name" placeholder="Ex: Lire Examens" class="form-control" style="width:100%;">
+                        <label class="form-label" style="font-size: 12px; margin-bottom: 4px;">{{ __('admin.features.action_name') }}</label>
+                        <input type="text" id="new-action-name" placeholder="{{ __('admin.features.action_add_placeholder') }}" class="form-control" style="width:100%;">
                     </div>
                     <div style="flex: 1;">
-                        <label class="form-label" style="font-size: 12px; margin-bottom: 4px;">Code de l'Action</label>
-                        <input type="text" id="new-action-code" placeholder="Ex: view-exams" class="form-control" style="width:100%; font-family: monospace;">
+                        <label class="form-label" style="font-size: 12px; margin-bottom: 4px;">{{ __('admin.features.action_code') }}</label>
+                        <input type="text" id="new-action-code" placeholder="{{ __('admin.features.action_code_placeholder') }}" class="form-control" style="width:100%; font-family: monospace;">
                     </div>
                     <div style="display: flex; align-items: flex-end;">
                         <button type="button" onclick="submitNewAction()" class="btn-submit" style="padding: 10px 16px; font-size: 13px; white-space: nowrap;">
-                            Ajouter
+                            {{ __('common.add') }}
                         </button>
                     </div>
                 </div>
@@ -148,9 +148,9 @@
                     <table class="data-table" id="actions-table">
                         <thead>
                             <tr>
-                                <th>Nom de l'Action</th>
-                                <th>Code de l'Action</th>
-                                <th style="text-align:right;">Actions</th>
+                                <th>{{ __('admin.features.action_name') }}</th>
+                                <th>{{ __('admin.features.action_code') }}</th>
+                                <th style="text-align:right;">{{ __('common.actions') }}</th>
                             </tr>
                         </thead>
                         <tbody id="actions-tbody">
@@ -165,7 +165,7 @@
                                     </td>
                                     <td style="text-align:right;">
                                         <div style="display:flex;align-items:center;justify-content:flex-end;gap:6px;">
-                                            <button type="button" onclick="showEditForm({{ $action->id }})" class="table-action-btn" title="Modifier" style="background:none;border:none;cursor:pointer;padding:4px;color:#64748b;">
+                                            <button type="button" onclick="showEditForm({{ $action->id }})" class="table-action-btn" title="{{ __('common.edit') }}" style="background:none;border:none;cursor:pointer;padding:4px;color:#64748b;">
                                                 <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:16px;height:16px;">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
                                                 </svg>
@@ -178,7 +178,7 @@
                                             <button type="button"
                                                 onclick="confirmDeleteAction({{ $action->id }}, '{{ addslashes($action->name) }}')"
                                                 class="table-action-btn archive-btn"
-                                                title="Supprimer"
+                                                title="{{ __('common.delete') }}"
                                                 style="background:none;border:none;cursor:pointer;padding:4px;color:#ef4444;">
                                                 <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:16px;height:16px;">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -205,10 +205,10 @@
                                             </div>
                                             <div style="display: flex; gap: 6px;">
                                                 <button type="submit" class="btn-submit" style="padding: 6px 12px; font-size: 12px; white-space: nowrap;">
-                                                    Enregistrer
+                                                    {{ __('common.save') }}
                                                 </button>
                                                 <button type="button" onclick="hideEditForm({{ $action->id }})" class="btn-cancel" style="padding: 6px 12px; font-size: 12px; white-space: nowrap;">
-                                                    Annuler
+                                                    {{ __('common.cancel') }}
                                                 </button>
                                             </div>
                                         </form>
@@ -217,7 +217,7 @@
                             @empty
                                 <tr id="empty-actions-row">
                                     <td colspan="3" style="text-align: center; color: #94a3b8; font-style: italic; padding: 20px;">
-                                        Aucune action définie pour ce module.
+                                        {{ __('admin.features.actions_none_module') }}
                                     </td>
                                 </tr>
                             @endforelse
@@ -227,19 +227,19 @@
             </div>
 
             <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
-                <a href="{{ route('admin.features.index') }}" class="btn-cancel">Annuler</a>
-                <button type="submit" form="feature-form" class="btn-submit">Enregistrer les modifications</button>
+                <a href="{{ route('admin.features.index') }}" class="btn-cancel">{{ __('common.cancel') }}</a>
+                <button type="submit" form="feature-form" class="btn-submit">{{ __('admin.common.save_changes') }}</button>
             </div>
     </div>
 
     <!-- Icon Picker Modal -->
     <div id="iconModal" class="icon-modal hidden" onclick="closeIconPicker()">
         <div class="icon-modal-box" onclick="event.stopPropagation()">
-            <h3>Choisir une icône</h3>
-            <input id="iconSearch" type="text" placeholder="Rechercher une icône..." class="form-control">
+            <h3>{{ __('admin.features.choose_icon') }}</h3>
+            <input id="iconSearch" type="text" placeholder="{{ __('admin.features.icon_search') }}" class="form-control">
             <div class="icon-picker-grid" id="iconPickerGrid">
                 <div id="iconGridLoading" style="grid-column: 1 / -1; text-align: center; color: #94a3b8; font-style: italic;">
-                    Chargement des icônes...
+                    {{ __('admin.features.icon_loading') }}
                 </div>
             </div>
         </div>
@@ -261,7 +261,7 @@
                 .catch(() => {
                     iconsLoaded = false;
                     document.getElementById('iconGridLoading').innerText =
-                        'Erreur lors du chargement des icônes.';
+                        '@lang('admin.features.icon_error')';
                 });
         }
 
@@ -314,8 +314,8 @@
             if (!nameVal || !codeVal) {
                 Swal.fire({
                     icon: 'warning',
-                    title: 'Champs manquants',
-                    text: 'Veuillez remplir le nom et le code de l\'action.',
+                    title: @json(__('admin.features.missing_fields_title')),
+                    text: @json(__('admin.features.missing_fields')),
                     confirmButtonColor: '#4f46e5',
                 });
                 return;
@@ -340,14 +340,14 @@
         // ─── Delete Action with SweetAlert2 ───────────────────────────
         function confirmDeleteAction(id, name) {
             Swal.fire({
-                title: 'Supprimer cette action ?',
-                html: `L'action <strong>${name}</strong> sera définitivement supprimée.`,
+                title: @json(__('admin.features.delete_action_confirm')),
+                html: @json(__('admin.features.delete_action_html')).replace(':name', name),
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#ef4444',
                 cancelButtonColor: '#6b7280',
-                confirmButtonText: 'Oui, supprimer',
-                cancelButtonText: 'Annuler',
+                confirmButtonText: @json(__('admin.features.yes_delete')),
+                cancelButtonText: @json(__('common.cancel')),
                 reverseButtons: true,
             }).then((result) => {
                 if (result.isConfirmed) {

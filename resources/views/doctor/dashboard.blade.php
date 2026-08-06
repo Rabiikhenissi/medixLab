@@ -1,5 +1,5 @@
 <x-layouts.doctor>
-    <x-slot:title>Tableau de bord Médecin - Medix eSanté</x-slot:title>
+    <x-slot:title>{{ __('doctor.dashboard.title') }} - {{ __('app.brand') }}</x-slot:title>
 
     @section('content')
     <div class="w-full max-w-7xl mx-auto">
@@ -20,7 +20,7 @@
                     </h1>
                     <span
                         class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-bold tracking-wider text-[#0066FF] bg-[#0066FF]/10 border border-[#0066FF]/20 uppercase mt-1">
-                        Espace Médecin Connecté
+                        {{ __('doctor.dashboard.connected_badge') }}
                     </span>
                 </div>
             </div>
@@ -35,7 +35,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
-                        <input type="text" id="header_patient_code" placeholder="Rechercher patient par code..."
+                        <input type="text" id="header_patient_code" placeholder="{{ __('doctor.dashboard.search_placeholder') }}"
                             class="w-full sm:w-60 pl-10 pr-4 py-2.5 border border-[#e2e8f0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0066FF]/20 focus:border-[#0066FF] transition text-[#1e293b] text-xs bg-white shadow-xs font-semibold"
                             autocomplete="off" required />
                     </div>
@@ -44,11 +44,11 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6" />
                         </svg>
-                        Rechercher
+                        {{ __('common.search') }}
                     </button>
                     <button type="button" id="openQrScannerBtn"
                         class="bg-white border border-[#e2e8f0] hover:border-[#0066FF]/40 hover:bg-[#EFF6FF]/40 text-[#0066FF] font-bold w-10 h-10 rounded-xl transition flex items-center justify-center shadow-xs cursor-pointer flex-shrink-0"
-                        title="Scanner un QR Code patient">
+                        title="{{ __('doctor.dashboard.scan_qr_title') }}">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
                         </svg>
@@ -65,16 +65,16 @@
                     </button>
                     <div id="doctorNotifPanel" class="hidden fixed top-20 right-4 md:absolute md:top-12 md:right-0 w-80 max-w-[calc(100vw-2rem)] bg-white border border-[#e2e8f0] rounded-2xl shadow-2xl z-50 overflow-hidden">
                         <div class="flex items-center justify-between px-4 py-3 border-b border-[#f1f5f9]">
-                            <span class="text-xs font-bold text-[#1e293b] uppercase tracking-wider">Notifications</span>
-                            <button onclick="doctorMarkAllRead()" class="text-[10px] font-bold text-[#0066FF] hover:underline cursor-pointer">Tout marquer lu</button>
+                            <span class="text-xs font-bold text-[#1e293b] uppercase tracking-wider">{{ __('layout.notifications') }}</span>
+                            <button onclick="doctorMarkAllRead()" class="text-[10px] font-bold text-[#0066FF] hover:underline cursor-pointer">{{ __('layout.mark_all_read') }}</button>
                         </div>
                         <div id="doctorNotifList" class="max-h-72 overflow-y-auto divide-y divide-[#f1f5f9]">
-                            <div class="px-4 py-6 text-center text-xs text-[#94a3b8]">Chargement...</div>
+                            <div class="px-4 py-6 text-center text-xs text-[#94a3b8]">{{ __('common.loading') }}</div>
                         </div>
                     </div>
                 </div>
 
-                <a href="{{ route('profile.show') }}" class="w-10 h-10 bg-gradient-to-br from-[#0066FF] to-[#0052CC] rounded-xl flex items-center justify-center text-white text-xs font-bold hover:shadow-lg transition cursor-pointer" title="Mon profil">
+                <a href="{{ route('profile.show') }}" class="w-10 h-10 bg-gradient-to-br from-[#0066FF] to-[#0052CC] rounded-xl flex items-center justify-center text-white text-xs font-bold hover:shadow-lg transition cursor-pointer" title="{{ __('auth.profile') }}">
                     {{ strtoupper(substr($user->first_name, 0, 1)) }}{{ strtoupper(substr($user->last_name, 0, 1)) }}
                 </a>
 
@@ -86,7 +86,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                         </svg>
-                        Déconnexion
+                        {{ __('auth.logout') }}
                     </button>
                 </form>
             </div>
@@ -104,7 +104,7 @@
                         class="relative overflow-hidden p-6 bg-gradient-to-br from-[#0066FF]/5 to-[#0066FF]/10 border border-[#0066FF]/20 rounded-2xl shadow-xs block hover:border-[#0066FF]/40 transition">
                         <div class="text-3xl font-black text-[#0066FF] mb-1">{{ $doctorStats['examGroupsCount'] }}
                         </div>
-                        <p class="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Groupes d'Examens</p>
+                        <p class="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">{{ __('doctor.dashboard.exam_groups_label') }}</p>
                         <svg class="absolute -right-3 -bottom-3 w-14 h-14 text-[#0066FF]/10" fill="currentColor"
                             viewBox="0 0 24 24">
                             <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z" />
@@ -114,7 +114,7 @@
                         class="relative overflow-hidden p-6 bg-gradient-to-br from-emerald-500/5 to-emerald-500/10 border border-emerald-500/20 rounded-2xl shadow-xs">
                         <div class="text-3xl font-black text-emerald-600 mb-1">
                             {{ $doctorStats['examRequestsCount'] }}</div>
-                        <p class="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Prescriptions Envoyées
+                        <p class="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">{{ __('doctor.dashboard.prescriptions_sent') }}
                         </p>
                         <svg class="absolute -right-3 -bottom-3 w-14 h-14 text-emerald-500/10" fill="currentColor"
                             viewBox="0 0 24 24">
@@ -129,21 +129,21 @@
                         <svg class="w-4 h-4 text-[#0066FF]" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                         </svg>
-                        Statistiques & Analytiques
+                        {{ __('doctor.dashboard.statistics_title') }}
                     </h3>
 
                     {{-- Stat Cards --}}
                     <div class="grid grid-cols-2 gap-4 mb-6">
                         <div class="bg-gradient-to-br from-[#0066FF]/5 to-[#0066FF]/10 border border-[#0066FF]/20 rounded-2xl p-5 relative overflow-hidden">
                             <div class="text-3xl font-black text-[#0066FF] mb-1">{{ $uniquePatientsCount }}</div>
-                            <p class="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Patients Uniques</p>
+                            <p class="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">{{ __('doctor.dashboard.unique_patients') }}</p>
                             <svg class="absolute -right-3 -bottom-3 w-14 h-14 text-[#0066FF]/10" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
                         </div>
                         <div class="bg-gradient-to-br from-emerald-500/5 to-emerald-500/10 border border-emerald-500/20 rounded-2xl p-5 relative overflow-hidden">
                             <div class="text-3xl font-black text-emerald-600 mb-1">{{ $completionRate }}%</div>
-                            <p class="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Taux Complétion</p>
+                            <p class="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">{{ __('doctor.dashboard.completion_rate') }}</p>
                             <svg class="absolute -right-3 -bottom-3 w-14 h-14 text-emerald-500/10" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
@@ -152,7 +152,7 @@
 
                     {{-- Monthly Prescriptions Bar Chart --}}
                     <div class="bg-white border border-[#e2e8f0]/80 rounded-2xl p-5">
-                        <p class="text-[11px] font-bold text-[#64748b] uppercase tracking-wider mb-4">Prescriptions Mensuelles (6 derniers mois)</p>
+                        <p class="text-[11px] font-bold text-[#64748b] uppercase tracking-wider mb-4">{{ __('doctor.dashboard.monthly_prescriptions') }}</p>
                         <div style="height: 220px;">
                             <canvas id="doctorMonthlyChart"></canvas>
                         </div>
@@ -168,12 +168,12 @@
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2" />
                         </svg>
-                        Dernières Prescriptions d'Analyses
+                        {{ __('doctor.dashboard.recent_prescriptions') }}
                     </h3>
                     {{-- Search & Filter Form --}}
                     <form action="{{ route('doctor.dashboard') }}" method="GET" class="mb-5 flex flex-col sm:flex-row items-center gap-3">
                         <div class="relative flex-1 w-full">
-                            <input type="text" name="search" value="{{ $search }}" placeholder="Rechercher par nom de patient ou code..." 
+                            <input type="text" name="search" value="{{ $search }}" placeholder="{{ __('doctor.dashboard.filter_placeholder') }}" 
                                    class="w-full pl-4 pr-10 py-2.5 border border-[#e2e8f0] rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#0066FF]/20 focus:border-[#0066FF] transition text-[#1e293b] bg-white shadow-xs" />
                             @if($search)
                                 <a href="{{ route('doctor.dashboard', ['status' => $status]) }}" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
@@ -185,15 +185,15 @@
                         </div>
                         <div class="w-full sm:w-48">
                             <select name="status" onchange="this.form.submit()" class="w-full px-3 py-2.5 border border-[#e2e8f0] rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#0066FF]/20 focus:border-[#0066FF] bg-white text-[#1e293b] cursor-pointer shadow-xs">
-                                <option value="all" {{ $status == 'all' || !$status ? 'selected' : '' }}>Tous les statuts</option>
-                                <option value="pending" {{ $status == 'pending' ? 'selected' : '' }}>En attente</option>
-                                <option value="collected" {{ $status == 'collected' ? 'selected' : '' }}>Collecté</option>
-                                <option value="processing" {{ $status == 'processing' ? 'selected' : '' }}>En cours</option>
-                                <option value="completed" {{ $status == 'completed' ? 'selected' : '' }}>Complété</option>
-                                <option value="cancelled" {{ $status == 'cancelled' ? 'selected' : '' }}>Annulé</option>
+                                <option value="all" {{ $status == 'all' || !$status ? 'selected' : '' }}>{{ __('doctor.dashboard.all_statuses') }}</option>
+                                <option value="pending" {{ $status == 'pending' ? 'selected' : '' }}>{{ __('doctor.status_pending') }}</option>
+                                <option value="collected" {{ $status == 'collected' ? 'selected' : '' }}>{{ __('doctor.status_collected') }}</option>
+                                <option value="processing" {{ $status == 'processing' ? 'selected' : '' }}>{{ __('doctor.status_processing') }}</option>
+                                <option value="completed" {{ $status == 'completed' ? 'selected' : '' }}>{{ __('doctor.status_completed') }}</option>
+                                <option value="cancelled" {{ $status == 'cancelled' ? 'selected' : '' }}>{{ __('doctor.status_cancelled') }}</option>
                             </select>
                         </div>
-                        <button type="submit" class="w-full sm:w-auto bg-[#0066FF] hover:bg-[#0052CC] text-white font-bold px-5 py-2.5 rounded-xl text-xs uppercase tracking-wider transition">Filtrer</button>
+                        <button type="submit" class="w-full sm:w-auto bg-[#0066FF] hover:bg-[#0052CC] text-white font-bold px-5 py-2.5 rounded-xl text-xs uppercase tracking-wider transition">{{ __('common.filter') }}</button>
                     </form>
 
                     @if($recentExams->count() > 0)
@@ -220,10 +220,10 @@
                                                                         <path stroke-linecap="round" stroke-linejoin="round"
                                                                             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                                                     </svg>
-                                                                    {{ $examReq->created_at->format('d/m/Y à H:i') }}
+                                                                    {{ __('doctor.dashboard.exam_date', ['date' => $examReq->created_at->format('d/m/Y'), 'time' => $examReq->created_at->format('H:i')]) }}
                                                                 </span>
                                                                 <span class="flex items-center gap-1 font-semibold text-[#0066FF]">
-                                                                    {{ $examReq->items->count() }} examen(s)
+                                                                    {{ __('doctor.exam_count', ['n' => $examReq->items->count()]) }}
                                                                 </span>
                                                             </div>
                                                         </div>
@@ -237,11 +237,11 @@
                                                                     'cancelled' => 'text-red-700 bg-red-50 border-red-200',
                                                                 ];
                                                                 $statusLabels = [
-                                                                    'pending' => 'En attente',
-                                                                    'collected' => 'Collecté',
-                                                                    'processing' => 'Traitement',
-                                                                    'completed' => 'Complété',
-                                                                    'cancelled' => 'Annulé',
+                                                                    'pending' => __('doctor.status_pending'),
+                                                                    'collected' => __('doctor.status_collected'),
+                                                                    'processing' => __('doctor.status_processing'),
+                                                                    'completed' => __('doctor.status_completed'),
+                                                                    'cancelled' => __('doctor.status_cancelled'),
                                                                 ];
                                                                 $colorClass = $statusColors[$examReq->status] ?? 'text-[#64748b] bg-[#f1f5f9] border-[#e2e8f0]';
                                                                 $label = $statusLabels[$examReq->status] ?? $examReq->status;
@@ -256,14 +256,14 @@
                                                                 data-id="{{ $examReq->id }}"
                                                                 data-patient="{{ $examReq->patient->user->first_name }} {{ $examReq->patient->user->last_name }}"
                                                                 data-date="{{ $examReq->created_at->format('d/m/Y H:i') }}"
-                                                                data-notes="{{ $examReq->clinical_notes ?? 'Aucune note clinique' }}"
+                                                                 data-notes="{{ $examReq->clinical_notes ?? __('doctor.no_clinical_notes') }}"
                                                                 data-status="{{ $examReq->status }}"
                                                                 data-approved-by-doctor="{{ $examReq->approved_by_doctor ? '1' : '0' }}"
                                                                 data-doctor-interpretation="{{ $examReq->doctor_interpretation }}"
                                                                 data-items-results="{{ json_encode($examReq->items->map(function ($it) {
                                          return ['exam_name' => $it->exam->name, 'result' => $it->resultLabo ? ['interpretation' => $it->resultLabo->interpretation, 'details' => $it->resultLabo->details] : null]; })) }}"
                                                                 data-exams="{{ json_encode($examReq->items->map(fn($it) => $it->exam->name)) }}">
-                                                                Voir Détails
+                                                                {{ __('doctor.dashboard.view_details') }}
                                                             </button>
                                                         </div>
                                                     </div>
@@ -274,7 +274,7 @@
                         </div>
                     @else
                         <div class="text-center py-10 border border-dashed border-[#cbd5e1] rounded-xl">
-                            <p class="text-xs text-[#94a3b8] italic">Aucune prescription ne correspond aux critères.</p>
+                            <p class="text-xs text-[#94a3b8] italic">{{ __('doctor.dashboard.no_prescriptions') }}</p>
                         </div>
                     @endif
                 </div>
@@ -288,7 +288,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                             </svg>
-                            Mes Groupes d'Examens
+                            {{ __('doctor.dashboard.my_exam_groups') }}
                         </h3>
                         <div class="flex items-center gap-2">
                             <a href="{{ route('doctor.exam-groups.create') }}"
@@ -297,11 +297,11 @@
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                                 </svg>
-                                Nouveau
+                                {{ __('common.new') }}
                             </a>
                             <a href="{{ route('doctor.exam-groups.index') }}"
                                 class="bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] font-bold px-3 py-1.5 rounded-xl transition text-[10px] uppercase tracking-wider flex items-center gap-1 border border-[#e2e8f0]">
-                                Gérer
+                                {{ __('common.manage') }}
                             </a>
                         </div>
                     </div>
@@ -318,30 +318,30 @@
                                             </p>
                                             <span
                                                 class="text-[9px] text-[#0066FF] font-bold bg-[#0066FF]/10 px-2 py-0.5 rounded border border-[#0066FF]/20">
-                                                {{ $group['items_count'] }} examen(s)
+                                                {{ __('doctor.exam_count', ['n' => $group['items_count']]) }}
                                             </span>
                                         </div>
                                         <p class="text-[11px] text-[#64748b] truncate mt-1 group-desc-label">
-                                            {{ $group['description'] ?? 'Aucune description' }}
+                                            {{ $group['description'] ?? __('doctor.no_description') }}
                                         </p>
                                     </div>
                                     <div class="flex items-center gap-1.5 self-start sm:self-auto flex-shrink-0">
                                         <a href="{{ route('doctor.exam-groups.edit', $group['id']) }}"
                                             class="inline-flex items-center gap-1 bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] font-bold px-2.5 py-1.5 rounded-lg border border-[#e2e8f0] text-[10px] uppercase tracking-wider">
-                                            Voir
+                                            {{ __('common.view') }}
                                         </a>
                                         <a href="{{ route('doctor.exam-groups.edit', $group['id']) }}"
                                             class="inline-flex items-center gap-1 bg-[#EFF6FF] hover:bg-[#DBEAFE] text-[#0066FF] font-bold px-2.5 py-1.5 rounded-lg border border-[#BFDBFE] text-[10px] uppercase tracking-wider">
-                                            Modifier
+                                            {{ __('common.edit') }}
                                         </a>
                                         <form action="{{ route('doctor.exam-groups.destroy', $group['id']) }}" method="POST"
                                             class="inline"
-                                            onsubmit="return swalConfirmSubmit(this, 'Supprimer définitivement « {{ addslashes($group['name']) }} » ?');">
+                                            onsubmit="return swalConfirmSubmit(this, '{{ __('doctor.delete_group_confirm', ['name' => addslashes($group['name'])]) }}');">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit"
                                                 class="inline-flex items-center gap-1 bg-red-50 hover:bg-red-100 text-red-600 font-bold px-2.5 py-1.5 rounded-lg border border-red-100 text-[10px] uppercase tracking-wider cursor-pointer">
-                                                Supprimer
+                                                {{ __('common.delete') }}
                                             </button>
                                         </form>
                                     </div>
@@ -351,11 +351,10 @@
                     @else
                         <div
                             class="text-center py-10 border border-dashed border-[#cbd5e1] rounded-xl no-groups-placeholder">
-                            <p class="text-xs text-[#94a3b8] italic mb-3">Vous n'avez pas encore créé de groupe d'examens
-                                personnalisé.</p>
+                            <p class="text-xs text-[#94a3b8] italic mb-3">{{ __('doctor.dashboard.no_groups') }}</p>
                             <a href="{{ route('doctor.exam-groups.create') }}"
                                 class="inline-flex items-center gap-1 bg-[#0066FF] hover:bg-[#0052CC] text-white font-bold px-4 py-2 rounded-xl text-[10px] uppercase tracking-wider">
-                                Créer un groupe
+                                {{ __('doctor.create_group') }}
                             </a>
                         </div>
                     @endif
@@ -370,17 +369,17 @@
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
-                        Informations Professionnelles
+                        {{ __('doctor.dashboard.professional_info') }}
                     </h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-[#1e293b]">
                         <div
                             class="flex items-center justify-between p-3 bg-[#F8FAFC] border border-[#e2e8f0] rounded-xl">
-                            <span class="text-[#64748b] font-medium">CNOM :</span>
+                            <span class="text-[#64748b] font-medium">{{ __('doctor.cnom_label') }}</span>
                             <span class="font-bold font-mono text-[#0066FF]">{{ $user->doctor->doctor_code }}</span>
                         </div>
                         <div
                             class="flex items-center justify-between p-3 bg-[#F8FAFC] border border-[#e2e8f0] rounded-xl">
-                            <span class="text-[#64748b] font-medium">Spécialité :</span>
+                            <span class="text-[#64748b] font-medium">{{ __('doctor.specialty_label') }} :</span>
                             <span class="font-bold capitalize">{{ $user->doctor->speciality }}</span>
                         </div>
                     </div>
@@ -403,8 +402,8 @@
                             </svg>
                         </div>
                         <div>
-                            <h3 class="text-sm font-bold text-[#1e293b] uppercase tracking-wider">Patients Récents</h3>
-                            <p class="text-[11px] text-[#64748b]">Accès autorisé précédemment</p>
+                            <h3 class="text-sm font-bold text-[#1e293b] uppercase tracking-wider">{{ __('doctor.dashboard.recent_patients') }}</h3>
+                            <p class="text-[11px] text-[#64748b]">{{ __('doctor.dashboard.previously_authorized') }}</p>
                         </div>
                     </div>
 
@@ -432,11 +431,11 @@
                                     <div class="mt-3.5 pt-3 border-t border-[#e2e8f0]/60 flex gap-2">
                                         <a href="{{ route('doctor.select-exams', $access->patient->id) }}"
                                             class="flex-1 bg-[#0066FF] hover:bg-[#0052CC] text-white font-bold py-2 px-3 rounded-lg text-[10px] uppercase tracking-wider text-center transition transform hover:scale-[1.02] active:scale-[0.98] shadow-xs cursor-pointer block">
-                                            Prescrire des Examens
+                                            {{ __('doctor.prescribe_exams') }}
                                         </a>
                                         <a href="{{ route('doctor.chat', $access->patient->id) }}"
                                             class="inline-flex items-center justify-center gap-1 bg-[#0D9488] hover:bg-[#0a7068] text-white font-bold py-2 px-3 rounded-lg text-[10px] uppercase tracking-wider transition transform hover:scale-[1.02] active:scale-[0.98] shadow-xs cursor-pointer"
-                                            title="Envoyer un message">
+                                            title="{{ __('doctor.send_message') }}">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
                                         </a>
                                     </div>
@@ -445,7 +444,7 @@
                         </div>
                     @else
                         <div class="text-center py-10 bg-[#F8FAFC]/50 border border-dashed border-[#e2e8f0] rounded-xl">
-                            <p class="text-xs text-[#94a3b8] italic">Aucun patient avec accès actuellement.</p>
+                            <p class="text-xs text-[#94a3b8] italic">{{ __('doctor.dashboard.no_patients_access') }}</p>
                         </div>
                     @endif
 
@@ -463,7 +462,7 @@
             <div class="p-8">
                 <!-- Header -->
                 <div class="flex items-center justify-between mb-6 pb-4 border-b border-[#e2e8f0]/80">
-                    <h3 class="text-base font-bold text-[#1e293b]">Détails de la Prescription</h3>
+                    <h3 class="text-base font-bold text-[#1e293b]">{{ __('doctor.dashboard.prescription_details') }}</h3>
                     <button type="button"
                         class="closeDetailsModalBtn text-[#94a3b8] hover:text-[#1e293b] transition cursor-pointer">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -474,36 +473,34 @@
 
                 <div class="space-y-4 text-xs">
                     <div>
-                        <span class="text-[#64748b] font-medium block">Patient :</span>
+                        <span class="text-[#64748b] font-medium block">{{ __('doctor.patient_label') }} :</span>
                         <span id="modalPatientName" class="font-bold text-sm text-[#1e293b]"></span>
                     </div>
                     <div>
-                        <span class="text-[#64748b] font-medium block">Date :</span>
+                        <span class="text-[#64748b] font-medium block">{{ __('common.date') }} :</span>
                         <span id="modalDate" class="font-semibold text-[#1e293b]"></span>
                     </div>
                     <div>
-                        <span class="text-[#64748b] font-medium block">Notes cliniques :</span>
+                        <span class="text-[#64748b] font-medium block">{{ __('doctor.clinical_notes') }} :</span>
                         <div id="modalNotes"
                             class="p-3 bg-[#F8FAFC] border border-[#e2e8f0] rounded-xl text-[#64748b] leading-relaxed italic mt-1">
                         </div>
                     </div>
                     <div>
-                        <span class="text-[#64748b] font-medium block mb-2">Examens prescrits :</span>
+                        <span class="text-[#64748b] font-medium block mb-2">{{ __('doctor.prescribed_exams') }} :</span>
                         <div id="modalExamsList" class="space-y-1.5 max-h-[180px] overflow-y-auto pr-1"></div>
                     </div>
 
                     {{-- Lab Results Section --}}
                     <div id="modalLabResultsSection" class="hidden border-t border-[#e2e8f0]/80 pt-4 space-y-3">
-                        <span class="text-[#64748b] font-bold text-xs uppercase tracking-wider block">Résultats du
-                            Laboratoire :</span>
+                        <span class="text-[#64748b] font-bold text-xs uppercase tracking-wider block">{{ __('doctor.lab_results') }} :</span>
                         <div id="modalLabResultsContainer" class="space-y-4"></div>
                     </div>
 
                     {{-- Doctor Interpretation Section --}}
                     <div id="modalDoctorInterpretationSection"
                         class="hidden border-t border-[#e2e8f0]/80 pt-4 space-y-3">
-                        <span class="text-[#64748b] font-bold text-xs uppercase tracking-wider block">Interprétation &
-                            Validation Médicale :</span>
+                        <span class="text-[#64748b] font-bold text-xs uppercase tracking-wider block">{{ __('doctor.medical_interpretation') }} :</span>
 
                         <div id="doctorInterpretationRead"
                             class="hidden p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 leading-relaxed font-semibold">
@@ -513,11 +510,11 @@
                             @csrf
                             <textarea id="modalDoctorInterpretationInput" name="doctor_interpretation" rows="4"
                                 class="w-full p-4 border border-[#e2e8f0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0066FF]/20 focus:border-[#0066FF] transition text-[#1e293b] text-xs leading-relaxed"
-                                placeholder="Saisissez votre interprétation médicale pour finaliser l'examen..."
+                                placeholder="{{ __('doctor.interpretation_placeholder') }}"
                                 required></textarea>
                             <button type="submit"
                                 class="w-full bg-[#0066FF] hover:bg-[#0052CC] text-white font-bold py-3 rounded-xl transition transform hover:scale-[1.01] active:scale-[0.99] shadow-md uppercase tracking-wider text-xs cursor-pointer text-center">
-                                Soumettre l'interprétation et valider
+                                {{ __('doctor.submit_interpretation') }}
                             </button>
                         </form>
                     </div>
@@ -526,11 +523,11 @@
                 <div class="pt-6 border-t border-[#e2e8f0]/80 mt-6 flex justify-end gap-3">
                     <button type="button" id="modalDoctorPrintBtn"
                         class="hidden bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2.5 px-5 rounded-xl transition uppercase tracking-wider text-xs cursor-pointer">
-                        🖨 Imprimer Résultats
+                        🖨 {{ __('doctor.print_results') }}
                     </button>
                     <button type="button"
                         class="closeDetailsModalBtn bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] font-bold py-2.5 px-5 rounded-xl transition border border-[#e2e8f0] uppercase tracking-wider text-xs cursor-pointer">
-                        Fermer
+                        {{ __('common.close') }}
                     </button>
                 </div>
             </div>
@@ -544,7 +541,7 @@
             <div class="p-8">
                 <!-- Header -->
                 <div class="flex items-center justify-between mb-6 pb-4 border-b border-[#e2e8f0]/80">
-                    <h3 class="text-base font-bold text-[#1e293b]">Patient Trouvé</h3>
+                    <h3 class="text-base font-bold text-[#1e293b]">{{ __('doctor.patient_found') }}</h3>
                     <button type="button"
                         class="closeSearchModalBtn text-[#94a3b8] hover:text-[#1e293b] transition cursor-pointer">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -575,12 +572,12 @@
                 <div class="space-y-2.5">
                     <button type="button" id="requestAccessBtn"
                         class="w-full bg-[#0066FF] hover:bg-[#0052CC] text-white font-bold py-3 px-4 rounded-xl transition transform hover:scale-[1.02] active:scale-[0.98] shadow-md flex items-center justify-center gap-2 uppercase tracking-wider text-xs cursor-pointer">
-                        Demander l'Accès au Patient
+                        {{ __('doctor.request_access') }}
                     </button>
 
                     <button type="button" id="proceedToExamsBtn"
                         class="hidden w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-4 rounded-xl transition transform hover:scale-[1.02] active:scale-[0.98] shadow-md flex items-center justify-center gap-2 uppercase tracking-wider text-xs cursor-pointer">
-                        Prescrire des Examens
+                        {{ __('doctor.prescribe_exams') }}
                     </button>
 
                     <div id="accessGrantedMessage"
@@ -592,9 +589,8 @@
                                     clip-rule="evenodd" />
                             </svg>
                             <div>
-                                <p class="font-bold text-emerald-800">Accès autorisé ✓</p>
-                                <p class="text-emerald-700 mt-0.5">L'accès à ce patient est accordé. Vous pouvez
-                                    prescrire.</p>
+                                <p class="font-bold text-emerald-800">{{ __('doctor.access_granted') }} ✓</p>
+                                <p class="text-emerald-700 mt-0.5">{{ __('doctor.access_granted_desc') }}</p>
                             </div>
                         </div>
                     </div>
@@ -608,16 +604,15 @@
                                     d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             <div>
-                                <p class="font-bold text-amber-800">Demande en attente</p>
-                                <p class="text-amber-700 mt-0.5">Le patient doit confirmer votre demande sur son compte.
-                                </p>
+                                <p class="font-bold text-amber-800">{{ __('doctor.access_pending') }}</p>
+                                <p class="text-amber-700 mt-0.5">{{ __('doctor.access_pending_desc') }}</p>
                             </div>
                         </div>
                     </div>
 
                     <button type="button"
                         class="closeSearchModalBtn w-full bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] font-bold py-2.5 px-4 rounded-xl transition border border-[#e2e8f0] uppercase tracking-wider text-xs cursor-pointer text-center">
-                        Annuler
+                        {{ __('common.cancel') }}
                     </button>
                 </div>
             </div>
@@ -634,7 +629,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
                         </svg>
                     </div>
-                    <h3 class="text-sm font-bold text-[#1e293b]">Scanner QR Code Patient</h3>
+                    <h3 class="text-sm font-bold text-[#1e293b]">{{ __('doctor.scan_qr_patient') }}</h3>
                 </div>
                 <button id="closeQrScannerBtn" class="text-[#94a3b8] hover:text-[#1e293b] transition cursor-pointer">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -644,7 +639,7 @@
             </div>
             <div class="p-4">
                 <div id="qrReaderRegion" class="rounded-xl overflow-hidden bg-black min-h-[260px]"></div>
-                <p id="qrScannerStatus" class="text-center text-[11px] text-[#64748b] mt-3 font-semibold">Pointez la caméra vers le QR Code du patient...</p>
+                <p id="qrScannerStatus" class="text-center text-[11px] text-[#64748b] mt-3 font-semibold">{{ __('doctor.scan_qr_hint') }}</p>
             </div>
         </div>
     </div>
@@ -659,7 +654,7 @@
             data: {
                 labels: monthlyData.map(d => d.label),
                 datasets: [{
-                    label: 'Prescriptions',
+                    label: '@lang('doctor.chart_prescriptions')',
                     data: monthlyData.map(d => d.count),
                     backgroundColor: 'rgba(0, 102, 255, 0.75)',
                     hoverBackgroundColor: 'rgba(0, 102, 255, 0.9)',
@@ -731,7 +726,7 @@
                             return `
                                 <div class="bg-[#F8FAFC] border border-[#e2e8f0] rounded-xl p-3.5">
                                     <p class="font-bold text-[#1e293b]">${item.exam_name}</p>
-                                    <p class="text-[#64748b] italic mt-1">Aucun résultat saisi pour cet examen.</p>
+                                    <p class="text-[#64748b] italic mt-1">@lang('doctor.no_result_entered')</p>
                                 </div>
                             `;
                         }
@@ -760,10 +755,10 @@
                                 <table class="w-full text-left border-collapse mb-2.5">
                                     <thead>
                                         <tr class="text-[9px] text-[#64748b] uppercase tracking-wider font-bold">
-                                            <th class="pb-1.5 pr-2">Paramètre</th>
-                                            <th class="pb-1.5 px-2">Valeur</th>
-                                            <th class="pb-1.5 px-2">Référence</th>
-                                            <th class="pb-1.5 pl-2 text-right">Statut</th>
+                                            <th class="pb-1.5 pr-2">@lang('doctor.parameter')</th>
+                                            <th class="pb-1.5 px-2">@lang('doctor.value')</th>
+                                            <th class="pb-1.5 px-2">@lang('doctor.reference')</th>
+                                            <th class="pb-1.5 pl-2 text-right">@lang('common.status')</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -772,7 +767,7 @@
                                 </table>
                                 ${item.result.interpretation ? `
                                     <div class="bg-purple-50/50 border border-[#7C3AED]/10 rounded-lg p-2.5 mt-2">
-                                        <p class="text-[10px] font-bold text-[#7C3AED] uppercase tracking-wider">Interprétation Labo :</p>
+                                        <p class="text-[10px] font-bold text-[#7C3AED] uppercase tracking-wider">@lang('doctor.interpretation_lab_label')</p>
                                         <p class="text-[11px] text-[#475569] mt-0.5 leading-relaxed">${item.result.interpretation}</p>
                                     </div>
                                 ` : ''}
@@ -782,7 +777,7 @@
 
                     if (dataset.approvedByDoctor === '1') {
                         document.getElementById('doctorInterpretationRead').classList.remove('hidden');
-                        document.getElementById('doctorInterpretationRead').textContent = dataset.doctorInterpretation || 'Aucune interprétation saisie.';
+                        document.getElementById('doctorInterpretationRead').textContent = dataset.doctorInterpretation || "@lang('doctor.no_interpretation')";
                         document.getElementById('doctorInterpretationForm').classList.add('hidden');
                     } else {
                         document.getElementById('doctorInterpretationRead').classList.add('hidden');
@@ -854,14 +849,14 @@
 
                     searchAvatar.textContent = (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
                     searchName.textContent = `${firstName} ${lastName}`;
-                    searchCodeBadge.textContent = `Code: ${data.patient.patient_code}`;
+                    searchCodeBadge.textContent = `@lang('doctor.code_label') ${data.patient.patient_code}`;
                     searchEmail.textContent = `✉ ${data.patient.user.email}`;
                     searchPhone.textContent = `☎ ${data.patient.user.phone}`;
 
                     // Reset buttons
                     requestAccessBtn.classList.remove('hidden');
                     requestAccessBtn.disabled = false;
-                    requestAccessBtn.innerHTML = "Demander l'Accès au Patient";
+                    requestAccessBtn.innerHTML = "@lang('doctor.request_access')";
                     proceedToExamsBtn.classList.add('hidden');
                     accessGrantedMessage.classList.add('hidden');
                     accessPendingMessage.classList.add('hidden');
@@ -878,16 +873,16 @@
                         proceedToExamsBtn.classList.add('hidden');
                         accessGrantedMessage.classList.add('hidden');
                         accessPendingMessage.classList.add('hidden');
-                        showSuccessToast('Vous êtes bloqué par ce patient.', 'error');
+                        showSuccessToast("@lang('doctor.blocked_by_patient')", 'error');
                     }
 
                     searchResultModal.classList.remove('hidden');
                 } else {
-                    showSuccessToast(data.message || 'Patient non trouvé', 'error');
+                    showSuccessToast(data.message || "@lang('doctor.patient_not_found')", 'error');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                showSuccessToast('Erreur lors de la recherche du patient.', 'error');
+                showSuccessToast("@lang('doctor.search_error')", 'error');
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalHTML;
@@ -923,22 +918,22 @@
                         requestAccessBtn.classList.add('hidden');
                         accessGrantedMessage.classList.remove('hidden');
                         proceedToExamsBtn.classList.remove('hidden');
-                        showSuccessToast('Accès autorisé !', 'success');
+                        showSuccessToast("@lang('doctor.access_granted') !", 'success');
                     } else {
                         requestAccessBtn.classList.add('hidden');
                         accessPendingMessage.classList.remove('hidden');
-                        showSuccessToast('Demande envoyée avec succès', 'success');
+                        showSuccessToast("@lang('doctor.request_sent')", 'success');
                     }
                 } else {
-                    showSuccessToast(data.message || 'Erreur lors de la demande.', 'error');
+                    showSuccessToast(data.message || "@lang('doctor.request_error')", 'error');
                     requestAccessBtn.disabled = false;
-                    requestAccessBtn.innerHTML = "Demander l'Accès au Patient";
+                    requestAccessBtn.innerHTML = "@lang('doctor.request_access')";
                 }
             } catch (error) {
                 console.error('Error:', error);
-                showSuccessToast('Une erreur est survenue.', 'error');
+                showSuccessToast("@lang('common.error_generic')", 'error');
                 requestAccessBtn.disabled = false;
-                requestAccessBtn.innerHTML = "Demander l'Accès au Patient";
+                requestAccessBtn.innerHTML = "@lang('doctor.request_access')";
             }
         });
 
@@ -979,7 +974,7 @@
                 const data = await res.json();
                 const list = document.getElementById('doctorNotifList');
                 if (data.notifications.length === 0) {
-                    list.innerHTML = '<div class="px-4 py-6 text-center text-xs text-[#94a3b8]">Aucune notification</div>';
+                    list.innerHTML = '<div class="px-4 py-6 text-center text-xs text-[#94a3b8]">@lang('doctor.no_notifications')</div>';
                     return;
                 }
                 list.innerHTML = data.notifications.map(n => `
@@ -1059,7 +1054,7 @@
 
         function startQrScanner() {
             const statusEl = document.getElementById('qrScannerStatus');
-            statusEl.textContent = 'Initialisation de la caméra...';
+            statusEl.textContent = "@lang('doctor.camera_init')";
 
             qrCodeScanner = new Html5Qrcode('qrReaderRegion');
             qrCodeScanner.start(
@@ -1077,7 +1072,7 @@
                 },
                 () => {}
             ).catch(() => {
-                statusEl.textContent = 'Caméra indisponible. Veuillez scanner manuellement.';
+                statusEl.textContent = "@lang('doctor.camera_unavailable')";
             });
         }
 

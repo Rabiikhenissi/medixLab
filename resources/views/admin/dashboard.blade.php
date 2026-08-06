@@ -1,15 +1,15 @@
 @extends('layouts.admin')
 
-@section('title', 'Espace Administrateur')
+@section('title', __('admin.dashboard.title'))
 
 
 @section('page-title')
-Espace <span style="color:#0066ff;">Administrateur</span>
+<span style="color:#0066ff;">{{ __('admin.dashboard.title') }}</span>
 @endsection
 
 
 @section('page-subtitle')
-Gérez la plateforme et supervisez les activités de Medix eSanté.
+{{ __('admin.dashboard.page_subtitle') }}
 @endsection
 
 @section('content')
@@ -263,7 +263,7 @@ Gérez la plateforme et supervisez les activités de Medix eSanté.
             </svg>
         </div>
         <div>
-            <div class="stat-label">Patients</div>
+            <div class="stat-label">{{ __('admin.dashboard.patients') }}</div>
             <div class="stat-value">{{ $stats['total_patients'] ?? 0 }}</div>
         </div>
     </div>
@@ -276,7 +276,7 @@ Gérez la plateforme et supervisez les activités de Medix eSanté.
             </svg>
         </div>
         <div>
-            <div class="stat-label">Médecins</div>
+            <div class="stat-label">{{ __('admin.dashboard.doctors') }}</div>
             <div class="stat-value">{{ $stats['total_doctors'] ?? 0 }}</div>
         </div>
     </div>
@@ -289,7 +289,7 @@ Gérez la plateforme et supervisez les activités de Medix eSanté.
             </svg>
         </div>
         <div>
-            <div class="stat-label">Centres/Labos</div>
+            <div class="stat-label">{{ __('admin.dashboard.centers_labs') }}</div>
             <div class="stat-value">{{ $stats['total_laboratories'] ?? 0 }}</div>
         </div>
     </div>
@@ -302,7 +302,7 @@ Gérez la plateforme et supervisez les activités de Medix eSanté.
             </svg>
         </div>
         <div>
-            <div class="stat-label">Prescriptions</div>
+            <div class="stat-label">{{ __('admin.dashboard.prescriptions') }}</div>
             <div class="stat-value">{{ $stats['total_exam_requests'] ?? 0 }}</div>
         </div>
     </div>
@@ -315,7 +315,7 @@ Gérez la plateforme et supervisez les activités de Medix eSanté.
             </svg>
         </div>
         <div>
-            <div class="stat-label">Examens Actifs</div>
+            <div class="stat-label">{{ __('admin.dashboard.exams_active') }}</div>
             <div class="stat-value">{{ $stats['total_exams'] ?? 0 }}</div>
         </div>
     </div>
@@ -328,7 +328,7 @@ Gérez la plateforme et supervisez les activités de Medix eSanté.
             </svg>
         </div>
         <div>
-            <div class="stat-label">Archivés</div>
+            <div class="stat-label">{{ __('admin.dashboard.archive_stat') }}</div>
             <div class="stat-value">{{ $stats['archived_exams'] ?? 0 }}</div>
         </div>
     </div>
@@ -340,7 +340,7 @@ Gérez la plateforme et supervisez les activités de Medix eSanté.
 
     <!-- Trend line chart -->
     <div class="chart-container">
-        <h3>Volume des prescriptions (15 derniers jours)</h3>
+        <h3>{{ __('admin.dashboard.prescription_trend') }}</h3>
         <div style="position:relative; height:260px; width:100%;">
             <canvas id="trendChart"></canvas>
         </div>
@@ -348,7 +348,7 @@ Gérez la plateforme et supervisez les activités de Medix eSanté.
 
     <!-- Status distribution chart -->
     <div class="chart-container">
-        <h3>Statuts des prescriptions</h3>
+        <h3>{{ __('admin.dashboard.prescription_status') }}</h3>
         <div style="position:relative; height:260px; width:100%; display:flex; justify-content:center;">
             <canvas id="statusChart"></canvas>
         </div>
@@ -361,7 +361,7 @@ Gérez la plateforme et supervisez les activités de Medix eSanté.
 
     <!-- Top Prescribed Exams -->
     <div class="chart-container">
-        <h3>Top 5 des examens les plus prescrits</h3>
+        <h3>{{ __('admin.dashboard.top_exams') }}</h3>
         @if(count($topExams) > 0)
             <div class="top-exams-list">
                 @foreach($topExams as $index => $item)
@@ -370,29 +370,29 @@ Gérez la plateforme et supervisez les activités de Medix eSanté.
                             <span style="font-weight:900; color:#64748b; font-size:14px;">#{{ $index + 1 }}</span>
                             <span class="top-exam-name">{{ $item['name'] }}</span>
                         </div>
-                        <span class="top-exam-count">{{ $item['count'] }} prescription(s)</span>
+                        <span class="top-exam-count">{{ __('admin.dashboard.prescription_count', ['count' => $item['count']]) }}</span>
                     </div>
                 @endforeach
             </div>
         @else
-            <p style="font-size:13px; color:#64748b; font-style:italic; margin:0;">Aucune prescription enregistrée.</p>
+            <p style="font-size:13px; color:#64748b; font-style:italic; margin:0;">{{ __('admin.dashboard.empty_prescription') }}</p>
         @endif
     </div>
 
     <!-- Quick Links / Modules -->
     <div class="chart-container">
-        <h3>Accès rapides</h3>
+        <h3>{{ __('admin.dashboard.quick_access') }}</h3>
         <div style="display:flex; flex-direction:column; gap:10px;">
             <a href="{{ route('admin.exams.index') }}" class="module-link">
-                <span>Gestion des examens</span>
+                <span>{{ __('admin.dashboard.manage_exams') }}</span>
                 <span>→</span>
             </a>
             <a href="{{ route('admin.laboratories.index') }}" class="module-link">
-                <span>Gestion des établissements</span>
+                <span>{{ __('admin.dashboard.manage_labs') }}</span>
                 <span>→</span>
             </a>
             <a href="{{ route('admin.users.index') }}" class="module-link">
-                <span>Gestion des utilisateurs</span>
+                <span>{{ __('admin.dashboard.manage_users') }}</span>
                 <span>→</span>
             </a>
         </div>
@@ -405,7 +405,7 @@ Gérez la plateforme et supervisez les activités de Medix eSanté.
 
     <!-- Recent Prescriptions -->
     <div class="chart-container">
-        <h3>Prescriptions récentes</h3>
+        <h3>{{ __('admin.dashboard.prescriptions_recent') }}</h3>
         @if(count($recentPrescriptions) > 0)
             <div class="recent-list">
                 @php
@@ -419,14 +419,14 @@ Gérez la plateforme et supervisez les activités de Medix eSanté.
                         $initials = strtoupper(substr($doctorName, 0, 1));
                         $color = $avatarColors[$i % count($avatarColors)];
                         $statusMap = [
-                            'pending' => ['En attente', 'pill-pending'],
-                            'assigned' => ['Labo choisi', 'pill-assigned'],
-                            'collected' => ['Collecté', 'pill-collected'],
-                            'processing' => ['En cours', 'pill-processing'],
-                            'completed' => ['Complété', 'pill-completed'],
-                            'cancelled' => ['Annulé', 'pill-cancelled'],
+                            'pending' => [__('admin.dashboard.status_pending'), 'pill-pending'],
+                            'assigned' => [__('admin.dashboard.status_assigned'), 'pill-assigned'],
+                            'collected' => [__('admin.dashboard.status_collected'), 'pill-collected'],
+                            'processing' => [__('admin.dashboard.status_processing'), 'pill-processing'],
+                            'completed' => [__('admin.dashboard.status_completed'), 'pill-completed'],
+                            'cancelled' => [__('admin.dashboard.status_cancelled'), 'pill-cancelled'],
                         ];
-                        $statusInfo = $statusMap[$rx['status']] ?? ['Inconnu', 'pill-pending'];
+                        $statusInfo = $statusMap[$rx['status']] ?? [__('admin.dashboard.status_unknown'), 'pill-pending'];
                     @endphp
                     <div class="recent-item">
                         <div class="recent-item-avatar" style="background:{{ $color }};">{{ $initials }}</div>
@@ -442,22 +442,22 @@ Gérez la plateforme et supervisez les activités de Medix eSanté.
                 @endforeach
             </div>
         @else
-            <p style="font-size:13px; color:#64748b; font-style:italic; margin:0;">Aucune prescription récente.</p>
+            <p style="font-size:13px; color:#64748b; font-style:italic; margin:0;">{{ __('admin.dashboard.empty_recent') }}</p>
         @endif
     </div>
 
     <!-- Labs Distribution + Quick Stats -->
     <div class="chart-container">
-        <h3>Répartition des centres par ville</h3>
+        <h3>{{ __('admin.dashboard.cities_distribution') }}</h3>
 
         <div class="summary-row" style="margin-bottom:20px;">
             <div class="summary-card">
                 <div class="summary-card-value" style="color:#0066ff;">{{ $activeLabs }}</div>
-                <div class="summary-card-label">Labos actifs</div>
+                <div class="summary-card-label">{{ __('admin.dashboard.active_labs') }}</div>
             </div>
             <div class="summary-card">
                 <div class="summary-card-value" style="color:#16a34a;">{{ $todayPrescriptions }}</div>
-                <div class="summary-card-label">Aujourd'hui</div>
+                <div class="summary-card-label">{{ __('admin.dashboard.today') }}</div>
             </div>
         </div>
 
@@ -477,7 +477,7 @@ Gérez la plateforme et supervisez les activités de Medix eSanté.
                 @endforeach
             </div>
         @else
-            <p style="font-size:13px; color:#64748b; font-style:italic; margin:0;">Aucun centre enregistré.</p>
+            <p style="font-size:13px; color:#64748b; font-style:italic; margin:0;">{{ __('admin.dashboard.empty_center') }}</p>
         @endif
     </div>
 
@@ -498,7 +498,7 @@ Gérez la plateforme et supervisez les activités de Medix eSanté.
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Volume de prescriptions',
+                    label: '@lang('admin.dashboard.prescription_volume')',
                     data: counts,
                     borderColor: '#0066ff',
                     backgroundColor: 'rgba(0, 102, 255, 0.05)',
@@ -539,7 +539,7 @@ Gérez la plateforme et supervisez les activités de Medix eSanté.
         new Chart(document.getElementById('statusChart'), {
             type: 'doughnut',
             data: {
-                labels: ['En attente', 'Labo choisi', 'Collecté', 'En cours', 'Complété', 'Annulé'],
+                labels: ['@lang('admin.dashboard.status_pending')', '@lang('admin.dashboard.status_assigned')', '@lang('admin.dashboard.status_collected')', '@lang('admin.dashboard.status_processing')', '@lang('admin.dashboard.status_completed')', '@lang('admin.dashboard.status_cancelled')'],
                 datasets: [{
                     data: [
                         statusDistribution.pending,

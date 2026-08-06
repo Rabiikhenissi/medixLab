@@ -1,5 +1,5 @@
 <x-layouts.auth>
-    <x-slot:title>{{ $legalTitle ?? 'Informations légales' }} - Medix eSanté</x-slot:title>
+    <x-slot:title>{{ $legalTitle ?? __('components.legal_layout.legal_infos') }} - Medix eSanté</x-slot:title>
 
     <div class="w-full max-w-3xl mx-auto py-10 px-4 md:px-6">
         <div class="glass-card rounded-[20px] p-8 md:p-12">
@@ -17,9 +17,9 @@
 
             <div class="mt-10 pt-6 border-t border-[#e2e8f0]/80 flex items-center justify-between">
                 <a href="{{ route('home') }}" class="text-xs font-semibold text-[#0066FF] hover:underline">
-                    &larr; Retour à l'accueil
+                    &larr; {{ __('auth.home') }}
                 </a>
-                <span class="text-xs text-[#94a3b8]">Dernière mise à jour : {{ $updatedAt ?? now()->format('d/m/Y') }}</span>
+                <span class="text-xs text-[#94a3b8]">{{ __('components.legal_layout.last_updated', ['date' => $updatedAt ?? now()->format('d/m/Y')]) }}</span>
             </div>
         </div>
     </div>

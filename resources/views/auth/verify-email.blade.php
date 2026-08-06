@@ -11,7 +11,7 @@
                         <path d="M12 3v4M10 5h4" stroke-width="2.2" stroke="#0D9488" />
                     </svg>
                 </div>
-                <span class="text-xs font-bold tracking-widest text-[#0066FF] uppercase">Medix eSanté</span>
+                <span class="text-xs font-bold tracking-widest text-[#0066FF] uppercase">{{ __('app.brand') }}</span>
             </div>
 
             <!-- Mail icon -->

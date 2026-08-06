@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>Traite CNAM #{{ $invoice->invoice_number }}</title>
+<html><head><meta charset="utf-8"><title>{{ __('center.traite.title') }} #{{ $invoice->invoice_number }}</title>
 <style>
     body { font-family: 'Courier New', monospace; font-size: 11px; color: #000; margin: 20px; }
     .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px; }
@@ -24,36 +24,36 @@
 </head>
 <body>
 <div class="header">
-    <h1>TRAITE CNAM</h1>
-    <p>N° {{ $invoice->invoice_number }}</p>
-    <p>Date: {{ $invoice->created_at->format('d/m/Y') }}</p>
+    <h1>{{ strtoupper(__('center.traite.title')) }}</h1>
+    <p>{{ __('center.traite.no', ['number' => $invoice->invoice_number]) }}</p>
+    <p>{{ __('center.traite.date_prefix') }} {{ $invoice->created_at->format(__('center.date_format')) }}</p>
 </div>
 
 <div class="info">
-    <div><span class="label">Laboratoire:</span><span>{{ $invoice->labo->name }}</span></div>
-    <div><span class="label">Adresse:</span><span>{{ $invoice->labo->address ?? '' }}</span></div>
-    <div><span class="label">Tél:</span><span>{{ $invoice->labo->phone ?? '' }}</span></div>
+    <div><span class="label">{{ __('center.traite.laboratory') }}</span><span>{{ $invoice->labo->name }}</span></div>
+    <div><span class="label">{{ __('center.traite.address') }}</span><span>{{ $invoice->labo->address ?? '' }}</span></div>
+    <div><span class="label">{{ __('center.traite.phone') }}</span><span>{{ $invoice->labo->phone ?? '' }}</span></div>
 </div>
 
 <div class="info">
-    <div><span class="label">Patient:</span><span>{{ $invoice->patient->user->first_name }} {{ $invoice->patient->user->last_name }}</span></div>
+    <div><span class="label">{{ __('center.traite.patient') }}</span><span>{{ $invoice->patient->user->first_name }} {{ $invoice->patient->user->last_name }}</span></div>
     @if($invoice->patient->cnamAffiliation)
-    <div><span class="label">N° CNAM:</span><span>{{ $invoice->patient->cnamAffiliation->cnam_number }}</span></div>
-    <div><span class="label">N° Affiliation:</span><span>{{ $invoice->patient->cnamAffiliation->affiliation_number ?? '-' }}</span></div>
-    <div><span class="label">Taux CNAM:</span><span>{{ $invoice->patient->cnamAffiliation->rate->taux ?? 0 }}% ({{ $invoice->patient->cnamAffiliation->rate->label ?? '' }})</span></div>
+    <div><span class="label">{{ __('center.traite.cnam_no') }}</span><span>{{ $invoice->patient->cnamAffiliation->cnam_number }}</span></div>
+    <div><span class="label">{{ __('center.traite.affiliation_no') }}</span><span>{{ $invoice->patient->cnamAffiliation->affiliation_number ?? '-' }}</span></div>
+    <div><span class="label">{{ __('center.traite.cnam_rate') }}</span><span>{{ $invoice->patient->cnamAffiliation->rate->taux ?? 0 }}% ({{ $invoice->patient->cnamAffiliation->rate->label ?? '' }})</span></div>
     @else
-    <div><span class="label">CNAM:</span><span>Non affilié</span></div>
+    <div><span class="label">{{ __('center.traite.cnam_label') }}</span><span>{{ __('center.traite.not_affiliated') }}</span></div>
     @endif
 </div>
 
 <table>
     <thead><tr>
-        <th>Code CNAM</th>
-        <th>Acte</th>
-        <th class="center">Qté</th>
-        <th class="right">Valeur B</th>
-        <th class="right">Coeff.</th>
-        <th class="right">Montant</th>
+        <th>{{ __('center.cnam.code_cnam') }}</th>
+        <th>{{ __('center.traite.act') }}</th>
+        <th class="center">{{ __('center.billing.qty') }}</th>
+        <th class="right">{{ __('center.traite.valeur_b') }}</th>
+        <th class="right">{{ __('center.traite.coeff') }}</th>
+        <th class="right">{{ __('center.traite.amount') }}</th>
     </tr></thead>
     <tbody>
         @foreach($invoice->items->where('cnam_code') as $item)
@@ -70,17 +70,17 @@
 </table>
 
 <div class="totals">
-    <div><span>Total actes</span><span>{{ number_format($invoice->cnam_amount, 3) }} TND</span></div>
-    <div class="bold"><span>Total à payer par CNAM</span><span>{{ number_format($invoice->cnam_amount, 3) }} TND</span></div>
+    <div><span>{{ __('center.traite.total_acts') }}</span><span>{{ number_format($invoice->cnam_amount, 3) }} TND</span></div>
+    <div class="bold"><span>{{ __('center.traite.total_cnam') }}</span><span>{{ number_format($invoice->cnam_amount, 3) }} TND</span></div>
 </div>
 
 <div class="signature">
-    <div><div class="line">Cachet et signature du laboratoire</div></div>
-    <div><div class="line">Cachet et signature du patient</div></div>
+    <div><div class="line">{{ __('center.traite.lab_signature') }}</div></div>
+    <div><div class="line">{{ __('center.traite.patient_signature') }}</div></div>
 </div>
 
 <div class="footer">
-    <p>Document généré par Medix eSanté le {{ now()->format('d/m/Y H:i') }}</p>
+    <p>{{ __('center.traite.generated', ['brand' => 'Medix eSanté', 'date' => now()->format(__('common.datetime_format'))]) }}</p>
 </div>
 <script>window.print();</script>
 </body>

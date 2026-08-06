@@ -11,7 +11,7 @@
                 <path d="M35 19a16 16 0 0 1-16 16M3 19a16 16 0 0 1 16-16"></path>
             </svg>
         </div>
-        <span id="loading-overlay-text" class="text-xs font-semibold text-white/90 tracking-widest uppercase">Chargement...</span>
+        <span id="loading-overlay-text" class="text-xs font-semibold text-white/90 tracking-widest uppercase">{{ __('layout.loading') }}</span>
     </div>
 </div>
 
@@ -44,7 +44,7 @@
             return silentUrls.some(silent => urlString.includes(silent));
         }
 
-        function showOverlay(message = 'Chargement en cours...', instant = false) {
+        function showOverlay(message = @json(__('components.loading_overlay.loading_in_progress')), instant = false) {
             const overlay = document.getElementById('global-loading-overlay');
             const textEl = document.getElementById('loading-overlay-text');
             if (!overlay) return;
@@ -90,7 +90,7 @@
                     const url = new URL(link.href);
                     // Only intercept same-origin and actual path changes
                     if (url.origin === window.location.origin && (url.pathname !== window.location.pathname || url.search !== window.location.search)) {
-                        showOverlay('Navigation...');
+                        showOverlay(@json(__('components.loading_overlay.navigation')));
                     }
                 } catch (err) {
                     // Ignore malformed URLs
@@ -102,7 +102,7 @@
         document.addEventListener('submit', (e) => {
             const form = e.target;
             if (form && !form.target && !form.getAttribute('onsubmit')) {
-                showOverlay('Traitement en cours...');
+                showOverlay(@json(__('components.loading_overlay.processing')));
             }
         });
 
@@ -114,7 +114,7 @@
             
             if (!silent) {
                 activeRequests++;
-                showOverlay('Requête en cours...');
+                showOverlay(@json(__('components.loading_overlay.request_in_progress')));
             }
             
             try {
@@ -143,7 +143,7 @@
             
             if (!silent) {
                 activeRequests++;
-                showOverlay('Requête en cours...');
+                showOverlay(@json(__('components.loading_overlay.request_in_progress')));
                 
                 this.addEventListener('loadend', () => {
                     activeRequests--;

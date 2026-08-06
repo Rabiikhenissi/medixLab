@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>Facture #{{ $invoice->invoice_number }}</title>
+<html><head><meta charset="utf-8"><title>{{ __('center.billing.invoice', ['number' => $invoice->invoice_number]) }}</title>
 <style>
     body { font-family: 'Courier New', monospace; font-size: 12px; color: #000; margin: 20px; }
     .header { text-align: center; margin-bottom: 20px; }
@@ -21,19 +21,19 @@
 <div class="header">
     <h1>{{ $invoice->labo->name }}</h1>
     <p>{{ $invoice->labo->address ?? '' }} | {{ $invoice->labo->phone ?? '' }}</p>
-    <h2>FACTURE #{{ $invoice->invoice_number }}</h2>
-    <p>Date: {{ $invoice->created_at->format('d/m/Y') }}</p>
+    <h2>{{ strtoupper(__('center.billing.invoice', ['number' => $invoice->invoice_number])) }}</h2>
+    <p>{{ __('common.date') }}: {{ $invoice->created_at->format(__('center.date_format')) }}</p>
 </div>
 
-<p><strong>Patient:</strong> {{ $invoice->patient->user->first_name }} {{ $invoice->patient->user->last_name }}</p>
+<p><strong>{{ __('doctor.patient_label') }}:</strong> {{ $invoice->patient->user->first_name }} {{ $invoice->patient->user->last_name }}</p>
 
 <table>
     <thead><tr>
-        <th>Description</th>
-        <th class="center">Qté</th>
-        <th class="right">Prix unit.</th>
-        <th class="right">Total</th>
-        <th class="right">CNAM</th>
+        <th>{{ __('center.billing.description') }}</th>
+        <th class="center">{{ __('center.billing.qty') }}</th>
+        <th class="right">{{ __('center.billing.unit_price') }}</th>
+        <th class="right">{{ __('common.total') }}</th>
+        <th class="right">{{ __('center.billing.cnam_col') }}</th>
     </tr></thead>
     <tbody>
         @foreach($invoice->items as $item)
@@ -49,18 +49,18 @@
 </table>
 
 <div class="totals">
-    <div><span>Total</span><span>{{ number_format($invoice->total_amount, 3) }} TND</span></div>
-    <div><span>Part CNAM</span><span>{{ number_format($invoice->cnam_amount, 3) }} TND</span></div>
-    <div class="bold"><span>Part Patient</span><span>{{ number_format($invoice->patient_amount, 3) }} TND</span></div>
-    <div><span>Payé</span><span>{{ number_format($invoice->paid_amount, 3) }} TND</span></div>
+    <div><span>{{ __('common.total') }}</span><span>{{ number_format($invoice->total_amount, 3) }} TND</span></div>
+    <div><span>{{ __('center.billing.cnam_part') }}</span><span>{{ number_format($invoice->cnam_amount, 3) }} TND</span></div>
+    <div class="bold"><span>{{ __('center.billing.patient_part') }}</span><span>{{ number_format($invoice->patient_amount, 3) }} TND</span></div>
+    <div><span>{{ __('center.billing.paid') }}</span><span>{{ number_format($invoice->paid_amount, 3) }} TND</span></div>
     @if($invoice->balance > 0)
-    <div class="bold"><span>Reste à payer</span><span>{{ number_format($invoice->balance, 3) }} TND</span></div>
+    <div class="bold"><span>{{ __('center.billing.remaining_to_pay') }}</span><span>{{ number_format($invoice->balance, 3) }} TND</span></div>
     @endif
 </div>
 
 <div class="footer">
-    <p>Medix eSanté - Document généré le {{ now()->format('d/m/Y H:i') }}</p>
-    <p>Merci de votre confiance.</p>
+    <p>{{ __('center.billing.generated_doc', ['brand' => 'Medix eSanté', 'date' => now()->format(__('common.datetime_format'))]) }}</p>
+    <p>{{ __('center.billing.thanks') }}</p>
 </div>
 <script>window.print();</script>
 </body>

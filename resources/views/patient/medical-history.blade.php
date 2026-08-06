@@ -1,5 +1,5 @@
 <x-layouts.patient>
-    <x-slot:title>Historique Médical — Medix eSanté</x-slot:title>
+    <x-slot:title>{{ __('patient.medical_history.title') }} — Medix eSanté</x-slot:title>
 
     @section('content')
     <div class="w-full max-w-[1100px] mx-auto">
@@ -14,7 +14,7 @@
                         </svg>
                     </div>
                     <div>
-                        <h1 class="text-xl font-bold text-[#1e293b]">Historique Médical</h1>
+                        <h1 class="text-xl font-bold text-[#1e293b]">{{ __('patient.medical_history.title') }}</h1>
                         <p class="text-sm text-[#64748b] mt-0.5">
                             {{ $user->first_name }} {{ $user->last_name }} —
                             <span class="font-semibold text-[#0D9488]">{{ $patient->patient_code }}</span>
@@ -26,7 +26,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
                     </svg>
-                    Retour au tableau de bord
+                    {{ __('patient.dashboard.back_label') }}
                 </a>
             </div>
 
@@ -40,20 +40,20 @@
             <div class="flex flex-wrap gap-3 mb-8">
                 <div class="flex items-center gap-2 px-4 py-2 bg-[#0D9488]/10 border border-[#0D9488]/20 rounded-full">
                     <span class="w-2 h-2 rounded-full bg-[#0D9488]"></span>
-                    <span class="text-xs font-bold text-[#0D9488]">{{ $total }} Demande(s) au total</span>
+                    <span class="text-xs font-bold text-[#0D9488]">{{ __('patient.medical_history.total_requests', ['n' => $total]) }}</span>
                 </div>
                 <div class="flex items-center gap-2 px-4 py-2 bg-green-50 border border-green-200 rounded-full">
                     <span class="w-2 h-2 rounded-full bg-green-500"></span>
-                    <span class="text-xs font-bold text-green-700">{{ $completed }} Complétée(s)</span>
+                    <span class="text-xs font-bold text-green-700">{{ __('patient.medical_history.completed_count', ['n' => $completed]) }}</span>
                 </div>
                 <div class="flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-full">
                     <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-                    <span class="text-xs font-bold text-amber-700">{{ $active }} En cours</span>
+                    <span class="text-xs font-bold text-amber-700">{{ __('patient.medical_history.in_progress', ['n' => $active]) }}</span>
                 </div>
                 @if ($cancelled > 0)
                 <div class="flex items-center gap-2 px-4 py-2 bg-red-50 border border-red-200 rounded-full">
                     <span class="w-2 h-2 rounded-full bg-red-400"></span>
-                    <span class="text-xs font-bold text-red-700">{{ $cancelled }} Annulée(s)</span>
+                    <span class="text-xs font-bold text-red-700">{{ __('patient.medical_history.cancelled_count', ['n' => $cancelled]) }}</span>
                 </div>
                 @endif
             </div>
@@ -64,8 +64,8 @@
                     <svg class="w-16 h-16 mx-auto mb-4 opacity-40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
-                    <p class="text-lg font-semibold">Aucun historique</p>
-                    <p class="text-sm mt-1 opacity-70">Vos demandes d'examens apparaîtront ici.</p>
+                    <p class="text-lg font-semibold">{{ __('patient.medical_history.empty_title') }}</p>
+                    <p class="text-sm mt-1 opacity-70">{{ __('patient.medical_history.empty_hint') }}</p>
                 </div>
             @else
                 {{-- Timeline --}}
@@ -85,12 +85,12 @@
                                     'cancelled'  => ['dot' => 'bg-red-400',    'badge' => 'text-red-700 bg-red-50 border-red-200'],
                                 ];
                                 $statusLabels = [
-                                    'pending'    => 'En attente',
-                                    'assigned'   => 'Labo sélectionné',
-                                    'collected'  => 'Collectée',
-                                    'processing' => 'En traitement',
-                                    'completed'  => 'Complétée',
-                                    'cancelled'  => 'Annulée',
+                                    'pending'    => __('patient.status.pending'),
+                                    'assigned'   => __('patient.status.assigned'),
+                                    'collected'  => __('patient.status.collected'),
+                                    'processing' => __('patient.status.processing'),
+                                    'completed'  => __('patient.status.completed'),
+                                    'cancelled'  => __('patient.status.cancelled'),
                                 ];
                                 $sc    = $statusColors[$req->status] ?? ['dot' => 'bg-slate-400', 'badge' => 'text-slate-700 bg-slate-50 border-slate-200'];
                                 $label = $statusLabels[$req->status] ?? $req->status;
@@ -145,7 +145,7 @@
                                                    target="_blank"
                                                    class="flex items-center gap-1 px-3 py-1 text-[10px] font-bold text-[#7C3AED] bg-[#7C3AED]/10 border border-[#7C3AED]/20 rounded-full hover:bg-[#7C3AED]/20 transition">
                                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
-                                                    Télécharger
+                                                    {{ __('patient.medical_history.download') }}
                                                 </a>
                                             @endif
                                         </div>
@@ -161,7 +161,7 @@
                                     {{-- Exams list --}}
                                     <div class="space-y-2">
                                         <p class="text-[10px] font-bold text-[#1e293b] uppercase tracking-wider mb-2">
-                                            {{ $req->items->count() }} examen(s) prescrit(s)
+                                            {{ __('patient.medical_history.prescribed_exams', ['n' => $req->items->count()]) }}
                                         </p>
                                         @foreach ($req->items as $item)
                                             <div class="flex items-start gap-3 p-3 bg-[#F8FAFC]/60 border border-[#e2e8f0]/60 rounded-xl">
@@ -209,7 +209,7 @@
                                     {{-- Doctor interpretation --}}
                                     @if ($req->status === 'completed' && $req->approved_by_doctor && $req->doctor_interpretation)
                                         <div class="mt-4 p-4 bg-purple-50/50 border border-purple-200/60 rounded-xl">
-                                            <p class="text-[10px] font-bold text-purple-700 uppercase tracking-wider mb-1">Interprétation du médecin</p>
+                                            <p class="text-[10px] font-bold text-purple-700 uppercase tracking-wider mb-1">{{ __('patient.medical_history.doctor_interpretation') }}</p>
                                             <p class="text-sm text-[#475569]">{{ $req->doctor_interpretation }}</p>
                                         </div>
                                     @endif

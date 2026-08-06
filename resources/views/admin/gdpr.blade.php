@@ -1,15 +1,15 @@
 @extends('layouts.admin')
 
-@section('title', 'RGPD / Données personnelles')
+@section('title', __('admin.gdpr.title'))
 
-@section('page-title', 'RGPD / Données personnelles')
-@section('page-subtitle', 'Répondre aux demandes de portabilité et d\'effacement (droit à l\'oubli).')
+@section('page-title', __('admin.gdpr.title'))
+@section('page-subtitle', __('admin.gdpr.page_subtitle'))
 
 @section('content')
     <div class="data-section anim anim-1">
         <div class="data-header">
-            <div class="data-title">Comptes utilisateurs</div>
-            <a href="{{ route('admin.gdpr.incidents') }}" class="btn-export">Registre des incidents RGPD &rarr;</a>
+            <div class="data-title">{{ __('admin.gdpr.user_accounts') }}</div>
+            <a href="{{ route('admin.gdpr.incidents') }}" class="btn-export">{{ __('admin.gdpr.incidents_link') }} &rarr;</a>
         </div>
 
         @if (session('success'))
@@ -23,16 +23,16 @@
         <form method="GET" action="{{ route('admin.gdpr') }}" id="filter-form">
             <div class="filters-bar">
                 <div>
-                    <span class="filter-label">Recherche</span>
+                    <span class="filter-label">{{ __('common.search') }}</span>
                     <div class="filter-group" style="position:relative;display:inline-block;">
                         <svg class="search-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
                         </svg>
-                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Nom, email..." class="filter-input">
+                        <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('admin.gdpr.search_placeholder') }}" class="filter-input">
                     </div>
                 </div>
                 <div style="align-self:flex-end;">
-                    <button type="submit" class="btn-filter">Filtrer</button>
+                    <button type="submit" class="btn-filter">{{ __('admin.common.filter') }}</button>
                 </div>
             </div>
         </form>
@@ -42,11 +42,11 @@
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Nom</th>
-                    <th>Email</th>
-                    <th>Rôles</th>
-                    <th>Inscrit le</th>
-                    <th>Actions</th>
+                    <th>{{ __('admin.gdpr.name') }}</th>
+                    <th>{{ __('common.email') }}</th>
+                    <th>{{ __('admin.gdpr.roles') }}</th>
+                    <th>{{ __('admin.gdpr.registered_on') }}</th>
+                    <th>{{ __('common.actions') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -58,39 +58,39 @@
                         <td>
                             @php
                                 $roles = [];
-                                if ($user->patient) $roles[] = 'Patient';
-                                if ($user->doctor) $roles[] = 'Docteur';
-                                if ($user->staff) $roles[] = 'Établissement';
+                                if ($user->patient) $roles[] = __('admin.gdpr.role_patient');
+                                if ($user->doctor) $roles[] = __('admin.gdpr.role_doctor');
+                                if ($user->staff) $roles[] = __('admin.gdpr.role_staff');
                             @endphp
                             @forelse($roles as $role)
                                 <span class="feature-badge">{{ $role }}</span>
                             @empty
-                                <span class="text-muted">Aucun profil</span>
+                                <span class="text-muted">{{ __('admin.gdpr.no_profile') }}</span>
                             @endforelse
                         </td>
                         <td>{{ optional($user->created_at)->format('d/m/Y H:i') }}</td>
                         <td>
                             <div style="display:flex;gap:8px;align-items:center;">
-                                <a class="btn-export" href="{{ route('admin.gdpr.export', $user) }}" target="_blank">Exporter (JSON)</a>
+                                <a class="btn-export" href="{{ route('admin.gdpr.export', $user) }}" target="_blank">{{ __('admin.gdpr.export_json') }}</a>
 
-                                <form method="POST" action="{{ route('admin.gdpr.erase', $user) }}" onsubmit="return confirm('Effacer définitivement ce compte ? Cette action est irréversible.')" style="margin:0;">
+                                <form method="POST" action="{{ route('admin.gdpr.erase', $user) }}" onsubmit="return confirm('{{ __('admin.gdpr.erase_confirm') }}')" style="margin:0;">
                                     @csrf
                                     <input type="hidden" name="confirm" value="1">
-                                    <button type="submit" class="btn-erase">Anonymiser</button>
+                                    <button type="submit" class="btn-erase">{{ __('admin.gdpr.anonymize') }}</button>
                                 </form>
 
-                                <form method="POST" action="{{ route('admin.gdpr.erase', $user) }}" onsubmit="return confirm('Suppression TOTALE du compte et du profil ? Les données cliniques sont conservées pour la traçabilité du laboratoire.')" style="margin:0;">
+                                <form method="POST" action="{{ route('admin.gdpr.erase', $user) }}" onsubmit="return confirm('{{ __('admin.gdpr.total_erase_confirm') }}')" style="margin:0;">
                                     @csrf
                                     <input type="hidden" name="confirm" value="1">
                                     <input type="hidden" name="hard" value="1">
-                                    <button type="submit" class="btn-erase-hard">Effacement total</button>
+                                    <button type="submit" class="btn-erase-hard">{{ __('admin.gdpr.total_erase') }}</button>
                                 </form>
                             </div>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="text-center">Aucun utilisateur trouvé.</td>
+                        <td colspan="6" class="text-center">{{ __('admin.gdpr.no_users') }}</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -105,16 +105,10 @@
 
     <div class="data-section anim anim-2">
         <div class="data-header">
-            <div class="data-title">Analyse d'impact (DPIA)</div>
+            <div class="data-title">{{ __('admin.gdpr.dpia_title') }}</div>
         </div>
         <p style="font-size:13px;color:#475569;line-height:1.7;margin:0;">
-            Le traitement de données de santé réalisé par la plateforme a fait l'objet d'une
-            <strong>analyse d'impact relative à la protection des données (DPIA / AIPD)</strong> conformément à
-            l'article 35 du RGPD. Les mesures d'atténuation mises en œuvre comprennent : chiffrement des
-            mots de passe, authentification à deux facteurs par email, journalisation immuable des accès,
-            contrôle d'accès par rôle et permission, enregistrement du consentement et politique de
-            conservation limitée. Toute modification substantielle d'un traitement doit donner lieu à une
-            mise à jour de la DPIA avant sa mise en œuvre.
+            {!! __('admin.gdpr.dpia') !!}
         </p>
     </div>
 @endsection
