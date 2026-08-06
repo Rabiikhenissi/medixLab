@@ -8,11 +8,11 @@
         </svg>
     </div>
 
-    <h2>Vérification de votre connexion</h2>
+    <h2>{{ __('emails.two_factor.title') }}</h2>
 
     <p>
-        Une tentative de connexion à votre compte Medix eSanté est en cours.
-        Utilisez le code suivant pour finaliser l'authentification :
+        {{ __('emails.two_factor.intro') }}
+        {{ __('emails.two_factor.use_code') }}
     </p>
 
     <div style="text-align:center; margin-bottom:24px;">
@@ -23,13 +23,12 @@
 
     <div class="info-box">
         <p>
-            <strong>Code valide pendant :</strong> {{ $minutes }} minutes<br>
-            <strong>Date :</strong> {{ now()->format('d/m/Y à H:i') }}
+            <strong>{{ __('emails.two_factor.valid_for', ['minutes' => $minutes]) }}</strong><br>
+            <strong>{{ __('emails.date_label') }}</strong> {{ now()->format(__('common.datetime_format')) }}
         </p>
     </div>
 
     <p class="expire-note">
-        Si vous n'êtes pas à l'origine de cette connexion, ignorez cet email et
-        changez immédiatement votre mot de passe. Ne partagez jamais ce code.
+        {{ __('emails.two_factor.warning') }}
     </p>
 @endsection

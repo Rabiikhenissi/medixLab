@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Journal d'activité — Medix eSanté</title>
+    <title>{{ __('admin.activity.title') }} — Medix eSanté</title>
     <style>
         * { box-sizing: border-box; }
         body { font-family: Helvetica, Arial, sans-serif; color: #1e293b; font-size: 9px; line-height: 1.4; margin: 0; padding: 0; }
@@ -35,12 +35,12 @@
             <tr>
                 <td style="vertical-align:top;">
                     <div class="brand">Medix eSanté</div>
-                    <div class="brand-sub">Journal d'activité — traçabilité médico-légale</div>
+                    <div class="brand-sub">{{ __('admin.activity.pdf_subtitle') }}</div>
                 </td>
                 <td class="meta" style="vertical-align:top;">
-                    <div class="ref">Export du {{ now()->format('d/m/Y à H:i') }}</div>
-                    <div>Généré par {{ $generatedBy->first_name }} {{ $generatedBy->last_name }}</div>
-                    <div>{{ $logs->count() }} entrée(s) sur la période disponible</div>
+                    <div class="ref">{{ __('admin.activity.exported_on', ['date' => now()->format('d/m/Y H:i')]) }}</div>
+                    <div>{{ __('admin.activity.generated_by', ['name' => $generatedBy->first_name . ' ' . $generatedBy->last_name]) }}</div>
+                    <div>{{ __('admin.activity.entries_count', ['count' => $logs->count()]) }}</div>
                 </td>
             </tr>
         </table>
@@ -48,26 +48,26 @@
 
     @if(request()->filled('entity') || request()->filled('action') || request()->filled('search'))
         <div class="summary">
-            Filtres appliqués :
-            @if(request()->filled('entity')) Entité : <strong>{{ request('entity') }}</strong>@endif
-            @if(request()->filled('action')) Action : <strong>{{ request('action') }}</strong>@endif
-            @if(request()->filled('search')) Recherche : <strong>"{{ request('search') }}"</strong>@endif
+            {{ __('admin.activity.filters_applied') }}
+            @if(request()->filled('entity')) {{ __('admin.activity.entity') }} : <strong>{{ request('entity') }}</strong>@endif
+            @if(request()->filled('action')) {{ __('admin.activity.action') }} : <strong>{{ request('action') }}</strong>@endif
+            @if(request()->filled('search')) {{ __('admin.activity.search') }} : <strong>"{{ request('search') }}"</strong>@endif
         </div>
     @endif
 
     @if($logs->isEmpty())
-        <div class="empty">Aucune entrée ne correspond aux critères demandés.</div>
+        <div class="empty">{{ __('admin.activity.empty_no_match') }}</div>
     @else
         <table class="logs">
             <thead>
                 <tr>
-                    <th style="width:11%;">Date</th>
-                    <th style="width:13%;">Utilisateur</th>
-                    <th style="width:9%;">Rôle</th>
-                    <th style="width:9%;">Action</th>
-                    <th style="width:12%;">Entité</th>
-                    <th style="width:26%;">Description</th>
-                    <th style="width:12%;">Changements</th>
+                    <th style="width:11%;">{{ __('common.date') }}</th>
+                    <th style="width:13%;">{{ __('admin.activity.user') }}</th>
+                    <th style="width:9%;">{{ __('admin.activity.role') }}</th>
+                    <th style="width:9%;">{{ __('admin.activity.action') }}</th>
+                    <th style="width:12%;">{{ __('admin.activity.entity') }}</th>
+                    <th style="width:26%;">{{ __('admin.activity.description') }}</th>
+                    <th style="width:12%;">{{ __('admin.activity.changes') }}</th>
                     <th style="width:8%;">IP</th>
                 </tr>
             </thead>
@@ -79,7 +79,7 @@
                             @if($log->user)
                                 <span class="user">{{ $log->user->first_name }} {{ $log->user->last_name }}</span>
                             @else
-                                <span class="system">Système</span>
+                                <span class="system">{{ __('admin.activity.system') }}</span>
                             @endif
                         </td>
                         <td>{{ $log->role ? ucfirst($log->role) : '—' }}</td>
@@ -98,7 +98,7 @@
     @endif
 
     <div class="footer">
-        Medix eSanté — Journal d'activité immuable — Document généré automatiquement le {{ now()->format('d/m/Y à H:i') }}. Pour toute contestation, adressez-vous à l'administrateur RGPD.
+        Medix eSanté — {{ __('admin.activity.footer', ['date' => now()->format('d/m/Y H:i')]) }}
     </div>
 
 </body>

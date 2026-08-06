@@ -1,9 +1,9 @@
 @extends('layouts.admin')
 
-@section('title', 'Ajouter un Examen Disponible')
+@section('title', __('admin.available_exams.add_title'))
 
 @section('page-title')
-Ajouter un <span style="color:#0066ff;">Examen Disponible</span>
+{{ __('admin.available_exams.add_prefix') }}<span style="color:#0066ff;">{{ __('admin.available_exams.title') }}</span>
 @endsection
 
 @section('content')
@@ -23,9 +23,9 @@ Ajouter un <span style="color:#0066ff;">Examen Disponible</span>
         <form action="{{ route('admin.available-exams.store') }}" method="POST">
             @csrf
             <div class="form-group">
-                <label class="form-label">Laboratoire <span class="required-star">*</span></label>
+                <label class="form-label">{{ __('admin.common.laboratory') }} <span class="required-star">*</span></label>
                 <select name="labo_id" class="form-control" required>
-                    <option value="">Sélectionner...</option>
+                    <option value="">{{ __('common.select') }}...</option>
                     @foreach($labos as $labo)
                         <option value="{{ $labo->id }}" {{ old('labo_id') == $labo->id ? 'selected' : '' }}>{{ $labo->name }} — {{ $labo->city }}</option>
                     @endforeach
@@ -33,9 +33,9 @@ Ajouter un <span style="color:#0066ff;">Examen Disponible</span>
             </div>
 
             <div class="form-group">
-                <label class="form-label">Examen <span class="required-star">*</span></label>
+                <label class="form-label">{{ __('admin.available_exams.exam') }} <span class="required-star">*</span></label>
                 <select name="exam_id" class="form-control" required>
-                    <option value="">Sélectionner...</option>
+                    <option value="">{{ __('common.select') }}...</option>
                     @foreach($exams as $exam)
                         <option value="{{ $exam->id }}" {{ old('exam_id') == $exam->id ? 'selected' : '' }}>[{{ $exam->code }}] {{ $exam->name }}</option>
                     @endforeach
@@ -43,20 +43,20 @@ Ajouter un <span style="color:#0066ff;">Examen Disponible</span>
             </div>
 
             <div class="form-group">
-                <label class="form-label">Prix (DT) <span class="required-star">*</span></label>
+                <label class="form-label">{{ __('admin.available_exams.price') }} <span class="required-star">*</span></label>
                 <input type="number" name="price" class="form-control" value="{{ old('price', '0.00') }}" min="0" step="0.01" required>
             </div>
 
             <div class="form-group">
                 <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
                     <input type="checkbox" name="is_active" value="1" {{ old('is_active', '1') ? 'checked' : '' }} style="accent-color:#0066ff; width:16px; height:16px;">
-                    <span class="form-label" style="margin:0;">Actif</span>
+                    <span class="form-label" style="margin:0;">{{ __('admin.common.active') }}</span>
                 </label>
             </div>
 
             <div style="display:flex; gap:10px; margin-top:24px;">
-                <button type="submit" class="btn-submit">Enregistrer</button>
-                <a href="{{ route('admin.available-exams.index') }}" class="btn-cancel">Annuler</a>
+                <button type="submit" class="btn-submit">{{ __('common.save') }}</button>
+                <a href="{{ route('admin.available-exams.index') }}" class="btn-cancel">{{ __('common.cancel') }}</a>
             </div>
         </form>
     </div>

@@ -8,28 +8,24 @@
         </svg>
     </div>
 
-    <h2>Vous êtes invité(e) à rejoindre Medix eSanté</h2>
+    <h2>{{ __('emails.invite.title') }}</h2>
 
     <p>
         @if($invite->first_name)
-            Bonjour {{ $invite->first_name }},
+            {{ __('emails.invite.greeting', ['name' => $invite->first_name]) }}
         @else
-            Bonjour,
+            {{ __('emails.invite.greeting_no_name') }}
         @endif
-        Un compte <strong>{{ $invite->roleLabel() }}</strong> vous a été préparé sur la
-        plateforme Medix eSanté. Cliquez sur le bouton ci-dessous pour choisir votre mot de
-        passe et activer votre compte. Le lien est valable
-        <strong>{{ config('legal.invite_days') }} jours</strong>.
+        {!! __('emails.invite.intro', ['role' => $invite->roleLabel(), 'days' => config('legal.invite_days')]) !!}
     </p>
 
     <div style="text-align:center; margin-bottom:24px;">
         <a href="{{ $url }}" class="btn btn-teal">
-            Activer mon compte
+            {{ __('emails.invite.button') }}
         </a>
     </div>
 
     <p class="expire-note">
-        Si vous n'attendiez pas cette invitation, vous pouvez ignorer cet email en toute
-        sécurité — aucune action de votre part n'est requise.
+        {{ __('emails.invite.expire_note') }}
     </p>
 @endsection

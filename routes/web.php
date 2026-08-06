@@ -20,6 +20,7 @@ use App\Http\Controllers\MachineController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SampleController;
+use App\Http\Controllers\TourController;
 use App\Http\Controllers\TwoFactorController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VerificationController;
@@ -852,4 +853,5 @@ Route::get('/countries/{country}/states', [LocationController::class, 'getStates
 
 Route::middleware('auth')->group(function () {
     // Old profile routes removed — using ProfileController routes above
+    Route::post('/tour/complete', [TourController::class, 'complete'])->name('tour.complete');
 });

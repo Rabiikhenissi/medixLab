@@ -1,14 +1,14 @@
 @extends('layouts.admin')
 
-@section('title', 'Modifier l\'Utilisateur')
+@section('title', __('admin.users.edit_title'))
 
-@section('page-title', 'Modifier l\'Utilisateur')
-@section('page-subtitle', 'Mettez à jour les informations et le rôle de l\'utilisateur. Laissez le mot de passe vide pour le conserver.')
+@section('page-title', __('admin.users.edit_title'))
+@section('page-subtitle', __('admin.users.edit_subtitle'))
 
 @section('content')
     <div class="data-section anim anim-1" style="padding: 28px;">
         <h3 class="data-title" style="margin-top: 0; margin-bottom: 24px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; font-size: 16px;">
-            Informations Personnelles & Rôle
+            {{ __('admin.users.personal_info') }}
         </h3>
 
         @if($errors->any())
@@ -28,31 +28,31 @@
             <!-- Form Row -->
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label">Prénom<span class="required-star">*</span></label>
-                    <input type="text" name="first_name" value="{{ old('first_name', $user->first_name) }}" required placeholder="Ex: Jean" class="form-control">
+                    <label class="form-label">{{ __('auth.first_name') }}<span class="required-star">*</span></label>
+                    <input type="text" name="first_name" value="{{ old('first_name', $user->first_name) }}" required placeholder="{{ __('admin.users.first_name_placeholder') }}" class="form-control">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Nom<span class="required-star">*</span></label>
-                    <input type="text" name="last_name" value="{{ old('last_name', $user->last_name) }}" required placeholder="Ex: Dupont" class="form-control">
-                </div>
-            </div>
-
-            <!-- Form Row -->
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">Adresse Email<span class="required-star">*</span></label>
-                    <input type="email" name="email" value="{{ old('email', $user->email) }}" required placeholder="Ex: jean.dupont@email.com" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Téléphone</label>
-                    <input type="text" name="phone" value="{{ old('phone', $user->phone) }}" placeholder="Ex: 55123456" class="form-control">
+                    <label class="form-label">{{ __('auth.last_name') }}<span class="required-star">*</span></label>
+                    <input type="text" name="last_name" value="{{ old('last_name', $user->last_name) }}" required placeholder="{{ __('admin.users.last_name_placeholder') }}" class="form-control">
                 </div>
             </div>
 
             <!-- Form Row -->
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label">Rôle / Groupe de Sécurité<span class="required-star">*</span></label>
+                    <label class="form-label">{{ __('admin.users.email_label') }}<span class="required-star">*</span></label>
+                    <input type="email" name="email" value="{{ old('email', $user->email) }}" required placeholder="{{ __('admin.users.email_placeholder') }}" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">{{ __('admin.users.phone_label') }}</label>
+                    <input type="text" name="phone" value="{{ old('phone', $user->phone) }}" placeholder="{{ __('admin.users.phone_placeholder') }}" class="form-control">
+                </div>
+            </div>
+
+            <!-- Form Row -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">{{ __('admin.users.group_label') }}<span class="required-star">*</span></label>
                     <div style="position:relative;">
                         <select name="group_id" id="group_id" required class="form-control" onchange="toggleLabField(); updateRoleTableHint()">
                             @foreach($groups as $group)
@@ -64,22 +64,22 @@
                     <div id="role-table-hint" style="margin-top:8px;font-size:12px;color:#64748b;"></div>
                     @if($user->group?->role_table)
                         <div style="margin-top:4px;font-size:12px;color:#94a3b8;">
-                            Le groupe ne peut être modifié que vers un autre groupe de la même table de profil.
+                            {{ __('admin.users.group_same_table') }}
                         </div>
                     @endif
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Adresse de résidence</label>
-                    <input type="text" name="address" value="{{ old('address', $user->address) }}" placeholder="Ex: 15 Rue de Paris, Tunis" class="form-control">
+                    <label class="form-label">{{ __('admin.users.residence_address') }}</label>
+                    <input type="text" name="address" value="{{ old('address', $user->address) }}" placeholder="{{ __('admin.users.address_placeholder') }}" class="form-control">
                 </div>
             </div>
 
             <!-- Laboratory Select (Conditional) -->
             <div class="form-group" id="laboratory-group" style="display: none; margin-bottom: 16px;">
-                <label class="form-label">Laboratoire Associé<span class="required-star">*</span></label>
+                <label class="form-label">{{ __('admin.users.associated_laboratory') }}<span class="required-star">*</span></label>
                 <div style="position:relative;">
                     <select name="laboratory_id" id="laboratory_id" class="form-control">
-                        <option value="">Sélectionner un laboratoire...</option>
+                        <option value="">{{ __('admin.users.select_laboratory') }}</option>
                         @foreach($laboratories as $labo)
                             <option value="{{ $labo->id }}" {{ old('laboratory_id', $user->staff ? $user->staff->laboratory_id : '') == $labo->id ? 'selected' : '' }}>{{ $labo->name }} ({{ $labo->city }})</option>
                         @endforeach
@@ -91,9 +91,9 @@
             <!-- Form Row -->
             <div class="form-row" style="margin-bottom: 24px;">
                 <div class="form-group">
-                    <label class="form-label">Nouveau Mot de Passe (Optionnel)</label>
+                    <label class="form-label">{{ __('admin.users.new_password') }}</label>
                     <div style="position:relative;">
-                        <input type="password" name="password" id="pw1" placeholder="Saisir 8 caractères minimum" class="form-control" style="padding-right: 42px;">
+                        <input type="password" name="password" id="pw1" placeholder="{{ __('admin.users.password_placeholder') }}" class="form-control" style="padding-right: 42px;">
                         <button type="button" tabindex="-1" onclick="togglePw(this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#94a3b8;padding:4px;display:flex;align-items:center;justify-content:center;border-radius:6px;">
                             <svg class="pw-eye" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/>
@@ -106,9 +106,9 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Confirmer le Nouveau Mot de Passe</label>
+                    <label class="form-label">{{ __('admin.users.new_password_confirm') }}</label>
                     <div style="position:relative;">
-                        <input type="password" name="password_confirmation" id="pw2" placeholder="Confirmer le nouveau mot de passe" class="form-control" style="padding-right: 42px;">
+                        <input type="password" name="password_confirmation" id="pw2" placeholder="{{ __('admin.users.new_password_confirm_placeholder') }}" class="form-control" style="padding-right: 42px;">
                         <button type="button" tabindex="-1" onclick="togglePw(this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#94a3b8;padding:4px;display:flex;align-items:center;justify-content:center;border-radius:6px;">
                             <svg class="pw-eye" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/>
@@ -124,8 +124,8 @@
 
             <!-- Footer actions -->
             <div style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid #f1f5f9; padding-top: 24px; margin-top: 24px;">
-                <a href="{{ route('admin.users.index') }}" class="btn-cancel">Annuler</a>
-                <button type="submit" class="btn-submit">Enregistrer les modifications</button>
+                <a href="{{ route('admin.users.index') }}" class="btn-cancel">{{ __('common.cancel') }}</a>
+                <button type="submit" class="btn-submit">{{ __('admin.users.save_changes') }}</button>
             </div>
         </form>
     </div>
@@ -164,12 +164,12 @@
         input.focus();
     }
 
-    var roleTableLabels = {
-        'admin': 'Table de profil : Administrateurs (admins)',
-        'doctor': 'Table de profil : Médecins (doctors)',
-        'patient': 'Table de profil : Patients (patients)',
-        'staff': 'Table de profil : Personnel du Centre (staff)'
-    };
+    var roleTableLabels = @json([
+        'admin' => __('admin.users.role_table_admin'),
+        'doctor' => __('admin.users.role_table_doctor'),
+        'patient' => __('admin.users.role_table_patient'),
+        'staff' => __('admin.users.role_table_staff'),
+    ]);
 
     function updateRoleTableHint() {
         var groupSelect = document.getElementById('group_id');

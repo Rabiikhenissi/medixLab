@@ -1,5 +1,5 @@
 <x-layouts.auth>
-    <x-slot:title>{{ __('patient.register_title') }} - Medix eSanté</x-slot:title>
+    <x-slot:title>{{ __('patient.register_title') }} - {{ __('app.brand') }}</x-slot:title>
 
     <x-auth-card
         title="{{ __('patient.register_title') }}"
@@ -23,7 +23,7 @@
                 type="text"
                 name="first_name"
                 label="{{ __('auth.first_name') }}"
-                placeholder="ex. Marie"
+                placeholder="{{ __('patient.register_first_name_placeholder') }}"
                 :required="true"
                 :value="old('first_name')"
             />
@@ -33,7 +33,7 @@
                 type="text"
                 name="last_name"
                 label="{{ __('auth.last_name') }}"
-                placeholder="ex. Martin"
+                placeholder="{{ __('patient.register_last_name_placeholder') }}"
                 :required="true"
                 :value="old('last_name')"
             />
@@ -131,7 +131,7 @@
                 type="text"
                 name="allergies"
                 label="{{ __('auth.allergies') }}"
-                placeholder="ex. Pénicilline, Pollen (sinon laisser vide)"
+                placeholder="{{ __('patient.register_allergies_placeholder') }}"
                 :required="false"
                 :value="old('allergies')"
             />
@@ -142,7 +142,7 @@
             type="textarea"
             name="address"
             label="{{ __('auth.address') }}"
-            placeholder="ex. Avenue Habib Bourguiba, Tunis"
+            placeholder="{{ __('patient.register_address_placeholder') }}"
             :required="false"
             :value="old('address')"
         />

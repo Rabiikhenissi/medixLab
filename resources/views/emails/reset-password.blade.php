@@ -1,20 +1,20 @@
 @extends('components.email-layout')
 
 @section('content')
-    <h2>Réinitialisation du mot de passe</h2>
+    <h2>{{ __('emails.reset.title') }}</h2>
 
     <p>
-        Vous recevez cet email car une demande de réinitialisation de mot de passe a été effectuée pour votre compte.<br>
-        Cliquez sur le bouton ci-dessous pour choisir un nouveau mot de passe.
+        {{ __('emails.reset.intro') }}<br>
+        {{ __('emails.reset.instructions') }}
     </p>
 
-    <a href="{{ $url }}" class="btn">Réinitialiser mon mot de passe</a>
+    <a href="{{ $url }}" class="btn">{{ __('emails.reset.button') }}</a>
 
-    <p>Si le bouton ne fonctionne pas, copiez et collez ce lien dans votre navigateur&nbsp;:</p>
+    <p>{{ __('emails.reset.link_fallback') }}&nbsp;:</p>
     <div class="url-box">{{ $url }}</div>
 
     <p class="expire-note">
-        Ce lien expirera dans {{ config('auth.passwords.users.expire', 60) }} minutes.<br>
-        Si vous n'avez pas demandé cette réinitialisation, ignorez cet email — votre mot de passe reste inchangé.
+        {{ __('emails.reset.expiry', ['minutes' => config('auth.passwords.users.expire', 60)]) }}<br>
+        {{ __('emails.reset.ignore_note') }}
     </p>
 @endsection

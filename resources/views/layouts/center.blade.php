@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@yield('title', 'Espace Etablissement') - Medix eSanté</title>
+    <title>@yield('title', __('layouts.center.default_title')) - Medix eSanté</title>
 
     <!-- Google Fonts: Outfit & Instrument Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -435,32 +435,32 @@
             <!-- Page Content -->
             <div class="mt-4">
                 <div class="flex items-center gap-2 text-[10px] uppercase tracking-wider font-extrabold text-[#64748b] bg-[#f8fafc]/40 px-4 py-2.5 rounded-xl border border-[#e2e8f0]/40 mb-6 select-none">
-                    <a href="{{ route('center.dashboard') }}" class="hover:text-[#7C3AED] transition">Espace Labo</a>
+                    <a href="{{ route('center.dashboard') }}" class="hover:text-[#7C3AED] transition">{{ __('layouts.center.lab_space') }}</a>
                     <svg class="w-3 h-3 text-[#94a3b8]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
                     @if($route === 'center.dashboard')
-                        <span class="text-[#1e293b]">Tableau de Bord</span>
+                        <span class="text-[#1e293b]">{{ __('layouts.center.dashboard') }}</span>
                     @elseif($route === 'center.working-hours')
-                        <a href="{{ route('center.working-hours') }}" class="hover:text-[#7C3AED] transition">Horaires</a>
+                        <a href="{{ route('center.working-hours') }}" class="hover:text-[#7C3AED] transition">{{ __('layouts.center.working_hours') }}</a>
                         <svg class="w-3 h-3 text-[#94a3b8]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
-                        <span class="text-[#1e293b]">Exceptions</span>
+                        <span class="text-[#1e293b]">{{ __('layouts.center.exceptions') }}</span>
                     @elseif($route === 'center.consumables')
-                        <a href="{{ route('center.consumables') }}" class="hover:text-[#7C3AED] transition">Stock</a>
+                        <a href="{{ route('center.consumables') }}" class="hover:text-[#7C3AED] transition">{{ __('layouts.center.stock') }}</a>
                         <svg class="w-3 h-3 text-[#94a3b8]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
-                        <span class="text-[#1e293b]">Consommables</span>
+                        <span class="text-[#1e293b]">{{ __('layouts.center.consumables') }}</span>
                     @elseif($route === 'center.equipment')
-                        <a href="{{ route('center.equipment') }}" class="hover:text-[#7C3AED] transition">Équipements</a>
+                        <a href="{{ route('center.equipment') }}" class="hover:text-[#7C3AED] transition">{{ __('layouts.center.equipment') }}</a>
                         <svg class="w-3 h-3 text-[#94a3b8]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
-                        <span class="text-[#1e293b]">Maintenance</span>
+                        <span class="text-[#1e293b]">{{ __('layouts.center.maintenance') }}</span>
                     @elseif($route === 'center.exam-requests')
-                        <span class="text-[#1e293b]">Demandes d'Analyses</span>
+                        <span class="text-[#1e293b]">{{ __('layouts.center.exam_requests') }}</span>
                     @elseif(str_contains($route, 'results.create'))
-                        <a href="{{ route('center.exam-requests') }}" class="hover:text-[#7C3AED] transition">Demandes d'Analyses</a>
+                        <a href="{{ route('center.exam-requests') }}" class="hover:text-[#7C3AED] transition">{{ __('layouts.center.exam_requests') }}</a>
                         <svg class="w-3 h-3 text-[#94a3b8]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
-                        <span class="text-[#1e293b]">Saisir les Résultats</span>
+                        <span class="text-[#1e293b]">{{ __('layouts.center.enter_results') }}</span>
                     @elseif(str_contains($route, 'results.edit'))
-                        <a href="{{ route('center.exam-requests') }}" class="hover:text-[#7C3AED] transition">Demandes d'Analyses</a>
+                        <a href="{{ route('center.exam-requests') }}" class="hover:text-[#7C3AED] transition">{{ __('layouts.center.exam_requests') }}</a>
                         <svg class="w-3 h-3 text-[#94a3b8]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
-                        <span class="text-[#1e293b]">Modifier les Résultats</span>
+                        <span class="text-[#1e293b]">{{ __('layouts.center.edit_results') }}</span>
                     @else
                         <span class="text-[#1e293b]">{{ ucfirst(str_replace(['center.', '-'], ['', ' '], $route)) }}</span>
                     @endif
@@ -475,14 +475,14 @@
     <script>
         function swalConfirmSubmit(form, message) {
             Swal.fire({
-                title: 'Confirmer',
+                title: @json(__('common.confirm')),
                 text: message,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#0066FF',
                 cancelButtonColor: '#94a3b8',
-                confirmButtonText: 'Confirmer',
-                cancelButtonText: 'Annuler'
+                confirmButtonText: @json(__('common.confirm')),
+                cancelButtonText: @json(__('common.cancel'))
             }).then((result) => {
                 if (result.isConfirmed) form.submit();
             });
@@ -521,7 +521,7 @@
                 const data = await res.json();
                 const list = document.getElementById('centerNotifList');
                 if (data.notifications.length === 0) {
-                    list.innerHTML = '<div class="px-4 py-6 text-center text-xs text-[#94a3b8]">Aucune notification</div>';
+                    list.innerHTML = '<div class="px-4 py-6 text-center text-xs text-[#94a3b8]">' + @json(__('layouts.center.no_notifications')) + '</div>';
                     return;
                 }
                 list.innerHTML = data.notifications.map(n => `
@@ -588,6 +588,7 @@
         setInterval(centerUpdateUnreadBadge, 15000);
     </script>
     @include('components.accessibility-widget')
+ <x-tour />
 </body>
 
 </html>

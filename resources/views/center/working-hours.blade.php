@@ -1,6 +1,6 @@
 @extends('layouts.center')
 
-@section('title', 'Gestion des Horaires - Medix eSanté')
+@section('title', __('center.working_hours.title') . ' - Medix eSanté')
 
 @section('content')
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -15,8 +15,8 @@
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-sm font-bold text-[#1e293b] uppercase tracking-wider">Horaires Hebdomadaires Réguliers</h3>
-                        <p class="text-xs text-[#64748b] mt-0.5">Définissez les heures d'ouverture et de fermeture ordinaires pour chaque jour de la semaine.</p>
+                        <h3 class="text-sm font-bold text-[#1e293b] uppercase tracking-wider">{{ __('center.working_hours.regular_title') }}</h3>
+                        <p class="text-xs text-[#64748b] mt-0.5">{{ __('center.working_hours.regular_subtitle') }}</p>
                     </div>
                 </div>
 
@@ -39,13 +39,13 @@
                                 <label class="inline-flex items-center cursor-pointer">
                                     <input type="checkbox" name="closed_{{ $dayName }}" id="closed_{{ $dayName }}" value="1" {{ $hour->is_closed ? 'checked' : '' }} onchange="toggleDayInputs('{{ $dayName }}')" class="sr-only peer">
                                     <div class="relative w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-red-500"></div>
-                                    <span class="ms-2 text-xs font-bold text-gray-500 peer-checked:text-red-500">Jour de repos / Fermé</span>
+                                    <span class="ms-2 text-xs font-bold text-gray-500 peer-checked:text-red-500">{{ __('center.working_hours.closed_day') }}</span>
                                 </label>
 
                                 <!-- Time inputs -->
                                 <div class="flex items-center space-x-2" id="time-inputs-{{ $dayName }}">
                                     <input type="time" name="start_{{ $dayName }}" value="{{ $hour->start_time ? substr($hour->start_time, 0, 5) : '08:00' }}" {{ $hour->is_closed ? 'disabled' : '' }} class="px-2.5 py-1.5 border border-[#e2e8f0] rounded-lg text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-[#7C3AED] bg-white text-[#1e293b] disabled:opacity-50 disabled:bg-gray-100">
-                                    <span class="text-xs text-[#64748b] font-medium">à</span>
+                                    <span class="text-xs text-[#64748b] font-medium">{{ __('center.working_hours.to') }}</span>
                                     <input type="time" name="end_{{ $dayName }}" value="{{ $hour->end_time ? substr($hour->end_time, 0, 5) : '17:00' }}" {{ $hour->is_closed ? 'disabled' : '' }} class="px-2.5 py-1.5 border border-[#e2e8f0] rounded-lg text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-[#7C3AED] bg-white text-[#1e293b] disabled:opacity-50 disabled:bg-gray-100">
                                 </div>
                             </div>
@@ -54,7 +54,7 @@
 
                     <div class="pt-4 border-t border-[#e2e8f0]/60 flex justify-end">
                         <x-button type="submit" color="purple" :fullWidth="false" class="!py-2.5 !px-6 !text-xs font-bold uppercase tracking-wider shadow-md shadow-[#7C3AED]/20">
-                            Enregistrer les horaires
+                            {{ __('center.working_hours.save_hours') }}
                         </x-button>
                     </div>
                 </form>
@@ -73,8 +73,8 @@
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-sm font-bold text-[#1e293b] uppercase tracking-wider">Ajouter une Exception</h3>
-                        <p class="text-xs text-[#64748b] mt-0.5">Indiquez les fermetures exceptionnelles (jours fériés, congés, imprévus).</p>
+                        <h3 class="text-sm font-bold text-[#1e293b] uppercase tracking-wider">{{ __('center.working_hours.add_exception') }}</h3>
+                        <p class="text-xs text-[#64748b] mt-0.5">{{ __('center.working_hours.exception_subtitle') }}</p>
                     </div>
                 </div>
 
@@ -82,17 +82,17 @@
                     @csrf
                     
                     <div class="space-y-1">
-                        <label for="date_close" class="text-xs font-bold text-[#475569] uppercase tracking-wider">Date d'Exception</label>
+                        <label for="date_close" class="text-xs font-bold text-[#475569] uppercase tracking-wider">{{ __('center.working_hours.exception_date') }}</label>
                         <input type="date" name="date_close" id="date_close" required class="w-full px-3 py-2.5 border border-[#e2e8f0] rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/10 focus:border-[#7C3AED] transition text-[#1e293b] bg-white">
                     </div>
 
                     <div class="space-y-1">
-                        <label for="reason" class="text-xs font-bold text-[#475569] uppercase tracking-wider">Motif / Description</label>
-                        <input type="text" name="reason" id="reason" required placeholder="Ex: Jour de l'An, Fête Nationale" class="w-full px-3 py-2.5 border border-[#e2e8f0] rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/10 focus:border-[#7C3AED] transition text-[#1e293b] bg-white">
+                        <label for="reason" class="text-xs font-bold text-[#475569] uppercase tracking-wider">{{ __('center.working_hours.reason_label') }}</label>
+                        <input type="text" name="reason" id="reason" required placeholder="{{ __('center.working_hours.reason_placeholder') }}" class="w-full px-3 py-2.5 border border-[#e2e8f0] rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/10 focus:border-[#7C3AED] transition text-[#1e293b] bg-white">
                     </div>
 
                     <x-button type="submit" color="purple" :fullWidth="true" class="!py-2.5 !text-xs font-bold uppercase tracking-wider">
-                        Ajouter l'Exception
+                        {{ __('center.working_hours.add_exception_button') }}
                     </x-button>
                 </form>
             </div>
@@ -103,9 +103,8 @@
                     <svg class="w-4 h-4 text-[#7C3AED] mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z" />
                     </svg>
-                    Fermetures Exceptionnelles
+                    {{ __('center.working_hours.exceptions_title') }}
                 </h3>
-
                 @if($exceptions->count() > 0)
                     <div class="space-y-3 max-h-[300px] overflow-y-auto pr-1">
                         @foreach($exceptions as $exception)
@@ -117,7 +116,7 @@
                                     </div>
                                 </div>
                                 
-                                <form action="{{ route('center.working-hours.exceptions.destroy', $exception) }}" method="POST" onsubmit="return swalConfirmSubmit(this, 'Supprimer cette exception de fermeture ?')">
+                                <form action="{{ route('center.working-hours.exceptions.destroy', $exception) }}" method="POST" onsubmit="return swalConfirmSubmit(this, '{{ __('center.working_hours.delete_confirm') }}')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition">
@@ -131,7 +130,7 @@
                     </div>
                 @else
                     <div class="text-center py-6">
-                        <p class="text-xs text-[#94a3b8] font-medium">Aucune fermeture exceptionnelle enregistrée.</p>
+                        <p class="text-xs text-[#94a3b8] font-medium">{{ __('center.working_hours.empty') }}</p>
                     </div>
                 @endif
             </div>

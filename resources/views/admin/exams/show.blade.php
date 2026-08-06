@@ -1,12 +1,12 @@
 @extends('layouts.admin')
 
 
-@section('title','Détails Examen')
+@section('title', __('admin.exams.details_title'))
 
 
 @section('page-title')
 
-Détails de <span style="color:#0066ff;">
+{{ __('admin.exams.show_details_prefix') }} <span style="color:#0066ff;">
 {{ $exam->name }}
 </span>
 
@@ -16,7 +16,7 @@ Détails de <span style="color:#0066ff;">
 
 @section('page-subtitle')
 
-Informations complètes de l'examen médical.
+{{ __('admin.exams.show_subtitle') }}
 
 @endsection
 
@@ -32,7 +32,7 @@ Informations complètes de l'examen médical.
 <div class="data-header">
 
 <div class="data-title">
-Informations générales
+{{ __('admin.exams.general_information') }}
 </div>
 
 
@@ -46,14 +46,14 @@ Informations générales
 
 
 <p>
-<strong>Code :</strong>
+<strong>{{ __('admin.exams.code') }} :</strong>
 {{ $exam->code }}
 </p>
 
 
 
 <p>
-<strong>Nom :</strong>
+<strong>{{ __('common.name') }} :</strong>
 {{ $exam->name }}
 </p>
 
@@ -61,7 +61,7 @@ Informations générales
 
 
 <p>
-<strong>Catégorie :</strong>
+<strong>{{ __('admin.exams.category') }} :</strong>
 {{ ucfirst($exam->category) }}
 </p>
 
@@ -69,7 +69,7 @@ Informations générales
 
 
 <p>
-<strong>Valeur normale :</strong>
+<strong>{{ __('admin.exams.normal_range') }} :</strong>
 {{ $exam->default_normal_range ?? '-' }}
 </p>
 
@@ -77,23 +77,23 @@ Informations générales
 
 
 <p>
-<strong>Description :</strong>
+<strong>{{ __('admin.exams.description') }} :</strong>
 </p>
 
 <p>
-{{ $exam->description ?? 'Aucune description' }}
+{{ $exam->description ?? __('admin.exams.no_description') }}
 </p>
 
 
 
 
 <p>
-<strong>Instructions :</strong>
+<strong>{{ __('admin.exams.instructions') }}</strong>
 </p>
 
 
 <p>
-{{ $exam->preparation_instructions ?? 'Aucune instruction' }}
+{{ $exam->preparation_instructions ?? __('admin.exams.no_instruction') }}
 </p>
 
 
@@ -115,7 +115,7 @@ Informations générales
 <div class="data-header">
 
 <div class="data-title">
-Paramètres de l'examen
+{{ __('admin.exams.parameters_title') }}
 </div>
 
 
@@ -131,15 +131,15 @@ Paramètres de l'examen
 <tr>
 
 <th>
-Nom
+{{ __('common.name') }}
 </th>
 
 <th>
-Unité
+{{ __('admin.exams.parameter_unit') }}
 </th>
 
 <th>
-Valeur normale
+{{ __('admin.exams.normal_range') }}
 </th>
 
 
@@ -183,7 +183,7 @@ Valeur normale
 
 <td colspan="3">
 
-Aucun paramètre ajouté.
+{{ __('admin.exams.no_parameters') }}
 
 </td>
 
@@ -208,7 +208,7 @@ Aucun paramètre ajouté.
 <a href="{{ route('admin.exams.index') }}"
 class="btn-filter">
 
-← Retour aux examens
+← {{ __('admin.exams.return_exams') }}
 
 </a>
 

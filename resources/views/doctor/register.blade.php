@@ -1,5 +1,5 @@
 <x-layouts.auth>
-    <x-slot:title>{{ __('doctor.register_title') }} - Medix eSanté</x-slot:title>
+    <x-slot:title>{{ __('doctor.register_title') }} - {{ __('app.brand') }}</x-slot:title>
 
     <x-auth-card
         title="{{ __('doctor.register_title') }}"
@@ -23,7 +23,7 @@
                 type="text"
                 name="first_name"
                 label="{{ __('auth.first_name') }}"
-                placeholder="ex. Jean"
+                placeholder="{{ __('doctor.register_first_name_placeholder') }}"
                 :required="true"
             />
 
@@ -32,7 +32,7 @@
                 type="text"
                 name="last_name"
                 label="{{ __('auth.last_name_full') }}"
-                placeholder="ex. Dupont"
+                placeholder="{{ __('doctor.register_last_name_placeholder') }}"
                 :required="true"
             />
         </div>
@@ -116,7 +116,7 @@
             type="textarea"
             name="address"
             label="{{ __('auth.address') }}"
-            placeholder="ex. Rue de la Liberté, Tunis"
+            placeholder="{{ __('doctor.register_address_placeholder') }}"
             :required="false"
         />
 

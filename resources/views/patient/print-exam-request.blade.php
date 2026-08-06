@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rapport d'Analyses — Medix eSanté</title>
+    <title>{{ __('patient.report.title') }} — Medix eSanté</title>
     <style>
         /* ── Google Font (loaded inline so it works offline too via print) ── */
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap');
@@ -159,11 +159,11 @@
 
 {{-- Print / close bar (hidden during actual print) --}}
 <div class="print-bar">
-    <p>📋 Rapport d'Analyses — Medix eSanté</p>
+    <p>📋 {{ __('patient.report.title') }} — Medix eSanté</p>
     <div style="display:flex;gap:8px">
-        <a class="close-btn" style="text-decoration:none; display:inline-flex; align-items:center; gap-x:6px;" href="{{ url()->current() }}?pdf=1">⬇ Télécharger PDF</a>
-        <button class="close-btn" onclick="history.back()">← Retour</button>
-        <button class="print-btn" onclick="window.print()">🖨 Imprimer</button>
+        <a class="close-btn" style="text-decoration:none; display:inline-flex; align-items:center; gap-x:6px;" href="{{ url()->current() }}?pdf=1">⬇ {{ __('patient.report.download_pdf') }}</a>
+        <button class="close-btn" onclick="history.back()">← {{ __('common.back') }}</button>
+        <button class="print-btn" onclick="window.print()">🖨 {{ __('common.print') }}</button>
     </div>
 </div>
 
@@ -179,12 +179,12 @@
             </div>
             <div>
                 <div class="brand-name">Medix eSanté</div>
-                <div class="brand-sub">Rapport officiel d'analyses médicales</div>
+                <div class="brand-sub">{{ __('patient.report.official_subtitle') }}</div>
             </div>
         </div>
         <div class="report-meta">
-            <div class="ref">Réf. #{{ $examRequest->id }}</div>
-            <div>Émis le {{ now()->format('d/m/Y à H:i') }}</div>
+            <div class="ref">{{ __('patient.report.ref_prefix') }} #{{ $examRequest->id }}</div>
+            <div>{{ __('patient.report.issued_on') }} {{ now()->format(__('patient.report.date_time_format')) }}</div>
             @if($examRequest->laboratory)
             <div style="margin-top:4px; font-weight:700; color:#1e293b">
                 {{ $examRequest->laboratory->name }}
@@ -195,39 +195,39 @@
     </div>
 
     {{-- ─── Patient / Doctor info ─────────────────────────────────────── --}}
-    <p class="section-title">Informations du patient</p>
+    <p class="section-title">{{ __('patient.report.patient_info') }}</p>
     <div class="info-grid">
         <div class="info-box">
-            <div class="label">Patient</div>
+            <div class="label">{{ __('layout.role_patient') }}</div>
             <div class="value">{{ $examRequest->patient->user->first_name }} {{ $examRequest->patient->user->last_name }}</div>
-            <div class="sub">Code : {{ $examRequest->patient->patient_code }}</div>
+            <div class="sub">{{ __('patient.invoices.patient_code') }} : {{ $examRequest->patient->patient_code }}</div>
         </div>
         <div class="info-box">
-            <div class="label">Médecin prescripteur</div>
+            <div class="label">{{ __('patient.report.prescribing_doctor') }}</div>
             <div class="value">Dr. {{ $examRequest->doctor->user->first_name }} {{ $examRequest->doctor->user->last_name }}</div>
             <div class="sub">{{ $examRequest->doctor->speciality }}</div>
         </div>
         <div class="info-box">
-            <div class="label">Date de prescription</div>
+            <div class="label">{{ __('patient.report.prescription_date') }}</div>
             <div class="value">{{ $examRequest->created_at->format('d/m/Y') }}</div>
             <div class="sub">{{ $examRequest->created_at->format('H:i') }}</div>
         </div>
         <div class="info-box">
-            <div class="label">Statut</div>
+            <div class="label">{{ __('common.status') }}</div>
             <div class="value">
-                <span class="status-badge">✓ Complétée & Approuvée</span>
+                <span class="status-badge">✓ {{ __('patient.report.completed_approved') }}</span>
             </div>
         </div>
     </div>
 
     {{-- Clinical notes --}}
     @if($examRequest->clinical_notes)
-    <p class="section-title">Notes cliniques</p>
+    <p class="section-title">{{ __('patient.dashboard.clinical_notes') }}</p>
     <div class="clinical-notes">"{{ $examRequest->clinical_notes }}"</div>
     @endif
 
     {{-- ─── Exam results ───────────────────────────────────────────────── --}}
-    <p class="section-title">Résultats des analyses ({{ $examRequest->items->count() }} examen(s))</p>
+    <p class="section-title">{{ __('patient.report.results_count', ['n' => $examRequest->items->count()]) }}</p>
 
     @foreach($examRequest->items as $item)
     <div class="exam-card">
@@ -243,10 +243,10 @@
         <table class="results-table">
             <thead>
                 <tr>
-                    <th>Paramètre</th>
-                    <th>Valeur</th>
-                    <th>Plage normale</th>
-                    <th>Statut</th>
+                    <th>{{ __('patient.report.parameter') }}</th>
+                    <th>{{ __('patient.report.value') }}</th>
+                    <th>{{ __('patient.report.normal_range') }}</th>
+                    <th>{{ __('common.status') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -258,10 +258,10 @@
                     <td>
                         @php $smap = ['normal'=>'status-normal','high'=>'status-high','low'=>'status-low','critical'=>'status-critical']; @endphp
                         <span class="{{ $smap[$detail->status] ?? '' }}">
-                            @if($detail->status === 'normal') ✓ Normal
-                            @elseif($detail->status === 'high') ↑ Élevé
-                            @elseif($detail->status === 'low')  ↓ Bas
-                            @elseif($detail->status === 'critical') ⚠ Critique
+                            @if($detail->status === 'normal') ✓ {{ __('patient.report.status_normal') }}
+                            @elseif($detail->status === 'high') ↑ {{ __('patient.report.status_high') }}
+                            @elseif($detail->status === 'low')  ↓ {{ __('patient.report.status_low') }}
+                            @elseif($detail->status === 'critical') ⚠ {{ __('patient.report.status_critical') }}
                             @else {{ $detail->status }}
                             @endif
                         </span>
@@ -271,10 +271,10 @@
             </tbody>
         </table>
         @if($item->resultLabo->interpretation)
-        <p class="interp">Interprétation : {{ $item->resultLabo->interpretation }}</p>
+        <p class="interp">{{ __('patient.report.interpretation') }} {{ $item->resultLabo->interpretation }}</p>
         @endif
         @else
-        <p style="padding:10px 14px; color:#94a3b8; font-style:italic; font-size:12px">Aucun résultat détaillé disponible.</p>
+        <p style="padding:10px 14px; color:#94a3b8; font-style:italic; font-size:12px">{{ __('patient.report.no_detailed_results') }}</p>
         @endif
     </div>
     @endforeach
@@ -282,7 +282,7 @@
     {{-- ─── Doctor interpretation ──────────────────────────────────────── --}}
     @if($examRequest->doctor_interpretation)
     <div class="doctor-interp">
-        <p class="section-title" style="margin-top:0; color:#6d28d9">Interprétation du médecin</p>
+        <p class="section-title" style="margin-top:0; color:#6d28d9">{{ __('patient.report.doctor_interpretation') }}</p>
         <p style="font-size:13px; color:#374151">{{ $examRequest->doctor_interpretation }}</p>
     </div>
     @endif
@@ -290,8 +290,8 @@
     {{-- ─── Footer / Signature ─────────────────────────────────────────── --}}
     <div class="report-footer">
         <div>
-            <div>Medix eSanté — Plateforme de santé numérique</div>
-            <div style="margin-top:2px">Document généré automatiquement le {{ now()->format('d/m/Y à H:i') }}</div>
+            <div>Medix eSanté — {{ __('patient.report.digital_health_platform') }}</div>
+            <div style="margin-top:2px">{{ __('patient.report.auto_generated') }} {{ now()->format(__('patient.report.date_time_format')) }}</div>
         </div>
         <div class="signature-box">
             <div class="signature-line"></div>

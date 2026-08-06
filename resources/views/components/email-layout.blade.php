@@ -167,8 +167,8 @@
             </div>
 
             <div class="footer">
-                &copy; {{ date('Y') }} <a href="{{ config('app.url') }}">Medix eSanté</a> — Plateforme de santé numérique sécurisée<br>
-                <span style="font-size:10px; color:#cbd5e1;">Cet email a été envoyé automatiquement, merci de ne pas y répondre.</span>
+                &copy; {{ date('Y') }} <a href="{{ config('app.url') }}">Medix eSanté</a> — {{ __('components.email_layout.tagline') }}<br>
+                <span style="font-size:10px; color:#cbd5e1;">{{ __('components.email_layout.auto_message') }}</span>
             </div>
         </div>
     </div>

@@ -1,5 +1,5 @@
 <x-layouts.auth>
-    <x-slot:title>{{ __('center.register_title') }} - Medix eSanté</x-slot:title>
+    <x-slot:title>{{ __('center.register_title') }} - {{ __('app.brand') }}</x-slot:title>
 
     <x-auth-card
         title="{{ __('center.register_title') }}"
@@ -21,7 +21,7 @@
             type="text"
             name="center_name"
             label="{{ __('auth.center_name') }}"
-            placeholder="ex. Clinique El Amen"
+            placeholder="{{ __('center.register_center_name_placeholder') }}"
             :required="true"
         />
 
@@ -30,7 +30,7 @@
             type="text"
             name="responsible"
             label="{{ __('auth.responsible') }}"
-            placeholder="ex. Dr. Ahmed Ben Ali"
+            placeholder="{{ __('center.register_responsible_placeholder') }}"
             :required="true"
         />
 
@@ -60,7 +60,7 @@
                 type="text"
                 name="city"
                 label="{{ __('auth.city') }}"
-                placeholder="ex. Tunis"
+                placeholder="{{ __('center.register_city_placeholder') }}"
                 :required="true"
             />
 
@@ -87,7 +87,7 @@
             type="textarea"
             name="address"
             label="{{ __('auth.address') }}"
-            placeholder="ex. 45 Rue du Lac, Les Berges du Lac, Tunis"
+            placeholder="{{ __('center.register_address_placeholder') }}"
             :required="false"
         />
 

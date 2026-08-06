@@ -1,15 +1,15 @@
 @extends('layouts.admin')
 
-@section('title', 'Ajouter un Examen')
+@section('title', __('admin.exams.add_title'))
 
 
 @section('page-title')
-Ajouter un <span style="color:#0066ff;">Examen</span>
+{{ __('admin.exams.add_prefix') }}<span style="color:#0066ff;">{{ __('admin.exams.exam') }}</span>
 @endsection
 
 
 @section('page-subtitle')
-Créer un nouvel examen médical dans le catalogue.
+{{ __('admin.exams.create_subtitle') }}
 @endsection
 
 
@@ -19,7 +19,7 @@ Créer un nouvel examen médical dans le catalogue.
 <a href="{{ route('admin.exams.index') }}"
    class="btn-cancel">
 
-    Retour aux examens
+    {{ __('admin.exams.return_exams') }}
 
 </a>
 
@@ -39,7 +39,7 @@ Créer un nouvel examen médical dans le catalogue.
 <div class="data-header">
 
 <div class="data-title">
-Informations de l'examen
+{{ __('admin.exams.exam_information') }}
 </div>
 
 </div>
@@ -106,7 +106,7 @@ Informations de l'examen
 
 <label class="form-label">
 
-Code examen
+{{ __('admin.exams.code_exam') }}
 
 <span class="required-star">*</span>
 
@@ -117,7 +117,7 @@ Code examen
        name="code"
        value="{{ old('code') }}"
        class="form-control"
-       placeholder="Ex: HBA1C"
+       placeholder="{{ __('admin.exams.code_placeholder') }}"
        required>
 
 
@@ -134,7 +134,7 @@ Code examen
 
 <label class="form-label">
 
-Nom examen
+{{ __('admin.exams.exam_name') }}
 
 <span class="required-star">*</span>
 
@@ -145,7 +145,7 @@ Nom examen
        name="name"
        value="{{ old('name') }}"
        class="form-control"
-       placeholder="Ex: Glycémie"
+       placeholder="{{ __('admin.exams.name_placeholder') }}"
        required>
 
 
@@ -172,7 +172,7 @@ Nom examen
 
 <label class="form-label">
 
-Catégorie
+{{ __('admin.exams.category') }}
 
 <span class="required-star">*</span>
 
@@ -187,37 +187,37 @@ Catégorie
 
 
 <option value="">
-Sélectionner
+{{ __('admin.exams.select') }}
 </option>
 
 
 <option value="biochemistry">
-Biochimie
+{{ __('admin.exams.category_biochemistry') }}
 </option>
 
 
 <option value="hematology">
-Hématologie
+{{ __('admin.exams.category_hematology') }}
 </option>
 
 
 <option value="microbiology">
-Microbiologie
+{{ __('admin.exams.category_microbiology') }}
 </option>
 
 
 <option value="immunology">
-Immunologie
+{{ __('admin.exams.category_immunology') }}
 </option>
 
 
 <option value="urinalysis">
-Urinalyse
+{{ __('admin.exams.category_urinalysis') }}
 </option>
 
 
 <option value="other">
-Autre
+{{ __('admin.exams.category_other') }}
 </option>
 
 
@@ -238,7 +238,7 @@ Autre
 
 <label class="form-label">
 
-Valeur normale
+{{ __('admin.exams.normal_range') }}
 
 </label>
 
@@ -248,7 +248,7 @@ Valeur normale
        name="default_normal_range"
        value="{{ old('default_normal_range') }}"
        class="form-control"
-       placeholder="Ex: 4 - 6 mmol/L">
+       placeholder="{{ __('admin.exams.normal_range_placeholder') }}">
 
 
 </div>
@@ -269,7 +269,7 @@ Valeur normale
 
 <label class="form-label">
 
-Description
+{{ __('admin.exams.description') }}
 
 </label>
 
@@ -277,7 +277,7 @@ Description
 <textarea name="description"
           rows="3"
           class="form-control"
-          placeholder="Description de l'examen">{{ old('description') }}</textarea>
+          placeholder="{{ __('admin.exams.description_placeholder') }}">{{ old('description') }}</textarea>
 
 
 </div>
@@ -294,7 +294,7 @@ Description
 
 <label class="form-label">
 
-Instructions de préparation
+{{ __('admin.exams.preparation_instructions') }}
 
 </label>
 
@@ -302,7 +302,7 @@ Instructions de préparation
 <textarea name="preparation_instructions"
           rows="3"
           class="form-control"
-          placeholder="Ex: Être à jeun 12h">{{ old('preparation_instructions') }}</textarea>
+          placeholder="{{ __('admin.exams.preparation_placeholder') }}">{{ old('preparation_instructions') }}</textarea>
 
 
 </div>
@@ -336,7 +336,7 @@ margin-bottom:15px;
 
 <div class="data-title">
 
-Paramètres
+{{ __('admin.exams.parameters') }}
 
 </div>
 
@@ -346,7 +346,7 @@ Paramètres
         onclick="addParameter()"
         class="btn-add-exam">
 
-+ Ajouter un paramètre
++ {{ __('admin.exams.parameter_add') }}
 
 </button>
 
@@ -372,14 +372,14 @@ Paramètres
 
 
 <label class="form-label">
-Nom
+{{ __('common.name') }}
 </label>
 
 
 <input type="text"
        name="parameters[0][name]"
        class="form-control"
-       placeholder="Ex: Hémoglobine">
+       placeholder="{{ __('admin.exams.parameter_name_placeholder') }}">
 
 
 </div>
@@ -392,7 +392,7 @@ Nom
 
 
 <label class="form-label">
-Unité
+{{ __('admin.exams.parameter_unit') }}
 </label>
 
 
@@ -412,7 +412,7 @@ Unité
 
 
 <label class="form-label">
-Valeur normale
+{{ __('admin.exams.normal_range') }}
 </label>
 
 
@@ -422,7 +422,7 @@ Valeur normale
        placeholder="13 - 17">
 
 <label class="form-label" style="margin-top:15px;">
-Valeur critique basse
+{{ __('admin.exams.parameter_critical_low') }}
 </label>
 
 <input type="number"
@@ -432,7 +432,7 @@ Valeur critique basse
        placeholder="7.0">
 
 <label class="form-label" style="margin-top:15px;">
-Valeur critique haute
+{{ __('admin.exams.parameter_critical_high') }}
 </label>
 
 <input type="number"
@@ -466,10 +466,10 @@ gap:10px;
 ">
 
 
-<a href="{{ route('admin.exams.index') }}"
+    <a href="{{ route('admin.exams.index') }}"
    class="btn-cancel">
 
-Annuler
+{{ __('common.cancel') }}
 
 </a>
 
@@ -478,7 +478,7 @@ Annuler
 <button type="submit"
         class="btn-submit">
 
-Créer l'examen
+{{ __('admin.exams.create_button') }}
 
 </button>
 
@@ -541,7 +541,7 @@ container.insertAdjacentHTML(
 <input type="text"
 name="parameters[${parameterIndex}][name]"
 class="form-control"
-placeholder="Nom du paramètre">
+placeholder="@lang('admin.exams.parameter_name_placeholder')">
 
 </div>
 
@@ -553,7 +553,7 @@ placeholder="Nom du paramètre">
 <input type="text"
 name="parameters[${parameterIndex}][unit]"
 class="form-control"
-placeholder="Unité">
+placeholder="@lang('admin.exams.parameter_unit')">
 
 </div>
 
@@ -565,7 +565,7 @@ placeholder="Unité">
 <input type="text"
 name="parameters[${parameterIndex}][normal_range]"
 class="form-control"
-placeholder="Valeur normale">
+placeholder="@lang('admin.exams.normal_range')">
 
 </div>
 
@@ -577,7 +577,7 @@ placeholder="Valeur normale">
 step="any"
 name="parameters[${parameterIndex}][critical_low]"
 class="form-control"
-placeholder="Valeur critique basse">
+placeholder="@lang('admin.exams.parameter_critical_low')">
 
 </div>
 
@@ -589,7 +589,7 @@ placeholder="Valeur critique basse">
 step="any"
 name="parameters[${parameterIndex}][critical_high]"
 class="form-control"
-placeholder="Valeur critique haute">
+placeholder="@lang('admin.exams.parameter_critical_high')">
 
 </div>
 

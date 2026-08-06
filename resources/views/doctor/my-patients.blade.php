@@ -1,5 +1,5 @@
 <x-layouts.doctor>
-    <x-slot:title>Mes Patients - Medix eSanté</x-slot:title>
+    <x-slot:title>{{ __('doctor.my_patients.title') }} - {{ __('app.brand') }}</x-slot:title>
 
     @section('content')
     <div class="w-full max-w-[1200px] mx-auto">
@@ -14,8 +14,8 @@
                         </svg>
                     </div>
                     <div>
-                        <h1 class="text-xl font-bold text-[#1e293b]">Mes Patients</h1>
-                        <span class="text-xs text-[#64748b]">{{ $accesses->count() }} patient(s) avec accès actif</span>
+                        <h1 class="text-xl font-bold text-[#1e293b]">{{ __('doctor.my_patients.title') }}</h1>
+                        <span class="text-xs text-[#64748b]">{{ __('doctor.my_patients.active_access', ['n' => $accesses->count()]) }}</span>
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
@@ -24,7 +24,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                         </svg>
-                        Tableau de bord
+                        {{ __('doctor.dashboard.label') }}
                     </a>
                 </div>
             </div>
@@ -37,11 +37,11 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-[#1e293b] mb-2">Aucun patient actif</h3>
-                    <p class="text-sm text-[#64748b]">Vous n'avez pas encore de patients avec un accès accordé.</p>
+                    <h3 class="text-lg font-semibold text-[#1e293b] mb-2">{{ __('doctor.my_patients.no_active_patients') }}</h3>
+                    <p class="text-sm text-[#64748b]">{{ __('doctor.my_patients.no_active_desc') }}</p>
                     <a href="{{ route('doctor.patient-search') }}"
                        class="mt-4 inline-flex items-center px-4 py-2 bg-[#0066FF] text-white text-sm font-semibold rounded-xl hover:bg-[#0052cc] transition">
-                        Rechercher un patient
+                        {{ __('doctor.search_patient') }}
                     </a>
                 </div>
             @else
@@ -62,9 +62,9 @@
                                 </div>
                                 @if($access->expires_at)
                                     <div class="mt-3 text-[10px] text-white/70">
-                                        Accès expire le {{ $access->expires_at->format('d/m/Y') }}
+                                        {{ __('doctor.my_patients.access_expires') }} {{ $access->expires_at->format('d/m/Y') }}
                                         @if($access->isExpired())
-                                            <span class="ml-1 px-1.5 py-0.5 bg-red-500 rounded text-white">EXPIRÉ</span>
+                                            <span class="ml-1 px-1.5 py-0.5 bg-red-500 rounded text-white">{{ __('doctor.my_patients.expired') }}</span>
                                         @endif
                                     </div>
                                 @endif
@@ -83,14 +83,14 @@
                                         <svg class="w-4 h-4 text-red-400" fill="currentColor" viewBox="0 0 24 24">
                                             <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
                                         </svg>
-                                        Groupe sanguin : <strong class="text-[#1e293b]">{{ $patient->blood_group }}</strong>
+                                        {{ __('auth.blood_group') }} : <strong class="text-[#1e293b]">{{ $patient->blood_group }}</strong>
                                     </div>
                                 @endif
 
                                 {{-- Recent Exams --}}
                                 @if($patient->examRequests->count() > 0)
                                     <div class="pt-3 border-t border-[#f1f5f9]">
-                                        <p class="text-xs font-semibold text-[#94a3b8] uppercase tracking-wider mb-2">Dernières demandes</p>
+                                        <p class="text-xs font-semibold text-[#94a3b8] uppercase tracking-wider mb-2">{{ __('doctor.my_patients.recent_requests') }}</p>
                                         <div class="space-y-1.5">
                                             @foreach($patient->examRequests->take(3) as $req)
                                                 @php
@@ -102,11 +102,11 @@
                                                         'cancelled'  => 'bg-red-100 text-red-700',
                                                     ];
                                                     $statusLabels = [
-                                                        'pending'    => 'En attente',
-                                                        'assigned'   => 'Assigné',
-                                                        'processing' => 'En cours',
-                                                        'completed'  => 'Terminé',
-                                                        'cancelled'  => 'Annulé',
+                                                        'pending'    => __('doctor.status_pending'),
+                                                        'assigned'   => __('doctor.status_assigned'),
+                                                        'processing' => __('doctor.status_processing'),
+                                                        'completed'  => __('doctor.status_done'),
+                                                        'cancelled'  => __('doctor.status_cancelled'),
                                                     ];
                                                 @endphp
                                                 <div class="flex items-center justify-between text-xs">
@@ -116,7 +116,7 @@
                                                             {{ $statusLabels[$req->status] ?? $req->status }}
                                                         </span>
                                                         @if($req->status === 'completed')
-                                                            <a href="{{ route('doctor.print-exam-request', $req->id) }}?auto=1" class="text-[#0066FF] hover:text-[#0052cc] inline-flex items-center p-1" title="Imprimer le rapport PDF">
+                                                            <a href="{{ route('doctor.print-exam-request', $req->id) }}?auto=1" class="text-[#0066FF] hover:text-[#0052cc] inline-flex items-center p-1" title="{{ __('doctor.my_patients.print_pdf') }}">
                                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
                                                                 </svg>
@@ -134,11 +134,11 @@
                             <div class="px-5 pb-5 flex gap-2">
                                 <a href="{{ route('doctor.select-exams', $patient->id) }}"
                                    class="flex-1 text-center text-xs font-semibold py-2 px-3 bg-[#0066FF] text-white rounded-xl hover:bg-[#0052cc] transition">
-                                    Prescrire
+                                    {{ __('doctor.prescribe') }}
                                 </a>
                                 <a href="{{ route('doctor.medical-records', $patient->id) }}"
                                    class="flex-1 text-center text-xs font-semibold py-2 px-3 bg-white text-[#0066FF] border border-[#0066FF] rounded-xl hover:bg-[#f0f6ff] transition">
-                                    Dossier
+                                    {{ __('doctor.record') }}
                                 </a>
                             </div>
                         </div>

@@ -63,6 +63,7 @@ class FreshInstallTest extends TestCase
         $this->assertTrue(Schema::hasColumn('users', 'two_factor_confirmed_at'));
         $this->assertTrue(Schema::hasColumn('users', 'two_factor_code'));
         $this->assertTrue(Schema::hasColumn('users', 'two_factor_code_expires_at'));
+        $this->assertTrue(Schema::hasColumn('users', 'tour_completed_at'));
 
         // hashed 2FA codes (60-char bcrypt) must fit in the two_factor_code column
         $twoFactorCode = collect(Schema::getColumns('users'))

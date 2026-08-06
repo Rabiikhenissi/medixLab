@@ -1,5 +1,5 @@
 <x-layouts.auth>
-    <x-slot:title>{{ __('doctor.login_title') }} - {{ __('login.meta') }} - Medix eSanté</x-slot:title>
+    <x-slot:title>{{ __('doctor.login_title') }} - {{ __('login.meta') }} - {{ __('app.brand') }}</x-slot:title>
 
     <x-auth-card
         title="{{ __('doctor.login_title') }}"

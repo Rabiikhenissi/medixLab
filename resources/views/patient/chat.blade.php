@@ -1,5 +1,5 @@
 <x-layouts.patient>
-<x-slot:title>Chat — Medix eSanté</x-slot:title>
+<x-slot:title>{{ __('patient.chat.title') }} — Medix eSanté</x-slot:title>
 
 @section('styles')
 <style>
@@ -34,7 +34,7 @@
         </div>
         <div class="flex-1 min-w-0">
             <h2 class="text-sm font-bold text-[#1e293b] truncate">Dr. {{ $doctor->user->first_name }} {{ $doctor->user->last_name }}</h2>
-            <p class="text-[10px] text-[#94a3b8]">{{ $doctor->speciality ?? 'Médecin' }}</p>
+            <p class="text-[10px] text-[#94a3b8]">{{ $doctor->speciality ?? __('patient.chat.doctor_default') }}</p>
         </div>
         <span id="unreadBadge" class="hidden inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#0D9488] text-white text-[10px] font-bold">0</span>
     </div>
@@ -43,7 +43,7 @@
     <div id="chatMessages" class="chat-scroll overflow-y-auto px-4 py-4 space-y-3 bg-[#fafbfc] flex-1">
         <div class="text-center py-8">
             <div class="animate-spin w-5 h-5 border-2 border-[#0D9488] border-t-transparent rounded-full mx-auto mb-2"></div>
-            <p class="text-xs text-[#94a3b8]">Chargement des messages...</p>
+            <p class="text-xs text-[#94a3b8]">{{ __('patient.chat.loading_messages') }}</p>
         </div>
     </div>
 
@@ -51,7 +51,7 @@
     <div class="px-4 py-3 border-t border-[#e2e8f0] bg-white rounded-b-2xl">
         <form id="chatForm" class="flex items-center gap-2">
             @csrf
-            <input type="text" id="chatInput" placeholder="Écrivez votre message..."
+            <input type="text" id="chatInput" placeholder="{{ __('patient.chat.placeholder') }}"
                 class="flex-1 px-4 py-2.5 text-sm rounded-xl border border-[#e2e8f0] bg-[#f8fafc] focus:outline-none focus:ring-2 focus:ring-[#0D9488]/30 focus:border-[#0D9488] transition text-[#1e293b]"
                 autocomplete="off" maxlength="2000">
             <button type="submit" id="sendBtn"
@@ -94,7 +94,7 @@
                     <svg class="w-10 h-10 mx-auto mb-3 opacity-30" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                     </svg>
-                    <p class="text-xs text-[#94a3b8]">Commencez la conversation</p>
+                    <p class="text-xs text-[#94a3b8]">@lang('patient.chat.start_conversation')</p>
                 </div>`;
             return;
         }

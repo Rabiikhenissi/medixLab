@@ -1,6 +1,6 @@
 @extends('layouts.center')
 
-@section('title', 'Demandes d\'analyses - Medix eSanté')
+@section('title', __('center.exam_requests.title').' - Medix eSanté')
 
 @section('content')
 
@@ -9,12 +9,12 @@
     <!-- Header -->
     <div class="flex items-start justify-between">
         <div>
-            <h1 class="text-3xl font-bold text-[#1e293b]">Demandes d'analyses</h1>
-            <p class="text-sm text-[#64748b] mt-2">Consultez et prenez en charge les demandes d'analyses assignées à votre laboratoire.</p>
+            <h1 class="text-3xl font-bold text-[#1e293b]">{{ __('center.exam_requests.title') }}</h1>
+            <p class="text-sm text-[#64748b] mt-2">{{ __('center.exam_requests.subtitle') }}</p>
         </div>
         <div id="machineStatus" class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border bg-gray-50 border-gray-200 text-gray-400">
             <span class="w-2 h-2 rounded-full bg-gray-400 animate-pulse"></span>
-            Vérification machine...
+            {{ __('center.exam_requests.checking_machine') }}
         </div>
     </div>
 
@@ -29,25 +29,25 @@
     <!-- Search & Filter -->
     <form method="GET" class="flex flex-wrap items-end gap-3 mb-4">
         <div class="flex flex-col gap-1">
-            <label class="text-[10px] font-bold text-[#64748b] uppercase tracking-wider">Recherche</label>
-            <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Nom patient, médecin, n° demande..."
+            <label class="text-[10px] font-bold text-[#64748b] uppercase tracking-wider">{{ __('center.exam_requests.search') }}</label>
+            <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="{{ __('center.exam_requests.search_placeholder') }}"
                 class="border border-[#e2e8f0] rounded-xl px-4 py-2.5 text-sm text-[#1e293b] placeholder:text-[#94a3b8] focus:border-[#0066ff] focus:ring-1 focus:ring-[#0066ff] outline-none w-full sm:w-64">
         </div>
         <div class="flex flex-col gap-1">
-            <label class="text-[10px] font-bold text-[#64748b] uppercase tracking-wider">Statut</label>
+            <label class="text-[10px] font-bold text-[#64748b] uppercase tracking-wider">{{ __('common.status') }}</label>
             <select name="status" class="border border-[#e2e8f0] rounded-xl px-4 py-2.5 text-sm text-[#1e293b] focus:border-[#0066ff] focus:ring-1 focus:ring-[#0066ff] outline-none">
-                <option value="">Tous</option>
-                <option value="pending" {{ ($status ?? '') === 'pending' ? 'selected' : '' }}>En attente</option>
-                <option value="assigned" {{ ($status ?? '') === 'assigned' ? 'selected' : '' }}>Assignée</option>
-                <option value="collected" {{ ($status ?? '') === 'collected' ? 'selected' : '' }}>Collectée</option>
-                <option value="processing" {{ ($status ?? '') === 'processing' ? 'selected' : '' }}>En traitement</option>
-                <option value="completed" {{ ($status ?? '') === 'completed' ? 'selected' : '' }}>Terminée</option>
-                <option value="cancelled" {{ ($status ?? '') === 'cancelled' ? 'selected' : '' }}>Annulée</option>
+                <option value="">{{ __('common.all') }}</option>
+                <option value="pending" {{ ($status ?? '') === 'pending' ? 'selected' : '' }}>{{ __('center.status.pending') }}</option>
+                <option value="assigned" {{ ($status ?? '') === 'assigned' ? 'selected' : '' }}>{{ __('center.status.assigned') }}</option>
+                <option value="collected" {{ ($status ?? '') === 'collected' ? 'selected' : '' }}>{{ __('center.status.collected') }}</option>
+                <option value="processing" {{ ($status ?? '') === 'processing' ? 'selected' : '' }}>{{ __('center.status.processing') }}</option>
+                <option value="completed" {{ ($status ?? '') === 'completed' ? 'selected' : '' }}>{{ __('center.status.completed') }}</option>
+                <option value="cancelled" {{ ($status ?? '') === 'cancelled' ? 'selected' : '' }}>{{ __('center.status.cancelled') }}</option>
             </select>
         </div>
-        <button type="submit" class="bg-[#0066ff] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#0052cc] transition">Filtrer</button>
+        <button type="submit" class="bg-[#0066ff] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#0052cc] transition">{{ __('common.filter') }}</button>
         @if(($search ?? '') || ($status ?? ''))
-            <a href="{{ route('center.exam-requests') }}" class="text-sm text-[#64748b] hover:text-[#0066ff] font-medium px-3 py-2.5">Réinitialiser</a>
+            <a href="{{ route('center.exam-requests') }}" class="text-sm text-[#64748b] hover:text-[#0066ff] font-medium px-3 py-2.5">{{ __('center.exam_requests.reset') }}</a>
         @endif
     </form>
 
@@ -56,12 +56,12 @@
         <table class="w-full text-left border-collapse min-w-[700px]">
             <thead>
                 <tr class="bg-[#F8FAFC] border-b border-[#e2e8f0]">
-                    <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider">Patient</th>
-                    <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider">Médecin</th>
-                    <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider">Examens</th>
-                    <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider text-center">Statut</th>
-                    <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider">Date</th>
-                    <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider text-right">Actions</th>
+                    <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider">{{ __('doctor.patient_label') }}</th>
+                    <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider">{{ __('center.exam_requests.doctor') }}</th>
+                    <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider">{{ __('center.exam_requests.exams') }}</th>
+                    <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider text-center">{{ __('common.status') }}</th>
+                    <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider">{{ __('common.date') }}</th>
+                    <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider text-right">{{ __('common.actions') }}</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
@@ -70,7 +70,7 @@
                     <!-- Patient -->
                     <td class="p-4">
                         <div class="font-bold text-[#1e293b]">{{ $request->patient->user->first_name }} {{ $request->patient->user->last_name }}</div>
-                        <div class="text-xs text-[#64748b] mt-1">Demande #{{ $request->id }}</div>
+                        <div class="text-xs text-[#64748b] mt-1">{{ __('center.exam_requests.request_no', ['id' => $request->id]) }}</div>
                     </td>
 
                     <!-- Doctor -->
@@ -99,25 +99,25 @@
                         @if($request->approved_by_doctor)
                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/20">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            Validé
+                            {{ __('doctor.validated') }}
                         </span>
                         @elseif($request->status === 'assigned')
                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase bg-orange-50 text-orange-600 border border-orange-200">
-                            <span class="w-1.5 h-1.5 rounded-full bg-orange-500"></span>Assignée
+                            <span class="w-1.5 h-1.5 rounded-full bg-orange-500"></span>{{ __('center.status.assigned') }}
                         </span>
                         @elseif($request->status === 'processing')
                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase bg-purple-50 text-purple-700 border border-purple-200">
-                            <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>En traitement
+                            <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>{{ __('center.status.processing') }}
                         </span>
                         @else
                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase bg-emerald-50 text-emerald-600 border border-emerald-200">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Terminé
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>{{ __('center.status.done') }}
                         </span>
                         @endif
                     </td>
 
                     <!-- Date -->
-                    <td class="p-4 text-xs font-semibold text-[#64748b]">{{ $request->created_at->format('d/m/Y H:i') }}</td>
+                    <td class="p-4 text-xs font-semibold text-[#64748b]">{{ $request->created_at->format(__('common.datetime_format')) }}</td>
 
                     <!-- Actions -->
                     <td class="p-4">
@@ -127,7 +127,7 @@
                             <form method="POST" action="{{ route('center.exam-requests.claim',$request) }}">
                                 @csrf
                                 <button class="px-4 py-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white rounded-xl text-xs font-bold uppercase tracking-wider transition shadow-md shadow-purple-200">
-                                    Prendre en charge
+                                    {{ __('center.exam_requests.take_charge') }}
                                 </button>
                             </form>
                         @else
@@ -145,23 +145,23 @@
                                     @if($isLocked)
                                         @if($hasResult)
                                             <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg text-[10px] font-bold uppercase tracking-wider whitespace-nowrap">
-                                                ✓ Validé
+                                                {{ __('center.exam_requests.validated_badge') }}
                                             </span>
                                         @else
                                             <span class="px-2.5 py-1 bg-gray-50 text-gray-400 border border-gray-200 rounded-lg text-[10px] font-bold uppercase tracking-wider whitespace-nowrap">
-                                                En attente
+                                                {{ __('center.status.pending') }}
                                             </span>
                                         @endif
                                     @elseif($hasResult)
                                         <a href="{{ route('center.results.edit', $item->resultLabo) }}"
                                            class="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-[10px] font-bold uppercase tracking-wider transition whitespace-nowrap">
-                                            ✓ Résultat
+                                            {{ __('center.exam_requests.result') }}
                                         </a>
                                     @else
                                         <button type="button" onclick="toggleItemDropdown('{{ $dropdownId }}')"
                                             class="item-dropdown-trigger px-2.5 py-1 bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] border border-[#e2e8f0] hover:border-[#0066ff]/30 rounded-lg text-[10px] font-bold uppercase tracking-wider transition whitespace-nowrap flex items-center gap-1 cursor-pointer">
                                             <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z"/></svg>
-                                            Saisir
+                                            {{ __('center.exam_requests.enter') }}
                                         </button>
 
                                         <div id="{{ $dropdownId }}" class="hidden absolute right-0 top-full mt-1 w-56 bg-white border border-[#e2e8f0] rounded-xl shadow-2xl z-[100] overflow-visible">
@@ -171,8 +171,8 @@
                                                     <svg class="w-4 h-4 text-[#7C3AED]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                                 </span>
                                                 <div>
-                                                    <div class="font-bold">Saisir manuellement</div>
-                                                    <div class="text-[10px] text-[#94a3b8] font-normal">Entrer les résultats vous-même</div>
+                                                    <div class="font-bold">{{ __('center.exam_requests.manual_entry') }}</div>
+                                                    <div class="text-[10px] text-[#94a3b8] font-normal">{{ __('center.exam_requests.manual_entry_hint') }}</div>
                                                 </div>
                                             </a>
                                             <div class="border-t border-[#f1f5f9]"></div>
@@ -184,8 +184,8 @@
                                                         <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5"/></svg>
                                                     </span>
                                                     <div>
-                                                        <div class="font-bold machine-btn-text">Envoyer à la machine</div>
-                                                        <div class="text-[10px] text-[#94a3b8] font-normal machine-btn-sub">Analyse automatique HL7</div>
+                                                        <div class="font-bold machine-btn-text">{{ __('center.exam_requests.send_machine') }}</div>
+                                                        <div class="text-[10px] text-[#94a3b8] font-normal machine-btn-sub">{{ __('center.exam_requests.auto_hl7') }}</div>
                                                     </div>
                                                 </button>
                                             </form>
@@ -200,7 +200,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6" class="p-10 text-center text-gray-400 font-semibold">Aucune demande d'analyse assignée.</td>
+                    <td colspan="6" class="p-10 text-center text-gray-400 font-semibold">{{ __('center.exam_requests.empty') }}</td>
                 </tr>
             @endforelse
             </tbody>
@@ -218,11 +218,11 @@
             .then(data => {
                 const el = document.getElementById('machineStatus');
                 if (data.online) {
-                    const label = data.config_name || data.info?.machine || 'Machine connectée';
+                    const label = data.config_name || data.info?.machine || @json(__('center.exam_requests.machine_connected'));
                     el.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border bg-emerald-50 border-emerald-200 text-emerald-600';
                     el.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500"></span>' + label;
                 } else {
-                    const label = data.config_name ? data.config_name + ' (hors ligne)' : 'Machine hors ligne';
+                    const label = data.config_name ? data.config_name + @json(__('center.exam_requests.machine_offline_suffix')) : @json(__('center.exam_requests.machine_offline'));
                     el.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border bg-red-50 border-red-200 text-red-500';
                     el.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-500"></span>' + label;
                 }
@@ -230,7 +230,7 @@
             .catch(() => {
                 const el = document.getElementById('machineStatus');
                 el.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border bg-red-50 border-red-200 text-red-500';
-                el.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-500"></span>Machine hors ligne';
+                el.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-500"></span>' + @json(__('center.exam_requests.machine_offline'));
             });
     }
     checkMachineStatus();
@@ -267,8 +267,8 @@
         const form = btn.closest('form');
         const textEl = btn.querySelector('.machine-btn-text');
         const subEl = btn.querySelector('.machine-btn-sub');
-        if (textEl) textEl.textContent = 'Analyse en cours...';
-        if (subEl) subEl.textContent = 'Patientez...';
+        if (textEl) textEl.textContent = @json(__('center.exam_requests.analyzing'));
+        if (subEl) subEl.textContent = @json(__('center.exam_requests.please_wait'));
         btn.classList.add('opacity-60', 'cursor-wait');
         form.submit();
     }

@@ -1,15 +1,15 @@
 @extends('layouts.admin')
 
-@section('title', 'Gestion des Examens')
+@section('title', __('admin.exams.manage_title'))
 
 
 @section('page-title')
-Gestion des <span style="color:#0066ff;">Examens</span>
+{{ __('admin.exams.manage_prefix') }}<span style="color:#0066ff;">{{ __('admin.exams.title_plural') }}</span>
 @endsection
 
 
 @section('page-subtitle')
-Consultez et gérez le catalogue des examens médicaux.
+{{ __('admin.exams.page_subtitle') }}
 @endsection
 
 
@@ -30,7 +30,7 @@ Consultez et gérez le catalogue des examens médicaux.
 
     </svg>
 
-    Ajouter un examen
+    {{ __('admin.exams.add_title') }}
 
 </a>
 
@@ -66,7 +66,7 @@ Consultez et gérez le catalogue des examens médicaux.
 
 <div class="data-title">
 
-Catalogue des examens
+{{ __('admin.exams.exam_catalog') }}
 
 </div>
 
@@ -93,7 +93,7 @@ Catalogue des examens
 
 
 <label class="filter-label">
-Catégorie
+{{ __('admin.exams.category') }}
 </label>
 
 
@@ -102,43 +102,43 @@ Catégorie
 
 
 <option value="">
-Toutes
+{{ __('admin.exams.all_categories') }}
 </option>
 
 
 <option value="biochemistry"
 {{ request('category') == 'biochemistry' ? 'selected':'' }}>
-Biochimie
+{{ __('admin.exams.category_biochemistry') }}
 </option>
 
 
 <option value="hematology"
 {{ request('category') == 'hematology' ? 'selected':'' }}>
-Hématologie
+{{ __('admin.exams.category_hematology') }}
 </option>
 
 
 <option value="microbiology"
 {{ request('category') == 'microbiology' ? 'selected':'' }}>
-Microbiologie
+{{ __('admin.exams.category_microbiology') }}
 </option>
 
 
 <option value="immunology"
 {{ request('category') == 'immunology' ? 'selected':'' }}>
-Immunologie
+{{ __('admin.exams.category_immunology') }}
 </option>
 
 
 <option value="urinalysis"
 {{ request('category') == 'urinalysis' ? 'selected':'' }}>
-Urinalyse
+{{ __('admin.exams.category_urinalysis') }}
 </option>
 
 
 <option value="other"
 {{ request('category') == 'other' ? 'selected':'' }}>
-Autre
+{{ __('admin.exams.category_other') }}
 </option>
 
 
@@ -156,7 +156,7 @@ Autre
 
 
 <label class="filter-label">
-Recherche
+{{ __('common.search') }}
 </label>
 
 
@@ -164,7 +164,7 @@ Recherche
        name="search"
        value="{{ request('search') }}"
        class="filter-input"
-       placeholder="Nom ou code...">
+       placeholder="{{ __('admin.exams.search_placeholder') }}">
 
 
 </div>
@@ -186,7 +186,7 @@ Recherche
        {{ request('show_archived') ? 'checked':'' }}>
 
 
-Afficher les archives
+{{ __('admin.common.show_archived') }}
 
 
 </label>
@@ -204,7 +204,7 @@ Afficher les archives
 
 <button class="btn-filter">
 
-Filtrer
+{{ __('admin.common.filter') }}
 
 </button>
 
@@ -238,32 +238,32 @@ Filtrer
 
 
 <th>
-Code
+{{ __('admin.exams.code') }}
 </th>
 
 
 <th>
-Examen
+{{ __('admin.exams.exam') }}
 </th>
 
 
 <th>
-Catégorie
+{{ __('admin.exams.category') }}
 </th>
 
 
 <th>
-Valeur normale
+{{ __('admin.exams.normal_range') }}
 </th>
 
 
 <th>
-Statut
+{{ __('common.status') }}
 </th>
 
 
 <th>
-Actions
+{{ __('common.actions') }}
 </th>
 
 
@@ -372,7 +372,7 @@ Actions
 
 <span class="dot"></span>
 
-Archivé
+{{ __('admin.common.archived') }}
 
 </span>
 
@@ -384,7 +384,7 @@ Archivé
 
 <span class="dot"></span>
 
-Actif
+{{ __('admin.common.active') }}
 
 </span>
 
@@ -412,7 +412,7 @@ gap:6px;
 
 <a href="{{ route('admin.exams.edit',$exam) }}"
    class="table-action-btn"
-   title="Modifier">
+   title="{{ __('common.edit') }}">
 
 
 <svg fill="none"
@@ -438,7 +438,7 @@ d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07"/>
 <form method="POST"
       action="{{ route('admin.exams.archive',$exam) }}"
       style="display:inline;margin:0;"
-      onsubmit="return swalConfirmSubmit(this, '{{ $exam->is_archive ? 'Restaurer cet examen ?' : 'Archiver cet examen ?' }}')">
+      onsubmit="return swalConfirmSubmit(this, '{{ $exam->is_archive ? __('admin.exams.restore_confirm') : __('admin.exams.archive_confirm') }}')">
 
 
 @csrf
@@ -449,7 +449,7 @@ d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07"/>
 
 <button type="submit"
         class="table-action-btn {{ $exam->is_archive ? 'restore-btn' : 'archive-btn' }}"
-        title="{{ $exam->is_archive ? 'Restaurer' : 'Archiver' }}">
+        title="{{ $exam->is_archive ? __('admin.common.restore') : __('admin.common.archive') }}">
 
 @if($exam->is_archive)
     <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -468,10 +468,10 @@ d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07"/>
 </form>
 @if($exam->is_archive)
     <form action="{{ route('admin.exams.force-delete', $exam) }}" method="POST" style="display:inline;margin:0;"
-          onsubmit="return swalConfirmSubmit(this, 'Supprimer définitivement cet examen ? Cette action est irréversible.')">
+          onsubmit="return swalConfirmSubmit(this, '{{ __('admin.exams.force_delete_confirm') }}')">
         @csrf
         @method('DELETE')
-        <button type="submit" class="table-action-btn delete-btn" title="Supprimer définitivement">
+        <button type="submit" class="table-action-btn delete-btn" title="{{ __('admin.common.force_delete') }}">
             <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
             </svg>
@@ -511,12 +511,12 @@ d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07"/>
 
 
 <h3>
-Aucun examen trouvé
+{{ __('admin.exams.empty_title') }}
 </h3>
 
 
 <p>
-Ajoutez votre premier examen médical.
+{{ __('admin.exams.empty_hint') }}
 </p>
 
 

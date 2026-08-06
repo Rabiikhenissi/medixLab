@@ -1,22 +1,22 @@
 @extends('layouts.admin')
 
-@section('title', 'Gestion des Utilisateurs')
+@section('title', __('admin.users.manage_title'))
 
-@section('page-title', 'Utilisateurs')
-@section('page-subtitle', 'Gérez les comptes des médecins, des patients, des administrateurs et du personnel du centre.')
+@section('page-title', __('admin.users.title_plural'))
+@section('page-subtitle', __('admin.users.page_subtitle'))
 
 @section('header-actions')
     <a href="{{ route('admin.users.invite') }}" class="btn-add-exam" style="background:#0D9488;">
         <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/>
         </svg>
-        Inviter par Email
+        {{ __('admin.users.invite_button') }}
     </a>
     <a href="{{ route('admin.users.create') }}" class="btn-add-exam">
         <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
         </svg>
-        Créer un Utilisateur
+        {{ __('admin.users.add_title') }}
     </a>
 @endsection
 
@@ -24,7 +24,7 @@
     <div class="data-section anim anim-1">
         <!-- Table Header -->
         <div class="data-header">
-            <div class="data-title">Liste des Comptes Utilisateurs</div>
+            <div class="data-title">{{ __('admin.users.user_list') }}</div>
         </div>
 
         <!-- Filters -->
@@ -32,10 +32,10 @@
             <div class="filters-bar">
                 <!-- Group/Role Filter -->
                 <div>
-                    <span class="filter-label">Rôle / Groupe</span>
+                    <span class="filter-label">{{ __('admin.users.role_group') }}</span>
                     <div class="filter-group" style="position:relative;display:inline-block;">
                         <select name="group_id" class="filter-select" onchange="document.getElementById('filter-form').submit()">
-                            <option value="">Tous les rôles</option>
+                            <option value="">{{ __('admin.users.all_roles') }}</option>
                             @foreach($groups as $group)
                                 <option value="{{ $group->id }}" {{ $selectedGroup == $group->id ? 'selected' : '' }}>{{ $group->name }}</option>
                             @endforeach
@@ -46,12 +46,12 @@
 
                 <!-- Search -->
                 <div>
-                    <span class="filter-label">Recherche rapide</span>
+                    <span class="filter-label">{{ __('admin.users.quick_search') }}</span>
                     <div class="filter-group" style="position:relative;display:inline-block;">
                         <svg class="search-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
                         </svg>
-                        <input type="text" name="search" value="{{ $search }}" placeholder="Rechercher par nom, email, téléphone..." class="filter-input">
+                        <input type="text" name="search" value="{{ $search }}" placeholder="{{ __('admin.users.search_placeholder') }}" class="filter-input">
                     </div>
                 </div>
 
@@ -59,13 +59,13 @@
                 <div style="align-self:flex-end;">
                     <label class="filter-checkbox-wrap">
                         <input type="checkbox" name="show_archived" value="1" {{ $showArchived ? 'checked' : '' }} onchange="document.getElementById('filter-form').submit()">
-                        Afficher archivés
+                        {{ __('admin.users.show_archived') }}
                     </label>
                 </div>
 
                 <!-- Filter Button -->
                 <div style="align-self:flex-end;">
-                    <button type="submit" class="btn-filter">Filtrer</button>
+                    <button type="submit" class="btn-filter">{{ __('admin.common.filter') }}</button>
                 </div>
             </div>
         </form>
@@ -74,12 +74,12 @@
         <table class="data-table">
             <thead>
                 <tr>
-                    <th>Utilisateur</th>
-                    <th>Email</th>
-                    <th>Téléphone</th>
-                    <th>Rôle / Groupe</th>
-                    <th>Date d'inscription</th>
-                    <th style="text-align:right;">Actions</th>
+                    <th>{{ __('admin.users.user') }}</th>
+                    <th>{{ __('common.email') }}</th>
+                    <th>{{ __('admin.users.phone_label') }}</th>
+                    <th>{{ __('admin.users.role_group') }}</th>
+                    <th>{{ __('admin.users.registration_date') }}</th>
+                    <th style="text-align:right;">{{ __('common.actions') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -110,7 +110,7 @@
                                     {{ $user->group->name }}
                                 </span>
                             @else
-                                <span class="category-badge cat-other">Aucun</span>
+                                <span class="category-badge cat-other">{{ __('admin.users.no_group') }}</span>
                             @endif
                         </td>
                         <td style="color:#94a3b8;font-size:12px;white-space:nowrap;">
@@ -119,7 +119,7 @@
                         <td style="text-align:right;">
                             <div style="display:flex;align-items:center;justify-content:flex-end;gap:6px;">
                                 <!-- Edit Link -->
-                                <a href="{{ route('admin.users.edit', $user) }}" class="table-action-btn" title="Modifier">
+                                <a href="{{ route('admin.users.edit', $user) }}" class="table-action-btn" title="{{ __('common.edit') }}">
                                     <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/>
                                     </svg>
@@ -128,10 +128,10 @@
                                 <!-- Archive/Restore Form -->
                                 @if(auth()->id() !== $user->id)
                                     <form action="{{ route('admin.users.destroy', $user) }}" method="POST" style="display:inline;margin:0;"
-                                          onsubmit="return swalConfirmSubmit(this, '{{ $user->is_archive ? 'Restaurer cet utilisateur ?' : 'Archiver cet utilisateur ?' }}')">
+                                          onsubmit="return swalConfirmSubmit(this, '{{ $user->is_archive ? __('admin.users.restore_confirm') : __('admin.users.archive_confirm') }}')">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="table-action-btn {{ $user->is_archive ? 'restore-btn' : 'archive-btn' }}" title="{{ $user->is_archive ? 'Restaurer' : 'Archiver' }}">
+                                        <button type="submit" class="table-action-btn {{ $user->is_archive ? 'restore-btn' : 'archive-btn' }}" title="{{ $user->is_archive ? __('admin.users.restore') : __('admin.users.archive') }}">
                                             @if($user->is_archive)
                                                 <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"/></svg>
                                             @else
@@ -141,10 +141,10 @@
                                     </form>
                                     @if($user->is_archive)
                                         <form action="{{ route('admin.users.force-delete', $user) }}" method="POST" style="display:inline;margin:0;"
-                                              onsubmit="return swalConfirmSubmit(this, 'Supprimer définitivement cet utilisateur ? Cette action est irréversible.')">
+                                              onsubmit="return swalConfirmSubmit(this, '{{ __('admin.users.force_delete_confirm') }}')">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="table-action-btn delete-btn" title="Supprimer définitivement">
+                                            <button type="submit" class="table-action-btn delete-btn" title="{{ __('admin.users.force_delete') }}">
                                                 <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                                                 </svg>
@@ -152,7 +152,7 @@
                                         </form>
                                     @endif
                                 @else
-                                    <button class="table-action-btn" style="opacity: 0.3; cursor: not-allowed;" title="Vous ne pouvez pas archiver votre propre compte.">
+                                    <button class="table-action-btn" style="opacity: 0.3; cursor: not-allowed;" title="{{ __('admin.users.cannot_archive_self') }}">
                                         <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
                                     </button>
                                 @endif
@@ -168,8 +168,8 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
                                     </svg>
                                 </div>
-                                <h3>Aucun utilisateur trouvé</h3>
-                                <p>Créez un nouveau compte utilisateur pour commencer.</p>
+                                <h3>{{ __('admin.users.empty_title') }}</h3>
+                                <p>{{ __('admin.users.empty_hint') }}</p>
                             </div>
                         </td>
                     </tr>
@@ -182,9 +182,9 @@
             <div class="pagination-wrap">
                 <div style="display:flex;gap:4px;align-items:center;">
                     @if($users->onFirstPage())
-                        <span style="padding:6px 12px;background:#f1f5f9;color:#94a3b8;border-radius:6px;font-size:13px;cursor:not-allowed;">« Précédent</span>
+                        <span style="padding:6px 12px;background:#f1f5f9;color:#94a3b8;border-radius:6px;font-size:13px;cursor:not-allowed;">« {{ __('admin.common.previous') }}</span>
                     @else
-                        <a href="{{ $users->previousPageUrl() }}" style="padding:6px 12px;background:white;border:1px solid #e2e8f0;color:#374151;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none;">« Précédent</a>
+                        <a href="{{ $users->previousPageUrl() }}" style="padding:6px 12px;background:white;border:1px solid #e2e8f0;color:#374151;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none;">« {{ __('admin.common.previous') }}</a>
                     @endif
 
                     @foreach($users->getUrlRange(max(1, $users->currentPage()-2), min($users->lastPage(), $users->currentPage()+2)) as $page => $url)
@@ -196,9 +196,9 @@
                     @endforeach
 
                     @if($users->hasMorePages())
-                        <a href="{{ $users->nextPageUrl() }}" style="padding:6px 12px;background:white;border:1px solid #e2e8f0;color:#374151;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none;">Suivant »</a>
+                        <a href="{{ $users->nextPageUrl() }}" style="padding:6px 12px;background:white;border:1px solid #e2e8f0;color:#374151;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none;">{{ __('admin.common.next') }} »</a>
                     @else
-                        <span style="padding:6px 12px;background:#f1f5f9;color:#94a3b8;border-radius:6px;font-size:13px;cursor:not-allowed;">Suivant »</span>
+                        <span style="padding:6px 12px;background:#f1f5f9;color:#94a3b8;border-radius:6px;font-size:13px;cursor:not-allowed;">{{ __('admin.common.next') }} »</span>
                     @endif
                 </div>
             </div>

@@ -1,22 +1,22 @@
 @extends('layouts.center')
 
-@section('title', 'Suivi des Échantillons - Medix eSanté')
+@section('title', __('center.samples.index_title') . ' - Medix eSanté')
 
 @section('content')
 <div class="space-y-6 select-none">
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-3xl font-bold text-[#1e293b]">Suivi des Échantillons</h1>
-            <p class="text-sm text-[#64748b] mt-2">Gérez le suivi des échantillons par code-barres.</p>
+            <h1 class="text-3xl font-bold text-[#1e293b]">{{ __('center.samples.index_title') }}</h1>
+            <p class="text-sm text-[#64748b] mt-2">{{ __('center.samples.index_subtitle') }}</p>
         </div>
         <div class="flex gap-2">
             <a href="{{ route('center.samples.scan') }}" class="border border-[#e2e8f0] hover:bg-[#f8fafc] text-[#64748b] font-bold px-4 py-2.5 rounded-xl text-xs transition flex items-center gap-1.5">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z"/></svg>
-                Scanner
+                {{ __('center.samples.scan') }}
             </a>
             <a href="{{ route('center.samples.create') }}" class="bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold px-4 py-2.5 rounded-xl text-xs uppercase tracking-wider shadow-md transition flex items-center gap-1.5">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                Nouvel Échantillon
+                {{ __('center.samples.new') }}
             </a>
         </div>
     </div>
@@ -29,14 +29,14 @@
         <table class="w-full text-left border-collapse min-w-[800px]">
             <thead>
                 <tr class="bg-[#F8FAFC]/80 border-b border-[#e2e8f0]/80">
-                    <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider">Code</th>
-                    <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider">Patient</th>
-                    <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider">Examen</th>
-                    <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider">Type</th>
-                    <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider text-center">Statut</th>
-                    <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider text-center">Emplacement</th>
-                    <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider">Date</th>
-                    <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider text-right">Actions</th>
+                    <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider">{{ __('center.code') }}</th>
+                    <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider">{{ __('doctor.patient_label') }}</th>
+                    <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider">{{ __('center.exam') }}</th>
+                    <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider">{{ __('center.type') }}</th>
+                    <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider text-center">{{ __('common.status') }}</th>
+                    <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider text-center">{{ __('center.samples.location') }}</th>
+                    <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider">{{ __('common.date') }}</th>
+                    <th class="p-4 text-[10px] font-bold text-[#64748b] uppercase tracking-wider text-right">{{ __('common.actions') }}</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 text-sm">
@@ -53,14 +53,14 @@
                         </span>
                     </td>
                     <td class="p-4 text-center text-[#64748b] text-xs">{{ $sample->storage_location ?? '-' }}</td>
-                    <td class="p-4 text-[#64748b] text-xs">{{ $sample->created_at->format('d/m/Y') }}</td>
+                    <td class="p-4 text-[#64748b] text-xs">{{ $sample->created_at->format(__('center.date_format')) }}</td>
                     <td class="p-4 text-right">
-                        <a href="{{ route('center.samples.show', $sample->id) }}" class="text-[#7C3AED] hover:text-[#5B21B6] font-bold text-xs">Voir</a>
-                        <a href="{{ route('center.samples.barcode', $sample->id) }}" target="_blank" class="text-[#64748b] hover:text-[#1e293b] font-bold text-xs ml-2">Code-barres</a>
+                        <a href="{{ route('center.samples.show', $sample->id) }}" class="text-[#7C3AED] hover:text-[#5B21B6] font-bold text-xs">{{ __('common.view') }}</a>
+                        <a href="{{ route('center.samples.barcode', $sample->id) }}" target="_blank" class="text-[#64748b] hover:text-[#1e293b] font-bold text-xs ml-2">{{ __('center.samples.barcode') }}</a>
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="8" class="p-8 text-center text-[#94a3b8]">Aucun échantillon.</td></tr>
+                <tr><td colspan="8" class="p-8 text-center text-[#94a3b8]">{{ __('center.samples.empty') }}</td></tr>
                 @endforelse
             </tbody>
         </table>

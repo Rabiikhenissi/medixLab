@@ -14,7 +14,6 @@ class Group extends Model
     /** The profile tables a group's users can belong to. */
     public const ROLE_TABLES = ['admin', 'doctor', 'patient', 'staff'];
 
-
     protected function casts(): array
     {
         return [

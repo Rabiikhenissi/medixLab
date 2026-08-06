@@ -1,5 +1,5 @@
 <x-layouts.doctor>
-    <x-slot:title>Rechercher un Patient - Medix eSanté</x-slot:title>
+    <x-slot:title>{{ __('doctor.patient_search_title') }} - {{ __('app.brand') }}</x-slot:title>
 
     @section('content')
     <div class="w-full max-w-[620px] mx-auto">
@@ -14,8 +14,8 @@
                         </svg>
                     </div>
                     <div>
-                        <h2 class="text-xl font-bold text-[#1e293b]">Rechercher un Patient</h2>
-                        <p class="text-xs text-[#64748b] mt-0.5">Scannez le QR ou entrez le code patient</p>
+                        <h2 class="text-xl font-bold text-[#1e293b]">{{ __('doctor.patient_search_title') }}</h2>
+                        <p class="text-xs text-[#64748b] mt-0.5">{{ __('doctor.patient_search.subtitle') }}</p>
                     </div>
                 </div>
                 <a
@@ -25,7 +25,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
                     </svg>
-                    Tableau de Bord
+                    {{ __('doctor.dashboard.label') }}
                 </a>
             </div>
 
@@ -36,7 +36,7 @@
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
                     </svg>
                     <div>
-                        <h3 class="text-sm font-bold text-red-800">Erreur</h3>
+                        <h3 class="text-sm font-bold text-red-800">{{ __('doctor.error') }}</h3>
                         @foreach ($errors->all() as $error)
                             <p class="text-sm text-red-700 mt-1">{{ $error }}</p>
                         @endforeach
@@ -57,7 +57,7 @@
             <form id="patientSearchForm" class="space-y-5">
                 @csrf
                 <div>
-                    <label class="block text-xs font-bold text-[#1e293b] mb-2 uppercase tracking-wider">Code Patient</label>
+                    <label class="block text-xs font-bold text-[#1e293b] mb-2 uppercase tracking-wider">{{ __('doctor.patient_search.code_label') }}</label>
                     <div class="relative">
                         <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#0066FF]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
@@ -66,13 +66,13 @@
                             type="text"
                             name="patient_code"
                             id="patient_code"
-                            placeholder="Entrez ou scannez le code patient"
+                            placeholder="{{ __('doctor.patient_search.placeholder') }}"
                             class="w-full pl-12 pr-4 py-3 border border-[#e2e8f0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0066FF]/20 focus:border-[#0066FF] transition text-[#1e293b] bg-[#F8FAFC]"
                             autocomplete="off"
                             required
                         />
                     </div>
-                    <p class="text-xs text-[#94a3b8] mt-2">Utilisez votre lecteur QR ou entrez le code directement</p>
+                    <p class="text-xs text-[#94a3b8] mt-2">{{ __('doctor.patient_search.hint') }}</p>
                 </div>
 
                 <div class="flex gap-3">
@@ -83,7 +83,7 @@
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
-                        Rechercher
+                        {{ __('common.search') }}
                     </button>
                     <a
                         href="{{ route('doctor.dashboard') }}"
@@ -92,7 +92,7 @@
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
                         </svg>
-                        Retour
+                        {{ __('common.back') }}
                     </a>
                 </div>
             </form>
@@ -100,7 +100,7 @@
             {{-- Loading --}}
             <div id="loadingIndicator" class="hidden mt-6 flex items-center justify-center gap-3 p-4 bg-blue-50 border border-blue-200 rounded-xl">
                 <div class="animate-spin rounded-full h-5 w-5 border-2 border-[#0066FF] border-t-transparent"></div>
-                <span class="text-sm font-semibold text-[#0066FF]">Recherche en cours...</span>
+                <span class="text-sm font-semibold text-[#0066FF]">{{ __('doctor.patient_search.searching') }}</span>
             </div>
 
             {{-- Patient Found Section --}}
@@ -131,7 +131,7 @@
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/>
                         </svg>
-                        Demander l'Accès au Patient
+                        {{ __('doctor.request_access') }}
                     </button>
 
                     <div id="accessGrantedMessage" class="hidden p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
@@ -140,8 +140,8 @@
                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                             </svg>
                             <div>
-                                <p class="text-sm font-bold text-emerald-800">Accès autorisé ✓</p>
-                                <p class="text-xs text-emerald-700 mt-0.5">Vous pouvez maintenant prescrire des examens.</p>
+                                <p class="text-sm font-bold text-emerald-800">{{ __('doctor.access_granted') }} ✓</p>
+                                <p class="text-xs text-emerald-700 mt-0.5">{{ __('doctor.access_granted_now') }}</p>
                             </div>
                         </div>
                     </div>
@@ -152,8 +152,8 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                             <div>
-                                <p class="text-sm font-bold text-amber-800">En attente de confirmation</p>
-                                <p class="text-xs text-amber-700 mt-0.5">Votre demande a été envoyée au patient.</p>
+                                <p class="text-sm font-bold text-amber-800">{{ __('doctor.access_pending_confirm') }}</p>
+                                <p class="text-xs text-amber-700 mt-0.5">{{ __('doctor.access_pending_sent') }}</p>
                             </div>
                         </div>
                     </div>
@@ -166,7 +166,7 @@
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                         </svg>
-                        Prescrire des Examens
+                        {{ __('doctor.prescribe_exams') }}
                     </button>
 
                     <button
@@ -177,7 +177,7 @@
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
-                        Nouvelle Recherche
+                        {{ __('doctor.patient_search.new_search') }}
                     </button>
                 </div>
             </div>
@@ -235,7 +235,7 @@
 
                     patientAvatarEl.textContent  = initials;
                     patientNameEl.textContent    = `${firstName} ${lastName}`;
-                    patientCodeBadge.textContent = `Code: ${data.patient.patient_code}`;
+                    patientCodeBadge.textContent = `@lang('doctor.code_label') ${data.patient.patient_code}`;
                     patientEmailEl.textContent   = `✉ ${data.patient.user.email}`;
                     patientPhoneEl.textContent   = `☎ ${data.patient.user.phone}`;
 
@@ -261,16 +261,16 @@
                         proceedToExamsBtn.classList.add('hidden');
                         accessGrantedMsg.classList.add('hidden');
                         accessPendingMsg.classList.add('hidden');
-                        showToast('Vous êtes bloqué par ce patient.', 'error');
+                        showToast("@lang('doctor.blocked_by_patient')", 'error');
                     }
 
                     patientFoundSection.classList.remove('hidden');
                 } else {
-                    showToast(data.message || 'Patient non trouvé', 'error');
+                    showToast(data.message || "@lang('doctor.patient_not_found')", 'error');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                showToast('Une erreur est survenue lors de la recherche.', 'error');
+                showToast("@lang('doctor.search_error_generic')", 'error');
             } finally {
                 loadingIndicator.classList.add('hidden');
             }
@@ -278,7 +278,7 @@
 
         requestAccessBtn.addEventListener('click', async () => {
             requestAccessBtn.disabled = true;
-            requestAccessBtn.innerHTML = '<svg class="w-5 h-5 animate-spin flex-shrink-0" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Envoi en cours...';
+            requestAccessBtn.innerHTML = '<svg class="w-5 h-5 animate-spin flex-shrink-0" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> @lang('doctor.sending')';
 
             try {
                 const response = await fetch('{{ route('doctor.request-access') }}', {
@@ -300,25 +300,25 @@
                         proceedToExamsBtn.onclick = () => {
                             window.location.href = `/doctor/exams-selection/${currentPatientId}`;
                         };
-                        showToast('Accès autorisé !', 'success');
+                        showToast("@lang('doctor.access_granted')", 'success');
                     } else {
                         requestAccessBtn.classList.add('hidden');
                         accessPendingMsg.classList.remove('hidden');
-                        showToast('Demande envoyée au patient', 'success');
+                        showToast("@lang('doctor.request_sent_patient')", 'success');
                     }
                 } else {
-                    if (data.message && data.message.includes('déjà')) {
+                    if (data.message && data.message.includes("@lang('doctor.already')")) {
                         requestAccessBtn.classList.add('hidden');
                         accessPendingMsg.classList.remove('hidden');
                     } else {
-                        showToast(data.message || 'Erreur', 'error');
+                        showToast(data.message || "@lang('doctor.error')", 'error');
                         requestAccessBtn.disabled = false;
-                        requestAccessBtn.innerHTML = '<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg> Demander l\'Accès au Patient';
+                        requestAccessBtn.innerHTML = '<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg> @lang('doctor.request_access')';
                     }
                 }
             } catch (error) {
                 console.error('Error:', error);
-                showToast('Une erreur est survenue.', 'error');
+                showToast("@lang('doctor.error_retry')", 'error');
                 requestAccessBtn.disabled = false;
             }
         });
@@ -328,7 +328,7 @@
             patientFoundSection.classList.add('hidden');
             currentPatientId = null;
             requestAccessBtn.disabled = false;
-            requestAccessBtn.innerHTML = '<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg> Demander l\'Accès au Patient';
+            requestAccessBtn.innerHTML = '<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg> @lang('doctor.request_access')';
             patientCodeInput.focus();
         });
 

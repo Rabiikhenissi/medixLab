@@ -1,16 +1,16 @@
 @extends('layouts.admin')
 
-@section('title', 'Gestion des Modules & Actions')
+@section('title', __('admin.features.index_title'))
 
-@section('page-title', 'Gestion des Modules')
-@section('page-subtitle', 'Configurez les modules (fonctionnalites) et associez-leur des actions de securite.')
+@section('page-title', __('admin.features.manage_title'))
+@section('page-subtitle', __('admin.features.page_subtitle'))
 
 @section('header-actions')
     <a href="{{ route('admin.features.create') }}" class="btn-add-exam">
         <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
         </svg>
-        Ajouter un Module
+        {{ __('admin.features.add_title') }}
     </a>
 @endsection
 
@@ -18,7 +18,7 @@
     <div class="data-section anim anim-1">
         <!-- Table Header -->
         <div class="data-header">
-            <div class="data-title">Liste des Modules du Systeme</div>
+            <div class="data-title">{{ __('admin.features.module_list') }}</div>
         </div>
 
         <!-- Filters -->
@@ -26,7 +26,7 @@
             <div class="filters-bar">
                 <!-- Search -->
                 <div>
-                    <span class="filter-label">Recherche rapide</span>
+                    <span class="filter-label">{{ __('admin.common.quick_search') }}</span>
                     <div class="filter-group" style="position:relative;display:inline-block;">
                         <svg class="search-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
                             style="position:absolute;left:10px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:#94a3b8;pointer-events:none;">
@@ -34,7 +34,7 @@
                                 d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                         </svg>
                         <input type="text" name="search" value="{{ $search }}"
-                            placeholder="Rechercher par nom, code..." class="filter-input" style="padding-left:36px;">
+                            placeholder="{{ __('admin.features.search_placeholder') }}" class="filter-input" style="padding-left:36px;">
                     </div>
                 </div>
 
@@ -43,13 +43,13 @@
                     <label class="filter-checkbox-wrap">
                         <input type="checkbox" name="show_archived" value="1" {{ $showArchived ? 'checked' : '' }}
                             onchange="document.getElementById('filter-form').submit()">
-                        Afficher archives
+                        {{ __('admin.common.show_archived') }}
                     </label>
                 </div>
 
                 <!-- Filter Button -->
                 <div style="align-self:flex-end;">
-                    <button type="submit" class="btn-filter">Rechercher</button>
+                    <button type="submit" class="btn-filter">{{ __('common.search') }}</button>
                 </div>
             </div>
         </form>
@@ -58,14 +58,14 @@
         <table class="data-table">
             <thead>
                 <tr>
-                    <th style="width: 80px;">Ordre</th>
-                    <th>Code de securite</th>
-                    <th>Nom du module</th>
-                    <th>Route de navigation</th>
-                    <th style="width: 70px; text-align: center;">Icone</th>
-                    <th>Actions associees</th>
-                    <th>Statut</th>
-                    <th style="text-align:right;">Actions</th>
+                    <th style="width: 80px;">{{ __('admin.features.module_order') }}</th>
+                    <th>{{ __('admin.features.module_code') }}</th>
+                    <th>{{ __('admin.features.module_name') }}</th>
+                    <th>{{ __('admin.features.navigation_route') }}</th>
+                    <th style="width: 70px; text-align: center;">{{ __('admin.features.icon') }}</th>
+                    <th>{{ __('admin.features.actions_associated') }}</th>
+                    <th>{{ __('common.status') }}</th>
+                    <th style="text-align:right;">{{ __('common.actions') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -82,7 +82,7 @@
                             <div class="exam-name">{{ $feature->name }}</div>
                         </td>
                         <td style="font-family: monospace; font-size: 12px; color: #475569;">
-                            {{ $feature->route_name ?? '— (Aucune)' }}
+                            {{ $feature->route_name ?? __('admin.features.navigation_route_none') }}
                         </td>
                         <td style="text-align: center; color: #0066ff;">
                             @if ($feature->icon)
@@ -94,29 +94,29 @@
                                 </div>
                             @else
                                 <span style="color:#94a3b8; font-size:12px;">
-                                    Aucune
+                                    {{ __('admin.features.empty_icon') }}
                                 </span>
                             @endif
                         </td>
                         <td>
                             <span class="category-badge cat-other" style="font-weight: 700;">
-                                {{ $feature->actions_count }} action(s)
+                                {{ __('admin.features.actions_count', ['count' => $feature->actions_count]) }}
                             </span>
                         </td>
                         <td>
                             @if ($feature->is_archive)
-                                <span class="status-badge status-archived"><span class="dot"></span>Archive</span>
+                                <span class="status-badge status-archived"><span class="dot"></span>{{ __('admin.common.archived') }}</span>
                             @elseif ($feature->is_sidebar)
-                                <span class="status-badge status-active"><span class="dot"></span>Active</span>
+                                <span class="status-badge status-active"><span class="dot"></span>{{ __('admin.common.active') }}</span>
                             @else
-                                <span class="status-badge status-inactive"><span class="dot"></span>Inactive</span>
+                                <span class="status-badge status-inactive"><span class="dot"></span>{{ __('admin.common.inactive') }}</span>
                             @endif
                         </td>
                         <td style="text-align:right;">
                             <div style="display:flex;align-items:center;justify-content:flex-end;gap:6px;">
                                 <!-- Edit Link -->
                                 <a href="{{ route('admin.features.edit', $feature) }}" class="table-action-btn"
-                                    title="Modifier">
+                                    title="{{ __('common.edit') }}">
                                     <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                             d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
@@ -126,12 +126,12 @@
                                 <!-- Archive/Restore Form -->
                                 <form action="{{ route('admin.features.destroy', $feature) }}" method="POST"
                                     style="display:inline;margin:0;"
-                                    onsubmit="return swalConfirmSubmit(this, '{{ $feature->is_archive ? 'Restaurer ce module ?' : 'Archiver ce module ?' }}')">
+                                    onsubmit="return swalConfirmSubmit(this, '{{ $feature->is_archive ? __('admin.features.restore_confirm') : __('admin.features.archive_confirm') }}')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit"
                                         class="table-action-btn {{ $feature->is_archive ? 'restore-btn' : 'archive-btn' }}"
-                                        title="{{ $feature->is_archive ? 'Restaurer' : 'Archiver' }}">
+                                        title="{{ $feature->is_archive ? __('admin.common.restore') : __('admin.common.archive') }}">
                                         @if ($feature->is_archive)
                                             <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -147,10 +147,10 @@
                                 </form>
                                 @if($feature->is_archive)
                                     <form action="{{ route('admin.features.force-delete', $feature) }}" method="POST" style="display:inline;margin:0;"
-                                          onsubmit="return swalConfirmSubmit(this, 'Supprimer définitivement ce module ? Cette action est irréversible.')">
+                                          onsubmit="return swalConfirmSubmit(this, '{{ __('admin.features.force_delete_confirm') }}')">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="table-action-btn delete-btn" title="Supprimer définitivement">
+                                        <button type="submit" class="table-action-btn delete-btn" title="{{ __('admin.common.force_delete') }}">
                                             <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                                             </svg>
@@ -170,8 +170,8 @@
                                             d="M10.34 15.84c-.68-.34-1.16-.94-1.34-1.68m8.32.22c-.68.34-1.34.22-1.9-.3M9 10.5h.008v.008H9V10.5zm6 0h.008v.008H15V10.5zM12 21a9 9 0 110-18 9 9 0 010 18z" />
                                     </svg>
                                 </div>
-                                <h3>Aucun module enregistre</h3>
-                                <p>Utilisez le bouton "Ajouter un Module" pour commencer.</p>
+                                <h3>{{ __('admin.features.empty_title') }}</h3>
+                                <p>{{ __('admin.features.empty_hint') }}</p>
                             </div>
                         </td>
                     </tr>
@@ -186,11 +186,11 @@
                     @if ($features->onFirstPage())
                         <span
                             style="padding:6px 12px;background:#f1f5f9;color:#94a3b8;border-radius:6px;font-size:13px;cursor:not-allowed;">«
-                            Precedent</span>
+                            {{ __('admin.common.previous') }}</span>
                     @else
                         <a href="{{ $features->previousPageUrl() }}"
                             style="padding:6px 12px;background:white;border:1px solid #e2e8f0;color:#374151;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none;">«
-                            Precedent</a>
+                            {{ __('admin.common.previous') }}</a>
                     @endif
 
                     @foreach ($features->getUrlRange(max(1, $features->currentPage() - 2), min($features->lastPage(), $features->currentPage() + 2)) as $page => $url)
@@ -205,11 +205,11 @@
 
                     @if ($features->hasMorePages())
                         <a href="{{ $features->nextPageUrl() }}"
-                            style="padding:6px 12px;background:white;border:1px solid #e2e8f0;color:#374151;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none;">Suivant
+                            style="padding:6px 12px;background:white;border:1px solid #e2e8f0;color:#374151;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none;">{{ __('admin.common.next') }}
                             »</a>
                     @else
                         <span
-                            style="padding:6px 12px;background:#f1f5f9;color:#94a3b8;border-radius:6px;font-size:13px;cursor:not-allowed;">Suivant
+                            style="padding:6px 12px;background:#f1f5f9;color:#94a3b8;border-radius:6px;font-size:13px;cursor:not-allowed;">{{ __('admin.common.next') }}
                             »</span>
                     @endif
                 </div>

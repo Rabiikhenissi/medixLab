@@ -1,12 +1,12 @@
 @extends('layouts.center')
 
-@section('title', 'Scanner Échantillon - Medix eSanté')
+@section('title', __('center.samples.scan_title') . ' - Medix eSanté')
 
 @section('content')
 <div class="max-w-2xl mx-auto space-y-6 select-none">
     <div>
-        <h1 class="text-3xl font-bold text-[#1e293b]">Scanner un Échantillon</h1>
-        <p class="text-sm text-[#64748b] mt-2">Scannez le code-barres pour retrouver l'échantillon.</p>
+        <h1 class="text-3xl font-bold text-[#1e293b]">{{ __('center.samples.scan_title') }}</h1>
+        <p class="text-sm text-[#64748b] mt-2">{{ __('center.samples.scan_subtitle') }}</p>
     </div>
 
     <div class="bg-white border border-[#e2e8f0] rounded-2xl p-8 text-center">
@@ -19,25 +19,25 @@
             </div>
 
             <div class="flex justify-center gap-2 mb-6">
-                <button type="button" id="tabManual" class="tab-btn px-4 py-2 rounded-xl text-xs font-bold transition bg-[#7C3AED] text-white">Saisie manuelle</button>
-                <button type="button" id="tabCamera" class="tab-btn px-4 py-2 rounded-xl text-xs font-bold transition border border-[#e2e8f0] text-[#64748b]">Scanner caméra</button>
+                <button type="button" id="tabManual" class="tab-btn px-4 py-2 rounded-xl text-xs font-bold transition bg-[#7C3AED] text-white">{{ __('center.samples.manual_entry') }}</button>
+                <button type="button" id="tabCamera" class="tab-btn px-4 py-2 rounded-xl text-xs font-bold transition border border-[#e2e8f0] text-[#64748b]">{{ __('center.samples.camera_scan') }}</button>
             </div>
 
             <form id="scanForm" class="space-y-4">
                 @csrf
                 <div>
-                    <label class="text-[10px] font-bold text-[#64748b] uppercase tracking-wider">Code-barres</label>
-                    <input type="text" id="barcodeInput" name="code" placeholder="Scannez ou saisissez le code..." autofocus
+                    <label class="text-[10px] font-bold text-[#64748b] uppercase tracking-wider">{{ __('center.samples.barcode_label') }}</label>
+                    <input type="text" id="barcodeInput" name="code" placeholder="{{ __('center.samples.scan_placeholder') }}" autofocus
                         class="mt-1 w-full border-2 border-[#7C3AED] rounded-xl px-5 py-4 text-lg text-center font-mono font-bold focus:border-[#5B21B6] outline-none"
                         style="font-size: 24px; letter-spacing: 3px;">
                 </div>
-                <p class="text-xs text-[#94a3b8]">Scannez le code-barres ou saisissez-le manuellement.</p>
+                <p class="text-xs text-[#94a3b8]">{{ __('center.samples.scan_hint') }}</p>
             </form>
 
             <div id="cameraView" class="hidden mt-6">
                 <div id="cameraReader" class="mx-auto overflow-hidden rounded-2xl border-2 border-dashed border-[#e2e8f0]"></div>
-                <p id="cameraStatus" class="text-xs text-[#94a3b8] mt-3">Placez le code-barres devant la caméra. La recherche se lance automatiquement.</p>
-                <button type="button" id="cameraStopBtn" class="mt-3 border border-[#e2e8f0] hover:bg-[#f8fafc] text-[#64748b] font-bold px-4 py-2 rounded-xl text-xs transition">Arrêter la caméra</button>
+                <p id="cameraStatus" class="text-xs text-[#94a3b8] mt-3">{{ __('center.samples.place_barcode') }}</p>
+                <button type="button" id="cameraStopBtn" class="mt-3 border border-[#e2e8f0] hover:bg-[#f8fafc] text-[#64748b] font-bold px-4 py-2 rounded-xl text-xs transition">{{ __('center.samples.stop_camera') }}</button>
             </div>
 
             <div id="scanResult" class="hidden mt-6 p-6 rounded-2xl border"></div>
@@ -68,14 +68,14 @@
         result.innerHTML = `
             <div class="flex items-center justify-between">
                 <div class="text-left">
-                    <p class="text-xs text-[#64748b] uppercase font-bold tracking-wider">Échantillon trouvé</p>
+                    <p class="text-xs text-[#64748b] uppercase font-bold tracking-wider">${@json(__('center.samples.found'))}</p>
                     <p class="text-xl font-bold text-[#1e293b] mt-1">${data.sample_code}</p>
                     <p class="text-sm text-[#64748b]">${data.patient_name}</p>
                     <p class="text-sm text-[#64748b]">${data.exam} · ${data.material_type || ''}</p>
-                    <p class="text-sm">Statut: <span class="font-bold">${data.status}</span></p>
-                    <p class="text-sm">Emplacement: ${data.storage_location || '-'}</p>
+                    <p class="text-sm">${@json(__('center.samples.status_label'))} <span class="font-bold">${data.status}</span></p>
+                    <p class="text-sm">${@json(__('center.samples.location_label'))} ${data.storage_location || '-'}</p>
                 </div>
-                <a href="${data.show_url}" class="bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold px-4 py-2 rounded-xl text-xs transition">Voir détail</a>
+                <a href="${data.show_url}" class="bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold px-4 py-2 rounded-xl text-xs transition">${@json(__('center.samples.view_detail'))}</a>
             </div>
         `;
     }
@@ -93,7 +93,7 @@
 
             if (data.error) {
                 renderError(data.error);
-                if (wasCamera) cameraStatus.textContent = 'Scannez à nouveau (code non trouvé).';
+                if (wasCamera) cameraStatus.textContent = @json(__('center.samples.scan_again'));
                 return;
             }
 
@@ -107,7 +107,7 @@
         })
         .catch(() => {
             pendingCameraScan = false;
-            renderError('Erreur de recherche. Réessayez.');
+            renderError(@json(__('center.samples.lookup_error')));
         });
     }
 
@@ -136,7 +136,7 @@
 
         pendingCameraScan = true;
         input.value = code;
-        cameraStatus.textContent = 'Code lu: ' + code + ' — recherche…';
+        cameraStatus.textContent = @json(__('center.samples.code_read')).replace(':code', code);
         performLookup(code);
     }
 
@@ -146,13 +146,13 @@
             try { await html5Qr.stop(); } catch (e) {}
         }
         cameraView.classList.add('hidden');
-        cameraStatus.textContent = 'Placez le code-barres devant la caméra. La recherche se lance automatiquement.';
+        cameraStatus.textContent = @json(__('center.samples.place_barcode'));
     }
 
     async function startCamera() {
         if (cameraRunning) return;
         if (!window.Html5Qrcode) {
-            renderError('La bibliothèque de scan caméra n\'a pas pu être chargée.');
+            renderError(@json(__('center.samples.lib_not_loaded')));
             return;
         }
 
@@ -165,7 +165,7 @@
         document.getElementById('cameraReader').innerHTML = '';
 
         cameraView.classList.remove('hidden');
-        cameraStatus.textContent = 'Connexion à la caméra…';
+        cameraStatus.textContent = @json(__('center.samples.camera_connecting'));
 
         try {
             html5Qr = new Html5Qrcode('cameraReader', { formatsToSupport: [Html5QrcodeSupportedFormats.CODE_128] });
@@ -179,9 +179,9 @@
             cameraStatus.textContent = '';
         } catch (err) {
             cameraRunning = false;
-            cameraStatus.textContent = 'Impossible d\'accéder à la caméra: ' + err + ' — réessayez ou utilisez la saisie manuelle.';
+            cameraStatus.textContent = @json(__('center.samples.camera_error')).replace(':err', err);
             result.className = 'mt-6 p-6 rounded-2xl border border-red-200 bg-red-50 text-left';
-            result.innerHTML = `<p class="text-sm font-bold text-red-600">Impossible d\'accéder à la caméra: ${err}</p>`;
+            result.innerHTML = `<p class="text-sm font-bold text-red-600">${@json(__('center.samples.camera_error_short')).replace(':err', err)}</p>`;
             cameraView.classList.add('hidden');
         }
     }
