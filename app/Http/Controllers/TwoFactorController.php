@@ -63,7 +63,30 @@ class TwoFactorController extends Controller
 
         $user->update(['last_login_at' => now()]);
 
-        return redirect($intended);
+        $redirect = redirect($intended);
+
+        if ($request->filled('trust_device')) {
+            $token = $this->twoFactor->trustDevice(
+                $user,
+                $request->cookie(TwoFactorService::TRUST_COOKIE_NAME),
+            );
+
+            $redirect->withCookie(
+                cookie(
+                    TwoFactorService::TRUST_COOKIE_NAME,
+                    $token,
+                    TwoFactorService::TRUST_DEVICE_DAYS * 24 * 60,
+                    '/',
+                    null,
+                    $request->isSecure(),
+                    true,
+                    false,
+                    'Lax',
+                )
+            );
+        }
+
+        return $redirect;
     }
 
     /**
@@ -175,9 +198,14 @@ class TwoFactorController extends Controller
             'two_factor_confirmed_at' => null,
         ]);
         $this->twoFactor->clearCode($user);
+        $this->twoFactor->revokeAllDevices($user);
         $request->session()->forget('two_factor.setup.code_sent');
 
-        return back()->with('success', 'Authentification à deux facteurs désactivée.');
+        $response = back()->with('success', 'Authentification à deux facteurs désactivée.');
+
+        return $response->withCookie(
+            \Illuminate\Support\Facades\Cookie::forget(TwoFactorService::TRUST_COOKIE_NAME)
+        );
     }
 
     /** Resolve the pending challenge user from the stored payload, if valid. */

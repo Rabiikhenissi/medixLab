@@ -862,7 +862,7 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    showMessage(action === 'accepted' ? '@lang('patient.dashboard.access_accepted')' : '@lang('patient.dashboard.access_declined')', 'success');
+                    showMessage(action === 'accepted' ? @json(__('patient.dashboard.access_accepted')) : @json(__('patient.dashboard.access_declined')), 'success');
                     loadAccessRequests();
                     loadNotifications();
                     updateUnreadCount();

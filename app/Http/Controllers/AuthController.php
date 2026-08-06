@@ -49,7 +49,9 @@ class AuthController extends Controller
 
             // Two-factor challenge: do not authenticate yet, email a one-time
             // code, stash the pending login in the session and ask for the code.
-            if ($user->twoFactorEnabled()) {
+            // A previously trusted device skips the challenge entirely.
+            if ($user->twoFactorEnabled()
+                && ! $this->twoFactor->isTrustedDevice($user, $request->cookie(TwoFactorService::TRUST_COOKIE_NAME))) {
                 $intended = $user->admin
                     ? $this->safeIntended($request, 'admin.dashboard')
                     : $this->safeIntended($request, $role.'.dashboard');

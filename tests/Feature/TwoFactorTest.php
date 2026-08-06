@@ -4,10 +4,13 @@ namespace Tests\Feature;
 
 use App\Mail\TwoFactorCodeMail;
 use App\Models\Admin;
+use App\Models\TwoFactorDevice;
 use App\Models\User;
+use App\Services\TwoFactorService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Tests\CreatesUsers;
 use Tests\TestCase;
 
@@ -221,5 +224,104 @@ class TwoFactorTest extends TestCase
         ])->assertSessionHas('success');
 
         $this->assertFalse($user->fresh()->twoFactorEnabled());
+    }
+
+    public function test_login_with_valid_trusted_device_skips_the_challenge(): void
+    {
+        $doctor = $this->makeDoctor();
+        $this->enableTwoFactor($doctor['user']);
+
+        $token = Str::random(64);
+        TwoFactorDevice::create([
+            'user_id' => $doctor['user']->id,
+            'device_token' => $token,
+            'expires_at' => now()->addDays(30),
+        ]);
+
+        $this->withCookie(TwoFactorService::TRUST_COOKIE_NAME, $token)
+            ->post(route('doctor.login'), [
+                'email' => $doctor['user']->email,
+                'password' => 'password',
+            ])->assertRedirect(route('doctor.dashboard'));
+
+        $this->assertAuthenticatedAs($doctor['user']);
+        Mail::assertNothingSent();
+    }
+
+    public function test_expired_trusted_device_still_requires_the_challenge(): void
+    {
+        $doctor = $this->makeDoctor();
+        $this->enableTwoFactor($doctor['user']);
+
+        $token = Str::random(64);
+        TwoFactorDevice::create([
+            'user_id' => $doctor['user']->id,
+            'device_token' => $token,
+            'expires_at' => now()->subDay(),
+        ]);
+
+        $this->withCookie(TwoFactorService::TRUST_COOKIE_NAME, $token)
+            ->post(route('doctor.login'), [
+                'email' => $doctor['user']->email,
+                'password' => 'password',
+            ])->assertRedirect(route('two-factor.login'));
+
+        $this->assertGuest();
+    }
+
+    public function test_trust_device_checkbox_issues_cookie_and_skips_next_login(): void
+    {
+        $doctor = $this->makeDoctor();
+        $this->enableTwoFactor($doctor['user']);
+
+        $this->post(route('doctor.login'), [
+            'email' => $doctor['user']->email,
+            'password' => 'password',
+        ])->assertRedirect(route('two-factor.login'));
+
+        $response = $this->post(route('two-factor.verify'), [
+            'code' => $this->pendingCode($doctor['user']),
+            'trust_device' => '1',
+        ]);
+
+        $response->assertRedirect(route('doctor.dashboard'));
+        $response->assertCookie(TwoFactorService::TRUST_COOKIE_NAME);
+        $this->assertAuthenticatedAs($doctor['user']);
+
+        $token = TwoFactorDevice::where('user_id', $doctor['user']->id)->value('device_token');
+        $this->assertNotNull($token);
+
+        $this->app['auth']->guard()->logout();
+        $this->flushSession();
+
+        $this->withCookie(TwoFactorService::TRUST_COOKIE_NAME, $token)
+            ->post(route('doctor.login'), [
+                'email' => $doctor['user']->email,
+                'password' => 'password',
+            ])->assertRedirect(route('doctor.dashboard'));
+
+        $this->assertAuthenticatedAs($doctor['user']);
+
+        Mail::assertSent(TwoFactorCodeMail::class, 1);
+    }
+
+    public function test_disable_revokes_trusted_devices(): void
+    {
+        $doctor = $this->makeDoctor();
+        $user = $doctor['user'];
+        $this->enableTwoFactor($user);
+
+        $token = $this->app->make(TwoFactorService::class)->trustDevice($user);
+
+        $this->assertDatabaseHas('two_factor_devices', [
+            'user_id' => $user->id,
+            'device_token' => $token,
+        ]);
+
+        $this->actingAs($user)->post(route('profile.two-factor.disable'), [
+            'password' => 'password',
+        ])->assertSessionHas('success');
+
+        $this->assertDatabaseMissing('two_factor_devices', ['user_id' => $user->id]);
     }
 }
