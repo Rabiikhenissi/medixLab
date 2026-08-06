@@ -1734,6 +1734,8 @@
     "twofactor.resend_help": "Didn't receive anything? Check your spam folder, or",
     "twofactor.submit": "VERIFY",
     "twofactor.subtitle": "A 6-digit code was sent to your email address",
+    "twofactor.trust_device": "Trust this device",
+    "twofactor.trust_device_hint": "Skip this code for the next :days days on this browser",
     "twofactor.title": "Two-step verification",
     "verify.help": "Click the link in the email to activate your account and access your space.",
     "verify.meta_title": "Email verification - Medix eSanté",

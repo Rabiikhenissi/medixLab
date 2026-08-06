@@ -79,6 +79,23 @@
                     </div>
                 </div>
 
+                <label for="trust_device" class="group flex items-start gap-3 p-3.5 rounded-xl border border-[#e2e8f0] bg-gradient-to-r from-[#F8FAFC] to-[#F1F5F9] hover:border-[#0066FF]/30 hover:from-[#F0F7FF] hover:to-[#F8FAFC] transition-all duration-200 cursor-pointer select-none">
+                    <input
+                        type="checkbox"
+                        name="trust_device"
+                        id="trust_device"
+                        value="1"
+                        class="peer mt-0.5 w-4 h-4 accent-[#0066FF] cursor-pointer"
+                    />
+                    <span class="flex-1">
+                        <span class="block text-sm font-bold text-[#0f172a]">{{ __('twofactor.trust_device') }}</span>
+                        <span class="block text-xs text-[#64748b] font-medium mt-0.5">{{ __('twofactor.trust_device_hint', ['days' => 30]) }}</span>
+                    </span>
+                    <svg class="w-4 h-4 text-[#0066FF] mt-0.5 flex-shrink-0 opacity-0 group-hover:opacity-100 peer-checked:opacity-100 transition-opacity duration-200" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </label>
+
                 <button type="submit" class="w-full bg-gradient-to-r from-[#0066FF] to-[#0088FF] hover:from-[#0052CC] hover:to-[#0066CC] text-white rounded-xl py-3.5 px-5 text-sm font-bold tracking-wide transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-[#0066FF]/20 cursor-pointer flex items-center justify-center gap-2 active:scale-[0.98] shadow-lg shadow-[#0066FF]/20 hover:shadow-xl hover:shadow-[#0066FF]/30">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />

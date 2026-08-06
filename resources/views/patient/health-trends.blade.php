@@ -111,7 +111,7 @@
                     ? '<span class="text-blue-500 font-bold">@lang('patient.health_trends.trend_falling')</span>'
                     : '<span class="text-emerald-500 font-bold">@lang('patient.health_trends.trend_stable')</span>');
             const abnormalBadge = stats.abnormal_count > 0
-                ? '<span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-amber-50 text-amber-700 border border-amber-200">' + @lang('patient.health_trends.abnormal_count').replace(':n', stats.abnormal_count) + '</span>'
+                ? '<span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-amber-50 text-amber-700 border border-amber-200">' + @json(__('patient.health_trends.abnormal_count')).replace(':n', stats.abnormal_count) + '</span>'
                 : '';
 
             return `

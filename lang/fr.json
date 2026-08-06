@@ -1734,6 +1734,8 @@
     "twofactor.resend_help": "Vous n'avez rien reçu ? Pensez à vérifier vos spams, ou",
     "twofactor.submit": "VÉRIFIER",
     "twofactor.subtitle": "Un code à 6 chiffres a été envoyé à votre adresse email",
+    "twofactor.trust_device": "Se souvenir de cet appareil",
+    "twofactor.trust_device_hint": "Ignorez ce code pendant :days jours sur ce navigateur",
     "twofactor.title": "Vérification en deux étapes",
     "verify.help": "Cliquez sur le lien contenu dans l'email pour activer votre compte et accéder à votre espace.",
     "verify.meta_title": "Vérification de l'email - Medix eSanté",
