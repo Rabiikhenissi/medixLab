@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\AuditLogger;
 use App\Services\TwoFactorService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -62,6 +63,8 @@ class TwoFactorController extends Controller
         session()->forget('two_factor');
 
         $user->update(['last_login_at' => now()]);
+
+        AuditLogger::log('login', 'Connexion réussie (vérification en deux étapes)');
 
         $redirect = redirect($intended);
 
@@ -158,6 +161,8 @@ class TwoFactorController extends Controller
         $this->twoFactor->clearCode($user);
         $request->session()->forget('two_factor.setup.code_sent');
 
+        AuditLogger::log('2fa-enabled', 'Authentification à deux facteurs activée');
+
         return back()->with('success', 'Authentification à deux facteurs activée. À partir de maintenant, un code vous sera envoyé par email à chaque connexion.');
     }
 
@@ -200,6 +205,8 @@ class TwoFactorController extends Controller
         $this->twoFactor->clearCode($user);
         $this->twoFactor->revokeAllDevices($user);
         $request->session()->forget('two_factor.setup.code_sent');
+
+        AuditLogger::log('2fa-disabled', 'Authentification à deux facteurs désactivée');
 
         $response = back()->with('success', 'Authentification à deux facteurs désactivée.');
 

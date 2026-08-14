@@ -25,7 +25,13 @@ class ActivityLogController extends Controller
             ->orderBy('entity_type')
             ->pluck('entity_type');
 
-        return view('admin.activity', compact('logs', 'entities'));
+        $actions = AuditLog::select('action')
+            ->whereNotNull('action')
+            ->distinct()
+            ->orderBy('action')
+            ->pluck('action');
+
+        return view('admin.activity', compact('logs', 'entities', 'actions'));
     }
 
     /**

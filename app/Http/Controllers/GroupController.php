@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Feature;
 use App\Models\Group;
+use App\Services\AuditLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -108,6 +109,8 @@ class GroupController extends Controller
 
         $this->flushGroupPermissionCache($group);
 
+        AuditLogger::log('group-created', 'Création du rôle '.$group->name, 'Group', $group->id);
+
         // redirect back to the groups list
         return redirect()->route('admin.groups.index')->with('success', 'Rôle créé avec succès.');
     }
@@ -169,6 +172,8 @@ class GroupController extends Controller
 
         $this->flushGroupPermissionCache($group);
 
+        AuditLogger::log('group-updated', 'Modification du rôle '.$group->name, 'Group', $group->id);
+
         return redirect()->route('admin.groups.index')->with('success', 'Rôle mis à jour avec succès.');
     }
 
@@ -188,6 +193,13 @@ class GroupController extends Controller
         // Toggle archive status
         $group->update(['is_archive' => ! $group->is_archive]);
 
+        AuditLogger::log(
+            $group->is_archive ? 'group-archived' : 'group-restored',
+            ($group->is_archive ? 'Archivage' : 'Restauration').' du rôle '.$group->name,
+            'Group',
+            $group->id,
+        );
+
         $message = $group->is_archive
             ? 'Rôle archivé avec succès.'
             : 'Rôle restauré avec succès.';
@@ -206,7 +218,12 @@ class GroupController extends Controller
             return redirect()->route('admin.groups.index')->with('error', 'Impossible de supprimer ce rôle car il est attribué à des utilisateurs.');
         }
 
+        $name = $group->name;
+        $id = $group->id;
+
         $group->delete();
+
+        AuditLogger::log('group-deleted', 'Suppression définitive du rôle '.$name, 'Group', $id);
 
         return redirect()->route('admin.groups.index')->with('success', 'Rôle supprimé définitivement.');
     }
