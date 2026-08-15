@@ -992,7 +992,6 @@
                                 <div>
                                     <p class="text-sm font-bold text-[#1e293b]">Dr. ${doc.doctor_name}</p>
                                     <p class="text-[11px] text-[#64748b]">${doc.speciality || ''}</p>
-                                    ${doc.expires_at ? `<p class="text-[10px] text-[#94a3b8]">@lang('patient.dashboard.expires_on').replace(':date', doc.expires_at)</p>` : ''}
                                 </div>
                             </div>
                             <div class="flex items-center gap-2">

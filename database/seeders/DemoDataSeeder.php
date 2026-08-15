@@ -45,7 +45,6 @@ class DemoDataSeeder extends Seeder
                 ['doctor_id' => $doctors[array_rand($doctors)], 'patient_id' => $patients[array_rand($patients)]],
                 [
                     'access_status' => $statuses[array_rand($statuses)],
-                    'expires_at' => Carbon::now()->addDays(rand(30, 365)),
                     'is_archive' => false,
                 ]
             );

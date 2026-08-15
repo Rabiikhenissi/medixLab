@@ -161,7 +161,6 @@ class PatientController extends Controller
                     'doctor_id' => $access->doctor_id,
                     'doctor_name' => $access->doctor->user->first_name.' '.$access->doctor->user->last_name,
                     'speciality' => $access->doctor->speciality ?? '',
-                    'expires_at' => $access->expires_at ? $access->expires_at->format('d/m/Y') : null,
                     'granted_at' => $access->updated_at->diffForHumans(),
                 ];
             }),
@@ -198,14 +197,11 @@ class PatientController extends Controller
             ], 403);
         }
 
-        // Normalize action and set expiry on grant
+        // Normalize action; a grant gives permanent access until blocked
         $action = $request->action;
         if (in_array($action, ['accept', 'accepted'])) {
-            $access->update([
-                'access_status' => 'granted',
-                'expires_at' => now()->addMonths(6),
-            ]);
-            $message = 'Accès accordé au médecin (valide 6 mois)';
+            $access->update(['access_status' => 'granted']);
+            $message = 'Accès accordé au médecin';
         } else {
             $access->update(['access_status' => 'revoked']);
             $message = 'Demande d\'accès refusée';
@@ -324,7 +320,7 @@ class PatientController extends Controller
             ->first();
 
         if ($access) {
-            $access->update(['access_status' => 'granted', 'expires_at' => now()->addMonths(6)]);
+            $access->update(['access_status' => 'granted']);
         }
 
         return response()->json([
@@ -990,14 +986,12 @@ class PatientController extends Controller
             }
             $existing->update([
                 'access_status' => 'granted',
-                'expires_at' => now()->addMonths(6),
             ]);
         } else {
             $existing = DoctorPatientAccess::create([
                 'doctor_id' => $doctor->id,
                 'patient_id' => $patient->id,
                 'access_status' => 'granted',
-                'expires_at' => now()->addMonths(6),
             ]);
         }
 

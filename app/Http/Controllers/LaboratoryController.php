@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Labo;
+use App\Services\AuditLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -74,7 +75,9 @@ class LaboratoryController extends Controller
         ]);
 
         $data['is_archive'] = false;
-        Labo::create($data);
+        $laboratory = Labo::create($data);
+
+        AuditLogger::log('labo-created', 'Création du laboratoire '.$laboratory->name, 'Labo', $laboratory->id);
 
         return redirect()->route('admin.laboratories.index')->with('success', 'Laboratoire créé avec succès.');
     }
@@ -110,6 +113,8 @@ class LaboratoryController extends Controller
 
         $laboratory->update($data);
 
+        AuditLogger::log('labo-updated', 'Modification du laboratoire '.$laboratory->name, 'Labo', $laboratory->id);
+
         return redirect()->route('admin.laboratories.index')->with('success', 'Laboratoire mis à jour avec succès.');
     }
 
@@ -121,6 +126,13 @@ class LaboratoryController extends Controller
     public function destroy(Labo $laboratory)
     {
         $laboratory->update(['is_archive' => ! $laboratory->is_archive]);
+
+        AuditLogger::log(
+            $laboratory->is_archive ? 'labo-archived' : 'labo-restored',
+            ($laboratory->is_archive ? 'Archivage' : 'Restauration').' du laboratoire '.$laboratory->name,
+            'Labo',
+            $laboratory->id,
+        );
 
         $message = $laboratory->is_archive
             ? 'Laboratoire archivé avec succès.'
@@ -136,7 +148,12 @@ class LaboratoryController extends Controller
      */
     public function forceDelete(Labo $laboratory)
     {
+        $name = $laboratory->name;
+        $id = $laboratory->id;
+
         $laboratory->delete();
+
+        AuditLogger::log('labo-deleted', 'Suppression définitive du laboratoire '.$name, 'Labo', $id);
 
         return redirect()->route('admin.laboratories.index')->with('success', 'Laboratoire supprimé définitivement.');
     }

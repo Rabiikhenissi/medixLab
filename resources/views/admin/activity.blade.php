@@ -15,6 +15,28 @@
 @endsection
 
 @section('content')
+    @php
+        $actionCategories = [
+            'login' => ['label' => __('admin.activity.action_login'), 'style' => 'background:#ecfdf5;color:#047857;'],
+            'logout' => ['label' => __('admin.activity.action_logout'), 'style' => 'background:#f1f5f9;color:#475569;'],
+            'password-changed' => ['label' => __('admin.activity.action_password'), 'style' => 'background:#fffbeb;color:#b45309;'],
+            'password-reset' => ['label' => __('admin.activity.action_password'), 'style' => 'background:#fffbeb;color:#b45309;'],
+            '2fa-enabled' => ['label' => __('admin.activity.action_2fa'), 'style' => 'background:#f5f3ff;color:#6d28d9;'],
+            '2fa-disabled' => ['label' => __('admin.activity.action_2fa'), 'style' => 'background:#f5f3ff;color:#6d28d9;'],
+            'labo-created' => ['label' => __('admin.activity.action_labo'), 'style' => 'background:#eff6ff;color:#2563eb;'],
+            'labo-updated' => ['label' => __('admin.activity.action_labo'), 'style' => 'background:#eff6ff;color:#2563eb;'],
+            'labo-archived' => ['label' => __('admin.activity.action_labo'), 'style' => 'background:#eff6ff;color:#2563eb;'],
+            'labo-restored' => ['label' => __('admin.activity.action_labo'), 'style' => 'background:#eff6ff;color:#2563eb;'],
+            'labo-deleted' => ['label' => __('admin.activity.action_labo'), 'style' => 'background:#fff1f2;color:#e11d48;'],
+            'group-created' => ['label' => __('admin.activity.action_role'), 'style' => 'background:#eff6ff;color:#2563eb;'],
+            'group-updated' => ['label' => __('admin.activity.action_role'), 'style' => 'background:#eff6ff;color:#2563eb;'],
+            'group-archived' => ['label' => __('admin.activity.action_role'), 'style' => 'background:#eff6ff;color:#2563eb;'],
+            'group-restored' => ['label' => __('admin.activity.action_role'), 'style' => 'background:#eff6ff;color:#2563eb;'],
+            'group-deleted' => ['label' => __('admin.activity.action_role'), 'style' => 'background:#fff1f2;color:#e11d48;'],
+            'gdpr-incident-report' => ['label' => __('admin.activity.action_gdpr'), 'style' => 'background:#fef2f2;color:#b91c1c;'],
+        ];
+    @endphp
+
     <div class="data-section anim anim-1">
         <div class="data-header">
             <div class="data-title">{{ __('admin.activity.actions_log') }}</div>
@@ -41,8 +63,8 @@
                     <div class="filter-group" style="position:relative;display:inline-block;">
                         <select name="action" class="filter-select" onchange="document.getElementById('filter-form').submit()">
                             <option value="">{{ __('admin.activity.all_actions') }}</option>
-                            @foreach(['created' => __('admin.activity.action_created'), 'updated' => __('admin.activity.action_updated'), 'deleted' => __('admin.activity.action_deleted'), 'restored' => __('admin.activity.action_restored')] as $code => $label)
-                                <option value="{{ $code }}" {{ request('action') == $code ? 'selected' : '' }}>{{ $label }}</option>
+                            @foreach($actions as $actionCode)
+                                <option value="{{ $actionCode }}" {{ request('action') == $actionCode ? 'selected' : '' }}>{{ $actionCategories[$actionCode]['label'] ?? ucfirst($actionCode) }}</option>
                             @endforeach
                         </select>
                         <svg class="select-arrow" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
@@ -100,6 +122,8 @@
                                 <span class="status-badge" style="background:#fff1f2;color:#e11d48;"><span class="dot" style="background:#ef4444;"></span>{{ __('admin.activity.action_deleted') }}</span>
                             @elseif($log->action === 'restored')
                                 <span class="status-badge status-archived"><span class="dot"></span>{{ __('admin.activity.action_restored') }}</span>
+                            @elseif(isset($actionCategories[$log->action]))
+                                <span class="status-badge" style="{{ $actionCategories[$log->action]['style'] }}"><span class="dot"></span>{{ $actionCategories[$log->action]['label'] }}</span>
                             @else
                                 <span class="status-badge status-archived"><span class="dot"></span>{{ ucfirst($log->action) }}</span>
                             @endif
@@ -116,6 +140,8 @@
                                     'MachineConfiguration' => __('admin.activity.entity_machine_config'),
                                     'ExamParameter' => __('admin.activity.entity_exam_parameter'),
                                     'DoctorPatientAccess' => __('admin.activity.entity_doctor_access'),
+                                    'Labo' => __('admin.activity.entity_labo'),
+                                    'Group' => __('admin.activity.entity_group'),
                                 ];
                             @endphp
                             <span class="exam-code">{{ $entityLabels[$log->entity_type] ?? $log->entity_type }}</span>

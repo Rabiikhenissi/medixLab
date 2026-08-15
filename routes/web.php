@@ -29,11 +29,52 @@ use App\Models\ExamRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
-// Landing Selection Portal
-// Root redirects to the role-aware home page
+// SEO: robots directives for search engines (public)
+Route::get('/robots.txt', function () {
+    $lines = ['User-agent: *', 'Allow: /'];
+    foreach (['/admin', '/profile', '/invite'] as $path) {
+        $lines[] = 'Disallow: '.$path;
+    }
+    $lines[] = 'Sitemap: '.url('/sitemap.xml');
+
+    return response(implode(PHP_EOL, $lines).PHP_EOL)
+        ->header('Content-Type', 'text/plain');
+})->name('robots');
+
+// SEO: sitemap of indexable public pages
+Route::get('/sitemap.xml', function () {
+    $urls = [
+        url('/'),
+        url('/home'),
+        route('doctor.login'),
+        route('doctor.register'),
+        route('patient.login'),
+        route('patient.register'),
+        route('center.login'),
+        route('center.register'),
+        route('legal.terms'),
+        route('legal.privacy'),
+        route('legal.mentions'),
+    ];
+
+    $xml = '<?xml version="1.0" encoding="UTF-8"?>'.PHP_EOL;
+    $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'.PHP_EOL;
+    foreach ($urls as $url) {
+        $xml .= '  <url><loc>'.htmlspecialchars($url, ENT_XML1).'</loc><changefreq>monthly</changefreq></url>'.PHP_EOL;
+    }
+    $xml .= '</urlset>';
+
+    return response($xml)->header('Content-Type', 'application/xml');
+})->name('sitemap');
+
+// Public marketing landing page — authenticated users are bounced to their dashboard
 Route::get('/', function () {
-    return redirect()->route('home');
-});
+    if (auth()->check()) {
+        return redirect()->route('home');
+    }
+
+    return view('landing');
+})->name('landing');
 
 // Home portal: bounce each logged-in role to its own dashboard, else show the landing page
 Route::get('/home', function () {

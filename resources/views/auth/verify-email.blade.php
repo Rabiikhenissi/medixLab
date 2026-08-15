@@ -1,5 +1,6 @@
 <x-layouts.auth>
     <x-slot:title>{{ __('verify.meta_title') }}</x-slot:title>
+    <x-slot:metaDescription>{{ __('seo.verify_description') }}</x-slot:metaDescription>
 
     <div class="w-full max-w-[458px] mx-auto py-8">
         <div class="glass-card rounded-[20px] p-8 md:p-10 relative overflow-hidden">

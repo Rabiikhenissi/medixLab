@@ -9,6 +9,7 @@ use App\Models\Labo;
 use App\Models\Patient;
 use App\Models\Staff;
 use App\Models\User;
+use App\Services\AuditLogger;
 use App\Services\CodeGeneratorService;
 use App\Services\TwoFactorService;
 use Illuminate\Auth\Events\PasswordReset;
@@ -74,6 +75,8 @@ class AuthController extends Controller
 
             // Check if user is an admin
             if ($user->admin) {
+                AuditLogger::log('login', 'Connexion réussie');
+
                 return redirect($this->safeIntended($request, 'admin.dashboard'));
             }
 
@@ -104,6 +107,8 @@ class AuthController extends Controller
 
             // Track last login time
             $user->update(['last_login_at' => now()]);
+
+            AuditLogger::log('login', 'Connexion réussie');
 
             // redirect to the dashboard of the user's role
             return redirect($this->safeIntended($request, $role.'.dashboard'));
@@ -341,6 +346,8 @@ class AuthController extends Controller
      */
     public function logout(Request $request, string $role)
     {
+        AuditLogger::log('logout', 'Déconnexion');
+
         Auth::logout();
 
         // clear the session and regenerate the CSRF token
@@ -416,6 +423,14 @@ class AuthController extends Controller
                 $user->forceFill(['password' => Hash::make($password)])
                     ->setRememberToken(Str::random(60));
                 $user->save();
+                AuditLogger::log(
+                    'password-reset',
+                    'Mot de passe réinitialisé',
+                    'User',
+                    $user->id,
+                    userId: $user->id,
+                    role: $user->group?->code,
+                );
                 event(new PasswordReset($user));
             }
         );

@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Action;
 use App\Models\Admin;
 use App\Models\AuditLog;
+use App\Models\ExamRequest;
 use App\Models\Feature;
 use App\Models\GdprIncident;
 use App\Models\Group;
@@ -73,6 +74,50 @@ class GdprDepthTest extends TestCase
         $this->artisan('gdpr:retention-purge', ['--dry-run' => true])->assertSuccessful();
 
         $this->assertDatabaseHas('users', ['id' => $old->id]);
+    }
+
+    public function test_retention_purge_keeps_anonymised_accounts_with_clinical_records(): void
+    {
+        $patient = $this->makePatient();
+        $user = $patient['user'];
+        $labo = $this->makeLabo();
+
+        ExamRequest::create([
+            'doctor_id' => null,
+            'patient_id' => $patient['patient']->id,
+            'labo_id' => $labo->id,
+            'status' => 'pending',
+        ]);
+
+        $user->update([
+            'first_name' => 'Anonymisé',
+            'last_name' => 'Utilisateur',
+            'is_archive' => true,
+        ]);
+        $user->forceFill(['updated_at' => now()->subDays(120)])->saveQuietly();
+
+        $this->artisan('gdpr:retention-purge')->assertSuccessful();
+
+        $this->assertDatabaseHas('users', ['id' => $user->id]);
+        $this->assertDatabaseHas('exam_requests', ['patient_id' => $patient['patient']->id]);
+    }
+
+    public function test_retention_purge_removes_anonymised_accounts_without_clinical_records(): void
+    {
+        $patient = $this->makePatient();
+        $user = $patient['user'];
+
+        $user->update([
+            'first_name' => 'Anonymisé',
+            'last_name' => 'Utilisateur',
+            'is_archive' => true,
+        ]);
+        $user->forceFill(['updated_at' => now()->subDays(120)])->saveQuietly();
+
+        $this->artisan('gdpr:retention-purge')->assertSuccessful();
+
+        $this->assertDatabaseMissing('users', ['id' => $user->id]);
+        $this->assertDatabaseMissing('patients', ['id' => $patient['patient']->id]);
     }
 
     public function test_admin_can_declare_and_resolve_an_incident(): void

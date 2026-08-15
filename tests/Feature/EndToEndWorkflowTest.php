@@ -161,4 +161,44 @@ class EndToEndWorkflowTest extends TestCase
 
         $this->assertFalse($examRequest->fresh()->approved_by_doctor);
     }
+
+    public function test_granted_access_is_permanent_until_blocked(): void
+    {
+        $doctor = $this->makeDoctor();
+        $patient = $this->makePatient();
+
+        $access = DoctorPatientAccess::create([
+            'doctor_id' => $doctor['doctor']->id,
+            'patient_id' => $patient['patient']->id,
+            'access_status' => 'granted',
+        ]);
+        $access->forceFill(['created_at' => now()->subYears(2), 'updated_at' => now()->subYears(2)])->saveQuietly();
+
+        // An old grant is still active — access never expires over time.
+        $this->assertTrue(DoctorPatientAccess::query()->active()->where('id', $access->id)->exists());
+
+        // Only a patient block revokes it.
+        $access->update(['access_status' => 'blocked']);
+        $this->assertFalse(DoctorPatientAccess::query()->active()->where('id', $access->id)->exists());
+    }
+
+    public function test_patient_accept_grants_permanent_access(): void
+    {
+        $doctor = $this->makeDoctor();
+        $patient = $this->makePatient();
+
+        $access = DoctorPatientAccess::create([
+            'doctor_id' => $doctor['doctor']->id,
+            'patient_id' => $patient['patient']->id,
+            'access_status' => 'pending',
+        ]);
+
+        $this->actingAs($patient['user'])->post(route('patient.respond-access'), [
+            'access_id' => $access->id,
+            'action' => 'accept',
+        ])->assertOk()->assertJson(['success' => true]);
+
+        $this->assertSame('granted', $access->fresh()->access_status);
+        $this->assertTrue(DoctorPatientAccess::query()->active()->where('id', $access->id)->exists());
+    }
 }

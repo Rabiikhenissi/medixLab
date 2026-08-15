@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\AuditLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -105,6 +106,8 @@ class ProfileController extends Controller
         $user->update([
             'password' => Hash::make($request->password),
         ]);
+
+        AuditLogger::log('password-changed', 'Mot de passe modifié');
 
         return back()->with('success', 'Mot de passe modifié avec succès.');
     }
