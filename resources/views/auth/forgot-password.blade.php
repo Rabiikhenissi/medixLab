@@ -1,5 +1,6 @@
 <x-layouts.auth>
     <x-slot:title>{{ __('forgot.meta_title') }}</x-slot:title>
+    <x-slot:metaDescription>{{ __('seo.forgot_password_description') }}</x-slot:metaDescription>
 
     <x-auth-card
         title="{{ __('forgot.title') }}"

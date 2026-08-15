@@ -1,5 +1,6 @@
 <x-layouts.auth>
     <x-slot:title>{{ __('invite.meta_title') }}</x-slot:title>
+    <x-slot:metaDescription>{{ __('seo.invite_description') }}</x-slot:metaDescription>
 
     <x-auth-card
         title="{{ __('invite.title') }}"

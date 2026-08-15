@@ -134,7 +134,7 @@ class DoctorController extends Controller
             ], 403);
         }
 
-        $hasGrantedAccess = $access && $access->access_status === 'granted' && ! $access->isExpired();
+        $hasGrantedAccess = $access && $access->access_status === 'granted';
 
         // Build the safe patient payload
         $patientData = [
@@ -481,10 +481,7 @@ class DoctorController extends Controller
         // Verify the doctor has active access to the patient
         $access = DoctorPatientAccess::where('doctor_id', $doctor->id)
             ->where('patient_id', $patient->id)
-            ->where('access_status', 'granted')
-            ->where(function ($q) {
-                $q->whereNull('expires_at')->orWhere('expires_at', '>', now());
-            })
+            ->active()
             ->first();
 
         if (! $access) {

@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['doctor_id', 'patient_id', 'access_status', 'is_archive', 'expires_at'])]
+#[Fillable(['doctor_id', 'patient_id', 'access_status', 'is_archive'])]
 /**
- * Access grant linking a doctor to a patient, with status and expiry.
+ * Access grant linking a doctor to a patient.
+ *
+ * Access is permanent: once granted it only ends when the patient blocks
+ * the doctor (access_status = 'blocked') or revokes it ('revoked').
  */
 class DoctorPatientAccess extends Model
 {
@@ -16,30 +18,18 @@ class DoctorPatientAccess extends Model
     {
         return [
             'is_archive' => 'boolean',
-            'expires_at' => 'datetime',
         ];
     }
 
     protected $table = 'doctor_patient_access';
 
     /**
-     * Check whether this access grant has expired.
-     */
-    public function isExpired(): bool
-    {
-        return $this->expires_at !== null && $this->expires_at->isPast();
-    }
-
-    /**
-     * Scope: only active (granted + not expired) accesses.
+     * Scope: only currently granted accesses (the patient block is the only
+     * way a doctor loses access).
      */
     public function scopeActive($query)
     {
-        return $query->where('access_status', 'granted')
-            ->where(function ($q) {
-                $q->whereNull('expires_at')
-                    ->orWhere('expires_at', '>', Carbon::now());
-            });
+        return $query->where('access_status', 'granted');
     }
 
     /** Scope: only accesses that are not blocked. */

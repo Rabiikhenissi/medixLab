@@ -1,5 +1,6 @@
 <x-layouts.auth>
     <x-slot:title>{{ __('center.login_title') }} - {{ __('login.meta') }} - {{ __('app.brand') }}</x-slot:title>
+    <x-slot:metaDescription>{{ __('seo.center_login_description') }}</x-slot:metaDescription>
 
     <x-auth-card
         title="{{ __('center.login_title') }}"

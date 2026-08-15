@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\AvailableExam;
 use App\Models\CnamNomenclature;
 use App\Models\Doctor;
-use App\Models\DoctorPatientAccess;
 use App\Models\ExamRequest;
 use App\Models\ExamRequestItem;
 use App\Models\Invoice;
@@ -207,47 +206,5 @@ class ExamRequestService
                 $invoice->items()->create($iid);
             }
         });
-    }
-
-    /**
-     * TIER 2.3 — Check for doctor access approaching expiry and send reminder notifications.
-     * Should be called periodically (e.g., via scheduled task).
-     */
-    public static function checkAccessExpiry(): void
-    {
-        // Find granted accesses that expire within the next 7 days
-        $expiringSoon = DoctorPatientAccess::where('access_status', 'granted')
-            ->whereNotNull('expires_at')
-            ->where('expires_at', '<=', now()->addDays(7))
-            ->where('expires_at', '>', now())
-            ->with(['doctor.user', 'patient.user'])
-            ->get();
-
-        // Remind both the patient and the doctor before access expires
-        foreach ($expiringSoon as $access) {
-            $daysLeft = (int) $access->expires_at->diffInDays(now());
-            $patientName = $access->patient->user->first_name.' '.$access->patient->user->last_name;
-            $doctorName = 'Dr. '.$access->doctor->user->first_name.' '.$access->doctor->user->last_name;
-
-            // Notify the patient that the doctor's access is about to expire
-            NotificationService::send(
-                $access->patient->user_id,
-                'Accès expire dans '.$daysLeft.' jour(s)',
-                $doctorName.' a accès à votre dossier médical. Cet accès expire le '.
-                $access->expires_at->format('d/m/Y').'. Souhaitez-vous le renouveler ?',
-                'access_request',
-                $access->id
-            );
-
-            // Notify the doctor that their patient access is about to expire
-            NotificationService::send(
-                $access->doctor->user->id,
-                'Accès patient expire bientôt',
-                'Votre accès au dossier de '.$patientName.' expire le '.
-                $access->expires_at->format('d/m/Y').'. Le patient devra confirmer le renouvellement.',
-                'general',
-                $access->id
-            );
-        }
     }
 }

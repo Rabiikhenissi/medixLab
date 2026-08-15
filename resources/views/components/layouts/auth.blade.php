@@ -8,6 +8,16 @@
 
     <title>{{ $title ?? 'Medix eSanté' }}</title>
 
+    <meta name="description" content="{{ $metaDescription ?? __('seo.default_description') }}">
+    <link rel="canonical" href="{{ url()->current() }}">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Medix eSanté">
+    <meta property="og:title" content="{{ $title ?? 'Medix eSanté' }}">
+    <meta property="og:description" content="{{ $metaDescription ?? __('seo.default_description') }}">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta name="twitter:card" content="summary">
+    {{ $extraHead ?? '' }}
+
     <!-- Google Fonts: Outfit & Instrument Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

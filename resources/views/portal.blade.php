@@ -1,5 +1,6 @@
 <x-layouts.auth>
     <x-slot:title>{{ __('portal.meta_title') }}</x-slot:title>
+    <x-slot:metaDescription>{{ __('seo.portal_description') }}</x-slot:metaDescription>
 
     <div class="flex flex-col items-center justify-center w-full py-10">
         <!-- Main Headings -->

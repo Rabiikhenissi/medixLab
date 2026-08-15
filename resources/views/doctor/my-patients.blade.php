@@ -60,14 +60,6 @@
                                         <p class="text-xs text-white/80">{{ $patient->patient_code }}</p>
                                     </div>
                                 </div>
-                                @if($access->expires_at)
-                                    <div class="mt-3 text-[10px] text-white/70">
-                                        {{ __('doctor.my_patients.access_expires') }} {{ $access->expires_at->format('d/m/Y') }}
-                                        @if($access->isExpired())
-                                            <span class="ml-1 px-1.5 py-0.5 bg-red-500 rounded text-white">{{ __('doctor.my_patients.expired') }}</span>
-                                        @endif
-                                    </div>
-                                @endif
                             </div>
 
                             {{-- Patient Info --}}

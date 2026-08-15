@@ -1,5 +1,6 @@
 <x-layouts.auth>
     <x-slot:title>{{ $legalTitle ?? __('components.legal_layout.legal_infos') }} - Medix eSanté</x-slot:title>
+    <x-slot:metaDescription>{{ __('seo.legal_description') }}</x-slot:metaDescription>
 
     <div class="w-full max-w-3xl mx-auto py-10 px-4 md:px-6">
         <div class="glass-card rounded-[20px] p-8 md:p-12">

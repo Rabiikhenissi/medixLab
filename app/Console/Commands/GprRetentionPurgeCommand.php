@@ -7,8 +7,12 @@ use Illuminate\Console\Command;
 
 /**
  * Purge anonymised accounts whose data has passed the RGPD retention period.
- * Only fully-anonymised accounts (set by the GDPR erasure flow) are removed;
- * real clinical records stay under the laboratory's legal retention duty.
+ *
+ * Only fully-anonymised accounts (set by the GDPR erasure flow) with NO clinical
+ * records are removed. Accounts that still carry exam requests, samples, invoices
+ * or CNAM affiliations are kept (they are already anonymised, so they are no
+ * longer personal data) because their clinical records must stay for the
+ * laboratory's legal retention duty.
  */
 class GprRetentionPurgeCommand extends Command
 {
@@ -16,7 +20,7 @@ class GprRetentionPurgeCommand extends Command
         {--days= : Retention period in days (defaults to config legal.retention_days)}
         {--dry-run : List matching accounts without deleting anything}';
 
-    protected $description = 'Delete anonymised accounts past the RGPD retention period';
+    protected $description = 'Delete anonymised accounts past the RGPD retention period (clinical records are preserved)';
 
     public function handle(): int
     {
@@ -27,6 +31,10 @@ class GprRetentionPurgeCommand extends Command
             ->where('is_archive', true)
             ->where('first_name', 'Anonymisé')
             ->where('updated_at', '<=', $cutoff)
+            ->whereDoesntHave('patient.examRequests')
+            ->whereDoesntHave('patient.samples')
+            ->whereDoesntHave('patient.invoices')
+            ->whereDoesntHave('patient.cnamAffiliation')
             ->get();
 
         $purged = 0;
@@ -43,7 +51,22 @@ class GprRetentionPurgeCommand extends Command
             $this->line("Purged anonymised account #{$user->id}");
         }
 
+        $kept = User::query()
+            ->where('is_archive', true)
+            ->where('first_name', 'Anonymisé')
+            ->where('updated_at', '<=', $cutoff)
+            ->whereHas('patient', function ($query) {
+                $query->where(fn ($q) => $q->whereHas('examRequests')
+                    ->orWhereHas('samples')
+                    ->orWhereHas('invoices')
+                    ->orWhereHas('cnamAffiliation'));
+            })
+            ->count();
+
         $this->info("Retention purge finished: {$purged} account(s) removed, {$users->count()} matched the criteria.");
+        if ($kept > 0) {
+            $this->info("{$kept} anonymised account(s) kept: they carry clinical records which must stay for the laboratory's legal retention duty.");
+        }
 
         return self::SUCCESS;
     }

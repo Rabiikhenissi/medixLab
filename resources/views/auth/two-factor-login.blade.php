@@ -1,5 +1,6 @@
 <x-layouts.auth>
     <x-slot:title>{{ __('twofactor.meta_title') }}</x-slot:title>
+    <x-slot:metaDescription>{{ __('seo.two_factor_description') }}</x-slot:metaDescription>
 
     <div class="w-full max-w-md mx-auto py-8">
         <div class="glass-card rounded-2xl p-8 md:p-10 relative overflow-hidden">
